@@ -1,5 +1,6 @@
 CXX=g++
-CXXFLAGS=-g -Wall -std=c++1y -march=native -mtune=native -fopenmp -O3
+CXXFLAGS=-g -Wall -std=c++1y -march=native -mtune=native -fopenmp -O3 
+# for my home computer, "-march=znver2" is ideal, but compiler support is iffy
 LDFLAGS=-fopenmp
 CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 
@@ -20,6 +21,8 @@ debug:
 	@echo "sources: $(SOURCES)";
 	@echo "objects: $(OBJS)";
 	@echo "exec:    $(EXEC)";
+debug: LDFLAGS += -Q --help=target
+debug: clean build
 
 $(EXEC): $(OBJS)
 	@mkdir -p $(EXEC_DIR);
