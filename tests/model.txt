@@ -1,0 +1,50 @@
+1. Model (40 pts)
+
+Question: What is a compute node of mamba composed of? What kind of processor
+it has? Which architecture is the processor built on? (For instance, some core
+i7 are based on the ivy-bridge architecture, some on the haswell architecture,
+...)
+ - A compute node has two Intel Xeon E5-2667 v3 processors OR two Intel Xeon
+ E5-2667 v4. Nodes 5-8 are v4, nodes 1-4 are v3. Each processor has 8 physical
+ cores. Hyperthreading is disabled.
+ - the v3 processors use the Haswell microarchitecture, the v4 processors use
+ the Broadwell microarchitecture
+
+Question: What is the maximum number of floating point operations this machine
+can perform per second?
+
+ - (num processors) * (num physical cores per processor) * (cycles per second)
+   * (instructions per cycle) * (operations per instruction) * (parallel
+   instructions due to vector processing)
+   - 2 processors
+   - 8 cores per processor
+   - 3.2 Ghz base clock speed
+   - 2 instructions per cycle: 2 lanes that do floating point operations
+   - 2 opearations per instruction: FMA does 2 operations simultaneously
+   - float is 32 bits, can pack 8 into 256bit register.
+ - 2 * 8 * 3 200 000 000 * 2 * 2 * 8 = 1638400000000
+ - 1.64 * 10^12
+ - 1.64 TFlop/s
+
+Question: What is the maximum number of integer operations this machine can
+perform per second?
+
+ - (num processors) * (num physical cores per processor) * (cycles per second)
+   * (instructions per cycle) * (operations per instruction) * (parallel
+   instructions due to vector processing)
+   - 2 processors
+   - 8 cores per processor
+   - 3.2 Ghz base clock speed
+   - 3 instructions per cycle: 3 lanes that do VECTOR IOPs simultaneously
+   - 1 operation per instruction
+   - uint8 is 8 bits, can pack 32 into 256bit register
+   - mul only supports 16 bit integers and up, so for the mul we can only pack
+     16 into a 256bit register
+ - 2 * 8 * 3 200 000 000 * (2 * 1 * 32 + 1 * 1 * 16) = 4096000000000
+ - 4.10 * 10^12
+ - 4.10 TIop/s
+ 
+instruction: 2 adds, 1 mul
+
+Hint: Remember what matters: frequency, core count, but also instruction set,
+the number of execution units within the cores, and what they can do at once.
