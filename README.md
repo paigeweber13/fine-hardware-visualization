@@ -18,7 +18,8 @@ actual performance and then comparing the two. We will hard code an
 architecture and output the results to the command line. 
 
  - Benchmark machine
- - Identify actual resource utilization when running some software
- - Compare benchmark with actual
- - Test with software that uses a lot of memory and no CPU or vice-versa
-
+   - handwritten benchmark
+   - run likwid benchmark
+   - compare
+ - programatically run likwid given some input executable
+   - get hardware counters and time execution to calculate flop/s
