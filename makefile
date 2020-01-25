@@ -5,12 +5,13 @@ CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 
 SRC_DIR=src
 OBJ_DIR=obj
+ASM_DIR=asm
 EXEC_DIR=bin
 
 SOURCES=$(wildcard src/*.cpp)
 HEADERS=$(wildcard src/*.h)
-# OBJS=$(SOURCES:.cpp=.o)
-OBJS=$(SOURCES:src/%.cpp=obj/%.o)
+OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
 EXEC=$(EXEC_DIR)/fhv
 
 build: $(EXEC)
@@ -24,21 +25,21 @@ $(EXEC): $(OBJS)
 	@mkdir -p $(EXEC_DIR);
 	$(CXX) $(LDFLAGS) $(OBJS) -o $@
 
-# $(OBJS): $(SOURCES)
-# $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR);
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-assembly: $(SOURCES)
-	$(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $(SOURCES)
+assembly: $(ASM)
+
+$(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp
+	@mkdir -p $(ASM_DIR);
+	$(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $< -o $@
 
 clean:
 	rm -f $(OBJS) $(EXEC)
 
 test: build
 	./$(EXEC)
-
 
 mamba: $(EXEC)
 	qsub -q mamba -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 $(EXEC).sh
