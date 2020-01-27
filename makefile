@@ -1,21 +1,23 @@
 CXX=g++
 CXXFLAGS=-g -Wall -std=c++1y -march=native -mtune=native -fopenmp -O3 
 # for my home computer, "-march=znver2" is ideal, but compiler support is iffy
-LDFLAGS=-fopenmp
+LDFLAGS=-march=native -mtune=native -fopenmp
 CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 
-SRC_DIR=src
+MAIN_DIR=src
+SRC_DIR=lib
 OBJ_DIR=obj
 ASM_DIR=asm
 EXEC_DIR=bin
 
-SOURCES=$(wildcard src/*.cpp)
-HEADERS=$(wildcard src/*.h)
+SOURCES=$(wildcard lib/*.cpp)
+HEADERS=$(wildcard lib/*.h)
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
 EXEC=$(EXEC_DIR)/fhv
+BENCH_EXEC=$(EXEC_DIR)/bench
 
-build: $(EXEC)
+build: $(EXEC) $(BENCH_EXEC)
 
 debug:
 	@echo "sources: $(SOURCES)";
@@ -24,9 +26,13 @@ debug:
 debug: LDFLAGS += -Q --help=target
 debug: clean build
 
+$(BENCH_EXEC): $(OBJS)
+	@mkdir -p $(EXEC_DIR);
+	$(CXX) $(LDFLAGS) $(OBJS) src/benchmark.cpp -o $@
+
 $(EXEC): $(OBJS)
 	@mkdir -p $(EXEC_DIR);
-	$(CXX) $(LDFLAGS) $(OBJS) -o $@
+	$(CXX) $(LDFLAGS) $(OBJS) src/fhv.cpp -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR);
@@ -39,7 +45,7 @@ $(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(OBJS) $(EXEC) $(BENCH_EXEC)
 
 test: build
 	./$(EXEC)

@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "computation_measurements.h"
 
 __m256 flops(std::uint64_t num_iterations){
   // float* a = static_cast<float*>(aligned_alloc(32, 32));

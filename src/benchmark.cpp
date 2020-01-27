@@ -3,7 +3,7 @@
 #include <iostream>
 #include <omp.h>
 
-#include "functions.h"
+#include "../lib/computation_measurements.h"
 
 
 int main(int argc, char* argv[])
