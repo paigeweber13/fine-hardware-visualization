@@ -26,11 +26,11 @@ debug:
 debug: LDFLAGS += -Q --help=target
 debug: clean build
 
-$(BENCH_EXEC): $(OBJS)
+$(BENCH_EXEC): $(OBJS) src/benchmark.cpp
 	@mkdir -p $(EXEC_DIR);
 	$(CXX) $(LDFLAGS) $(OBJS) src/benchmark.cpp -o $@
 
-$(EXEC): $(OBJS)
+$(EXEC): $(OBJS) src/fhv.cpp
 	@mkdir -p $(EXEC_DIR);
 	$(CXX) $(LDFLAGS) $(OBJS) src/fhv.cpp -o $@
 
