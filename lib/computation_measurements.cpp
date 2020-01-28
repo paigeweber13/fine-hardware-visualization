@@ -40,11 +40,11 @@ __m256 flops(std::uint64_t num_iterations){
   for (std::uint64_t i = 0; i < num_iterations; i++){
     // operations per loop iteration
     // d = _mm256_fmadd_ps (reg_a, reg_b, reg_c);
-    c = _mm256_fmadd_ps (a, b, c); // 2 ops on 16 floats
-    f = _mm256_fmadd_ps (d, e, f); // 2 more ops on 16 floats
-    j = _mm256_fmadd_ps (g, h, j); // 2 more ops on 16 floats
-    m = _mm256_fmadd_ps (k, l, m); // 2 more ops on 16 floats
-    p = _mm256_fmadd_ps (n, o, p); // 2 more ops on 16 floats
+    c = _mm256_fmadd_ps (a, b, c); // 2 ops on 8 floats
+    f = _mm256_fmadd_ps (d, e, f); // 2 more ops on 8 floats
+    j = _mm256_fmadd_ps (g, h, j); // 2 more ops on 8 floats
+    m = _mm256_fmadd_ps (k, l, m); // 2 more ops on 8 floats
+    p = _mm256_fmadd_ps (n, o, p); // 2 more ops on 8 floats
   }
 
   // delete a;
