@@ -14,8 +14,10 @@ SOURCES=$(wildcard lib/*.cpp)
 HEADERS=$(wildcard lib/*.h)
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
-EXEC=$(EXEC_DIR)/fhv
-BENCH_EXEC=$(EXEC_DIR)/bench
+EXEC_NAME=fhv
+EXEC=$(EXEC_DIR)/$(EXEC_NAME)
+BENCH_EXEC_NAME=bench
+BENCH_EXEC=$(EXEC_DIR)/$(BENCH_EXEC_NAME)
 
 build: $(EXEC) $(BENCH_EXEC)
 
@@ -50,8 +52,11 @@ clean:
 test: build
 	./$(EXEC)
 
-mamba: $(EXEC)
-	qsub -q mamba -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 $(EXEC).sh
-	# qsub -q mamba -d $(shell pwd) -l nodes=$(MAMBA_NODE):ppn=16 -l walltime=01:00:00 $(EXEC).sh
-	# qsub -q mamba -d $(shell pwd) -l nodes=$(MAMBA_NODE):ppn=16:gpus=1 -l walltime=01:00:00 $(EXEC).sh
+cph-bench: $(BENCH_EXEC)
+	qsub -q copperhead -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 $(BENCH_EXEC_NAME).sh
+
+cph: $(EXEC)
+	qsub -q copperhead -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 $(EXEC_NAME).sh
+	# qsub -q copperhead -d $(shell pwd) -l nodes=$(MAMBA_NODE):ppn=16 -l walltime=01:00:00 $(EXEC).sh
+	# qsub -q copperhead -d $(shell pwd) -l nodes=$(MAMBA_NODE):ppn=16:gpus=1 -l walltime=01:00:00 $(EXEC).sh
 
