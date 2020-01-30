@@ -2,3 +2,6 @@
 bin
 obj
 asm
+*.e*
+*.o*
+
