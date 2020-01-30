@@ -1,0 +1,41 @@
+# Copperhead Model
+## Processor
+### Architecture
+ - Most CPU nodes have 2 x Intel(R) Xeon(R) CPU E5-2667 v3 @ 3.20GHz
+ - Each of these has 8 cores, so 16 per node
+ - These use the Haswell microarchitecture
+ - Hyperthreading is disabled.
+ - The GPU nodes have the same CPUs
+ - Some nodes have 1 Intel(R) Xeon(R) Gold 6154 processor, which has 36 threads
+   over 8 physical cores. These will not be considered.
+
+### Theoretical FLOP/s performance
+ - (num processors) * (num physical cores per processor) * (cycles per second)
+   * (instructions per cycle) * (operations per instruction) * (parallel
+   instructions due to vector processing)
+   - 2 processors
+   - 8 cores per processor
+   - 3.2 Ghz base clock speed
+   - 2 instructions per cycle: 2 lanes that do floating point operations
+   - 2 opearations per instruction: FMA does 2 operations simultaneously
+   - float is 32 bits, can pack 8 into 256bit register.
+ - 2 * 8 * 3 200 000 000 * 2 * 2 * 8 = 1638400000000
+ - 1.64 * 10^12
+ - 1.64 TFlop/s
+
+### Theoretical IOP/s performance
+ - (num processors) * (num physical cores per processor) * (cycles per second)
+   * (instructions per cycle) * (operations per instruction) * (parallel
+   instructions due to vector processing)
+   - 2 processors
+   - 8 cores per processor
+   - 3.2 Ghz base clock speed
+   - 3 instructions per cycle: 3 lanes that do VECTOR IOPs simultaneously
+   - 1 operation per instruction
+   - uint8 is 8 bits, can pack 32 into 256bit register
+   - mul only supports 16 bit integers and up, so for the mul we can only pack
+     16 into a 256bit register
+ - 2 * 8 * 3 200 000 000 * (2 * 1 * 32 + 1 * 1 * 16) = 4096000000000
+ - 4.10 * 10^12
+ - 4.10 TIop/s
+ 
