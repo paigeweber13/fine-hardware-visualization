@@ -3,6 +3,7 @@
 ### Architecture
  - 1 4-core i5-6300U running at a base frequency of 2.4 GHz (3.0 GHz turbo)
  - what frequency does it run at when 4 cores are saturated?
+   - my experiments show 2.9 Ghz on both battery and A/C
 
 BELOW INFO NEEDS TO BE UPDATED
 
