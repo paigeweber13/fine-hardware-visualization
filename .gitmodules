@@ -1,3 +1,5 @@
 [submodule "brandon_senior_project"]
 	path = brandon_senior_project
 	url = https://github.com/rileyweber13/Capstone2017.git
+	update = merge # automatically get changes from the superproject
+
