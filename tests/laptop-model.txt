@@ -8,32 +8,32 @@
 BELOW INFO NEEDS TO BE UPDATED
 
 ### Theoretical FLOP/s performance
- - (num processors) * (num physical cores per processor) * (cycles per second)
+ - (num processors) * (num cores per processor) * (cycles per second)
    * (instructions per cycle) * (operations per instruction) * (parallel
    instructions due to vector processing)
-   - 2 processors
-   - 8 cores per processor
-   - 3.2 Ghz base clock speed
-   - 2 instructions per cycle: 2 lanes that do floating point operations
+   - 1 processor
+   - 4 cores per processor
+   - 2.9 Ghz clock speed
+   - 2 instructions per cycle: 2 lanes that do floating point fma
    - 2 opearations per instruction: FMA does 2 operations simultaneously
    - float is 32 bits, can pack 8 into 256bit register.
- - 2 * 8 * 3 200 000 000 * 2 * 2 * 8 = 1638400000000
- - 1.64 * 10^12
- - 1.64 TFlop/s
+ - 1 * 4 * 2 900 000 000 * 2 * 2 * 8 = 1638400000000
+ - 3.71 * 10^11
+ - 371 GFlop/s
 
 ### Theoretical IOP/s performance
  - (num processors) * (num physical cores per processor) * (cycles per second)
    * (instructions per cycle) * (operations per instruction) * (parallel
    instructions due to vector processing)
-   - 2 processors
-   - 8 cores per processor
-   - 3.2 Ghz base clock speed
+   - 1 processors
+   - 4 cores per processor
+   - 2.9 Ghz clock speed
    - 3 instructions per cycle: 3 lanes that do VECTOR IOPs simultaneously
    - 1 operation per instruction
    - uint8 is 8 bits, can pack 32 into 256bit register
    - mul only supports 16 bit integers and up, so for the mul we can only pack
      16 into a 256bit register
- - 2 * 8 * 3 200 000 000 * (2 * 1 * 32 + 1 * 1 * 16) = 4096000000000
- - 4.10 * 10^12
- - 4.10 TIop/s
+ - 1 * 4 * 2 900 000 000 * (3 * 1 * 32) = 1.1136 * 10^12
+ - 1.11 * 10^12
+ - 1.11 TIop/s
  
