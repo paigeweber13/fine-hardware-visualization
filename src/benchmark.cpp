@@ -9,8 +9,11 @@
 int main(int argc, char* argv[])
 {
   // must match the same definition in functions.cpp
+  //                                   100 000 000 one hundred million
   std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
   std::uint64_t FLOP_PER_ITERATION = 80; //multiply and add to every float, 8 floats in a register
+  // should total 8 billion flops, getting 4 billion from likwid
+  // likwid counts FMA as a single operation
 
   std::uint64_t INT_NUM_ITERATIONS = 1000000000;
   std::uint64_t IOP_PER_ITERATION = 80; //32 adds + 32 adds + 16 muls
