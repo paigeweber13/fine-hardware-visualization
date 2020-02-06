@@ -38,8 +38,8 @@ int main(int argc, char* argv[])
   double total_float_ops = FLOAT_NUM_ITERATIONS * FLOP_PER_ITERATION * NUM_CORES;
   const double flops_to_tflops = 1e-12;
 
-  // std::cout << "time taken: " << duration*1.0e-6 << " seconds." << std::endl;
-  // std::cout << "total floating point operations: " << total_float_ops << std::endl;
+  std::cout << "time taken: " << duration*1.0e-6 << " seconds." << std::endl;
+  std::cout << "total floating point operations: " << total_float_ops << std::endl;
   std::cout << (total_float_ops*flops_to_tflops) / (duration*microseconds_to_seconds) << " TFlop/s" << std::endl;
 
   // IOPS
