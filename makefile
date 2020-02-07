@@ -1,8 +1,13 @@
 CXX=g++
-CXXFLAGS=-g -Wall -std=c++1y -march=native -mtune=native -fopenmp -O3 
-# for my home computer, "-march=znver2" is ideal, but compiler support is iffy
-LDFLAGS=-march=native -mtune=native -fopenmp
+CXXFLAGS=-g -Wall -std=c++1y -I$(INC_DIR) -march=native -mtune=native \
+  -fopenmp -O3 -DLIKWID_PERFMON
+LDFLAGS=-L$(LIB_DIR) -march=native -mtune=native -fopenmp -llikwid
 CXXASSEMBLYFLAGS=-S -g -fverbose-asm
+
+# make sure likwid is installed to this prefix
+PREFIX=/usr/local
+INC_DIR=$(PREFIX)/include
+LIB_DIR=$(PREFIX)/lib
 
 MAIN_DIR=src
 SRC_DIR=lib
@@ -30,11 +35,11 @@ debug: clean build
 
 $(BENCH_EXEC): $(OBJS) src/benchmark.cpp
 	@mkdir -p $(EXEC_DIR);
-	$(CXX) $(LDFLAGS) $(OBJS) src/benchmark.cpp -o $@
+	$(CXX) $(OBJS) src/benchmark.cpp $(LDFLAGS) -o $@
 
 $(EXEC): $(OBJS) src/fhv.cpp
 	@mkdir -p $(EXEC_DIR);
-	$(CXX) $(LDFLAGS) $(OBJS) src/fhv.cpp -o $@
+	$(CXX) $(OBJS) src/fhv.cpp $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR);
