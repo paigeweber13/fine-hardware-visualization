@@ -13,6 +13,11 @@ bottlenecks in high-performance applications.
  - Visualize that
 
 ## TODO:
+ - put likwid markers into benchmark to see if I'm doing my own math right
+ - compare to theoretical max to see if we can use these operations to saturate
+   floating point operations
+ - are there integer operation counters?
+
  - get a baseline benchmark
    - try to saturate machine?
      - calculate flop/s
@@ -32,6 +37,14 @@ architecture and output the results to the command line.
 
 ## Hardware Counters
 Group "FLOPS_SP" and "FLOPS_DP" seem useful.
+
+### Some notes on what does and doesn't get counted:
+FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
+one retired instruction. 
+It counds one vector FMA operation as 2 retired instructions
+
+AVX SP MFLOP/s counts one vector operation as 8 floating point operations: This
+is what we want
 
 ### Group "UOPS_EXEC"
 +---------------------------------+---------+------------+------------+------------+------------+
