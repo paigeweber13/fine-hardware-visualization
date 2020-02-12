@@ -15,8 +15,8 @@ class performance_monitor {
 
     // ------ functions ------ //
     void likwid_perfmonInit(const char * event_group);
-    void likwid_perfmonStart(const char * tag); // could also be called "begin region"
-    void likwid_perfmonStop(const char * tag); // could also be called "end region"
+    void likwid_perfmonStartRegion(const char * tag);
+    void likwid_perfmonStopRegion(const char * tag);
     void likwid_perfmonClose();
     void likwid_perfmonPrintResults();
 

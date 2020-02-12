@@ -36,9 +36,9 @@ int main(int argc, char* argv[])
     NUM_CORES = omp_get_num_threads();
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
-    perfmon.likwid_perfmonStart("flops");
+    perfmon.likwid_perfmonStartRegion("flops");
     d = flops(FLOAT_NUM_ITERATIONS);
-    perfmon.likwid_perfmonStop("flops");
+    perfmon.likwid_perfmonStopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
