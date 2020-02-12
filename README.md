@@ -14,6 +14,10 @@ bottlenecks in high-performance applications.
 
 ## TODO:
  - fix no code working anymore, mine or brandon's
+   - fixed brandon's: just needed to run `modprobe msr` :sheepish:
+   - mine: am I doing all the same things? Yes!
+   - mine: do I need to start region inside parallel block? Yes! That was the
+     problem
  - can we measure integer operations?
 
  - put likwid markers into benchmark to see if I'm doing my own math right
