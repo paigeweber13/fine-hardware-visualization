@@ -38,6 +38,12 @@ architecture and output the results to the command line.
  - programatically run likwid given some input executable
    - get hardware counters and time execution to calculate flop/s
 
+## Accomplishments:
+ - evaluated both likwid and papi for use
+ - investigated likwid-bench
+ - Got likwid marker to measure code
+ - basic research on likwid-accesD vs direct access
+
 ## Hardware Counters
 Group "FLOPS_SP" and "FLOPS_DP" seem useful.
 
