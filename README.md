@@ -18,7 +18,10 @@ bottlenecks in high-performance applications.
  - end goal is to apply this to graph problems: kernels in graph problems tend
    to change behavior throughout execution
  - Dr. Saule said last week "now we know likwid counts by region"... what
-   exactly does that mean? I guess that it aggregates by region
+   exactly does that mean? I guess that he's referring to how it aggregates by
+   region... but it also aggregates per physical thread: running flops code
+   twice did not change the number of regions reported by likwid: still only
+   did one per physical thread
 
 ## TODO:
  - can we measure integer operations?
@@ -45,6 +48,10 @@ bottlenecks in high-performance applications.
  - Got likwid marker to measure code
    - investigated brandon's code
    - got my code working
+ - Investigated how likwid aggregates
+   - aggregates by region but on a per-thread basis
+   - if two regions have the same name and they are on the same thread, they
+     will be aggregated.
 
 ## Hardware Counters
 Group "FLOPS_SP" and "FLOPS_DP" seem useful.
