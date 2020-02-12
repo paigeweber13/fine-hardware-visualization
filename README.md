@@ -4,13 +4,21 @@ Present the user with a visualization of their computer architecture and
 indicate what parts of that architecture are most loaded to identify
 bottlenecks in high-performance applications.
 
-## Architecture
- - Identify architecture
+## Architecture of Program
+ - Identify hardware architecture
  - Identify peak FLOP/s, memory bandwidth, etc.
  - Identify latency
  - Measure what actual utilization of memory/processor is
  - Compare actual utilization with peak on an piece-by-piece basis
  - Visualize that
+
+## Some things to keep in mind:
+ - take notes on what I'm doing inside this readme! This will be used later to
+   justify the work I'm doing this semester
+ - end goal is to apply this to graph problems: kernels in graph problems tend
+   to change behavior throughout execution
+ - Dr. Saule said last week "now we know likwid counts by region"... what
+   exactly does that mean? I guess that it aggregates by region
 
 ## TODO:
  - can we measure integer operations?
@@ -29,33 +37,6 @@ bottlenecks in high-performance applications.
    LOWER priority
 	 - IF I BUILD LIKWID FROM SOURCE, I CAN USE IT WITHOUT SUDO????? WTF???
  -  can likwid-accessD can only monitor at the process level?
-
-### Old TODO:
-These are things that directly relate to the final program we want to make, but
-Dr. Saule has asked me to spend time investigating likwid and how it works,
-instead of working on something that would conceivably go into the final
-program
-
- - put likwid markers into benchmark to see if I'm doing my own math right
- - compare to theoretical max to see if we can use these operations to saturate
-   floating point operations
- - are there integer operation counters?
- - get a baseline benchmark
-   - try to saturate machine?
-     - calculate flop/s
-     - or use hardware counters
-   - use theoretical numbers for comparison
-
-As a POC, for now we're just going to focus on identifying peak performance and
-actual performance and then comparing the two. We will hard code an
-architecture and output the results to the command line. 
-
- - Benchmark machine
-   - handwritten benchmark
-   - run likwid to measure FLOP/s and Mem bandwidth, use this as benchmark
-   - compare
- - programatically run likwid given some input executable
-   - get hardware counters and time execution to calculate flop/s
 
 ## Accomplishments:
  - evaluated both likwid and papi for use
