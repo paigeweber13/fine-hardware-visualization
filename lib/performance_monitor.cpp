@@ -1,11 +1,12 @@
 #include "performance_monitor.h"
 
-void performance_monitor::likwid_perfmonInit()
+void performance_monitor::likwid_perfmonInit(const char * event_group)
 {
-  setenv("LIKWID_EVENTS", this->event_group, 1);
+  setenv("LIKWID_EVENTS", event_group, 1);
   setenv("LIKWID_MODE", this->accessmode, 1);
   setenv("LIKWID_FILEPATH", this->filepath, 1); // output filepath
-  // setenv("LIKWID_THREADS", "0,1", 1); // list of threads
+  // unfortunately, this likwid_threads envvar is absolutely necessary
+  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
   // setenv("LIKWID_FORCE", "1", 1);
 
   // likwid marker init reads the environment variables above
@@ -28,27 +29,32 @@ void performance_monitor::likwid_perfmonInit()
   printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
 }
 
-void performance_monitor::likwid_perfmonStart()
+void performance_monitor::likwid_perfmonStart(const char * tag)
 {
-  perfmon_startCounters();
-  likwid_markerRegisterRegion(this->tag);
+  // optional according to https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
+  // likwid_markerRegisterRegion(tag);
 
-  likwid_markerStartRegion(this->tag);
+  perfmon_startCounters();
+  likwid_markerStartRegion(tag);
 }
 
-void performance_monitor::likwid_perfmonStop()
+void performance_monitor::likwid_perfmonStop(const char * tag)
 {
+  likwid_markerStopRegion(tag);
+  perfmon_stopCounters();
+
   int nevents = 20;
   double events[nevents];
   double time;
   int count;
 
-  likwid_markerStopRegion(this->tag);
-  LIKWID_MARKER_GET(this->tag, &nevents, events, &time, &count);
+  LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
   printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
-         this->tag, omp_get_thread_num(), nevents, time, count);
+         tag, omp_get_thread_num(), nevents, time, count);
 
-  perfmon_stopCounters();
+}
+
+void performance_monitor::likwid_perfmonClose(){
   likwid_markerClose();
   likwid_perfmonPrintResults();
   perfmon_finalize();
@@ -58,7 +64,7 @@ void performance_monitor::likwid_perfmonPrintResults()
 {
   int gid;
 
-  perfmon_readMarkerFile(filepath);
+  perfmon_readMarkerFile(this->filepath);
   printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   {
