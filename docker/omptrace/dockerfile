@@ -1,0 +1,54 @@
+#
+# used to build omptrace, software developed by Dr. YongHong Yan and associates
+# at UNCC. Included here because omptrace is similar to what we use and may
+# give useful insights.
+# 
+# for more information, see https://github.com/passlab/omptrace
+# 
+# Modified Ubuntu Dockerfile
+#
+# https://github.com/dockerfile/ubuntu
+#
+
+# Pull base image.
+FROM ubuntu:18.04
+
+# Install.
+# RUN sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list
+RUN apt-get update && \
+  apt-get -y upgrade && \
+  apt-get install -y build-essential && \
+  apt-get install -y software-properties-common  && \
+  apt-get install -y byobu curl git htop man unzip vim wget
+# RUN  rm -rf /var/lib/apt/lists/*
+
+# Add files.
+# ADD root/.bashrc /root/.bashrc
+# ADD root/.gitconfig /root/.gitconfig
+# ADD root/.scripts /root/.scripts
+
+# Set environment variables.
+ENV HOME /root
+
+# Define working directory.
+WORKDIR /root
+
+# Define default command.
+CMD ["bash"]
+
+######
+# build OMPtrace
+
+RUN apt-get install -y cmake
+RUN git clone https://github.com/llvm-mirror/openmp.git llvm-openmp && \
+ cd llvm-openmp && \
+ mkdir BUILD && \
+ cd BUILD && \
+ pwd && \
+# here, workdir is "$HOME/llvm-openmp/BUILD"
+# so -DCMAKE_INSTALL_PREFIX is $HOME/llvm-openmp-install
+ cmake -G "Unix Makefiles" -DLIBOMP_OMPT_SUPPORT=on -DCMAKE_INSTALL_PREFIX=../../llvm-openmp-install .. && \
+ make; make install
+
+RUN git clone https://github.com/passlab/omptrace.git && \
+  cd omptrace
