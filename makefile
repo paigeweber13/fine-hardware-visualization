@@ -5,6 +5,8 @@ LDFLAGS=-L$(LIB_DIR) -march=native -mtune=native -fopenmp -llikwid
 CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 
 # make sure likwid is installed to this prefix
+# manual install to this directory is preferred because then we can run without
+# sudo permission
 PREFIX=/usr/local
 INC_DIR=$(PREFIX)/include
 LIB_DIR=$(PREFIX)/lib
