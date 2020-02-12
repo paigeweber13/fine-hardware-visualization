@@ -13,6 +13,9 @@ bottlenecks in high-performance applications.
  - Visualize that
 
 ## TODO:
+ - fix no code working anymore, mine or brandon's
+ - can we measure integer operations?
+
  - put likwid markers into benchmark to see if I'm doing my own math right
  - compare to theoretical max to see if we can use these operations to saturate
    floating point operations
