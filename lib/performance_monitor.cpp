@@ -7,7 +7,8 @@ void performance_monitor::likwid_perfmonInit(const char * event_group)
   setenv("LIKWID_FILEPATH", this->filepath, 1); // output filepath
   // unfortunately, this likwid_threads envvar is absolutely necessary
   setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
-  // setenv("LIKWID_FORCE", "1", 1);
+  // forces likwid to take control of registers even if they are in use
+  setenv("LIKWID_FORCE", "1", 1);
 
   // likwid marker init reads the environment variables above
   likwid_markerInit();
@@ -15,9 +16,14 @@ void performance_monitor::likwid_perfmonInit(const char * event_group)
   // optionally pin each thread to single core
 #pragma omp parallel
   {
-    // Init marker api for current thread
+    // Brandon's code includdes the following comment:
+
     // Read on mailing list dont need to do this unless not already pinning
-    // likwid_markerThreadInit(); // init thread hash table
+
+    // I cannot find anything in the mailing list... what does it mean?
+
+    // Init marker api for current thread
+    likwid_markerThreadInit(); 
 
     // pin each thread to single core
     likwid_pinThread(omp_get_thread_num()); 
@@ -31,8 +37,13 @@ void performance_monitor::likwid_perfmonInit(const char * event_group)
 
 void performance_monitor::likwid_perfmonStartRegion(const char * tag)
 {
-  // optional according to https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
-  // likwid_markerRegisterRegion(tag);
+  // optional according to
+  // https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
+
+  // BUT highly recommended when using accessD according to
+  // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
+
+  likwid_markerRegisterRegion(tag);
 
   perfmon_startCounters();
   likwid_markerStartRegion(tag);
@@ -57,7 +68,6 @@ void performance_monitor::likwid_perfmonStopRegion(const char * tag)
 void performance_monitor::likwid_perfmonClose(){
   likwid_markerClose();
   likwid_perfmonPrintResults();
-  perfmon_finalize();
 }
 
 void performance_monitor::likwid_perfmonPrintResults()
