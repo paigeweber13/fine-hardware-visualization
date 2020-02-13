@@ -2,6 +2,11 @@
 // gcc likwid_minimal.c -L/usr/local/lib -march=native -mtune=native -fopenmp -llikwid
 // or the like
 
+// this can be run alone `./a.out`
+// or with likwid-perfctr by commenting out the `setenv` lines and then running
+// likwid-perfctr -C S0:0 -g FLOPS_DP -M 1 -m ./a.out
+// or the like
+
 #include <likwid.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +42,10 @@ int main()
   // print results here if you want
 
   // calling both 'likwid_markerClose()' and 'perfmon_finalize()' causes
-  // segfault, but I can call either twice in a row and be fine
+  // segfault, but I can call either twice in a row and be fine. This only
+  // happens when running the program on its own. If wrapped in likwid-perfctr
+  // (see comment block before inlcudes), this doesn't happen
+
   // likwid_markerClose();
   likwid_markerClose();
   // perfmon_finalize();
