@@ -29,22 +29,22 @@ int main(int argc, char* argv[])
   performance_monitor perfmon;
 
   // FLOPS ----------------------------
-  perfmon.likwid_perfmonInit("FLOPS_SP");
+  perfmon.init("FLOPS_SP");
   auto start_time = std::chrono::high_resolution_clock::now();
   #pragma omp parallel
   {
     NUM_CORES = omp_get_num_threads();
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
-    perfmon.likwid_perfmonStartRegion("flops");
+    perfmon.startRegion("flops");
     d = flops(FLOAT_NUM_ITERATIONS);
-    perfmon.likwid_perfmonStopRegion("flops");
+    perfmon.stopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
   const double microseconds_to_seconds = 1e-6;
 
-  perfmon.likwid_perfmonClose();
+  perfmon.close();
   
   double total_float_ops = FLOAT_NUM_ITERATIONS * FLOP_PER_ITERATION * NUM_CORES;
   const double flops_to_tflops = 1e-12;

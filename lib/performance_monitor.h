@@ -14,11 +14,11 @@ class performance_monitor {
     int num_threads;
 
     // ------ functions ------ //
-    void likwid_perfmonInit(const char * event_group);
-    void likwid_perfmonStartRegion(const char * tag);
-    void likwid_perfmonStopRegion(const char * tag);
-    void likwid_perfmonClose();
-    void likwid_perfmonPrintResults();
+    void init(const char * event_group);
+    void startRegion(const char * tag);
+    void stopRegion(const char * tag);
+    void close();
+    void printResults();
 
   private:
 };

@@ -1,6 +1,6 @@
 #include "performance_monitor.h"
 
-void performance_monitor::likwid_perfmonInit(const char * event_group)
+void performance_monitor::init(const char * event_group)
 {
   setenv("LIKWID_EVENTS", event_group, 1);
   setenv("LIKWID_MODE", this->accessmode, 1);
@@ -35,7 +35,7 @@ void performance_monitor::likwid_perfmonInit(const char * event_group)
   printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
 }
 
-void performance_monitor::likwid_perfmonStartRegion(const char * tag)
+void performance_monitor::startRegion(const char * tag)
 {
   // optional according to
   // https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
@@ -49,7 +49,7 @@ void performance_monitor::likwid_perfmonStartRegion(const char * tag)
   likwid_markerStartRegion(tag);
 }
 
-void performance_monitor::likwid_perfmonStopRegion(const char * tag)
+void performance_monitor::stopRegion(const char * tag)
 {
   likwid_markerStopRegion(tag);
   perfmon_stopCounters();
@@ -65,12 +65,12 @@ void performance_monitor::likwid_perfmonStopRegion(const char * tag)
 
 }
 
-void performance_monitor::likwid_perfmonClose(){
+void performance_monitor::close(){
   likwid_markerClose();
-  likwid_perfmonPrintResults();
+  printResults();
 }
 
-void performance_monitor::likwid_perfmonPrintResults()
+void performance_monitor::printResults()
 {
   int gid;
 
