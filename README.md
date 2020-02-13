@@ -71,7 +71,13 @@ bottlenecks in high-performance applications.
           HyperThreading. Counter results defaults to 0."
         - I assume if you want to use PMC4-7 those would be used in context
           switches but if you disable hyperthreading then you can use them 
-        - when trying to use counter PMC8 and above, likwid reports "WARN: Counter PMC8 not defined for current architecture"
+        - when trying to use counter PMC8 and above, likwid reports "WARN:
+          Counter PMC8 not defined for current architecture"
+        - it also reports "WARN: Counter FIXC0 already used in event set,
+          skipping". I wonder if it's trying to wrap around with counters?
+        - the FIXC0-2 registers will only allow certain counters
+        - even trying to move a counter that works on FIXC0 to FIXC2 will not
+          work
 	 - if we add a TON of counters, are results similar?
  - check out brandon's bw and lat code, report on that
  - How does likwid behave when you..
