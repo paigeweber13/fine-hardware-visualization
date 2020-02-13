@@ -21,7 +21,9 @@ bottlenecks in high-performance applications.
    exactly does that mean? I guess that he's referring to how it aggregates by
    region... but it also aggregates per physical thread: running flops code
    twice did not change the number of regions reported by likwid: still only
-   did one per physical thread
+   did one per physical thread. But within each thread, both runs were included
+   even though we closed and opened that region. So you can like... re-enter
+   regions
 
 ## TODO:
  - can we measure integer operations?
@@ -33,6 +35,9 @@ bottlenecks in high-performance applications.
  	- pin 1 omp thread to each physical thread? 
  	- pin 1 omp thread to each physical core?
  	- pin multiple omp threads to one physical thread?
+    - according to
+      https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC#problems , this
+      is not supported. Access to hash table entries is not thread safe
   - start with pinning 1 omp thread to each physical thread and then partway
     through execution shift all omp threads to one physical thread (use
     pthread_setaffinity_np to migrate threads)
@@ -52,6 +57,7 @@ bottlenecks in high-performance applications.
    - aggregates by region but on a per-thread basis
    - if two regions have the same name and they are on the same thread, they
      will be aggregated.
+ - discovered "vectorization ratio" metric in likwid
 
 ## Hardware Counters
 Group "FLOPS_SP" and "FLOPS_DP" seem useful.
