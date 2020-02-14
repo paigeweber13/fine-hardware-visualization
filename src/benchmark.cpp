@@ -30,6 +30,7 @@ int main(int argc, char* argv[])
 
   // FLOPS ----------------------------
   perfmon.init("FLOPS_SP");
+  // perfmon.init("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE:PMC0");
   auto start_time = std::chrono::high_resolution_clock::now();
   #pragma omp parallel
   {
