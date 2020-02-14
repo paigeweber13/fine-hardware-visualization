@@ -73,6 +73,8 @@ void performance_monitor::close(){
 void performance_monitor::printResults()
 {
   int gid;
+  const char * mflops_metric_name = "AVX SP [MFLOP/s]";
+  float mflops = 0.;
 
   perfmon_readMarkerFile(this->filepath);
   printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
@@ -96,11 +98,21 @@ void performance_monitor::printResults()
         printf("Event %s:%s: %f\n", perfmon_getEventName(gid, k),
                perfmon_getCounterName(gid, k),
                perfmon_getResultOfRegionThread(i, k, t));
-      for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
-        printf("Metric %s: %f\n", perfmon_getMetricName(gid, k),
-               perfmon_getMetricOfRegionThread(i, k, t));
+      for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+        const char * metric = perfmon_getMetricName(gid, k);
+        float value = perfmon_getMetricOfRegionThread(i, k, t);
+        printf("Metric %s: %f\n", metric, value);
+        if(strcmp(metric, mflops_metric_name)){
+          mflops += value;
+        }
+      }
       printf("\n");
     }
   }
+
+  printf("Aggregate %s: %f\n", mflops_metric_name, mflops);
+  printf("Total TFlop/s: %f\n", mflops*MFLOPS_TO_TFLOPS);
+  printf("\n");
+
   remove(filepath);
 }

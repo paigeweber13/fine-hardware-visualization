@@ -5,6 +5,7 @@
 
 #define ACCESSMODE_DAEMON "1"
 #define ACCESSMODE_DIRECT "0"
+#define MFLOPS_TO_TFLOPS 1e-6
 
 class performance_monitor {
   public:
