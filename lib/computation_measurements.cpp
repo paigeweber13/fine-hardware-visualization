@@ -38,7 +38,7 @@ __m256 flops(std::uint64_t num_iterations){
   // __m256 v = _mm256_setr_ps (2020., 220., 320., 420., 520., 620., 720., 820.);
 
   for (std::uint64_t i = 0; i < num_iterations; i++){
-    // operations per loop iteration
+    // operations per loop iteration: 80
     // d = _mm256_fmadd_ps (reg_a, reg_b, reg_c);
     c = _mm256_fmadd_ps (a, b, c); // 2 ops on 8 floats
     f = _mm256_fmadd_ps (d, e, f); // 2 more ops on 8 floats
