@@ -38,13 +38,14 @@ bottlenecks in high-performance applications.
      - UOPS_EXECUTED.PORT5
      - UOPS_EXECUTED.PORT015
      - UOPS_EXECUTED.PORT234
+     - unforunately, most float and int operations share ports 0 and 1
    - possible to count vector stuff:
      - SIMD_INT_64.PACKED_MPY counts packed multiply operations
      - FP_COMP_OPS_EXE.SSE2_INTEGER
      - SIMD_INT_128.PACKED_MPY
    - we can create custom event sets
-   - event groups are stored in $(PREFIX)/share/$(ARCH)/
-   - ex /usr/local/share/skylake/FLOPS_SP.txt
+   - event groups are stored in $(PREFIX)/share/likwid/perfgroups/$(ARCH)/
+   - ex /usr/local/share/likwid/perfgroups/skylakeFLOPS_SP.txt
  - Do some basic sampling tests
    - if you specify more than one group, switch groups in a round-robin
      fashion. 
@@ -79,14 +80,25 @@ bottlenecks in high-performance applications.
         - even trying to move a counter that works on FIXC0 to FIXC2 will not
           work
 	 - if we add a TON of counters, are results similar?
+        - abstracted ones are, but no extrapolation is done for actual counts
  - check out brandon's bw and lat code, report on that
  - How does likwid behave when you..
+  - NOTE: expected performance is 371 GFlop/s
  	- pin 1 omp thread to each physical thread? 
+    - 193.8 GFlop/s
  	- pin 1 omp thread to each physical core?
+    - likwid calls both threads and cores "threads"
+    - pinned one thread to core 0 and one thread to core 2
+    - got 100.1 GFlop/s
  	- pin multiple omp threads to one physical thread?
     - according to
       https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC#problems , this
       is not supported. Access to hash table entries is not thread safe
+    - I tried it anyways. 
+      - most threads reported "-22" for all counters... some kind of code?
+      - still did all operations
+      - reported 56.8 GFlop/s, which is about 1/4 our 4-core measurement and
+        1/2 our 2-core measurement
   - start with pinning 1 omp thread to each physical thread and then partway
     through execution shift all omp threads to one physical thread (use
     pthread_setaffinity_np to migrate threads)
@@ -120,5 +132,7 @@ FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
 one retired instruction. 
 It counds one vector FMA operation as 2 retired instructions
 
-AVX SP MFLOP/s counts one vector operation as 8 floating point operations: This
+AVX SP MFLOP/s counts vector operation as 8 floating point operations: This
 is what we want
+
+so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
