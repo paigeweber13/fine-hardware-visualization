@@ -20,6 +20,10 @@ BELOW INFO NEEDS TO BE UPDATED
  - 1 * 4 * 2 900 000 000 * 2 * 2 * 8 = 1638400000000
  - 3.71 * 10^11
  - 371 GFlop/s
+ - 185.5 GFlop/s without hyperthreading
+ - experiments are giving me 0.100195 TFlop/s on 2 cores and 0.193845 TFlop/s
+   on 4 cores with hyperthreading enabled
+ - disabled cpu 1 and 3 on the OS level and got 0.091052 TFlop/s
 
 ### Theoretical IOP/s performance
  - (num processors) * (num physical cores per processor) * (cycles per second)
