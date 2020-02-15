@@ -26,6 +26,11 @@ EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 BENCH_EXEC_NAME=bench
 BENCH_EXEC=$(EXEC_DIR)/$(BENCH_EXEC_NAME)
 
+init:
+	@mkdir -p $(EXEC_DIR);
+	@mkdir -p $(OBJ_DIR);
+	@mkdir -p $(EXEC_DIR)/tests;
+
 build: $(EXEC) $(BENCH_EXEC)
 
 debug:
@@ -35,17 +40,28 @@ debug:
 debug: LDFLAGS += -Q --help=target
 debug: clean build
 
+tests: run-tests/thread_migration run-tests/likwid_minimal
+
 $(BENCH_EXEC): $(OBJS) src/benchmark.cpp
-	@mkdir -p $(EXEC_DIR);
 	$(CXX) $(OBJS) src/benchmark.cpp $(LDFLAGS) -o $@
 
 $(EXEC): $(OBJS) src/fhv.cpp
-	@mkdir -p $(EXEC_DIR);
 	$(CXX) $(OBJS) src/fhv.cpp $(LDFLAGS) -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(OBJ_DIR);
+bin/tests/thread_migration: $(OBJS) tests/thread_migration.cpp
+	$(CXX) $(OBJS) tests/thread_migration.cpp $(LDFLAGS) -o $@
+
+run-tests/thread_migration: bin/tests/thread_migration
+	bin/tests/thread_migration
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp init
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+bin/tests/likwid_minimal: $(OBJS) tests/likwid_minimal.c
+	gcc tests/likwid_minimal.c -L/usr/local/lib -march=native -mtune=native -fopenmp -llikwid -o tests/likwid_minimal
+
+run-tests/likwid_minimal: bin/tests/likwid_minimal
+	likwid-perfctr -C S0:0 -g L3 -g FLOPS_DP -M 1 -m tests/likwid_minimal
 
 assembly: $(ASM)
 
