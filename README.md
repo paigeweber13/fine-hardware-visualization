@@ -4,6 +4,12 @@ Present the user with a visualization of their computer architecture and
 indicate what parts of that architecture are most loaded to identify
 bottlenecks in high-performance applications.
 
+## Running
+After cloning the repository, there are a couple things you can do:
+ - for a quick demo of how the program works, run `make` and then run
+   `bin/bench`
+ - to build and run the (currently limited) test suite, run `make tests`
+
 ## Architecture of Program
  - Identify hardware architecture
  - Identify peak FLOP/s, memory bandwidth, etc.
@@ -99,9 +105,23 @@ bottlenecks in high-performance applications.
       - still did all operations
       - reported 56.8 GFlop/s, which is about 1/4 our 4-core measurement and
         1/2 our 2-core measurement
-  - start with pinning 1 omp thread to each physical thread and then partway
-    through execution shift all omp threads to one physical thread (use
-    pthread_setaffinity_np to migrate threads)
+  - play with thread migration
+    - use pthread_setaffinity_np to migrate threads
+      - pthread_setaffinity_np is unnecessary because likwid_pinThread does the
+        same much more easily
+    - note: IDs reported by omp_get_thread_num do not change when cores are
+      migrated! I assume this is because the IDs are unique to OpenMP threads,
+      not physical cores
+    - SCHED_GETCPU(3) will tell you what core is being used
+    - swap odd and even cores
+      - only even-numbered omp threads were allowed to do work, but odd cores
+        also reported data. This indicates that likwid checks on a hardware
+        core level and not by omp thread.
+      - core 2 didn't have work? I suppose that's because of hyperthreading:
+        maybe hardware thread 0 will run work for hardware thread 1 because
+        they're on the same physical core?
+    - start with pinning 1 omp thread to each physical thread and then partway
+      through execution shift all omp threads to one physical thread 
  - Spend a little bit of time finding out how to avoid using sudo. This is a
    LOWER priority
 	 - IF I BUILD LIKWID FROM SOURCE, I CAN USE IT WITHOUT SUDO????? WTF???
