@@ -38,7 +38,9 @@ int main(int argc, char* argv[])
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
     perfmon.startRegion("flops");
+    // #pragma omp barrier
     d = flops(FLOAT_NUM_ITERATIONS);
+    // #pragma omp barrier
     perfmon.stopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();

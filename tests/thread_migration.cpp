@@ -99,7 +99,7 @@ void migrate_all_to_one(){
 #pragma omp parallel
   {
     perfmon.startRegion("flops");
-    #pragma omp barrier
+    // #pragma omp barrier
 
     int omp_thread = omp_get_thread_num();
     likwid_pinThread(omp_thread);

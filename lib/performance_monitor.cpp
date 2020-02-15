@@ -32,6 +32,7 @@ void performance_monitor::init(const char * event_group)
   }
 
   this->runtime = 0;
+  perfmon_startCounters();
 
   printf("Thread count initialized to %d\n", this->num_threads);
   printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
@@ -47,14 +48,12 @@ void performance_monitor::startRegion(const char * tag)
 
   likwid_markerRegisterRegion(tag);
 
-  perfmon_startCounters();
   likwid_markerStartRegion(tag);
 }
 
 void performance_monitor::stopRegion(const char * tag)
 {
   likwid_markerStopRegion(tag);
-  perfmon_stopCounters();
 
   int nevents = 20;
   double events[nevents];
@@ -68,6 +67,7 @@ void performance_monitor::stopRegion(const char * tag)
 }
 
 void performance_monitor::close(){
+  perfmon_stopCounters();
   likwid_markerClose();
   // perfmon_finalize();
   printResults();
