@@ -18,6 +18,8 @@
 
 int main()
 {
+  printf("\n\nThis is a minimal example of how the likwid marker api works\n");
+
   const char *filepath = "/tmp/likwid.out";
 
   // setenv("LIKWID_EVENTS", "FLOPS_DP", 1);
