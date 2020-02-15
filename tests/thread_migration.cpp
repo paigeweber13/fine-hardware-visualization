@@ -20,6 +20,7 @@ void migrate_cores_12_to_cores_34(){
 #pragma omp parallel
   {
     perfmon.startRegion("flops");
+    #pragma omp barrier
 
     int original_core = sched_getcpu();
     int omp_thread = omp_get_thread_num();
@@ -52,8 +53,37 @@ void migrate_cores_12_to_cores_34(){
       // perfmon.stopRegion("flops");
     }
 
+    #pragma omp barrier
     perfmon.stopRegion("flops");
   }
+
+  perfmon.close();
+}
+
+void migrate_thread_core_0_to_2()
+{
+  performance_monitor perfmon;
+  __m256 d;
+  __m256 e;
+
+  perfmon.init("FLOPS_SP");
+  printf("here, one thread is migrated from core 0 to core 2\n");
+
+#pragma omp parallel
+{
+  perfmon.startRegion("flops");
+}
+
+  likwid_pinThread(0);
+  d = flops(10000000);
+
+  likwid_pinThread(2);
+  e = flops(10000000);
+
+#pragma omp parallel
+{
+  perfmon.stopRegion("flops");
+}
 
   perfmon.close();
 }
@@ -68,6 +98,9 @@ void migrate_all_to_one(){
 
 #pragma omp parallel
   {
+    perfmon.startRegion("flops");
+    #pragma omp barrier
+
     int omp_thread = omp_get_thread_num();
     likwid_pinThread(omp_thread);
     int original_core = sched_getcpu();
@@ -75,9 +108,7 @@ void migrate_all_to_one(){
 
     // compute round 1
     printf("Thread %d doing work on core %d\n", omp_thread, original_core);
-    perfmon.startRegion("flops");
     d = flops(10000000);
-    perfmon.stopRegion("flops");
 
     // migrate threads
     likwid_pinThread(0);
@@ -88,8 +119,9 @@ void migrate_all_to_one(){
 
     // compute round 2
     printf("Thread %d doing work on core %d\n", omp_thread, new_core);
-    perfmon.startRegion("flops");
     d += flops(10000000);
+
+    #pragma omp barrier
     perfmon.stopRegion("flops");
   }
 
@@ -100,16 +132,23 @@ int main(int argc, char *argv[])
 {
   if (argc < 2)
   {
-    printf("usage: %s 0|1\n", argv[0]);
-    printf("0 will run test that swaps even and odd cores\n");
-    printf("1 will run test that starts with 1 thread per core and then \n"
+    printf("usage: %s 0|1|2\n", argv[0]);
+    printf("0 will run test that moves from cores 0,1 to cores 2,3\n");
+    printf("1 will run test that moves thread from core 0 to core 2\n");
+    printf("2 will run test that starts with 1 thread per core and then \n"
            "moves all threads to one core\n");
   }
 
   if (std::stoi(argv[1]) == 0)
   {
-    printf("----- testing thread migration by swapping even and odd cores\n");
+    printf("----- testing thread migration by moving from cores 0,1 to cores 2,3\n");
     migrate_cores_12_to_cores_34();
+    printf("\n\n");
+  }
+  else if (std::stoi(argv[1]) == 1)
+  {
+    printf("----- testing thread migration by moving from core 0 to 2\n");
+    migrate_thread_core_0_to_2();
     printf("\n\n");
   }
   else
