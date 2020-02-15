@@ -66,6 +66,8 @@ After cloning the repository, there are a couple things you can do:
      - fixed it: all I had to do was add a call to "likwid_markerNextGroup"
      - this overrides time set by -T. It does not switch after a given time,
        but just when that function is called
+     - so we'd have to run whatever it is multiple times
+     - would be possible to switch by time if we use the command line interface
      - had very similar rates (MFLOP/s) but half the number of flops when
        running two groups
 	 - how many counters before sampling starts?
@@ -87,6 +89,9 @@ After cloning the repository, there are a couple things you can do:
           work
 	 - if we add a TON of counters, are results similar?
         - abstracted ones are, but no extrapolation is done for actual counts
+   - note: doesn't seem to be able to re-initialize, so you can't change the
+     group name. Have to specify all at the beginning and then call
+     likwid_markerSwitch() 
  - check out brandon's bw and lat code, report on that
  - How does likwid behave when you..
   - NOTE: expected performance is 371 GFlop/s
@@ -120,8 +125,35 @@ After cloning the repository, there are a couple things you can do:
       - core 2 didn't have work? I suppose that's because of hyperthreading:
         maybe hardware thread 0 will run work for hardware thread 1 because
         they're on the same physical core?
+      - yeah, swapping even and odd cores is somewhat non-deterministic and I'm
+        pretty sure it's because of hyperthreading
+    - instead of swapping even and odd, started on cores 1 and 2 and moved to
+      cores 3 and 4
+      - when I did start region -> run1 -> migrate -> run2 -> stop region, I
+        got "WARN: Stopping an unknown/not-started region flops". So sometimes
+        one thread would start a region and another would stop it... this is
+        interesting, and further reinforces the theory that regions and stuff
+        is done on a hardware-thread level
+      - this was changed to start and stop regions immediately surrounding runs
+      - not all cores always had work reported... but thread 2 or 3 almost
+        always had work, which would not be possible if likwid wasn't tracking
+        hardware threads
+      - adding "#pragma omp barrier" after starting regions and before stopping
+        them" made everything report work every time
+      - if regions were started and stopped immediately surrounding work, only
+        threads 0 and 1 reported work.... which corresponds with openmp
+        threads, not physical threads... Does this mean when a region is
+        started it sets it up with omp threads but then measures the associated
+        physical threads?
+    - move single thread from core 0 to core 2
+      - seems that if you start region on one core and stop on another, nothing
+        is reported
+      - starting region on one core, siwtching to another, doing work,
+        siwtching back to first, and stopping region causes only first core to
+        report work
     - start with pinning 1 omp thread to each physical thread and then partway
       through execution shift all omp threads to one physical thread 
+      - only reported work for final core that had all threads.... weird.
  - Spend a little bit of time finding out how to avoid using sudo. This is a
    LOWER priority
 	 - IF I BUILD LIKWID FROM SOURCE, I CAN USE IT WITHOUT SUDO????? WTF???
