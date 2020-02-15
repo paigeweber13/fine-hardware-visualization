@@ -2,6 +2,8 @@
 
 void performance_monitor::init(const char * event_group)
 {
+  // TODO: use omp_get_thread_nums() to build string for LIKWID_THREADS
+
   setenv("LIKWID_EVENTS", event_group, 1);
   setenv("LIKWID_MODE", this->accessmode, 1);
   setenv("LIKWID_FILEPATH", this->filepath, 1); // output filepath
@@ -15,11 +17,10 @@ void performance_monitor::init(const char * event_group)
 
 #pragma omp parallel
   {
-    // Brandon's code includdes the following comment:
-
-    // Read on mailing list dont need to do this unless not already pinning
-
-    // I cannot find anything in the mailing list... what does it mean?
+    // Brandon's code includdes the comment "Read on mailing list dont need to
+    // do this unless not already pinning" above the call to
+    // likwid_markerThreadInit. I cannot find anything like this in the mailing
+    // list... what does it mean?
 
     // Init marker api for current thread
     likwid_markerThreadInit(); 
@@ -68,6 +69,7 @@ void performance_monitor::stopRegion(const char * tag)
 
 void performance_monitor::close(){
   likwid_markerClose();
+  // perfmon_finalize();
   printResults();
 }
 
@@ -93,7 +95,7 @@ void performance_monitor::printResults()
 
   for (int t = 0; t < this->num_threads; t++)
   {
-    printf("\nMetrics output for thread %d\n", t);
+    printf("\nMetrics output for hardware thread %d\n", t);
 
     for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
     {
