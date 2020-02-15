@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
   const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
 
   // we do 5 fma, so 10 total operations on 8 floats each
-  const std::uint64_t FLOP_PER_ITERATION = 80; 
+  const std::uint64_t FLOP_PER_ITERATION = 64; 
 
   // should total 8 billion flops, getting 4 billion from likwid
   // likwid counts FMA as a single operation?
