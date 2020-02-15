@@ -53,7 +53,8 @@ bin/tests/thread_migration: $(OBJS) tests/thread_migration.cpp
 	$(CXX) $(OBJS) tests/thread_migration.cpp $(LDFLAGS) -o $@
 
 run-tests/thread_migration: bin/tests/thread_migration
-	bin/tests/thread_migration
+	bin/tests/thread_migration 0; \
+	bin/tests/thread_migration 1;
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp init
 	$(CXX) $(CXXFLAGS) -c $< -o $@

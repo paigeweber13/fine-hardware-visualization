@@ -89,12 +89,24 @@ void migrate_all_to_one(){
 
 int main(int argc, char *argv[])
 {
-  printf("----- testing thread migration by swapping even and odd cores\n");
-  swap_even_and_odd_cores();
-  printf("\n\n");
+  if (argc < 2)
+  {
+    printf("usage: %s 0|1\n", argv[0]);
+    printf("0 will run test that swaps even and odd cores\n");
+    printf("1 will run test that starts with 1 thread per core and then \n"
+           "moves all threads to one core\n");
+  }
 
-  // running both in a row causes segfault, no matter the order
-  printf("----- testing thread migration by moving all threads to one core\n");
-  migrate_all_to_one();
-  printf("\n\n");
+  if (std::stoi(argv[1]) == 0)
+  {
+    printf("----- testing thread migration by swapping even and odd cores\n");
+    swap_even_and_odd_cores();
+    printf("\n\n");
+  }
+  else
+  {
+    printf("----- testing thread migration by moving all threads to one core\n");
+    migrate_all_to_one();
+    printf("\n\n");
+  }
 }
