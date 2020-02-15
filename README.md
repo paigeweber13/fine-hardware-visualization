@@ -92,7 +92,6 @@ After cloning the repository, there are a couple things you can do:
    - note: doesn't seem to be able to re-initialize, so you can't change the
      group name. Have to specify all at the beginning and then call
      likwid_markerSwitch() 
- - check out brandon's bw and lat code, report on that
  - How does likwid behave when you..
   - NOTE: expected performance is 371 GFlop/s
  	- pin 1 omp thread to each physical thread? 
@@ -157,7 +156,29 @@ After cloning the repository, there are a couple things you can do:
  - Spend a little bit of time finding out how to avoid using sudo. This is a
    LOWER priority
 	 - IF I BUILD LIKWID FROM SOURCE, I CAN USE IT WITHOUT SUDO????? WTF???
- -  can likwid-accessD can only monitor at the process level?
+   - likwid-perfctr in ubuntu repos is version 4.3.0
+   - likwid-perfctr built from source is version 5.0.1
+ - can likwid-accessD can only monitor at the process level?
+   - one test: ran thread migration 0,1,2,3 -> 0
+     - in both cases, only thread 0 reported work
+     - with direct access 4.0e8 packed sp float ops
+     - with accessD 16.0e8 packed sp float ops - four times the amount???
+   - both access modes reported same number of fp ops when migrating 0,1 -> 2,3
+     - the fact that results were the same is telling me it's reporting on
+       hardware level, because only openmp threads 0,1 are allowed to do work
+       but all four hardware threads report work
+     - this tells me accessD is NOT monitoring on the process level
+ - something I discovered:
+   - counts were inconsistent, but adding "#pragma omp barrier" after
+     perfmon.startRegion and before perfmon.stopRegion fixed this
+   - I later discovered that an alternate solution was to run
+     perfmon_startCounters in perfmon.init and perfmon_stopCounters in
+     perfmon.close and this also fixed the problem, even after removing the
+     barriers
+   - code where threads migrated still needed the barrier before stopping
+     regions, likely because some regions were getting stopped by a thread not
+     doing work, but before work was done.
+ - check out brandon's bw and lat code, report on that
 
 ## Accomplishments:
 ### before 2020-02-11
