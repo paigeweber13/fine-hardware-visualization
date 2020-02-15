@@ -63,7 +63,7 @@ void performance_monitor::stopRegion(const char * tag)
   LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
   printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
          tag, omp_get_thread_num(), nevents, time, count);
-  this->runtime = std::max(this->runtime, time);
+  this->runtime = fmax(this->runtime, time);
 }
 
 void performance_monitor::close(){
@@ -104,7 +104,8 @@ void performance_monitor::printResults()
         const char * counter_name = perfmon_getCounterName(gid, k);
         float event_value = perfmon_getResultOfRegionThread(i, k, t);
         printf("Event %s:%s: %.3f\n", event_name, counter_name, event_value);
-        if(strcmp(event_name, flops_event_name) == 0){
+        if(strcmp(event_name, flops_event_name) == 0 &&
+           event_value > 0){
           num_flops += event_value;
         }
       }
@@ -112,7 +113,8 @@ void performance_monitor::printResults()
         const char * metric_name = perfmon_getMetricName(gid, k);
         float metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         printf("Metric %s: %.3f\n", metric_name, metric_value);
-        if(strcmp(metric_name, mflops_metric_name) == 0){
+        if(strcmp(metric_name, mflops_metric_name) == 0 &&
+           !isnan(metric_value)){
           mflops += metric_value;
         }
       }

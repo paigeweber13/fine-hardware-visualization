@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <math.h>
 #include <iostream>
 #include <likwid.h>
 #include <omp.h>
