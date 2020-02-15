@@ -26,12 +26,13 @@ EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 BENCH_EXEC_NAME=bench
 BENCH_EXEC=$(EXEC_DIR)/$(BENCH_EXEC_NAME)
 
+# build: $(EXEC) $(BENCH_EXEC)
+build: $(BENCH_EXEC)
+
 init:
 	@mkdir -p $(EXEC_DIR);
 	@mkdir -p $(OBJ_DIR);
 	@mkdir -p $(EXEC_DIR)/tests;
-
-build: $(EXEC) $(BENCH_EXEC)
 
 debug:
 	@echo "sources: $(SOURCES)";
