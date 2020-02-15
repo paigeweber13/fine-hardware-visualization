@@ -13,7 +13,6 @@ void performance_monitor::init(const char * event_group)
   // likwid marker init reads the environment variables above
   likwid_markerInit();
 
-  // optionally pin each thread to single core
 #pragma omp parallel
   {
     // Brandon's code includdes the following comment:
@@ -25,11 +24,13 @@ void performance_monitor::init(const char * event_group)
     // Init marker api for current thread
     likwid_markerThreadInit(); 
 
-    // pin each thread to single core
+    // optionally pin each thread to single core
     likwid_pinThread(omp_get_thread_num()); 
 
     this->num_threads = omp_get_num_threads();
   }
+
+  this->runtime = 0;
 
   printf("Thread count initialized to %d\n", this->num_threads);
   printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
@@ -62,7 +63,7 @@ void performance_monitor::stopRegion(const char * tag)
   LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
   printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
          tag, omp_get_thread_num(), nevents, time, count);
-
+  this->runtime = std::max(this->runtime, time);
 }
 
 void performance_monitor::close(){
@@ -73,9 +74,13 @@ void performance_monitor::close(){
 void performance_monitor::printResults()
 {
   int gid;
+  const char * flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";
+  float num_flops = 0.;
   const char * mflops_metric_name = "AVX SP [MFLOP/s]";
+  const uint ops_per_vector = 8;
   float mflops = 0.;
 
+  printf("----- begin performance_monitor report -----");
   perfmon_readMarkerFile(this->filepath);
   printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -94,24 +99,34 @@ void performance_monitor::printResults()
     {
       gid = perfmon_getGroupOfRegion(i);
       printf("Region %s with gid %d\n", perfmon_getTagOfRegion(i), gid);
-      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++)
-        printf("Event %s:%s: %f\n", perfmon_getEventName(gid, k),
-               perfmon_getCounterName(gid, k),
-               perfmon_getResultOfRegionThread(i, k, t));
+      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
+        const char * event_name = perfmon_getEventName(gid, k);
+        const char * counter_name = perfmon_getCounterName(gid, k);
+        float event_value = perfmon_getResultOfRegionThread(i, k, t);
+        printf("Event %s:%s: %.3f\n", event_name, counter_name, event_value);
+        if(strcmp(event_name, flops_event_name) == 0){
+          num_flops += event_value;
+        }
+      }
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
-        const char * metric = perfmon_getMetricName(gid, k);
-        float value = perfmon_getMetricOfRegionThread(i, k, t);
-        printf("Metric %s: %f\n", metric, value);
-        if(strcmp(metric, mflops_metric_name)){
-          mflops += value;
+        const char * metric_name = perfmon_getMetricName(gid, k);
+        float metric_value = perfmon_getMetricOfRegionThread(i, k, t);
+        printf("Metric %s: %.3f\n", metric_name, metric_value);
+        if(strcmp(metric_name, mflops_metric_name) == 0){
+          mflops += metric_value;
         }
       }
       printf("\n");
     }
   }
 
+
+  printf("Aggregate %s: %.3e\n", flops_event_name, num_flops);
+  printf("Total FP ops: %.3e\n", num_flops * ops_per_vector);
+  printf("Total runtime: %f\n", this->runtime);
   printf("Aggregate %s: %f\n", mflops_metric_name, mflops);
   printf("Total TFlop/s: %f\n", mflops*MFLOPS_TO_TFLOPS);
+  printf("----- end performance_monitor report -----\n");
   printf("\n");
 
   remove(filepath);

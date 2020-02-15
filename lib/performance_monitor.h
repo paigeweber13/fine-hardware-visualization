@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <likwid.h>
 #include <omp.h>
@@ -13,6 +14,7 @@ class performance_monitor {
     const char *filepath = "/tmp/test_marker.out";
     const char *accessmode = ACCESSMODE_DAEMON;
     int num_threads;
+    double runtime;
 
     // ------ functions ------ //
     void init(const char * event_group);
