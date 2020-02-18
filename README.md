@@ -168,6 +168,10 @@ After cloning the repository, there are a couple things you can do:
        hardware level, because only openmp threads 0,1 are allowed to do work
        but all four hardware threads report work
      - this tells me accessD is NOT monitoring on the process level
+ - explore accessD code to better understand how it works?
+   - would have to compare version 4.3.0 and 5.0.1 to really understand lack of
+     need for sudo in new version
+   - could use strace to evaluate need for sudo
  - something I discovered:
    - counts were inconsistent, but adding "#pragma omp barrier" after
      perfmon.startRegion and before perfmon.stopRegion fixed this
