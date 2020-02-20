@@ -4,11 +4,14 @@ Present the user with a visualization of their computer architecture and
 indicate what parts of that architecture are most loaded to identify
 bottlenecks in high-performance applications.
 
+## Prerequisites
+ - **likwid:** it is preferred you build likwid from source and install to
+   `/usr/local`, as this is the only confirmed way to use `likwid-accessD`
+   without root permissions. Alternatively, you can also install it with your
+   package manger (ex. `sudo apt install likwid` on ubuntu)
+
 ## Running
-After cloning the repository, there are a couple things you can do:
- - for a quick demo of how the program works, run `make` and then run
-   `bin/bench`
- - to build and run the (currently limited) test suite, run `make tests`
+To build and run the (currently limited) test suite, run `make tests`
 
 ## Architecture of Program
  - Identify hardware architecture
@@ -22,7 +25,7 @@ After cloning the repository, there are a couple things you can do:
 ## Goals:
  - main goal is to give people new to HPC something they can use to:
    - understand how their application maps to the architecture
-   - give suggestions for improvement
+   - give suggestions on how to improveme their application
  - apply this to graph problems: kernels in graph problems tend to change
    behavior throughout execution
 
