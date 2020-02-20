@@ -41,7 +41,7 @@ debug:
 debug: LDFLAGS += -Q --help=target
 debug: clean build
 
-tests: run-tests/thread_migration run-tests/likwid_minimal
+tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
 
 $(BENCH_EXEC): $(OBJS) src/benchmark.cpp
 	$(CXX) $(OBJS) src/benchmark.cpp $(LDFLAGS) -o $@
@@ -52,7 +52,7 @@ $(EXEC): $(OBJS) src/fhv.cpp
 bin/tests/benchmark-likwid-vs-manual: $(OBJS) tests/benchmark-likwid-vs-manual.cpp
 	$(CXX) $(OBJS) tests/benchmark-likwid-vs-manual.cpp $(LDFLAGS) -o $@
 
-run-bin/tests/benchmark-likwid-vs-manual: bin/tests/benchmark-likwid-vs-manual
+run-tests/benchmark-likwid-vs-manual: bin/tests/benchmark-likwid-vs-manual
 	bin/tests/benchmark-likwid-vs-manual
 
 bin/tests/thread_migration: $(OBJS) tests/thread_migration.cpp
