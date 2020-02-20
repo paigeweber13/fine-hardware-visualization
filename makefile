@@ -49,6 +49,12 @@ $(BENCH_EXEC): $(OBJS) src/benchmark.cpp
 $(EXEC): $(OBJS) src/fhv.cpp
 	$(CXX) $(OBJS) src/fhv.cpp $(LDFLAGS) -o $@
 
+bin/tests/benchmark-likwid-vs-manual: $(OBJS) tests/benchmark-likwid-vs-manual.cpp
+	$(CXX) $(OBJS) tests/benchmark-likwid-vs-manual.cpp $(LDFLAGS) -o $@
+
+run-bin/tests/benchmark-likwid-vs-manual: bin/tests/benchmark-likwid-vs-manual
+	bin/tests/benchmark-likwid-vs-manual
+
 bin/tests/thread_migration: $(OBJS) tests/thread_migration.cpp
 	$(CXX) $(OBJS) tests/thread_migration.cpp $(LDFLAGS) -o $@
 
