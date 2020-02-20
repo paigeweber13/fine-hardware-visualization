@@ -9,6 +9,8 @@
 
 int main(int argc, char* argv[])
 {
+  std::cout << "---- running benchmark and doing manual timing to compare";
+  std::cout << " with likwid results ----" << std::endl;
   //                                         100 000 000 one hundred million
   const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
 
