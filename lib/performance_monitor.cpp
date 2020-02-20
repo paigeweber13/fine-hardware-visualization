@@ -69,8 +69,6 @@ void performance_monitor::stopRegion(const char * tag)
 void performance_monitor::close(){
   perfmon_stopCounters();
   likwid_markerClose();
-  // perfmon_finalize();
-  printResults();
 }
 
 void performance_monitor::printResults()

@@ -45,6 +45,7 @@ int main(int argc, char* argv[])
   const double microseconds_to_seconds = 1e-6;
 
   perfmon.close();
+  perfmon.printResults();
   
   double total_float_ops = FLOAT_NUM_ITERATIONS * FLOP_PER_ITERATION * NUM_CORES;
   const double flops_to_tflops = 1e-12;

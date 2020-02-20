@@ -58,6 +58,7 @@ void migrate_cores_12_to_cores_34(){
   }
 
   perfmon.close();
+  perfmon.printResults();
 }
 
 void migrate_thread_core_0_to_2()
@@ -86,6 +87,7 @@ void migrate_thread_core_0_to_2()
 }
 
   perfmon.close();
+  perfmon.printResults();
 }
 
 void migrate_all_to_one(){
@@ -126,6 +128,7 @@ void migrate_all_to_one(){
   }
 
   perfmon.close();
+  perfmon.printResults();
 }
 
 int main(int argc, char *argv[])
