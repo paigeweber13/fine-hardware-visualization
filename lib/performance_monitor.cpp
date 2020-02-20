@@ -1,7 +1,12 @@
 #include "performance_monitor.h"
 
+performance_monitor::~performance_monitor(){
+  remove(filepath);
+}
+
 void performance_monitor::init(const char * event_group)
 {
+  remove(filepath);
   // TODO: use omp_get_thread_nums() to build string for LIKWID_THREADS
 
   setenv("LIKWID_EVENTS", event_group, 1);
@@ -71,16 +76,45 @@ void performance_monitor::close(){
   likwid_markerClose();
 }
 
+void performance_monitor::getAggregateResults(){
+  int gid;
+  float event_value, metric_value;
+  const char * event_name, * metric_name;
+
+  perfmon_readMarkerFile(this->filepath);
+
+  for (int t = 0; t < this->num_threads; t++)
+  {
+    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    {
+      gid = perfmon_getGroupOfRegion(i);
+      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
+        event_name = perfmon_getEventName(gid, k);
+        event_value = perfmon_getResultOfRegionThread(i, k, t);
+        if(strcmp(event_name, flops_event_name) == 0 &&
+           event_value > 0){
+          num_flops += event_value;
+        }
+      }
+      for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+        metric_name = perfmon_getMetricName(gid, k);
+        metric_value = perfmon_getMetricOfRegionThread(i, k, t);
+        if(strcmp(metric_name, mflops_metric_name) == 0 &&
+           !isnan(metric_value)){
+          mflops += metric_value;
+        }
+      }
+    }
+  }
+}
+
 void performance_monitor::printResults()
 {
   int gid;
-  const char * flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";
-  float num_flops = 0.;
-  const char * mflops_metric_name = "AVX SP [MFLOP/s]";
-  const uint ops_per_vector = 8;
-  float mflops = 0.;
+  float event_value, metric_value;
+  const char * event_name, * counter_name, * metric_name;
 
-  printf("----- begin performance_monitor report -----");
+  printf("----- begin performance_monitor report -----\n");
   perfmon_readMarkerFile(this->filepath);
   printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -100,36 +134,33 @@ void performance_monitor::printResults()
       gid = perfmon_getGroupOfRegion(i);
       printf("Region %s with gid %d\n", perfmon_getTagOfRegion(i), gid);
       for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
-        const char * event_name = perfmon_getEventName(gid, k);
-        const char * counter_name = perfmon_getCounterName(gid, k);
-        float event_value = perfmon_getResultOfRegionThread(i, k, t);
+        event_name = perfmon_getEventName(gid, k);
+        counter_name = perfmon_getCounterName(gid, k);
+        event_value = perfmon_getResultOfRegionThread(i, k, t);
         printf("Event %s:%s: %.3f\n", event_name, counter_name, event_value);
-        if(strcmp(event_name, flops_event_name) == 0 &&
-           event_value > 0){
-          num_flops += event_value;
-        }
       }
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
-        const char * metric_name = perfmon_getMetricName(gid, k);
-        float metric_value = perfmon_getMetricOfRegionThread(i, k, t);
+        metric_name = perfmon_getMetricName(gid, k);
+        metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         printf("Metric %s: %.3f\n", metric_name, metric_value);
-        if(strcmp(metric_name, mflops_metric_name) == 0 &&
-           !isnan(metric_value)){
-          mflops += metric_value;
-        }
       }
       printf("\n");
     }
   }
 
+  printOnlyAggregate();
+}
 
+void performance_monitor::printOnlyAggregate()
+{
+  getAggregateResults();
+
+  printf("----- begin aggregate performance_monitor report -----\n");
   printf("Aggregate %s: %.3e\n", flops_event_name, num_flops);
-  printf("Total FP ops: %.3e\n", num_flops * ops_per_vector);
+  printf("Total FP ops: %.3e\n", num_flops * OPS_PER_VECTOR);
   printf("Total runtime: %f\n", this->runtime);
   printf("Aggregate %s: %f\n", mflops_metric_name, mflops);
   printf("Total TFlop/s: %f\n", mflops*MFLOPS_TO_TFLOPS);
   printf("----- end performance_monitor report -----\n");
   printf("\n");
-
-  remove(filepath);
 }
