@@ -70,7 +70,7 @@ bin/tests/likwid_minimal: $(OBJS) tests/likwid_minimal.c
 	gcc tests/likwid_minimal.c -L/usr/local/lib -march=native -mtune=native -fopenmp -llikwid -o bin/tests/likwid_minimal
 
 run-tests/likwid_minimal: bin/tests/likwid_minimal
-	likwid-perfctr -C S0:0 -g L3 -g FLOPS_DP -M 1 -m tests/likwid_minimal
+	likwid-perfctr -C S0:0 -g L3 -g FLOPS_DP -M 1 -m bin/tests/likwid_minimal
 
 assembly: $(ASM)
 
