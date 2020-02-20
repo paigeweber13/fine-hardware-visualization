@@ -164,3 +164,7 @@ void performance_monitor::printOnlyAggregate()
   printf("----- end performance_monitor report -----\n");
   printf("\n");
 }
+
+float performance_monitor::getMFlops(){
+  return mflops;
+}

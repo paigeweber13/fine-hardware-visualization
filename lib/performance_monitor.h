@@ -27,6 +27,7 @@ class performance_monitor {
     void printOnlyAggregate();
 
     // ------ getters and setters ----- //
+    float getMFlops();
 
   private:
     // ------ attributes ------ //
