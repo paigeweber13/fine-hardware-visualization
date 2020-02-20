@@ -110,6 +110,12 @@ void performance_monitor::getAggregateResults(){
 
 void performance_monitor::printResults()
 {
+  printDetailedResults();
+  printOnlyAggregate();
+}
+
+void performance_monitor::printDetailedResults()
+{
   int gid;
   float event_value, metric_value;
   const char * event_name, * counter_name, * metric_name;
@@ -147,8 +153,6 @@ void performance_monitor::printResults()
       printf("\n");
     }
   }
-
-  printOnlyAggregate();
 }
 
 void performance_monitor::printOnlyAggregate()

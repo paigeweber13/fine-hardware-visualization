@@ -24,6 +24,7 @@ class performance_monitor {
     void close();
     void getAggregateResults();
     void printResults();
+    void printDetailedResults();
     void printOnlyAggregate();
 
     // ------ getters and setters ----- //
