@@ -6,7 +6,9 @@
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
 
-const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
+const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
+const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
+const unsigned num_iter = 5;
 
 int main(int argc, char* argv[])
 {
@@ -17,6 +19,7 @@ int main(int argc, char* argv[])
 
   // FLOPS ----------------------------
   perfmon.init("FLOPS_SP");
+  std::cout << "starting single precision flop benchmark" << std::endl;
   // perfmon.init("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE:PMC0");
   #pragma omp parallel
   {
@@ -28,5 +31,5 @@ int main(int argc, char* argv[])
   }
 
   perfmon.close();
-  perfmon.printResults();
+  perfmon.printOnlyAggregate();
 }
