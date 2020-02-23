@@ -1,3 +1,5 @@
+#pragma once
+
 #include <math.h>
 #include <iostream>
 #include <likwid.h>
@@ -22,6 +24,7 @@ class performance_monitor {
     void startRegion(const char * tag);
     void stopRegion(const char * tag);
     void close();
+
     void getAggregateResults();
     void printResults();
     void printDetailedResults();
