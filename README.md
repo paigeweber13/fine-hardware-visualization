@@ -35,6 +35,12 @@ To build and run the (currently limited) test suite, run `make tests`
  - create function that compares performance with benchmark, outputs to svg
    - and move printResults out of perfmon.close
  - create some test software that has balanced/inbalanced usage
+ - improve benchmark
+   - have it check bandwidth for all types of memory/cache
+   - improve software engineering: make it consistent what calls likwid, etc.
+   - have it check architecture to know what size of caches
+ - have LIKWID_THREADS environment variable get set dynamically instead of hard
+   coded
 
 ## Accomplishments:
 ### before 2020-02-11
