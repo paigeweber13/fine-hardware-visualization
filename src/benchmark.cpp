@@ -30,6 +30,10 @@ int main(int argc, char* argv[])
     perfmon.stopRegion("flops");
   }
 
+  likwid_markerNextGroup();
+  std::cout << "starting rw bandwidth benchmark" << std::endl;
+  bandwidth_rw(10000, 100);
+
   perfmon.close();
   perfmon.printOnlyAggregate();
 }

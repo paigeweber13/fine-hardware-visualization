@@ -64,3 +64,59 @@ __m256i iops(std::uint64_t num_iterations){
 
   return a;
 }
+
+void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
+{
+  // reduction(max:ticks) previously at the end of this pragma
+
+  // unsigned thr_num;
+  std::uint64_t i, j;
+  __m256d buffer;
+  performance_monitor perfmon;
+
+  const char * tag = "L2";
+  // align to cache line, which is 512 bits or 64 bytes
+  double * array = static_cast<double *>(
+    aligned_alloc(64, size_kib * KILO_BYTE_SIZE));
+  double * copy_array = static_cast<double *>(
+    aligned_alloc(64, size_kib * KILO_BYTE_SIZE));
+
+  std::uint64_t num_doubles = size_kib * KILO_BYTE_SIZE/BYTES_PER_DOUBLE;
+
+#pragma omp parallel default(shared) private(buffer, i, j)
+  {
+
+    // thr_num = omp_get_thread_num();
+    for (i = 0; i < num_iterations; i++)
+    {
+      //Get time snapshot just for one iteration
+      if (i == num_iterations / 2)
+      {
+        //	start = system_clock::now();
+        //	Maybe start likwid region here
+        //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
+        perfmon.startRegion(tag);
+      }
+      for (int k = 0; k < 100; k++)
+        for (j = 0; j < num_doubles; j += 4)
+        {
+          // Loading 256-bits into memory address of array
+          buffer = _mm256_load_pd(array + j);
+          // Storing 256-bits from buffer into address of cpy_arr
+          _mm256_store_pd(copy_array + j, buffer);
+        }
+      //Get time snapshot just for one iteration
+      if (i == num_iterations / 2)
+      {
+        //	end = system_clock::now();
+        //	Maybe stop likwid regin here
+        //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
+        likwid_markerStopRegion(tag);
+      }
+      asm(""); //Say no to loop optimization
+    }
+  }
+
+  free(array);
+  free(copy_array);
+}
