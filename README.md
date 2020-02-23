@@ -41,6 +41,7 @@ To build and run the (currently limited) test suite, run `make tests`
    - have it check architecture to know what size of caches
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
+ - rename "computation_measurements" to "measurements"?
 
 ## Accomplishments:
 ### before 2020-02-11
@@ -146,6 +147,16 @@ To build and run the (currently limited) test suite, run `make tests`
      siwtching back to first, and stopping region causes only first core to
      report work
    - results inconsistent.... not sure what this means yet
+
+### 2020-02-18 through 25
+ - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
+ - not sure how to supply multiple groups from within code...
+   - if I can find a way to close and re-init without segfaulting, I could just
+     do that
+   - feels a little hacky though.
+   - I asked on the likwid-users google group if there's a way to specify
+     multiple groups using the environment variable LIKWID_EVENTS
+ - would this be easier to write as a likwid extension?
 
 ## Hardware Counters
 Group "FLOPS_SP" and "FLOPS_DP" seem useful.
