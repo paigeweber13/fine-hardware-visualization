@@ -36,38 +36,6 @@ __m256 flops(std::uint64_t num_iterations)
   return a;
 }
 
-__m256i iops(std::uint64_t num_iterations){
-  __m256i a = _mm256_setr_epi8 (1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4);
-  __m256i b = _mm256_setr_epi8 (1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4);
-  __m256i c = _mm256_setr_epi8 (1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4);
-  __m256i d = _mm256_setr_epi8 (1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4);
-  __m256i e = _mm256_setr_epi8 (1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4);
-  __m256i f = _mm256_setr_epi8 (1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
-                                1, 2, 3, 4, 1, 2, 3, 4);
-
-  for (std::uint64_t i = 0; i < num_iterations; i++){
-    // operations per iteration: 80
-
-    a = _mm256_add_epi8 (a, b); // 32 adds
-    c = _mm256_add_epi8 (c, d); // 32 adds
-    e = _mm256_add_epi8 (e, f); // 32 adds
-
-  }
-
-  return a;
-}
-
 void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
 {
   // reduction(max:ticks) previously at the end of this pragma
