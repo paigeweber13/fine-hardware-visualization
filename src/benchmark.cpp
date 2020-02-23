@@ -9,7 +9,8 @@
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
 const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
 
-void benchmark_sp_flops(){
+void benchmark_sp_flops()
+{
   __m256 d;
   __m256i e;
 
@@ -17,7 +18,12 @@ void benchmark_sp_flops(){
 
   perfmon.init("FLOPS_SP");
   std::cout << "starting single precision flop benchmark" << std::endl;
-  d = flops(FLOAT_NUM_ITERATIONS);
+#pragma omp parallel
+  {
+    perfmon.startRegion("flops");
+    d = flops(FLOAT_NUM_ITERATIONS);
+    perfmon.stopRegion("flops");
+  }
   perfmon.close();
   perfmon.printOnlyAggregate();
 }

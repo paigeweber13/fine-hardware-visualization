@@ -2,8 +2,6 @@
 
 __m256 flops(std::uint64_t num_iterations)
 {
-  performance_monitor perfmon;
-
   __m256 a = _mm256_setr_ps(1., 2., 3., 4., 5., 6., 7., 8.);
   __m256 b = _mm256_setr_ps(10., 20., 30., 40., 50., 60., 70., 80.);
   __m256 c = _mm256_setr_ps(11., 21., 31., 41., 51., 61., 71., 81.);
@@ -20,21 +18,15 @@ __m256 flops(std::uint64_t num_iterations)
   __m256 l = _mm256_setr_ps(66., 26., 36., 46., 56., 66., 76., 86.);
   __m256 m = _mm256_setr_ps(1111., 211., 311., 411., 511., 611., 711., 811.);
 
-#pragma omp parallel
+  for (std::uint64_t i = 0; i < num_iterations; i++)
   {
-    perfmon.startRegion("flops");
-
-    for (std::uint64_t i = 0; i < num_iterations; i++)
-    {
-      // operations per loop iteration: 64
-      // do four things per loop to allow for the processor to pipeline
-      // instructions
-      c = _mm256_fmadd_ps(a, b, c); // 2 ops on 8 floats
-      f = _mm256_fmadd_ps(d, e, f); // 2 more ops on 8 floats
-      j = _mm256_fmadd_ps(g, h, j); // 2 more ops on 8 floats
-      m = _mm256_fmadd_ps(k, l, m); // 2 more ops on 8 floats
-    }
-    perfmon.stopRegion("flops");
+    // operations per loop iteration: 64
+    // do four things per loop to allow for the processor to pipeline
+    // instructions
+    c = _mm256_fmadd_ps(a, b, c); // 2 ops on 8 floats
+    f = _mm256_fmadd_ps(d, e, f); // 2 more ops on 8 floats
+    j = _mm256_fmadd_ps(g, h, j); // 2 more ops on 8 floats
+    m = _mm256_fmadd_ps(k, l, m); // 2 more ops on 8 floats
   }
 
   // return whatever is computed
