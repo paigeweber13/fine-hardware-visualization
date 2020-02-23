@@ -55,6 +55,17 @@ To build and run the (currently limited) test suite, run `make tests`
    - aggregates by region but on a per-thread basis
    - if two regions have the same name and they are on the same thread, they
      will be aggregated.
+ - Group "FLOPS_SP" and "FLOPS_DP" seem useful.
+
+#### Some notes on what does and doesn't get counted:
+FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
+one retired instruction. 
+It counds one vector FMA operation as 2 retired instructions
+
+AVX SP MFLOP/s counts vector operation as 8 floating point operations: This
+is what we want
+
+so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
 
 ### 2020-02-11 through 18
 #### Misc. discoveries:
@@ -157,16 +168,3 @@ To build and run the (currently limited) test suite, run `make tests`
    - I asked on the likwid-users google group if there's a way to specify
      multiple groups using the environment variable LIKWID_EVENTS
  - would this be easier to write as a likwid extension?
-
-## Hardware Counters
-Group "FLOPS_SP" and "FLOPS_DP" seem useful.
-
-### Some notes on what does and doesn't get counted:
-FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
-one retired instruction. 
-It counds one vector FMA operation as 2 retired instructions
-
-AVX SP MFLOP/s counts vector operation as 8 floating point operations: This
-is what we want
-
-so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
