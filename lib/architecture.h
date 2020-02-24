@@ -21,11 +21,11 @@ const unsigned NUMA_DOMAINS [1][4] = {{0, 1, 2, 3}};
 
 // ---- Benchmark ---- //
 // -- computation --
-#define EXPERIENTIAL_SP_RATE_MFLOPS 177336.453125
+#define EXPERIENTIAL_SP_RATE_MFLOPS 183598.031250 // ~184 GFlop/s
 
 // -- memory -- 
 // all measurements are in MiB/s
 #define EXPERIENTIAL_RW_BW_L1  0.
-#define EXPERIENTIAL_RW_BW_L2  150194.921875
-#define EXPERIENTIAL_RW_BW_L3  102951.289062
-#define EXPERIENTIAL_RW_BW_RAM 0.
+#define EXPERIENTIAL_RW_BW_L2  150194.921875 // ~150 GB/s
+#define EXPERIENTIAL_RW_BW_L3  102951.289062 // ~103 GB/s
+#define EXPERIENTIAL_RW_BW_RAM 24208.177734  // ~24  GB/s
