@@ -39,7 +39,25 @@ void benchmark_l2_bw(){
   perfmon.printOnlyAggregate();
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-  benchmark_sp_flops();
+  if (argc < 2)
+  {
+    std::cout << "Usage: " << argv[0] << " 0|1" << std::endl;
+    std::cout << "       0 for FLOPS_SP benchmark" << std::endl;
+    std::cout << "       1 for L2 r/w bandwidth benchmark" << std::endl;
+    return 1;
+  }
+
+  int choice = std::stoi(argv[1]);
+
+  switch (choice)
+  {
+  case 0:
+    benchmark_sp_flops();
+    break;
+  case 1:
+    benchmark_l2_bw();
+    break;
+  }
 }

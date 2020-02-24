@@ -43,6 +43,10 @@ debug: clean build
 
 tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
 
+bench: $(BENCH_EXEC)
+	$(BENCH_EXEC) 0; \
+	$(BENCH_EXEC) 1;
+
 $(BENCH_EXEC): $(OBJS) src/benchmark.cpp
 	$(CXX) $(OBJS) src/benchmark.cpp $(LDFLAGS) -o $@
 
