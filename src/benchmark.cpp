@@ -23,6 +23,7 @@ void benchmark_sp_flops(performance_monitor perfmon)
     perfmon.stopRegion("flops");
   }
   perfmon.close();
+  // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
 }
 
@@ -34,6 +35,7 @@ void benchmark_l2_bw(performance_monitor perfmon){
   bandwidth_rw(10000, 100);
 
   perfmon.close();
+  // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
 }
 
@@ -41,10 +43,23 @@ void benchmark_l3_bw(performance_monitor perfmon){
   perfmon.init("L3");
   std::cout << "starting L3 rw bandwidth benchmark" << std::endl;
   // 1000 iterations for a good average
-  // 1000 kilobytes to fit well inside L2 cache
+  // 1000 kilobytes to fit well inside L3 cache
   bandwidth_rw(1000, 1000);
 
   perfmon.close();
+  // perfmon.printDetailedResults();
+  perfmon.printOnlyAggregate();
+}
+
+void benchmark_ram_bw(performance_monitor perfmon){
+  perfmon.init("MEM_DP");
+  std::cout << "starting RAM rw bandwidth benchmark" << std::endl;
+  // 10 iterations for a good average
+  // 100000 kilobytes (100MB) so it can't all be cached
+  bandwidth_rw(10, 100000);
+
+  perfmon.close();
+  // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
 }
 
@@ -71,6 +86,9 @@ int main(int argc, char *argv[])
     break;
   case 2:
     benchmark_l3_bw(perfmon);
+    break;
+  case 3:
+    benchmark_ram_bw(perfmon);
     break;
   }
 }
