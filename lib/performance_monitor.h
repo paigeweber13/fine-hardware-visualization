@@ -40,7 +40,12 @@ class performance_monitor {
 
     // aggregate results
     const char * flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";
-    float num_flops = 0.;
+    float num_flops;
     const char * mflops_metric_name = "AVX SP [MFLOP/s]";
-    float mflops = 0.;
+    float mflops;
+    const char * l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
+    float l2_bw;
+    const char * l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
+    float l3_bw;
+
 };

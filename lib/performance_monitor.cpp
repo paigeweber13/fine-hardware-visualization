@@ -81,6 +81,11 @@ void performance_monitor::getAggregateResults(){
   float event_value, metric_value;
   const char * event_name, * metric_name;
 
+  num_flops = 0.;
+  mflops = 0.;
+  l2_bw = 0.;
+  l3_bw = 0.;
+
   perfmon_readMarkerFile(this->filepath);
 
   for (int t = 0; t < this->num_threads; t++)
@@ -102,6 +107,14 @@ void performance_monitor::getAggregateResults(){
         if(strcmp(metric_name, mflops_metric_name) == 0 &&
            !isnan(metric_value)){
           mflops += metric_value;
+        }
+        else if(strcmp(metric_name, l2_bandwidth_metric_name) == 0 &&
+               !isnan(metric_value)){
+          l2_bw += metric_value;
+        }
+        else if(strcmp(metric_name, l3_bandwidth_metric_name) == 0 &&
+               !isnan(metric_value)){
+          l3_bw += metric_value;
         }
       }
     }
@@ -160,11 +173,15 @@ void performance_monitor::printOnlyAggregate()
   getAggregateResults();
 
   printf("----- begin aggregate performance_monitor report -----\n");
+  printf("Total runtime: %f\n", this->runtime);
+  printf("\n-- computation --\n");
   printf("Aggregate %s: %.3e\n", flops_event_name, num_flops);
   printf("Total FP ops: %.3e\n", num_flops * OPS_PER_VECTOR);
-  printf("Total runtime: %f\n", this->runtime);
   printf("Aggregate %s: %f\n", mflops_metric_name, mflops);
-  printf("Total TFlop/s: %f\n", mflops*MFLOPS_TO_TFLOPS);
+  // printf("Total TFlop/s: %f\n", mflops*MFLOPS_TO_TFLOPS);
+  printf("\n-- memory --\n");
+  printf("Aggregate %s: %f\n", l2_bandwidth_metric_name, l2_bw);
+  printf("Aggregate %s: %f\n", l3_bandwidth_metric_name, l3_bw);
   printf("----- end performance_monitor report -----\n");
   printf("\n");
 }
