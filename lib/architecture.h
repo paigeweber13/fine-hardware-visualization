@@ -21,18 +21,11 @@ const unsigned NUMA_DOMAINS [1][4] = {{0, 1, 2, 3}};
 
 // ---- Benchmark ---- //
 // -- computation --
-#define EXPERIENTIAL_SP_RATE_TFLOPS 0.181
+#define EXPERIENTIAL_SP_RATE_MFLOPS 177336.453125
 
 // -- memory -- 
-// all measurements are in GiB/s
-#define EXPERIENTIAL_READ_BW_L1  0.
-#define EXPERIENTIAL_READ_BW_L2  0.
-#define EXPERIENTIAL_READ_BW_L3  0.
-#define EXPERIENTIAL_READ_BW_RAM 0.
-
-// read/write operations (like copying) are typically limited by write and
-// typically have the same bandwidth as write operations
-#define EXPERIENTIAL_WRITE_BW_L1  0.
-#define EXPERIENTIAL_WRITE_BW_L2  0.
-#define EXPERIENTIAL_WRITE_BW_L3  0.
-#define EXPERIENTIAL_WRITE_BW_RAM 0.
+// all measurements are in MiB/s
+#define EXPERIENTIAL_RW_BW_L1  0.
+#define EXPERIENTIAL_RW_BW_L2  150194.921875
+#define EXPERIENTIAL_RW_BW_L3  102951.289062
+#define EXPERIENTIAL_RW_BW_RAM 0.
