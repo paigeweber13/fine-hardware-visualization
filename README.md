@@ -183,3 +183,17 @@ with L2 cache:
      1.0E-09*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0
 
 Do we want to separate out load/evict?
+
+Learned some things about memory:
+ - counters associated with DRAM obtained when running brandon's bw program
+   with size 100000 and number of iterations 10:
+   - DRAM_READS:MBOX0C1: 18446740000000000000.000000
+   - DRAM_WRITES:MBOX0C2: 321320900.000000
+   - Metric Memory bandwidth [MBytes/s]: 464390389739345.750000 (this seems
+     unreasonably high...)
+ - there are benchmarks for memory. For instance `likwid-bench -t copy -w
+   S0:100MB`
+
+these came from the group "MEM_DP", which also happened to include a lot of
+information about DP flops
+
