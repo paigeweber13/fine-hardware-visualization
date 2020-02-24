@@ -43,9 +43,14 @@ class performance_monitor {
     float num_flops;
     const char * mflops_metric_name = "AVX SP [MFLOP/s]";
     float mflops;
+    const char * mflops_dp_metric_name = "AVX DP [MFLOP/s]";
+    float mflops_dp;
+
     const char * l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
     float l2_bw;
     const char * l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
     float l3_bw;
+    const char * ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
+    float ram_bw;
 
 };
