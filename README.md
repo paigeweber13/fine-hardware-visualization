@@ -168,3 +168,18 @@ so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
    - I asked on the likwid-users google group if there's a way to specify
      multiple groups using the environment variable LIKWID_EVENTS
  - would this be easier to write as a likwid extension?
+
+The way likwid measures cache bandwidth is interesting. Following is an example
+with L2 cache: 
+ - measures L1D_REPLACEMENT, L1D_M_EVICT, and ICACHE_64B_IFTAG_MISS
+ - calculates the following: 
+   - L2D load bandwidth [MBytes/s] = 1.0E-06*L1D_REPLACEMENT*64.0/time
+   - L2D load data volume [GBytes] = 1.0E-09*L1D_REPLACEMENT*64.0
+   - L2D evict bandwidth [MBytes/s] = 1.0E-06*L1D_M_EVICT*64.0/time
+   - L2D evict data volume [GBytes] = 1.0E-09*L1D_M_EVICT*64.0
+   - L2 bandwidth [MBytes/s] =
+     1.0E-06*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0/time
+   - L2 data volume [GBytes] =
+     1.0E-09*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0
+
+Do we want to separate out load/evict?
