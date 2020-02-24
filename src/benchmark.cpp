@@ -9,12 +9,10 @@
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
 const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
 
-void benchmark_sp_flops()
+void benchmark_sp_flops(performance_monitor perfmon)
 {
   __m256 d;
   __m256i e;
-
-  performance_monitor perfmon;
 
   perfmon.init("FLOPS_SP");
   std::cout << "starting single precision flop benchmark" << std::endl;
@@ -28,12 +26,23 @@ void benchmark_sp_flops()
   perfmon.printOnlyAggregate();
 }
 
-void benchmark_l2_bw(){
-  performance_monitor perfmon;
-
+void benchmark_l2_bw(performance_monitor perfmon){
   perfmon.init("L2");
-  std::cout << "starting rw bandwidth benchmark" << std::endl;
+  std::cout << "starting L2 rw bandwidth benchmark" << std::endl;
+  // 10000 iterations for a good average
+  // 100 kilobytes to fit well inside L2 cache
   bandwidth_rw(10000, 100);
+
+  perfmon.close();
+  perfmon.printOnlyAggregate();
+}
+
+void benchmark_l3_bw(performance_monitor perfmon){
+  perfmon.init("L3");
+  std::cout << "starting L3 rw bandwidth benchmark" << std::endl;
+  // 1000 iterations for a good average
+  // 1000 kilobytes to fit well inside L2 cache
+  bandwidth_rw(1000, 1000);
 
   perfmon.close();
   perfmon.printOnlyAggregate();
@@ -50,14 +59,18 @@ int main(int argc, char *argv[])
   }
 
   int choice = std::stoi(argv[1]);
+  performance_monitor perfmon;
 
   switch (choice)
   {
   case 0:
-    benchmark_sp_flops();
+    benchmark_sp_flops(perfmon);
     break;
   case 1:
-    benchmark_l2_bw();
+    benchmark_l2_bw(perfmon);
+    break;
+  case 2:
+    benchmark_l3_bw(perfmon);
     break;
   }
 }
