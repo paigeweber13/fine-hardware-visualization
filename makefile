@@ -45,7 +45,8 @@ tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-l
 
 bench: $(BENCH_EXEC)
 	$(BENCH_EXEC) 0; \
-	$(BENCH_EXEC) 1;
+	$(BENCH_EXEC) 1; \
+	$(BENCH_EXEC) 2;
 
 $(BENCH_EXEC): $(OBJS) src/benchmark.cpp
 	$(CXX) $(OBJS) src/benchmark.cpp $(LDFLAGS) -o $@
