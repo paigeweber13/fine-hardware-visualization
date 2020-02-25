@@ -1,19 +1,39 @@
 # Fine Hardware Visualization
-## Goal
-Present the user with a visualization of their computer architecture and
-indicate what parts of that architecture are most loaded to identify
-bottlenecks in high-performance applications.
+This software is a work and process. It is designed to present the user with a
+visualization of their computer architecture and indicate what parts of that
+architecture are most loaded to identify bottlenecks in high-performance
+applications.
 
-## Prerequisites
+- [Fine Hardware Visualization](#fine-hardware-visualization)
+- [Prerequisites](#prerequisites)
+- [Running](#running)
+- [Architecture of Program](#architecture-of-program)
+- [Goals:](#goals)
+- [TODO:](#todo)
+  - [Immediate:](#immediate)
+  - [Long-term:](#long-term)
+- [Accomplishments:](#accomplishments)
+  - [2020-02-25 through 2020-03-03](#2020-02-25-through-2020-03-03)
+  - [2020-02-18 through 25](#2020-02-18-through-25)
+  - [2020-02-11 through 18](#2020-02-11-through-18)
+    - [Misc. discoveries:](#misc-discoveries)
+    - [Integer operations:](#integer-operations)
+    - [Sampling:](#sampling)
+    - [Number of Registers for hardware counters](#number-of-registers-for-hardware-counters)
+    - [Threads and migration](#threads-and-migration)
+  - [before 2020-02-11](#before-2020-02-11)
+    - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
+
+# Prerequisites
  - **likwid:** it is preferred you build likwid from source and install to
    `/usr/local`, as this is the only confirmed way to use `likwid-accessD`
    without root permissions. Alternatively, you can also install it with your
    package manger (ex. `sudo apt install likwid` on ubuntu)
 
-## Running
+# Running
 To build and run the (currently limited) test suite, run `make tests`
 
-## Architecture of Program
+# Architecture of Program
  - Identify hardware architecture
  - Identify peak FLOP/s, memory bandwidth, etc.
  - Identify latency
@@ -21,16 +41,15 @@ To build and run the (currently limited) test suite, run `make tests`
  - Compare actual utilization with peak on an piece-by-piece basis
  - Visualize that
 
-## Some things to keep in mind:
-## Goals:
+# Goals:
  - main goal is to give people new to HPC something they can use to:
    - understand how their application maps to the architecture
    - give suggestions on how to improveme their application
  - apply this to graph problems: kernels in graph problems tend to change
    behavior throughout execution
 
-## TODO:
-### Immediate:
+# TODO:
+## Immediate:
  - double check bandwidth by doing manual calculations
  - add some test software that has balanced/inbalanced usage
    - HPC code: convolution
@@ -43,7 +62,7 @@ To build and run the (currently limited) test suite, run `make tests`
  - don't worry about software engineering tooo much right now. Don't spend
    active time on it but do keep it in mind
 
-### Long-term:
+## Long-term:
  - create visualization of architecture (generate svg?)
  - expand suite of test software that has balanced/inbalanced usage
    - consider standard benchmarks
@@ -56,10 +75,10 @@ To build and run the (currently limited) test suite, run `make tests`
    coded
  - rename "computation_measurements" to "measurements"?
 
-## Accomplishments:
-### 2020-02-25 through 2020-03-03
+# Accomplishments:
+## 2020-02-25 through 2020-03-03
 
-### 2020-02-18 through 25
+## 2020-02-18 through 25
  - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
  - not sure how to supply multiple groups from within code...
    - if I can find a way to close and re-init without segfaulting, I could just
@@ -98,8 +117,8 @@ Learned some things about memory:
 these came from the group "MEM_DP", which also happened to include a lot of
 information about DP flops
 
-### 2020-02-11 through 18
-#### Misc. discoveries:
+## 2020-02-11 through 18
+### Misc. discoveries:
  - discovered "vectorization ratio" metric in likwid
  - there are counters for NVIDIA gpus - use the -W flag in likwid-perfctr
  - event groups are stored in $(PREFIX)/share/likwid/perfgroups/$(ARCH)/
@@ -116,7 +135,7 @@ information about DP flops
  - can use likwid-accesD to avoid need for sudo. This also monitors at hardware
    level, results are consistent with using direct access.
 
-#### Integer operations:
+### Integer operations:
  - Measuring integer operations is tough... 
    - some counters count both FP and INT operations, could in theory subtract
      FP ops. (See ARITH.MUL, MUL, DIV)
@@ -124,7 +143,7 @@ information about DP flops
      SIMD_INT_128.PACKED_MP&). Unfortunately, I didn't see anything for 256B or
      512B registers
 
-#### Sampling:
+### Sampling:
  - no extrapolation is done on counters.
  - when specifying multiple groups, likwid switches which group is tracked when
    likwid_markerNextGroup is called if the marker api is used. Else, the group
@@ -133,14 +152,14 @@ information about DP flops
    - for example: `likwid-perfctr -C S0:0 -g FLOPS_DP -g L3 -g L3 -T
      250ms -M 1 ./a.out`
 
-#### Number of Registers for hardware counters
+### Number of Registers for hardware counters
  - on my CPU (intel i5-6300U, skylake) there are 4 customizable hardware
    counter registers per hardware thread and 8 are available per hardware core
    if hyperthreading is disabled. These are numbered PMC0-7
  - the registers used for hardware counters are part of the context switch!
  - FIXC0-2 are not customizable
 
-#### Threads and migration
+### Threads and migration
  - NOTE: expected performance is 371 GFlop/s
  - pin 1 omp thread to each physical thread 
    - 193.8 GFlop/s
@@ -190,7 +209,7 @@ information about DP flops
      report work
    - results inconsistent.... not sure what this means yet
 
-### before 2020-02-11
+## before 2020-02-11
  - evaluated both likwid and papi for use
  - investigated likwid-bench
  - basic research on likwid-accesD vs direct access
@@ -203,7 +222,7 @@ information about DP flops
      will be aggregated.
  - Group "FLOPS_SP" and "FLOPS_DP" seem useful.
 
-#### Some notes on what does and doesn't get counted:
+### Some notes on what does and doesn't get counted:
 FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
 one retired instruction. 
 It counds one vector FMA operation as 2 retired instructions
