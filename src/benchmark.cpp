@@ -25,6 +25,7 @@ void benchmark_sp_flops(performance_monitor perfmon)
   perfmon.close();
   // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
+  perfmon.printComparison();
 }
 
 void benchmark_l2_bw(performance_monitor perfmon){
@@ -37,6 +38,7 @@ void benchmark_l2_bw(performance_monitor perfmon){
   perfmon.close();
   // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
+  perfmon.printComparison();
 }
 
 void benchmark_l3_bw(performance_monitor perfmon){
@@ -49,6 +51,7 @@ void benchmark_l3_bw(performance_monitor perfmon){
   perfmon.close();
   // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
+  perfmon.printComparison();
 }
 
 void benchmark_ram_bw(performance_monitor perfmon){
@@ -61,6 +64,7 @@ void benchmark_ram_bw(performance_monitor perfmon){
   perfmon.close();
   // perfmon.printDetailedResults();
   perfmon.printOnlyAggregate();
+  perfmon.printComparison();
 }
 
 int main(int argc, char *argv[])

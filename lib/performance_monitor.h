@@ -6,6 +6,8 @@
 #include <omp.h>
 #include <stdlib.h>
 
+#include "architecture.h"
+
 #define ACCESSMODE_DAEMON "1"
 #define ACCESSMODE_DIRECT "0"
 #define MFLOPS_TO_TFLOPS 1e-6
@@ -26,9 +28,11 @@ class performance_monitor {
     void close();
 
     void getAggregateResults();
+    void compareActualWithbench();
     void printResults();
     void printDetailedResults();
     void printOnlyAggregate();
+    void printComparison();
 
     // ------ getters and setters ----- //
     float getMFlops();
@@ -41,16 +45,22 @@ class performance_monitor {
     // aggregate results
     const char * flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";
     float num_flops;
+
     const char * mflops_metric_name = "AVX SP [MFLOP/s]";
     float mflops;
+    float mflops_saturation;
     const char * mflops_dp_metric_name = "AVX DP [MFLOP/s]";
     float mflops_dp;
+    float mflops_dp_saturation;
 
     const char * l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
     float l2_bw;
+    float l2_bw_saturation;
     const char * l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
     float l3_bw;
+    float l3_bw_saturation;
     const char * ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
     float ram_bw;
+    float ram_bw_saturation;
 
 };

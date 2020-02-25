@@ -131,10 +131,22 @@ void performance_monitor::getAggregateResults(){
   }
 }
 
+void performance_monitor::compareActualWithbench()
+{
+  getAggregateResults();
+  mflops_saturation = mflops/EXPERIENTIAL_SP_RATE_MFLOPS;
+  // mflops_dp_saturation = mflops/EXPERIENTIAL_DP_RATE_MFLOPS;
+  // l1_bw_saturation = l1_bw/EXPERIENTIAL_RW_BW_L1;
+  l2_bw_saturation = l2_bw/EXPERIENTIAL_RW_BW_L2;
+  l3_bw_saturation = l3_bw/EXPERIENTIAL_RW_BW_L3;
+  ram_bw_saturation = ram_bw/EXPERIENTIAL_RW_BW_RAM;
+}
+
 void performance_monitor::printResults()
 {
   printDetailedResults();
   printOnlyAggregate();
+  printComparison();
 }
 
 void performance_monitor::printDetailedResults()
@@ -183,19 +195,38 @@ void performance_monitor::printOnlyAggregate()
   getAggregateResults();
 
   printf("----- begin aggregate performance_monitor report -----\n");
-  printf("Total runtime: %f\n", this->runtime);
+  printf("Total runtime: %.3f\n", this->runtime);
   printf("\n-- computation --\n");
   printf("Aggregate %s: %.3e\n", flops_event_name, num_flops);
   printf("Total FP ops: %.3e\n", num_flops * OPS_PER_VECTOR);
   printf("\n-- computation rates --\n");
-  printf("Aggregate %s: %f\n", mflops_metric_name, mflops);
-  printf("Aggregate %s: %f\n", mflops_dp_metric_name, mflops_dp);
-  // printf("Total TFlop/s: %f\n", mflops*MFLOPS_TO_TFLOPS);
+  printf("Aggregate %s: %.3f\n", mflops_metric_name, mflops);
+  printf("Aggregate %s: %.3f\n", mflops_dp_metric_name, mflops_dp);
+  // printf("Total TFlop/s: %.3f\n", mflops*MFLOPS_TO_TFLOPS);
   printf("\n-- memory --\n");
-  printf("Aggregate %s: %f\n", l2_bandwidth_metric_name, l2_bw);
-  printf("Aggregate %s: %f\n", l3_bandwidth_metric_name, l3_bw);
-  printf("Aggregate %s: %f\n", ram_bandwidth_metric_name, ram_bw);
+  printf("Aggregate %s: %.3f\n", l2_bandwidth_metric_name, l2_bw);
+  printf("Aggregate %s: %.3f\n", l3_bandwidth_metric_name, l3_bw);
+  printf("Aggregate %s: %.3f\n", ram_bandwidth_metric_name, ram_bw);
   printf("----- end performance_monitor report -----\n");
+  printf("\n");
+}
+
+void performance_monitor::printComparison(){
+  compareActualWithbench();
+  printf("----- begin saturation level performance_monitor report -----\n");
+  printf("Percentage of available SP flop performance used: %.3f\n",
+         mflops_saturation);
+  // printf("Percentage of available DP flop performance used: %.3f\n",
+  //        mflops_dp_saturation);
+  // printf("Percentage of available L1 bandwidth used: %.3f\n",
+  //        l1_bw_saturation);
+  printf("Percentage of available L2 bandwidth used: %.3f\n",
+         l2_bw_saturation);
+  printf("Percentage of available L3 bandwidth used: %.3f\n",
+         l3_bw_saturation);
+  printf("Percentage of available RAM bandwidth used: %.3f\n",
+         ram_bw_saturation);
+  printf("----- end saturation level performance_monitor report -----\n");
   printf("\n");
 }
 
