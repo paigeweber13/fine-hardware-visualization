@@ -30,11 +30,24 @@ To build and run the (currently limited) test suite, run `make tests`
    behavior throughout execution
 
 ## TODO:
- - hardcode architecture and result of benchmark
+### Immediate:
+ - double check bandwidth by doing manual calculations
+ - add some test software that has balanced/inbalanced usage
+   - HPC code: convolution
+     - instrument loading/saving data too - different phases to application
+ - generate svg
+   - main part of program dumps info, second part reads and evaluates and creates
+     svg
+      - use json?
+   - libcairo
+ - don't worry about software engineering tooo much right now. Don't spend
+   active time on it but do keep it in mind
+
+### Long-term:
  - create visualization of architecture (generate svg?)
- - create function that compares performance with benchmark, outputs to svg
-   - and move printResults out of perfmon.close
- - create some test software that has balanced/inbalanced usage
+ - expand suite of test software that has balanced/inbalanced usage
+   - consider standard benchmarks
+     - like NAS parallel benchmarks
  - improve benchmark
    - have it check bandwidth for all types of memory/cache
    - improve software engineering: make it consistent what calls likwid, etc.
@@ -168,6 +181,7 @@ so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
    - I asked on the likwid-users google group if there's a way to specify
      multiple groups using the environment variable LIKWID_EVENTS
  - would this be easier to write as a likwid extension?
+ - hardcode architecture and result of benchmark
 
 The way likwid measures cache bandwidth is interesting. Following is an example
 with L2 cache: 
