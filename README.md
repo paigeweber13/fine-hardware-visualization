@@ -57,28 +57,46 @@ To build and run the (currently limited) test suite, run `make tests`
  - rename "computation_measurements" to "measurements"?
 
 ## Accomplishments:
-### before 2020-02-11
- - evaluated both likwid and papi for use
- - investigated likwid-bench
- - basic research on likwid-accesD vs direct access
- - Got likwid marker to measure code
-   - investigated brandon's code
-   - got my code working
- - Investigated how likwid aggregates
-   - aggregates by region but on a per-thread basis
-   - if two regions have the same name and they are on the same thread, they
-     will be aggregated.
- - Group "FLOPS_SP" and "FLOPS_DP" seem useful.
+### 2020-02-25 through 2020-03-03
 
-#### Some notes on what does and doesn't get counted:
-FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
-one retired instruction. 
-It counds one vector FMA operation as 2 retired instructions
+### 2020-02-18 through 25
+ - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
+ - not sure how to supply multiple groups from within code...
+   - if I can find a way to close and re-init without segfaulting, I could just
+     do that
+   - feels a little hacky though.
+   - I asked on the likwid-users google group if there's a way to specify
+     multiple groups using the environment variable LIKWID_EVENTS
+ - would this be easier to write as a likwid extension?
+ - hardcode architecture and result of benchmark
 
-AVX SP MFLOP/s counts vector operation as 8 floating point operations: This
-is what we want
+The way likwid measures cache bandwidth is interesting. Following is an example
+with L2 cache: 
+ - measures L1D_REPLACEMENT, L1D_M_EVICT, and ICACHE_64B_IFTAG_MISS
+ - calculates the following: 
+   - L2D load bandwidth [MBytes/s] = 1.0E-06*L1D_REPLACEMENT*64.0/time
+   - L2D load data volume [GBytes] = 1.0E-09*L1D_REPLACEMENT*64.0
+   - L2D evict bandwidth [MBytes/s] = 1.0E-06*L1D_M_EVICT*64.0/time
+   - L2D evict data volume [GBytes] = 1.0E-09*L1D_M_EVICT*64.0
+   - L2 bandwidth [MBytes/s] =
+     1.0E-06*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0/time
+   - L2 data volume [GBytes] =
+     1.0E-09*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0
 
-so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
+Do we want to separate out load/evict?
+
+Learned some things about memory:
+ - counters associated with DRAM obtained when running brandon's bw program
+   with size 100000 and number of iterations 10:
+   - DRAM_READS:MBOX0C1: 18446740000000000000.000000
+   - DRAM_WRITES:MBOX0C2: 321320900.000000
+   - Metric Memory bandwidth [MBytes/s]: 464390389739345.750000 (this seems
+     unreasonably high...)
+ - there are benchmarks for memory. For instance `likwid-bench -t copy -w
+   S0:100MB`
+
+these came from the group "MEM_DP", which also happened to include a lot of
+information about DP flops
 
 ### 2020-02-11 through 18
 #### Misc. discoveries:
@@ -172,42 +190,26 @@ so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
      report work
    - results inconsistent.... not sure what this means yet
 
-### 2020-02-18 through 25
- - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
- - not sure how to supply multiple groups from within code...
-   - if I can find a way to close and re-init without segfaulting, I could just
-     do that
-   - feels a little hacky though.
-   - I asked on the likwid-users google group if there's a way to specify
-     multiple groups using the environment variable LIKWID_EVENTS
- - would this be easier to write as a likwid extension?
- - hardcode architecture and result of benchmark
+### before 2020-02-11
+ - evaluated both likwid and papi for use
+ - investigated likwid-bench
+ - basic research on likwid-accesD vs direct access
+ - Got likwid marker to measure code
+   - investigated brandon's code
+   - got my code working
+ - Investigated how likwid aggregates
+   - aggregates by region but on a per-thread basis
+   - if two regions have the same name and they are on the same thread, they
+     will be aggregated.
+ - Group "FLOPS_SP" and "FLOPS_DP" seem useful.
 
-The way likwid measures cache bandwidth is interesting. Following is an example
-with L2 cache: 
- - measures L1D_REPLACEMENT, L1D_M_EVICT, and ICACHE_64B_IFTAG_MISS
- - calculates the following: 
-   - L2D load bandwidth [MBytes/s] = 1.0E-06*L1D_REPLACEMENT*64.0/time
-   - L2D load data volume [GBytes] = 1.0E-09*L1D_REPLACEMENT*64.0
-   - L2D evict bandwidth [MBytes/s] = 1.0E-06*L1D_M_EVICT*64.0/time
-   - L2D evict data volume [GBytes] = 1.0E-09*L1D_M_EVICT*64.0
-   - L2 bandwidth [MBytes/s] =
-     1.0E-06*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0/time
-   - L2 data volume [GBytes] =
-     1.0E-09*(L1D_REPLACEMENT+L1D_M_EVICT+ICACHE_64B_IFTAG_MISS)*64.0
+#### Some notes on what does and doesn't get counted:
+FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
+one retired instruction. 
+It counds one vector FMA operation as 2 retired instructions
 
-Do we want to separate out load/evict?
+AVX SP MFLOP/s counts vector operation as 8 floating point operations: This
+is what we want
 
-Learned some things about memory:
- - counters associated with DRAM obtained when running brandon's bw program
-   with size 100000 and number of iterations 10:
-   - DRAM_READS:MBOX0C1: 18446740000000000000.000000
-   - DRAM_WRITES:MBOX0C2: 321320900.000000
-   - Metric Memory bandwidth [MBytes/s]: 464390389739345.750000 (this seems
-     unreasonably high...)
- - there are benchmarks for memory. For instance `likwid-bench -t copy -w
-   S0:100MB`
-
-these came from the group "MEM_DP", which also happened to include a lot of
-information about DP flops
+so aggregate AVX SP MFLOP/s should correspond with what we expect on bench
 
