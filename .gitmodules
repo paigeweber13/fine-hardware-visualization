@@ -4,3 +4,9 @@
 	update = merge
 	branch = master
 
+[submodule "convolution-fast"]
+	path = convolution-fast
+	url = https://github.com/rileyweber13/convolution-fast.git
+	update = merge
+	branch = fhv-test
+
