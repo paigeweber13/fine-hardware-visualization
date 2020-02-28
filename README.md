@@ -65,19 +65,19 @@ To build and run the (currently limited) test suite, run `make tests`
    - main part of program dumps info, second part reads and evaluates and creates
      svg
       - use json?
-   - libcairo
+   - libcairo is an option for graphics
  - don't worry about software engineering tooo much right now. Don't spend
    active time on it but do keep it in mind
 
 ## Long-term:
- - create visualization of architecture (generate svg?)
  - expand suite of test software that has balanced/inbalanced usage
    - consider standard benchmarks
      - like NAS parallel benchmarks
  - improve benchmark
    - have it check bandwidth for all types of memory/cache
-   - improve software engineering: make it consistent what calls likwid, etc.
    - have it check architecture to know what size of caches
+   - have it populate architecture.h
+   - improve software engineering: make it consistent what calls likwid, etc.
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
  - rename "computation_measurements" to "measurements"?
