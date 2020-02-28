@@ -51,6 +51,13 @@ To build and run the (currently limited) test suite, run `make tests`
 # TODO:
 ## Immediate:
  - double check bandwidth by doing manual calculations
+   - only one core is reporting work even though I'm using multiple threads...
+   - is bandwidth too low to be taken advantage of by all cores? Or does the
+     memory controller only allow one core at a time to use it? Or maybe it's
+     just how likwid reports things?
+   - when I make code sequential, all threads but thread 0 report NAN values
+     for ram-related stuff. Also bandwidth is halved. I think this is just how
+     likwid reports things?
  - add some test software that has balanced/inbalanced usage
    - HPC code: convolution
      - instrument loading/saving data too - different phases to application
@@ -74,6 +81,8 @@ To build and run the (currently limited) test suite, run `make tests`
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
  - rename "computation_measurements" to "measurements"?
+ - manual benchmark off by a factor of 2 - investigate
+ - manual benchmark only prints runtime for flops region
 
 # Accomplishments:
 ## 2020-02-25 through 2020-03-03
