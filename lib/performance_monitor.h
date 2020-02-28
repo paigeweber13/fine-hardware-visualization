@@ -3,8 +3,10 @@
 #include <math.h>
 #include <iostream>
 #include <likwid.h>
+#include <map>
 #include <omp.h>
 #include <stdlib.h>
+#include <string>
 
 #include "architecture.h"
 
@@ -40,7 +42,7 @@ class performance_monitor {
   private:
     // ------ attributes ------ //
     int num_threads;
-    double runtime;
+    std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
     const char * flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";

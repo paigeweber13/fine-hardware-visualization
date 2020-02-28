@@ -36,7 +36,6 @@ void performance_monitor::init(const char * event_group)
     this->num_threads = omp_get_num_threads();
   }
 
-  this->runtime = 0;
   perfmon_startCounters();
 
   printf("Thread count initialized to %d\n", this->num_threads);
@@ -68,7 +67,12 @@ void performance_monitor::stopRegion(const char * tag)
   LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
   printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
          tag, omp_get_thread_num(), nevents, time, count);
-  this->runtime = fmax(this->runtime, time);
+  // std::string s(tag);
+  if(this->runtimes_by_tag.count(tag)){
+    this->runtimes_by_tag[tag] = fmax(this->runtimes_by_tag[tag], time);
+  } else {
+    this->runtimes_by_tag[tag] = time;
+  }
 }
 
 void performance_monitor::close(){
@@ -106,25 +110,22 @@ void performance_monitor::getAggregateResults(){
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
-        if(strcmp(metric_name, mflops_metric_name) == 0 &&
-           !isnan(metric_value)){
-          mflops += metric_value;
-        }
-        else if(strcmp(metric_name, mflops_dp_metric_name) == 0 &&
-               !isnan(metric_value)){
-          mflops_dp += metric_value;
-        }
-        else if(strcmp(metric_name, l2_bandwidth_metric_name) == 0 &&
-               !isnan(metric_value)){
-          l2_bw += metric_value;
-        }
-        else if(strcmp(metric_name, l3_bandwidth_metric_name) == 0 &&
-               !isnan(metric_value)){
-          l3_bw += metric_value;
-        }
-        else if(strcmp(metric_name, ram_bandwidth_metric_name) == 0 &&
-               !isnan(metric_value)){
-          ram_bw += metric_value;
+        if(!isnan(metric_value)){
+          if(strcmp(metric_name, mflops_metric_name) == 0){
+            mflops += metric_value;
+          }
+          else if(strcmp(metric_name, mflops_dp_metric_name) == 0){
+            mflops_dp += metric_value;
+          }
+          else if(strcmp(metric_name, l2_bandwidth_metric_name) == 0){
+            l2_bw += metric_value;
+          }
+          else if(strcmp(metric_name, l3_bandwidth_metric_name) == 0){
+            l3_bw += metric_value;
+          }
+          else if(strcmp(metric_name, ram_bandwidth_metric_name) == 0){
+            ram_bw += metric_value;
+          }
         }
       }
     }
@@ -195,7 +196,13 @@ void performance_monitor::printOnlyAggregate()
   getAggregateResults();
 
   printf("----- begin aggregate performance_monitor report -----\n");
-  printf("Total runtime: %.3f\n", this->runtime);
+  std::cout << "results_by_tag size: " + std::to_string(runtimes_by_tag.size())
+             + "\n";
+  for (std::map<std::string, double>::iterator it=runtimes_by_tag.begin(); 
+       it!=runtimes_by_tag.end(); ++it){
+    std::cout << "Runtime for " + it->first + ": "
+               + std::to_string(it->second) + "\n";
+  }
   printf("\n-- computation --\n");
   printf("Aggregate %s: %.3e\n", flops_event_name, num_flops);
   printf("Total FP ops: %.3e\n", num_flops * OPS_PER_VECTOR);
