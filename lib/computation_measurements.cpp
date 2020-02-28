@@ -69,7 +69,7 @@ void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
         perfmon.startRegion(tag);
       }
       for (int k = 0; k < 100; k++)
-        for (j = 0; j < num_doubles; j += 4)
+        for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
         {
           // Loading 256-bits into memory address of array
           buffer = _mm256_load_pd(array + j);
