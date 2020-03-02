@@ -17,52 +17,50 @@
 
 class performance_monitor {
   public:
-    ~performance_monitor();
-
     // ------ attributes ------ //
-    const char *filepath = "/tmp/test_marker.out";
-    const char *accessmode = ACCESSMODE_DAEMON;
+    static const std::string filepath;
+    static const std::string accessmode;
 
     // ------ functions ------ //
-    void init(const char * event_group);
-    void startRegion(const char * tag);
-    void stopRegion(const char * tag);
-    void close();
+    static void init(const char * event_group);
+    static void startRegion(const char * tag);
+    static void stopRegion(const char * tag);
+    static void close();
 
-    void getAggregateResults();
-    void compareActualWithbench();
-    void printResults();
-    void printDetailedResults();
-    void printOnlyAggregate();
-    void printComparison();
+    static void getAggregateResults();
+    static void compareActualWithbench();
+    static void printResults();
+    static void printDetailedResults();
+    static void printOnlyAggregate();
+    static void printComparison();
 
     // ------ getters and setters ----- //
-    float getMFlops();
+    static float getMFlops();
 
   private:
     // ------ attributes ------ //
-    int num_threads;
-    std::map<std::string, double> runtimes_by_tag;
+    static int num_threads;
+    static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
-    const char * flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";
-    float num_flops;
+    static const std::string flops_event_name;
+    static float num_flops;
 
-    const char * mflops_metric_name = "AVX SP [MFLOP/s]";
-    float mflops;
-    float mflops_saturation;
-    const char * mflops_dp_metric_name = "AVX DP [MFLOP/s]";
-    float mflops_dp;
-    float mflops_dp_saturation;
+    static const std::string mflops_metric_name;
+    static float mflops;
+    static float mflops_saturation;
+    static const std::string mflops_dp_metric_name;
+    static float mflops_dp;
+    static float mflops_dp_saturation;
 
-    const char * l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
-    float l2_bw;
-    float l2_bw_saturation;
-    const char * l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
-    float l3_bw;
-    float l3_bw_saturation;
-    const char * ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
-    float ram_bw;
-    float ram_bw_saturation;
+    static const std::string l2_bandwidth_metric_name;
+    static float l2_bw;
+    static float l2_bw_saturation;
+    static const std::string l3_bandwidth_metric_name;
+    static float l3_bw;
+    static float l3_bw_saturation;
+    static const std::string ram_bandwidth_metric_name;
+    static float ram_bw;
+    static float ram_bw_saturation;
 
 };

@@ -43,7 +43,6 @@ void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
   // unsigned thr_num;
   std::uint64_t i, j;
   __m256d buffer;
-  performance_monitor perfmon;
 
   const char * tag = "L2";
   // align to cache line, which is 512 bits or 64 bytes
@@ -66,7 +65,7 @@ void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
         //	start = system_clock::now();
         //	Maybe start likwid region here
         //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        perfmon.startRegion(tag);
+        performance_monitor::startRegion(tag);
       }
       for (int k = 0; k < 100; k++)
         for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
@@ -82,7 +81,7 @@ void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
         //	end = system_clock::now();
         //	Maybe stop likwid regin here
         //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        perfmon.stopRegion(tag);
+        performance_monitor::stopRegion(tag);
       }
       asm(""); //Say no to loop optimization
     }

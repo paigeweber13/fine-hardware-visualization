@@ -33,7 +33,6 @@ bw_results bandwidth_rw_bench_compare(
   std::chrono::high_resolution_clock::time_point start_time, end_time;
   std::uint64_t i, j, k;
   __m256d buffer;
-  performance_monitor perfmon;
 
   const char * tag = "RAM";
   // align to cache line, which is 512 bits or 64 bytes
@@ -55,7 +54,7 @@ bw_results bandwidth_rw_bench_compare(
         //	start = system_clock::now();
         //	Maybe start likwid region here
         //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        perfmon.startRegion(tag);
+        performance_monitor::startRegion(tag);
         start_time = std::chrono::high_resolution_clock::now();
       }
       for (k = 0; k < num_inner_iterations; k++)
@@ -72,7 +71,7 @@ bw_results bandwidth_rw_bench_compare(
         //	end = system_clock::now();
         //	Maybe stop likwid regin here
         //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        perfmon.stopRegion(tag);
+        performance_monitor::stopRegion(tag);
         end_time = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
       }
@@ -113,18 +112,18 @@ int main(int argc, char* argv[])
   performance_monitor perfmon;
 
   // FLOPS ----------------------------
-  perfmon.init("FLOPS_SP|MEM_DP");
+  performance_monitor::init("FLOPS_SP|MEM_DP");
   auto start_time = std::chrono::high_resolution_clock::now();
   #pragma omp parallel
   {
     NUM_CORES = omp_get_num_threads();
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
-    perfmon.startRegion("flops");
+    performance_monitor::startRegion("flops");
     // #pragma omp barrier
     d = flops(FLOAT_NUM_ITERATIONS);
     // #pragma omp barrier
-    perfmon.stopRegion("flops");
+    performance_monitor::stopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
@@ -132,8 +131,8 @@ int main(int argc, char* argv[])
   likwid_markerNextGroup();
   bw_results bandwidth_results = bandwidth_rw_bench_compare(10, 100000);
 
-  perfmon.close();
-  perfmon.printResults();
+  performance_monitor::close();
+  performance_monitor::printResults();
   
   double total_float_ops = FLOAT_NUM_ITERATIONS * FLOP_PER_ITERATION * NUM_CORES;
   const double flops_to_tflops = 1e-12;
