@@ -80,9 +80,12 @@ To build and run the (currently limited) test suite, run `make tests`
    - improve software engineering: make it consistent what calls likwid, etc.
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
- - rename "computation_measurements" to "measurements"?
  - manual benchmark off by a factor of 2 - investigate
  - manual benchmark only prints runtime for flops region
+ - software engineering
+   - rename "computation_measurements" to "measurements"?
+   - replace printf statements with cout
+   - combine all memory bandwidth functions
 
 # Accomplishments:
 ## 2020-02-25 through 2020-03-03
