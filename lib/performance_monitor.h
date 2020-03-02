@@ -22,6 +22,7 @@ class performance_monitor {
     static const std::string accessmode;
 
     // ------ functions ------ //
+    static void init();
     static void init(const char * event_group);
     static void startRegion(const char * tag);
     static void stopRegion(const char * tag);

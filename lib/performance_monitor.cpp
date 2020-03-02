@@ -24,6 +24,10 @@ float performance_monitor::l3_bw_saturation;
 float performance_monitor::ram_bw;
 float performance_monitor::ram_bw_saturation;
 
+void performance_monitor::init(){
+  init("FLOPS_SP|MEM_DP|L3|L2");
+}
+
 void performance_monitor::init(const char * event_group)
 {
   remove(filepath.c_str());
@@ -75,6 +79,8 @@ void performance_monitor::startRegion(const char * tag)
   likwid_markerRegisterRegion(tag);
 
   likwid_markerStartRegion(tag);
+
+  std::cout << "started region " << tag << "\n";
 }
 
 void performance_monitor::stopRegion(const char * tag)
