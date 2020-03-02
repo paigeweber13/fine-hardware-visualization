@@ -7,11 +7,14 @@ applications.
 - [Fine Hardware Visualization](#fine-hardware-visualization)
 - [Prerequisites](#prerequisites)
 - [Running](#running)
+- [Usage Notes](#usage-notes)
 - [Architecture of Program](#architecture-of-program)
 - [Goals:](#goals)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
   - [Long-term:](#long-term)
+    - [Problems to fix:](#problems-to-fix)
+    - [Features to add:](#features-to-add)
 - [Accomplishments:](#accomplishments)
   - [2020-02-25 through 2020-03-03](#2020-02-25-through-2020-03-03)
   - [2020-02-18 through 25](#2020-02-18-through-25)
@@ -33,6 +36,9 @@ applications.
 # Running
 To build and run the (currently limited) test suite, run `make tests`
 
+# Usage Notes
+ - Region names must not have spaces
+
 # Architecture of Program
  - Identify hardware architecture
  - Identify peak FLOP/s, memory bandwidth, etc.
@@ -50,17 +56,6 @@ To build and run the (currently limited) test suite, run `make tests`
 
 # TODO:
 ## Immediate:
- - double check bandwidth by doing manual calculations
-   - only one core is reporting work even though I'm using multiple threads...
-   - is bandwidth too low to be taken advantage of by all cores? Or does the
-     memory controller only allow one core at a time to use it? Or maybe it's
-     just how likwid reports things?
-   - when I make code sequential, all threads but thread 0 report NAN values
-     for ram-related stuff. Also bandwidth is halved. I think this is just how
-     likwid reports things?
- - add some test software that has balanced/inbalanced usage
-   - HPC code: convolution
-     - instrument loading/saving data too - different phases to application
  - generate svg
    - main part of program dumps info, second part reads and evaluates and creates
      svg
@@ -70,6 +65,16 @@ To build and run the (currently limited) test suite, run `make tests`
    active time on it but do keep it in mind
 
 ## Long-term:
+### Problems to fix:
+ - manual benchmark off by a factor of 2 - investigate
+ - manual benchmark only prints runtime for flops region
+   - in other words, runtime_by_tag doesn't seem to work for more than one 
+     region
+ - in convolution, the "entire_program" tag, which is designed to measure
+   across all stages of code, doesn't work. However, the tag "convolution"
+   inside the actual convolution does work.
+
+### Features to add:
  - expand suite of test software that has balanced/inbalanced usage
    - consider standard benchmarks
      - like NAS parallel benchmarks
@@ -80,15 +85,29 @@ To build and run the (currently limited) test suite, run `make tests`
    - improve software engineering: make it consistent what calls likwid, etc.
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
- - manual benchmark off by a factor of 2 - investigate
- - manual benchmark only prints runtime for flops region
  - software engineering
    - rename "computation_measurements" to "measurements"?
    - replace printf statements with cout
    - combine all memory bandwidth functions
+ - things CLI will need to do:
+   - benchmark machine
+   - create visualization from output data
 
 # Accomplishments:
 ## 2020-02-25 through 2020-03-03
+ - double check bandwidth by doing manual calculations
+   - only one core is reporting work even though I'm using multiple threads...
+   - is bandwidth too low to be taken advantage of by all cores? Or does the
+     memory controller only allow one core at a time to use it? Or maybe it's
+     just how likwid reports things?
+   - when I make code sequential, all threads but thread 0 report NAN values
+     for ram-related stuff. Also bandwidth is halved. I think this is just how
+     likwid reports things?
+   - results are off by a factor of 2...
+ - added HPC convolution to test
+   - instrument loading/saving data too - different phases to application
+   - this has been added, but only able to instrument actual convolution for
+     some reason?
 
 ## 2020-02-18 through 25
  - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
