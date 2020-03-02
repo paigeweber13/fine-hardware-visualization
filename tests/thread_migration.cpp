@@ -62,7 +62,6 @@ void migrate_cores_12_to_cores_34(){
 
 void migrate_thread_core_0_to_2()
 {
-  performance_monitor perfmon;
   __m256 d;
   __m256 e;
 
@@ -90,7 +89,6 @@ void migrate_thread_core_0_to_2()
 }
 
 void migrate_all_to_one(){
-  performance_monitor perfmon;
   __m256 d;
   __m256 e;
 

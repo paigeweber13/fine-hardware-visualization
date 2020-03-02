@@ -109,8 +109,6 @@ int main(int argc, char* argv[])
   __m256 d;
   __m256i e;
 
-  performance_monitor perfmon;
-
   // FLOPS ----------------------------
   performance_monitor::init("FLOPS_SP|MEM_DP");
   auto start_time = std::chrono::high_resolution_clock::now();
