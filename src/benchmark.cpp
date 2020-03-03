@@ -85,7 +85,10 @@ int main(int argc, char *argv[])
   {
     std::cout << "Usage: " << argv[0] << " 0|1" << std::endl;
     std::cout << "       0 for FLOPS_SP benchmark" << std::endl;
-    std::cout << "       1 for L2 r/w bandwidth benchmark" << std::endl;
+    std::cout << "       1 for FLOPS_DP benchmark" << std::endl;
+    std::cout << "       2 for L2 r/w bandwidth benchmark" << std::endl;
+    std::cout << "       3 for L3 r/w bandwidth benchmark" << std::endl;
+    std::cout << "       4 for RAM r/w bandwidth benchmark" << std::endl;
     return 1;
   }
 
