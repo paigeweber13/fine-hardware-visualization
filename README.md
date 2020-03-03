@@ -32,9 +32,11 @@ applications.
    `/usr/local`, as this is the only confirmed way to use `likwid-accessD`
    without root permissions. Alternatively, you can also install it with your
    package manger (ex. `sudo apt install likwid` on ubuntu)
- - **nlohmann/json** available [on
-   github](https://github.com/nlohmann/json). Installable on ubuntu with `sudo
-   apt install nlohmann-json-dev` 
+ - **nlohmann/json:** available [on github](https://github.com/nlohmann/json).
+   Also installable on ubuntu with `sudo apt install nlohmann-json-dev` 
+ - **boost/program_options:** available on [the boost
+   website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
+   install libboost-program-options1.65-dev`
 
 # Running
 To build and run the (currently limited) test suite, run `make tests`
