@@ -32,6 +32,9 @@ applications.
    `/usr/local`, as this is the only confirmed way to use `likwid-accessD`
    without root permissions. Alternatively, you can also install it with your
    package manger (ex. `sudo apt install likwid` on ubuntu)
+ - **nlohmann/json** available [on
+   github](https://github.com/nlohmann/json). Installable on ubuntu with `sudo
+   apt install nlohmann-json-dev` 
 
 # Running
 To build and run the (currently limited) test suite, run `make tests`
