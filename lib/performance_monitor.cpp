@@ -1,8 +1,8 @@
 #include "performance_monitor.h"
 
 const std::string performance_monitor::flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
-const std::string performance_monitor::mflops_metric_name = "AVX SP [MFLOP/s]";
-const std::string performance_monitor::mflops_dp_metric_name = "AVX DP [MFLOP/s]";
+const std::string performance_monitor::mflops_metric_name = "SP [MFLOP/s]";
+const std::string performance_monitor::mflops_dp_metric_name = "DP [MFLOP/s]";
 const std::string performance_monitor::l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
 const std::string performance_monitor::l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
 const std::string performance_monitor::ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
