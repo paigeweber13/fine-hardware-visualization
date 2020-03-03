@@ -105,6 +105,10 @@ void performance_monitor::stopRegion(const char * tag)
 void performance_monitor::close(){
   perfmon_stopCounters();
   likwid_markerClose();
+
+  getAggregateResults();
+  compareActualWithbench();
+  resultsToJson();
 }
 
 void performance_monitor::getAggregateResults(){
@@ -161,7 +165,6 @@ void performance_monitor::getAggregateResults(){
 
 void performance_monitor::compareActualWithbench()
 {
-  getAggregateResults();
   mflops_saturation = mflops/EXPERIENTIAL_SP_RATE_MFLOPS;
   mflops_dp_saturation = mflops_dp/EXPERIENTIAL_DP_RATE_MFLOPS;
   // l1_bw_saturation = l1_bw/EXPERIENTIAL_RW_BW_L1;
@@ -220,7 +223,8 @@ void performance_monitor::printDetailedResults()
 
 void performance_monitor::printOnlyAggregate()
 {
-  getAggregateResults();
+  // unnecessary, compareActualWithBench() calls this and it is called in close
+  // getAggregateResults();
 
   printf("----- begin aggregate performance_monitor report -----\n");
   std::cout << "results_by_tag size: " + std::to_string(runtimes_by_tag.size())
@@ -246,7 +250,8 @@ void performance_monitor::printOnlyAggregate()
 }
 
 void performance_monitor::printComparison(){
-  compareActualWithbench();
+  // unnecessary, it is called in close
+  // compareActualWithbench();
   printf("----- begin saturation level performance_monitor report -----\n");
   printf("Percentage of available SP flop performance used: %.3f\n",
          mflops_saturation);
@@ -269,5 +274,16 @@ float performance_monitor::getMFlops(){
 }
 
 void performance_monitor::resultsToJson(){
+  json results = {
+    {"saturation", {
+      {"flops_dp", mflops_dp_saturation},
+      {"flops_sp", mflops_saturation},
+      {"l2", l2_bw_saturation},
+      {"l3", l3_bw_saturation},
+      {"ram", ram_bw_saturation},
+    }},
+  };
 
+  std::ofstream o(jsonResultOutputFilepath);
+  o << std::setw(4) << results << std::endl;
 }

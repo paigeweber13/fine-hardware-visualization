@@ -1,9 +1,11 @@
 #pragma once
 
-#include <math.h>
+#include <fstream>
 #include <iostream>
 #include <likwid.h>
 #include <map>
+#include <math.h>
+#include <nlohmann/json.hpp>
 #include <omp.h>
 #include <stdlib.h>
 #include <string>
@@ -14,6 +16,8 @@
 #define ACCESSMODE_DIRECT "0"
 #define MFLOPS_TO_TFLOPS 1e-6
 #define OPS_PER_VECTOR 8
+
+using json = nlohmann::json;
 
 class performance_monitor {
   public:
