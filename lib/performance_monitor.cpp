@@ -79,8 +79,6 @@ void performance_monitor::startRegion(const char * tag)
   likwid_markerRegisterRegion(tag);
 
   likwid_markerStartRegion(tag);
-
-  std::cout << "started region " << tag << "\n";
 }
 
 void performance_monitor::stopRegion(const char * tag)
