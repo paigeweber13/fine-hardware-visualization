@@ -18,7 +18,8 @@
 class performance_monitor {
   public:
     // ------ attributes ------ //
-    static const std::string filepath;
+    static const std::string likwidOutputFilepath;
+    static const std::string jsonResultOutputFilepath;
     static const std::string accessmode;
 
     // ------ functions ------ //
@@ -34,6 +35,7 @@ class performance_monitor {
     static void printDetailedResults();
     static void printOnlyAggregate();
     static void printComparison();
+    static void resultsToJson();
 
     // ------ getters and setters ----- //
     static float getMFlops();

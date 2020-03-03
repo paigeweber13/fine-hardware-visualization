@@ -7,7 +7,8 @@ const std::string performance_monitor::l2_bandwidth_metric_name = "L2 bandwidth 
 const std::string performance_monitor::l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
 const std::string performance_monitor::ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
 
-const std::string performance_monitor::filepath = "/tmp/test_marker.out";
+const std::string performance_monitor::likwidOutputFilepath = "/tmp/test_marker.out";
+const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
 const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
@@ -30,12 +31,12 @@ void performance_monitor::init(){
 
 void performance_monitor::init(const char * event_group)
 {
-  remove(filepath.c_str());
+  remove(likwidOutputFilepath.c_str());
   // TODO: use omp_get_thread_nums() to build string for LIKWID_THREADS
 
   setenv("LIKWID_EVENTS", event_group, 1);
   setenv("LIKWID_MODE", accessmode.c_str(), 1);
-  setenv("LIKWID_FILEPATH", filepath.c_str(), 1); // output filepath
+  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); // output filepath
   // unfortunately, this likwid_threads envvar is absolutely necessary
   setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
   // forces likwid to take control of registers even if they are in use
@@ -118,7 +119,7 @@ void performance_monitor::getAggregateResults(){
   l3_bw = 0.;
   ram_bw = 0.;
 
-  perfmon_readMarkerFile(filepath.c_str());
+  perfmon_readMarkerFile(likwidOutputFilepath.c_str());
 
   for (int t = 0; t < num_threads; t++)
   {
@@ -183,7 +184,7 @@ void performance_monitor::printDetailedResults()
   const char * event_name, * counter_name, * metric_name;
 
   printf("----- begin performance_monitor report -----\n");
-  perfmon_readMarkerFile(filepath.c_str());
+  perfmon_readMarkerFile(likwidOutputFilepath.c_str());
   printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   {
@@ -265,4 +266,8 @@ void performance_monitor::printComparison(){
 
 float performance_monitor::getMFlops(){
   return mflops;
+}
+
+void performance_monitor::resultsToJson(){
+
 }
