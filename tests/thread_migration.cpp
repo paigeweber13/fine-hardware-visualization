@@ -29,7 +29,7 @@ void migrate_cores_12_to_cores_34(){
     if(omp_thread == 0 || omp_thread == 1){
       printf("Thread %d doing work on core %d\n", omp_thread, original_core);
       // performance_monitor::startRegion("flops");
-      d = flops(10000000);
+      d = flops_sp(10000000);
       // performance_monitor::stopRegion("flops");
     }
 
@@ -48,7 +48,7 @@ void migrate_cores_12_to_cores_34(){
     if(omp_thread == 0 || omp_thread == 1){
       printf("Thread %d doing work on core %d\n", omp_thread, new_core);
       // performance_monitor::startRegion("flops");
-      e = flops(10000000);
+      e = flops_sp(10000000);
       // performance_monitor::stopRegion("flops");
     }
 
@@ -74,10 +74,10 @@ void migrate_thread_core_0_to_2()
 }
 
   likwid_pinThread(0);
-  d = flops(10000000);
+  d = flops_sp(10000000);
 
   likwid_pinThread(2);
-  e = flops(10000000);
+  e = flops_sp(10000000);
 
 #pragma omp parallel
 {
@@ -107,7 +107,7 @@ void migrate_all_to_one(){
 
     // compute round 1
     printf("Thread %d doing work on core %d\n", omp_thread, original_core);
-    d = flops(10000000);
+    d = flops_sp(10000000);
 
     // migrate threads
     likwid_pinThread(0);
@@ -118,7 +118,7 @@ void migrate_all_to_one(){
 
     // compute round 2
     printf("Thread %d doing work on core %d\n", omp_thread, new_core);
-    d += flops(10000000);
+    d += flops_sp(10000000);
 
     #pragma omp barrier
     performance_monitor::stopRegion("flops");

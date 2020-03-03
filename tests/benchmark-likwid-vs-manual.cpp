@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
     performance_monitor::startRegion("flops");
     // #pragma omp barrier
-    d = flops(FLOAT_NUM_ITERATIONS);
+    d = flops_sp(FLOAT_NUM_ITERATIONS);
     // #pragma omp barrier
     performance_monitor::stopRegion("flops");
   }
