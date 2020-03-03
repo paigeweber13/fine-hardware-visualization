@@ -1,6 +1,6 @@
 #include "computation_measurements.h"
 
-__m256 flops(std::uint64_t num_iterations)
+__m256 flops_sp(std::uint64_t num_iterations)
 {
   __m256 a = _mm256_setr_ps(1., 2., 3., 4., 5., 6., 7., 8.);
   __m256 b = _mm256_setr_ps(10., 20., 30., 40., 50., 60., 70., 80.);
@@ -32,6 +32,42 @@ __m256 flops(std::uint64_t num_iterations)
   // return whatever is computed
   c = _mm256_fmadd_ps(f, j, c);
   a = _mm256_fmadd_ps(c, m, a);
+
+  return a;
+}
+
+__m256d flops_dp(std::uint64_t num_iterations)
+{
+  __m256d a = _mm256_setr_pd(1., 2., 3., 4.);
+  __m256d b = _mm256_setr_pd(10., 20., 30., 40.);
+  __m256d c = _mm256_setr_pd(11., 21., 31., 41.);
+
+  __m256d d = _mm256_setr_pd(77., 27., 37., 47.);
+  __m256d e = _mm256_setr_pd(88., 28., 38., 48.);
+  __m256d f = _mm256_setr_pd(99., 29., 39., 49.);
+
+  __m256d g = _mm256_setr_pd(22., 22., 32., 42.);
+  __m256d h = _mm256_setr_pd(33., 23., 33., 43.);
+  __m256d j = _mm256_setr_pd(44., 24., 34., 44.);
+
+  __m256d k = _mm256_setr_pd(55., 25., 35., 45.);
+  __m256d l = _mm256_setr_pd(66., 26., 36., 46.);
+  __m256d m = _mm256_setr_pd(1111., 211., 311., 411.);
+
+  for (std::uint64_t i = 0; i < num_iterations; i++)
+  {
+    // operations per loop iteration: 64
+    // do four things per loop to allow for the processor to pipeline
+    // instructions
+    c = _mm256_fmadd_pd(a, b, c); // 2 opd on 8 floats
+    f = _mm256_fmadd_pd(d, e, f); // 2 more opd on 8 floats
+    j = _mm256_fmadd_pd(g, h, j); // 2 more opd on 8 floats
+    m = _mm256_fmadd_pd(k, l, m); // 2 more opd on 8 floats
+  }
+
+  // return whatever is computed
+  c = _mm256_fmadd_pd(f, j, c);
+  a = _mm256_fmadd_pd(c, m, a);
 
   return a;
 }

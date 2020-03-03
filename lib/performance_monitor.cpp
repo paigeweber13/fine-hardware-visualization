@@ -163,7 +163,7 @@ void performance_monitor::compareActualWithbench()
 {
   getAggregateResults();
   mflops_saturation = mflops/EXPERIENTIAL_SP_RATE_MFLOPS;
-  // mflops_dp_saturation = mflops/EXPERIENTIAL_DP_RATE_MFLOPS;
+  mflops_dp_saturation = mflops_dp/EXPERIENTIAL_DP_RATE_MFLOPS;
   // l1_bw_saturation = l1_bw/EXPERIENTIAL_RW_BW_L1;
   l2_bw_saturation = l2_bw/EXPERIENTIAL_RW_BW_L2;
   l3_bw_saturation = l3_bw/EXPERIENTIAL_RW_BW_L3;
@@ -250,8 +250,8 @@ void performance_monitor::printComparison(){
   printf("----- begin saturation level performance_monitor report -----\n");
   printf("Percentage of available SP flop performance used: %.3f\n",
          mflops_saturation);
-  // printf("Percentage of available DP flop performance used: %.3f\n",
-  //        mflops_dp_saturation);
+  printf("Percentage of available DP flop performance used: %.3f\n",
+         mflops_dp_saturation);
   // printf("Percentage of available L1 bandwidth used: %.3f\n",
   //        l1_bw_saturation);
   printf("Percentage of available L2 bandwidth used: %.3f\n",

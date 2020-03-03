@@ -22,7 +22,7 @@ const unsigned NUMA_DOMAINS [1][4] = {{0, 1, 2, 3}};
 // ---- Benchmark ---- //
 // -- computation --
 const float EXPERIENTIAL_SP_RATE_MFLOPS = 183598.031250; // ~184 GFlop/s
-const float EXPERIENTIAL_DP_RATE_MFLOPS = 0.;            // 
+const float EXPERIENTIAL_DP_RATE_MFLOPS = 91583.672;     // ~92  GFlop/s
 
 // -- memory -- 
 // all measurements are in MiB/s

@@ -9,17 +9,29 @@
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
 const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
 
-void benchmark_sp_flops()
+enum precision { SINGLE_P, DOUBLE_P };
+
+void benchmark_flops(precision p)
 {
-  __m256 d;
+  __m256 d_s;
+  __m256d d_d;
   __m256i e;
 
-  performance_monitor::init("FLOPS_SP");
-  std::cout << "starting single precision flop benchmark" << std::endl;
+  if (p == precision::SINGLE_P){
+    performance_monitor::init("FLOPS_SP");
+    std::cout << "starting single precision flop benchmark" << std::endl;
+  } else if (p == precision::DOUBLE_P){
+    performance_monitor::init("FLOPS_DP");
+    std::cout << "starting double precision flop benchmark" << std::endl;
+  }
 #pragma omp parallel
   {
     performance_monitor::startRegion("flops");
-    d = flops(FLOAT_NUM_ITERATIONS);
+    if(p == precision::SINGLE_P){
+      d_s = flops_sp(FLOAT_NUM_ITERATIONS);
+    } else if (p == precision::DOUBLE_P){
+      d_d = flops_dp(FLOAT_NUM_ITERATIONS);
+    }
     performance_monitor::stopRegion("flops");
   }
   performance_monitor::close();
@@ -82,15 +94,18 @@ int main(int argc, char *argv[])
   switch (choice)
   {
   case 0:
-    benchmark_sp_flops();
+    benchmark_flops(precision::SINGLE_P);
     break;
   case 1:
-    benchmark_l2_bw();
+    benchmark_flops(precision::DOUBLE_P);
     break;
   case 2:
-    benchmark_l3_bw();
+    benchmark_l2_bw();
     break;
   case 3:
+    benchmark_l3_bw();
+    break;
+  case 4:
     benchmark_ram_bw();
     break;
   }
