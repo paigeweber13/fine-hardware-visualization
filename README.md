@@ -61,13 +61,33 @@ To build and run the (currently limited) test suite, run `make tests`
 
 # TODO:
 ## Immediate:
+ - try to align manual memory benchmark and likwid benchmark:
+   - seems that only reads are getting counted by likwid?
+   - Don't forget you have to read for ownership before you write to a cache
+     line 
+   - manual benchmark doesn't count how there's a read and then a write in each
+     iteration
+   - some related intrinsics:
+     - streamingread is a non-temporal read (so it goes into queue as
+       LEAST-recently read thing instead of most-recently read thing)
+ - try to align manual FLOP benchmark with likwid benchmark
+   - does difference decrease as computation size increases?
+   - make graphs of different metrics for different numbers of iterations
+ - make convolution into a case study
+   - nothing is reporting as being saturated... but maybe we are saturating one
+     scalar single precision float unit? 
+   - must be something with CPU, because memory is not the bandwidth. 
+   - identify how many instructions are getting piped from the front end to the
+     back end?
+   - metric for number of instructions decoded?
+   - identify types of instructions, identify parts of ports that are being
+     used? 
+ - CLI which benchmarks and process JSON into svg
  - generate svg
    - main part of program dumps info, second part reads and evaluates and creates
      svg
       - use json?
    - libcairo is an option for graphics
- - don't worry about software engineering tooo much right now. Don't spend
-   active time on it but do keep it in mind
 
 ## Long-term:
 ### Problems to fix:
@@ -117,6 +137,7 @@ To build and run the (currently limited) test suite, run `make tests`
  - changed performance_monitor functions to static
  - outputs data to JSON now
  - started executable which will bench system and visualize from json
+ - multiple groups now specified
 
 ## 2020-02-18 through 25
  - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
