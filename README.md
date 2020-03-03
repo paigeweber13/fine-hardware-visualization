@@ -113,6 +113,10 @@ To build and run the (currently limited) test suite, run `make tests`
    - instrument loading/saving data too - different phases to application
    - this has been added, but only able to instrument actual convolution for
      some reason?
+   - some minor fixes: aggregates all fp operations, not just avx ones
+ - changed performance_monitor functions to static
+ - outputs data to JSON now
+ - started executable which will bench system and visualize from json
 
 ## 2020-02-18 through 25
  - planning on using svgpp for svg generation https://github.com/svgpp/svgpp
