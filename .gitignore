@@ -4,4 +4,4 @@ obj
 asm
 *.e*
 *.o*
-
+*.json
