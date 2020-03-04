@@ -16,6 +16,7 @@ applications.
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
 - [Accomplishments:](#accomplishments)
+  - [2020-03-03 through 2020-03-10](#2020-03-03-through-2020-03-10)
   - [2020-02-25 through 2020-03-03](#2020-02-25-through-2020-03-03)
   - [2020-02-18 through 25](#2020-02-18-through-25)
   - [2020-02-11 through 18](#2020-02-11-through-18)
@@ -74,6 +75,7 @@ To build and run the (currently limited) test suite, run `make tests`
    - does difference decrease as computation size increases?
    - make graphs of different metrics for different numbers of iterations
  - make convolution into a case study
+   - google error I get when trying to instrument entire pipeline
    - nothing is reporting as being saturated... but maybe we are saturating one
      scalar single precision float unit? 
    - must be something with CPU, because memory is not the bandwidth. 
@@ -119,6 +121,25 @@ To build and run the (currently limited) test suite, run `make tests`
    - create visualization from output data
 
 # Accomplishments:
+## 2020-03-03 through 2020-03-10
+ - try to align manual memory benchmark and likwid benchmark:
+   - likwid measures:
+   - Memory load bandwidth [MBytes/s]  1.0E-06*DRAM_READS*64.0/time
+   - Memory evict bandwidth [MBytes/s]  1.0E-06*DRAM_WRITES*64.0/time
+   - so it seems likwid measures read and write. Does not seem to count the
+     read for ownership part of the write as a read operation, as there were
+     about 20% more reads than writes in benchmark, which is expected to be at
+     least double the number of writes if read for ownership is counted.
+ - try to align manual FLOP benchmark with likwid benchmark
+ - make convolution into a case study
+ - CLI which benchmarks and process JSON into svg
+   - couldn't get program_options to work, either from apt or when building from
+     source. Would get linker errors even with supplied examples
+     - PROBLEM WAS THE ORDER OF FLAGS GIVEN TO G++ WOW I SPENT LIKE 2 HOURS ON
+       THIS. You have to put -lboost_program_options AFTER the file you're
+       linking 
+ - generate svg
+
 ## 2020-02-25 through 2020-03-03
  - double check bandwidth by doing manual calculations
    - only one core is reporting work even though I'm using multiple threads...
