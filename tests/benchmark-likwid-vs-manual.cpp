@@ -14,6 +14,7 @@ const double microseconds_to_seconds = 1e-6;
 namespace po = boost::program_options;
 
 enum output_format { pretty, csv };
+enum test_type { none, flops, mem, both };
 
 struct bw_results {
   double duration_seconds;
@@ -144,14 +145,21 @@ flop_results flops_bench_compare(std::uint64_t num_iterations){
 }
 
 void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
-                 unsigned mem_size_kb, output_format o){
+                 unsigned mem_size_kb, output_format o, test_type t){
+  
   performance_monitor::init("FLOPS_SP|MEM");
 
-  flop_results sp_flop_results = flops_bench_compare(num_flop_iter);
+  flop_results sp_flop_results;
+  bw_results bandwidth_results;
+
+  if(t == test_type::flops || t == test_type::both)
+    sp_flop_results = flops_bench_compare(num_flop_iter);
 
   likwid_markerNextGroup();
 
-  bw_results bandwidth_results = bandwidth_rw_bench_compare(10, 100000);
+  if(t == test_type::mem || t == test_type::both)
+    bw_results bandwidth_results = bandwidth_rw_bench_compare(num_mem_iter, 
+      mem_size_kb);
 
   performance_monitor::close();
 
@@ -168,19 +176,33 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     std::cout << "size of data transferred (MB): " << bandwidth_results.mb_transferred << std::endl;
     std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
   } else if (o == output_format::csv){
-    // flops,manual_duration,manual_num_flops,manual_Mflops
-    std::cout << sp_flop_results.duration_seconds << "," 
-              << sp_flop_results.num_fp_ops << "," 
-              << sp_flop_results.mflops << "\n";
-    // rambw,manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s
-    std::cout << bandwidth_results.duration_seconds << "," 
-              << bandwidth_results.mb_transferred << "," 
-              << bandwidth_results.bandwidth << "\n";
+
+    // flops,manual_duration,manual_num_flops,manual_Mflops,
+    // likwid_duration,likwid_num_flops,likwid_Mflops
+    if(t == test_type::flops || t == test_type::both){
+      std::cout << sp_flop_results.duration_seconds << "," 
+                << sp_flop_results.num_fp_ops << "," 
+                << sp_flop_results.mflops << ","
+                << performance_monitor::get_runtimes_by_tag()["flops"] << ","
+                << performance_monitor::get_num_flops() << ","
+                << performance_monitor::getMFlops() << "\n";
+    }
+
+    // rambw,manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,
+    // likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s
+    if(t == test_type::mem || t == test_type::both){
+      std::cout << bandwidth_results.duration_seconds << "," 
+                << bandwidth_results.mb_transferred << "," 
+                << bandwidth_results.bandwidth << ","
+                << performance_monitor::get_runtimes_by_tag()["RAM"] << ","
+                << performance_monitor::get_num_flops() << ","
+                << performance_monitor::getMFlops() << "\n";
+    }
   }
 }
 
 void simple_test(){
-  custom_test(100000000, 10, 100000, output_format::pretty);
+  custom_test(100000000, 10, 100000, output_format::pretty, test_type::both);
 }
 
 int main(int argc, char* argv[])
@@ -189,13 +211,26 @@ int main(int argc, char* argv[])
   desc.add_options()
     ("help,h", "produce this help message")
     ("simple,s", "run a single simple test")
-    // todo: make these optional positional arguments 
-    ("num-flop-iterations,f", po::value<int>(), "number of iterations to run the flop benchmark")
-    ("num-mem-iterations,m", po::value<int>(), "number of iterations to run the RAM benchmark")
-    ("mem-transfer-size,t", po::value<int>(), "size of transfer used in RAM benchmark");
+    // todo: make these optional positional arguments
+    ("csv-style-output,c", "Output results in a csv style instead of the "
+      "detailed pretty output")
+    ("flops-test,f", po::value<unsigned>(), 
+      "Run a flop benchmark. Must be follwed by the number of iterations to "
+      "compute flops")
+    ("mem-bw-test,m", po::value<std::vector<unsigned>>()->multitoken(), 
+      "number of iterations to run the RAM benchmark. Must be followed by "
+      "the number of iterations to run and the size of data transferred in "
+      "Kb");
+
+  // po::positional_options_description p;
+  // p.add("num-flop-iterations", 1);
+  // p.add("num-mem-iterations", 1);
+  // p.add("mem-transfer-size", 1);
 
   po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::store(
+    po::command_line_parser(argc, argv).options(desc).run(),
+    vm);
   po::notify(vm);
   
   if (argc < 2) {
@@ -204,5 +239,32 @@ int main(int argc, char* argv[])
     simple_test();
   } else if (vm.count("help")) {
     std::cout << desc << "\n";
+  } else if (vm.count("simple")) {
+    simple_test();
+  } else {
+    test_type t = none;
+    output_format o = output_format::pretty;
+    unsigned flop_iter = 0;
+    unsigned mem_iter = 0;
+    unsigned mem_size = 0;
+
+    if (vm.count("flops-test")) {
+      t = test_type::flops;
+      flop_iter = vm["flops-test"].as<unsigned>();
+    }
+    if(vm.count("mem-bw-test")){
+      if (t == test_type::flops)
+        t = test_type::both;
+      else
+        t = test_type::mem;
+      
+      mem_iter = vm["mem-bw-test"].as<std::vector<unsigned>>()[0];
+      mem_size = vm["mem-bw-test"].as<std::vector<unsigned>>()[1];
+    }
+    if(vm.count("csv-style-output")){
+      o  = output_format::csv;
+    }
+
+    custom_test(flop_iter, mem_iter, mem_size, o, t);
   }
 }
