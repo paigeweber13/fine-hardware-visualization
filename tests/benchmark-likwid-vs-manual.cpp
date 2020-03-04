@@ -177,7 +177,7 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
   } else if (o == output_format::csv){
 
-    // flops,manual_duration,manual_num_flops,manual_Mflops,
+    // manual_duration,manual_num_flops,manual_Mflops,
     // likwid_duration,likwid_num_flops,likwid_Mflops
     if(t == test_type::flops || t == test_type::both){
       std::cout << sp_flop_results.duration_seconds << "," 
@@ -188,7 +188,7 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                 << performance_monitor::getMFlops() << "\n";
     }
 
-    // rambw,manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,
+    // manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,
     // likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s
     if(t == test_type::mem || t == test_type::both){
       std::cout << bandwidth_results.duration_seconds << "," 
@@ -211,9 +211,13 @@ int main(int argc, char* argv[])
   desc.add_options()
     ("help,h", "produce this help message")
     ("simple,s", "run a single simple test")
-    // todo: make these optional positional arguments
     ("csv-style-output,c", "Output results in a csv style instead of the "
-      "detailed pretty output")
+      "detailed pretty output. Order of output follows.\n"
+      "for flops:\n"
+      "manual_duration,manual_num_flops,manual_Mflops,likwid_duration,likwid_num_flops,likwid_Mflops\n"
+      "for mem:\n"
+      "manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s\n"
+    )
     ("flops-test,f", po::value<unsigned>(), 
       "Run a flop benchmark. Must be follwed by the number of iterations to "
       "compute flops")
@@ -221,11 +225,6 @@ int main(int argc, char* argv[])
       "number of iterations to run the RAM benchmark. Must be followed by "
       "the number of iterations to run and the size of data transferred in "
       "Kb");
-
-  // po::positional_options_description p;
-  // p.add("num-flop-iterations", 1);
-  // p.add("num-mem-iterations", 1);
-  // p.add("mem-transfer-size", 1);
 
   po::variables_map vm;
   po::store(
