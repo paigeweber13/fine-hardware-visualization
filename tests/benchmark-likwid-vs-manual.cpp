@@ -1,3 +1,4 @@
+#include <boost/program_options.hpp>
 #include <chrono>
 #include <immintrin.h>
 #include <iostream>
@@ -6,12 +7,25 @@
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
 
+#define NUM_MEM_OPERATIONS_PER_ITER 2
+
 const double microseconds_to_seconds = 1e-6;
+
+namespace po = boost::program_options;
+
+enum output_format { pretty, csv };
 
 struct bw_results {
   double duration_seconds;
   double mb_transferred;
   double bandwidth;
+  // double thing_computed;
+};
+
+struct flop_results {
+  double duration_seconds;
+  double num_fp_ops;
+  double mflops;
   // double thing_computed;
 };
 
@@ -80,7 +94,8 @@ bw_results bandwidth_rw_bench_compare(
   }
 
   bw_results results;
-  results.mb_transferred = num_inner_iterations*size_kib*kb_to_mb*num_threads;
+  results.mb_transferred = num_inner_iterations * NUM_MEM_OPERATIONS_PER_ITER 
+                         * size_kib * kb_to_mb * num_threads;
   results.duration_seconds = duration * microseconds_to_seconds;
   results.bandwidth = results.mb_transferred/results.duration_seconds;
   // results.thing_computed = copy_array[static_cast<size_t>(copy_array[0])];
@@ -90,19 +105,12 @@ bw_results bandwidth_rw_bench_compare(
   return results;
 }
 
-
-int main(int argc, char* argv[])
-{
-  std::cout << "---- running benchmark and doing manual timing to compare";
-  std::cout << " with likwid results ----" << std::endl;
+flop_results flops_bench_compare(std::uint64_t num_iterations){
   //                                         100 000 000 one hundred million
-  const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
+  // const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
 
   // we do 5 fma, so 10 total operations on 8 floats each
   const std::uint64_t FLOP_PER_ITERATION = 64; 
-
-  const std::uint64_t INT_NUM_ITERATIONS = 1000000000;
-  const std::uint64_t IOP_PER_ITERATION = 80; //32 adds + 32 adds + 16 muls
 
   std::uint64_t NUM_CORES;
 
@@ -110,7 +118,6 @@ int main(int argc, char* argv[])
   __m256i e;
 
   // FLOPS ----------------------------
-  performance_monitor::init("FLOPS_SP|MEM_DP");
   auto start_time = std::chrono::high_resolution_clock::now();
   #pragma omp parallel
   {
@@ -119,27 +126,83 @@ int main(int argc, char* argv[])
 
     performance_monitor::startRegion("flops");
     // #pragma omp barrier
-    d = flops_sp(FLOAT_NUM_ITERATIONS);
+    d = flops_sp(num_iterations);
     // #pragma omp barrier
     performance_monitor::stopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
 
+  
+  const double flops_to_mflops = 1e-6;
+
+  flop_results results;
+  results.duration_seconds = duration * microseconds_to_seconds;
+  results.num_fp_ops = num_iterations * FLOP_PER_ITERATION * NUM_CORES;
+  results.mflops = flops_to_mflops * results.num_fp_ops/results.duration_seconds;
+  return results;
+}
+
+void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
+                 unsigned mem_size_kb, output_format o){
+  performance_monitor::init("FLOPS_SP|MEM");
+
+  flop_results sp_flop_results = flops_bench_compare(num_flop_iter);
+
   likwid_markerNextGroup();
+
   bw_results bandwidth_results = bandwidth_rw_bench_compare(10, 100000);
 
   performance_monitor::close();
-  performance_monitor::printResults();
-  
-  double total_float_ops = FLOAT_NUM_ITERATIONS * FLOP_PER_ITERATION * NUM_CORES;
-  const double flops_to_tflops = 1e-12;
 
-  std::cout << "manually calculated results:\n";
-  std::cout << "time taken for flops: " << duration*1.0e-6 << " seconds." << std::endl;
-  std::cout << "total floating point operations: " << total_float_ops << std::endl;
-  std::cout << (total_float_ops*flops_to_tflops) / (duration*microseconds_to_seconds) << " TFlop/s" << std::endl;
-  std::cout << "time taken for memory transfer: " << bandwidth_results.duration_seconds << " seconds." << std::endl;
-  std::cout << "size of data transferred (MB): " << bandwidth_results.mb_transferred << std::endl;
-  std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
+  if (o == output_format::pretty){
+    performance_monitor::printResults();
+    std::cout << "---- running benchmark and doing manual timing to compare";
+    std::cout << " with likwid results ----" << std::endl;
+
+    std::cout << "manually calculated results:\n";
+    std::cout << "time taken for flops: " << sp_flop_results.duration_seconds << " seconds." << std::endl;
+    std::cout << "total floating point operations: " << sp_flop_results.num_fp_ops << std::endl;
+    std::cout << sp_flop_results.mflops << " MFlop/s" << std::endl;
+    std::cout << "time taken for memory transfer: " << bandwidth_results.duration_seconds << " seconds." << std::endl;
+    std::cout << "size of data transferred (MB): " << bandwidth_results.mb_transferred << std::endl;
+    std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
+  } else if (o == output_format::csv){
+    // flops,manual_duration,manual_num_flops,manual_Mflops
+    std::cout << sp_flop_results.duration_seconds << "," 
+              << sp_flop_results.num_fp_ops << "," 
+              << sp_flop_results.mflops << "\n";
+    // rambw,manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s
+    std::cout << bandwidth_results.duration_seconds << "," 
+              << bandwidth_results.mb_transferred << "," 
+              << bandwidth_results.bandwidth << "\n";
+  }
+}
+
+void simple_test(){
+  custom_test(100000000, 10, 100000, output_format::pretty);
+}
+
+int main(int argc, char* argv[])
+{
+  po::options_description desc("Allowed options");
+  desc.add_options()
+    ("help,h", "produce this help message")
+    ("simple,s", "run a single simple test")
+    // todo: make these optional positional arguments 
+    ("num-flop-iterations,f", po::value<int>(), "number of iterations to run the flop benchmark")
+    ("num-mem-iterations,m", po::value<int>(), "number of iterations to run the RAM benchmark")
+    ("mem-transfer-size,t", po::value<int>(), "size of transfer used in RAM benchmark");
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+  
+  if (argc < 2) {
+    std::cout << "no options provided, running single simple test.\n";
+    std::cout << "run \"" << argv[0] << " --help\" to see more options\n";
+    simple_test();
+  } else if (vm.count("help")) {
+    std::cout << desc << "\n";
+  }
 }
