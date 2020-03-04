@@ -26,7 +26,7 @@ float performance_monitor::ram_bw;
 float performance_monitor::ram_bw_saturation;
 
 void performance_monitor::init(){
-  init("FLOPS_SP|MEM_DP|L3|L2");
+  init("MEM_DP|FLOPS_SP|L3|L2");
 }
 
 void performance_monitor::init(const char * event_group)
