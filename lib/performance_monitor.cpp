@@ -63,8 +63,8 @@ void performance_monitor::init(const char * event_group)
 
   perfmon_startCounters();
 
-  printf("Thread count initialized to %d\n", num_threads);
-  printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
+  // printf("Thread count initialized to %d\n", num_threads);
+  // printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
 }
 
 void performance_monitor::startRegion(const char * tag)
@@ -92,9 +92,9 @@ void performance_monitor::stopRegion(const char * tag)
   int count;
 
   LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
-  printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
-         tag, omp_get_thread_num(), nevents, time, count);
-  // std::string s(tag);
+  // printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
+  //        tag, omp_get_thread_num(), nevents, time, count);
+
   if(runtimes_by_tag.count(tag)){
     runtimes_by_tag[tag] = fmax(runtimes_by_tag[tag], time);
   } else {
@@ -269,10 +269,6 @@ void performance_monitor::printComparison(){
   printf("\n");
 }
 
-float performance_monitor::getMFlops(){
-  return mflops;
-}
-
 void performance_monitor::resultsToJson(){
   json results = {
     {"saturation", {
@@ -286,4 +282,77 @@ void performance_monitor::resultsToJson(){
 
   std::ofstream o(jsonResultOutputFilepath);
   o << std::setw(4) << results << std::endl;
+}
+
+
+std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
+	return runtimes_by_tag;
+}
+
+const std::string performance_monitor::get_flops_event_name(){
+  return flops_event_name;
+}
+
+float performance_monitor::get_num_flops(){
+  return num_flops;
+}
+
+const std::string performance_monitor::get_mflops_metric_name(){
+  return mflops_metric_name;
+}
+
+float performance_monitor::getMFlops(){
+  return mflops;
+}
+
+float performance_monitor::get_mflops_saturation(){
+  return mflops_saturation;
+}
+
+const std::string performance_monitor::get_mflops_dp_metric_name(){
+  return mflops_dp_metric_name;
+}
+
+float performance_monitor::get_mflops_dp(){
+  return mflops_dp;
+}
+
+float performance_monitor::get_mflops_dp_saturation(){
+  return mflops_dp_saturation;
+}
+
+const std::string performance_monitor::get_l2_bandwidth_metric_name(){
+  return l2_bandwidth_metric_name;
+}
+
+float performance_monitor::get_l2_bw(){
+  return l2_bw;
+}
+
+float performance_monitor::get_l2_bw_saturation(){
+  return l2_bw_saturation;
+}
+
+const std::string performance_monitor::get_l3_bandwidth_metric_name(){
+  return l3_bandwidth_metric_name;
+}
+
+float performance_monitor::get_l3_bw(){
+  return l3_bw;
+}
+
+float performance_monitor::get_l3_bw_saturation(){
+  return l3_bw_saturation;
+}
+
+const std::string performance_monitor::get_ram_bandwidth_metric_name(){
+  return ram_bandwidth_metric_name;
+}
+
+float performance_monitor::get_ram_bw(){
+  return ram_bw;
+}
+
+float performance_monitor::get_ram_bw_saturation(){
+  return ram_bw_saturation;
 }

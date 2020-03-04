@@ -42,7 +42,26 @@ class performance_monitor {
     static void resultsToJson();
 
     // ------ getters and setters ----- //
+    static std::map<std::string,double> get_runtimes_by_tag();
+    static const std::string get_flops_event_name();
+    static float get_num_flops();
+
+    static const std::string get_mflops_metric_name();
     static float getMFlops();
+    static float get_mflops_saturation();
+    static const std::string get_mflops_dp_metric_name();
+    static float get_mflops_dp();
+    static float get_mflops_dp_saturation();
+
+    static const std::string get_l2_bandwidth_metric_name();
+    static float get_l2_bw();
+    static float get_l2_bw_saturation();
+    static const std::string get_l3_bandwidth_metric_name();
+    static float get_l3_bw();
+    static float get_l3_bw_saturation();
+    static const std::string get_ram_bandwidth_metric_name();
+    static float get_ram_bw();
+    static float get_ram_bw_saturation();
 
   private:
     // ------ attributes ------ //
