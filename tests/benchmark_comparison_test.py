@@ -42,7 +42,7 @@ def run_mem_iteration_tests():
     num_mem_iterations = 10
     mem_size = 10000
     output = []
-    while num_mem_iterations < 100001:
+    while num_mem_iterations < 500:
         print('running memory with ' + str(num_mem_iterations) + ' iterations'\
               ' and size ' + str(mem_size), end='', flush=True)
         start_time = time.time()
@@ -52,7 +52,7 @@ def run_mem_iteration_tests():
         elapsed_time = time.time() - start_time
         print(' {:.3f}s'.format(elapsed_time))
         output.append(child.stdout.decode().strip().split(','))
-        num_mem_iterations *= 10
+        num_mem_iterations *= 2
 
     write_csv(mem_iter_csv, mem_csv_header, output)
 
