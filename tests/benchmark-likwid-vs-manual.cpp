@@ -218,10 +218,10 @@ int main(int argc, char* argv[])
       "for mem:\n"
       "manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s\n"
     )
-    ("flops-test,f", po::value<unsigned>(), 
+    ("flops-test,f", po::value<std::uint64_t>(), 
       "Run a flop benchmark. Must be follwed by the number of iterations to "
       "compute flops")
-    ("mem-bw-test,m", po::value<std::vector<unsigned>>()->multitoken(), 
+    ("mem-bw-test,m", po::value<std::vector<std::uint64_t>>()->multitoken(), 
       "number of iterations to run the RAM benchmark. Must be followed by "
       "the number of iterations to run and the size of data transferred in "
       "Kb");
@@ -243,13 +243,13 @@ int main(int argc, char* argv[])
   } else {
     test_type t = none;
     output_format o = output_format::pretty;
-    unsigned flop_iter = 0;
-    unsigned mem_iter = 0;
-    unsigned mem_size = 0;
+    std::uint64_t flop_iter = 0;
+    std::uint64_t mem_iter = 0;
+    std::uint64_t mem_size = 0;
 
     if (vm.count("flops-test")) {
       t = test_type::flops;
-      flop_iter = vm["flops-test"].as<unsigned>();
+      flop_iter = vm["flops-test"].as<std::uint64_t>();
     }
     if(vm.count("mem-bw-test")){
       if (t == test_type::flops)
@@ -257,8 +257,8 @@ int main(int argc, char* argv[])
       else
         t = test_type::mem;
       
-      mem_iter = vm["mem-bw-test"].as<std::vector<unsigned>>()[0];
-      mem_size = vm["mem-bw-test"].as<std::vector<unsigned>>()[1];
+      mem_iter = vm["mem-bw-test"].as<std::vector<std::uint64_t>>()[0];
+      mem_size = vm["mem-bw-test"].as<std::vector<std::uint64_t>>()[1];
     }
     if(vm.count("csv-style-output")){
       o  = output_format::csv;
