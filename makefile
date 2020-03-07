@@ -17,11 +17,16 @@ SRC_DIR=lib
 OBJ_DIR=obj
 ASM_DIR=asm
 EXEC_DIR=bin
+TEST_DIR=tests
 
 SOURCES=$(wildcard lib/*.cpp)
 HEADERS=$(wildcard lib/*.h)
+MAINS=$(wildcard src/*.cpp)
+TEST_MAINS=$(wildcard tests/*.cpp)
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
+ASM+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(ASM_DIR)/%.s)
+ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
 EXEC_NAME=fhv
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 BENCH_EXEC_NAME=bench
@@ -35,11 +40,13 @@ init:
 	@mkdir -p $(EXEC_DIR)/tests;
 
 debug:
-	@echo "sources: $(SOURCES)";
-	@echo "objects: $(OBJS)";
-	@echo "exec:    $(EXEC)";
+	@echo "sources:   $(SOURCES)";
+	@echo "mainfiles: $(MAIN_DIR)";
+	@echo "objects:   $(OBJS)";
+	@echo "exec:      $(EXEC)";
+	@echo "asm:       $(ASM)"; 
 debug: LDFLAGS += -Q --help=target
-debug: clean build
+# debug: clean build
 
 tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
 
@@ -81,7 +88,7 @@ run-tests/likwid_minimal: bin/tests/likwid_minimal
 
 assembly: $(ASM)
 
-$(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp
+$(ASM_DIR)/%.s: $(SOURCES) $(MAINS) $(TEST_MAINS) 
 	@mkdir -p $(ASM_DIR);
 	$(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $< -o $@
 
