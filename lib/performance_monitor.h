@@ -15,7 +15,8 @@
 #define ACCESSMODE_DAEMON "1"
 #define ACCESSMODE_DIRECT "0"
 #define MFLOPS_TO_TFLOPS 1e-6
-#define OPS_PER_VECTOR 8
+#define OPS_PER_SP_256_VECTOR 8
+#define OPS_PER_SP_128_VECTOR 4
 
 using json = nlohmann::json;
 
@@ -43,7 +44,6 @@ class performance_monitor {
 
     // ------ getters and setters ----- //
     static std::map<std::string,double> get_runtimes_by_tag();
-    static const std::string get_flops_event_name();
     static float get_num_flops();
 
     static const std::string get_mflops_metric_name();
@@ -52,6 +52,9 @@ class performance_monitor {
     static const std::string get_mflops_dp_metric_name();
     static float get_mflops_dp();
     static float get_mflops_dp_saturation();
+
+    static const std::string get_ram_data_volume_metric_name();
+    static float get_ram_data_volume();
 
     static const std::string get_l2_bandwidth_metric_name();
     static float get_l2_bw();
@@ -69,7 +72,10 @@ class performance_monitor {
     static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
-    static const std::string flops_event_name;
+    // --- computation
+    static const std::string sp_scalar_flops_event_name;
+    static const std::string sp_avx_256_flops_event_name;
+    static const std::string sp_avx_128_flops_event_name;
     static float num_flops;
 
     static const std::string mflops_metric_name;
@@ -78,6 +84,10 @@ class performance_monitor {
     static const std::string mflops_dp_metric_name;
     static float mflops_dp;
     static float mflops_dp_saturation;
+
+    // --- memory
+    static const std::string ram_data_volume_metric_name; 
+    static float ram_data_volume;
 
     static const std::string l2_bandwidth_metric_name;
     static float l2_bw;

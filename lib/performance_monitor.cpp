@@ -1,8 +1,14 @@
 #include "performance_monitor.h"
 
-const std::string performance_monitor::flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
+const std::string performance_monitor::sp_scalar_flops_event_name("FP_ARITH_INST_RETIRED_SCALAR_SINGLE");
+const std::string performance_monitor::sp_avx_128_flops_event_name("FP_ARITH_INST_RETIRED_128B_PACKED_SINGLE");
+const std::string performance_monitor::sp_avx_256_flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
+
 const std::string performance_monitor::mflops_metric_name = "SP [MFLOP/s]";
 const std::string performance_monitor::mflops_dp_metric_name = "DP [MFLOP/s]";
+
+const std::string performance_monitor::ram_data_volume_metric_name = "Memory data volume [GBytes]";
+
 const std::string performance_monitor::l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
 const std::string performance_monitor::l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
 const std::string performance_monitor::ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
@@ -13,11 +19,16 @@ const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
 int performance_monitor::num_threads;
+
 float performance_monitor::num_flops;
+
 float performance_monitor::mflops;
 float performance_monitor::mflops_saturation;
 float performance_monitor::mflops_dp;
 float performance_monitor::mflops_dp_saturation;
+
+float performance_monitor::ram_data_volume;
+
 float performance_monitor::l2_bw;
 float performance_monitor::l2_bw_saturation;
 float performance_monitor::l3_bw;
@@ -133,9 +144,21 @@ void performance_monitor::getAggregateResults(){
       for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
-        if(flops_event_name.compare(event_name) == 0 &&
+        if(sp_scalar_flops_event_name.compare(event_name) == 0 &&
            event_value > 0){
           num_flops += event_value;
+        }
+        else if(sp_avx_128_flops_event_name.compare(event_name) == 0 &&
+           event_value > 0){
+          num_flops += event_value * OPS_PER_SP_128_VECTOR;
+        }
+        else if(sp_avx_256_flops_event_name.compare(event_name) == 0 &&
+           event_value > 0){
+          num_flops += event_value * OPS_PER_SP_256_VECTOR;
+        }
+        else if(ram_data_volume_metric_name.compare(event_name) == 0 &&
+           event_value > 0){
+          ram_data_volume += event_value;
         }
       }
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
@@ -235,8 +258,7 @@ void performance_monitor::printOnlyAggregate()
                + std::to_string(it->second) + "\n";
   }
   printf("\n-- computation --\n");
-  printf("Aggregate %s: %.3e\n", flops_event_name.c_str(), num_flops);
-  printf("Total FP ops: %.3e\n", num_flops * OPS_PER_VECTOR);
+  printf("Total FP ops: %.3e\n", num_flops);
   printf("\n-- computation rates --\n");
   printf("Aggregate %s: %.3f\n", mflops_metric_name.c_str(), mflops);
   printf("Aggregate %s: %.3f\n", mflops_dp_metric_name.c_str(), mflops_dp);
@@ -289,10 +311,6 @@ std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
 	return runtimes_by_tag;
 }
 
-const std::string performance_monitor::get_flops_event_name(){
-  return flops_event_name;
-}
-
 float performance_monitor::get_num_flops(){
   return num_flops;
 }
@@ -319,6 +337,14 @@ float performance_monitor::get_mflops_dp(){
 
 float performance_monitor::get_mflops_dp_saturation(){
   return mflops_dp_saturation;
+}
+
+const std::string performance_monitor::get_ram_data_volume_metric_name(){
+  return ram_data_volume_metric_name;
+}
+
+float performance_monitor::get_ram_data_volume(){
+  return ram_data_volume;
 }
 
 const std::string performance_monitor::get_l2_bandwidth_metric_name(){
