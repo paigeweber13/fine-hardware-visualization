@@ -1,12 +1,14 @@
 import argparse
 import csv
+import matplotlib.pyplot as plt
+import pandas
 import subprocess
 import time
 
 benchmark_comparison_bin_location = '../bin/tests/benchmark-likwid-vs-manual'
-flops_csv = './flops_comparison.csv'
-mem_iter_csv = './mem_iter_comparison.csv'
-mem_size_csv = './mem_size_comparison.csv'
+flops_file = './flops_comparison'
+mem_iter_file = './mem_iter_comparison'
+mem_size_file = './mem_size_comparison'
 
 flops_csv_header = ['manual_duration','manual_num_flops','manual_Mflops', \
                    'likwid_duration','likwid_num_flops','likwid_Mflops']
@@ -36,7 +38,7 @@ def run_flop_tests():
         output.append(child.stdout.decode().strip().split(','))
         num_flop_iterations *= 10
 
-    write_csv(flops_csv, flops_csv_header, output)
+    write_csv(flops_file + '.csv', flops_csv_header, output)
 
 def run_mem_iteration_tests():
     num_mem_iterations = 10
@@ -54,7 +56,7 @@ def run_mem_iteration_tests():
         output.append(child.stdout.decode().strip().split(','))
         num_mem_iterations *= 2
 
-    write_csv(mem_iter_csv, mem_csv_header, output)
+    write_csv(mem_iter_file + '.csv', mem_csv_header, output)
 
 def run_mem_size_tests():
     num_mem_iterations = 10
@@ -72,10 +74,20 @@ def run_mem_size_tests():
         output.append(child.stdout.decode().strip().split(','))
         mem_size *= 2
 
-    write_csv(mem_size_csv, mem_csv_header, output)
+    write_csv(mem_size_file + '.csv', mem_csv_header, output)
 
 def plot_results():
-    pass
+    flop_data = pandas.read_csv(flops_file + '.csv')
+    plt.figure(figsize=(10,7))
+    plt.plot(flop_data['manual_num_flops'], flop_data['manual_Mflops'])
+    plt.plot(flop_data['manual_num_flops'], flop_data['likwid_Mflops'])
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Number of SP FP operations')
+    plt.ylabel('Computation Rate, Mflop/s')
+    plt.legend(['Mflop/s calculated manually', 'Mflop/s as reported by likwid'])
+    plt.show()
+    plt.savefig(flops_file + '.png')
 
 def parse_cli_options():
     parser = argparse.ArgumentParser(
