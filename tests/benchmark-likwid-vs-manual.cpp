@@ -39,15 +39,13 @@ bw_results bandwidth_rw_bench_compare(
   // I'm no longer getting huge bandwidth numbers but my manual calculations
   // differ from likwid by a factor of 2
 
-  const unsigned num_inner_iterations = 100;
+  const unsigned num_inner_iterations = 10;
   const double kb_to_mb = 1e-3;
   std::uint64_t num_doubles = size_kib * KILO_BYTE_SIZE/BYTES_PER_DOUBLE;
 
   unsigned num_threads;
   double duration;
   std::chrono::high_resolution_clock::time_point start_time, end_time;
-  std::uint64_t i, j, k;
-  __m256d buffer;
 
   const char * tag = "RAM";
   // align to cache line, which is 512 bits or 64 bytes
@@ -56,8 +54,10 @@ bw_results bandwidth_rw_bench_compare(
   double * copy_array = static_cast<double *>(
     aligned_alloc(64, size_kib * KILO_BYTE_SIZE));
 
-#pragma omp parallel default(shared) private(buffer, i, j, k)
+#pragma omp parallel
   {
+    std::uint64_t i, j, k;
+    __m256d buffer;
     num_threads = omp_get_num_threads();
 
     // thr_num = omp_get_thread_num();
@@ -158,7 +158,7 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
   likwid_markerNextGroup();
 
   if(t == test_type::mem || t == test_type::both)
-    bw_results bandwidth_results = bandwidth_rw_bench_compare(num_mem_iter, 
+    bandwidth_results = bandwidth_rw_bench_compare(num_mem_iter, 
       mem_size_kb);
 
   performance_monitor::close();
