@@ -87,10 +87,20 @@ run-tests/likwid_minimal: bin/tests/likwid_minimal
 	likwid-perfctr -C S0:0 -g L3 -g FLOPS_DP -M 1 -m bin/tests/likwid_minimal
 
 assembly: $(ASM)
-
-$(ASM_DIR)/%.s: $(SOURCES) $(MAINS) $(TEST_MAINS) 
 	@mkdir -p $(ASM_DIR);
-	$(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $< -o $@
+
+define asm-command
+$(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $< -o $@
+endef
+
+$(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp 
+	$(asm-command)
+
+$(ASM_DIR)/%.s: $(TEST_DIR)/%.cpp
+	$(asm-command)
+
+$(ASM_DIR)/%.s: $(MAIN_DIR)/%.cpp
+	$(asm-command)
 
 clean:
 	rm -f $(OBJS) $(EXEC) $(BENCH_EXEC)
