@@ -110,7 +110,7 @@ flop_results flops_bench_compare(std::uint64_t num_iterations){
   //                                         100 000 000 one hundred million
   // const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
 
-  // we do 5 fma, so 10 total operations on 8 floats each
+  // we do 4 fma, so 8 total operations on 8 floats each
   const std::uint64_t FLOP_PER_ITERATION = 64; 
 
   std::uint64_t NUM_CORES;
@@ -126,9 +126,9 @@ flop_results flops_bench_compare(std::uint64_t num_iterations){
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
     performance_monitor::startRegion("flops");
-    // #pragma omp barrier
+    #pragma omp barrier
     d = flops_sp(num_iterations);
-    // #pragma omp barrier
+    #pragma omp barrier
     performance_monitor::stopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
@@ -195,8 +195,8 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                 << bandwidth_results.mb_transferred << "," 
                 << bandwidth_results.bandwidth << ","
                 << performance_monitor::get_runtimes_by_tag()["RAM"] << ","
-                << performance_monitor::get_num_flops() << ","
-                << performance_monitor::getMFlops() << "\n";
+                << performance_monitor::get_ram_data_volume() << ","
+                << performance_monitor::get_ram_bw() << "\n";
     }
   }
 }
