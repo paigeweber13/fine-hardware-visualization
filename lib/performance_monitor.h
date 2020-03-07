@@ -69,6 +69,10 @@ class performance_monitor {
   private:
     // ------ attributes ------ //
     static int num_threads;
+    // "runtimes by tag" should really be called "max runtime by tag" because
+    // that's how it's calculated, but likwid seems to calculate flops on a
+    // per-thread basis so this won't let us double-check the likwid
+    // calculations
     static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
