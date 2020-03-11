@@ -144,21 +144,16 @@ void performance_monitor::getAggregateResults(){
       for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
-        if(sp_scalar_flops_event_name.compare(event_name) == 0 &&
-           event_value > 0){
-          num_flops += event_value;
-        }
-        else if(sp_avx_128_flops_event_name.compare(event_name) == 0 &&
-           event_value > 0){
-          num_flops += event_value * OPS_PER_SP_128_VECTOR;
-        }
-        else if(sp_avx_256_flops_event_name.compare(event_name) == 0 &&
-           event_value > 0){
-          num_flops += event_value * OPS_PER_SP_256_VECTOR;
-        }
-        else if(ram_data_volume_metric_name.compare(event_name) == 0 &&
-           event_value > 0){
-          ram_data_volume += event_value;
+        if(event_value > 0){
+          if(sp_scalar_flops_event_name.compare(event_name) == 0){
+            num_flops += event_value;
+          }
+          else if(sp_avx_128_flops_event_name.compare(event_name) == 0){
+            num_flops += event_value * OPS_PER_SP_128_VECTOR;
+          }
+          else if(sp_avx_256_flops_event_name.compare(event_name) == 0){
+            num_flops += event_value * OPS_PER_SP_256_VECTOR;
+          }
         }
       }
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
@@ -176,6 +171,9 @@ void performance_monitor::getAggregateResults(){
           }
           else if(l3_bandwidth_metric_name.compare(metric_name) == 0){
             l3_bw += metric_value;
+          }
+          else if(ram_data_volume_metric_name.compare(metric_name) == 0){
+            ram_data_volume += metric_value;
           }
           else if(ram_bandwidth_metric_name.compare(metric_name) == 0){
             ram_bw += metric_value;
@@ -264,6 +262,7 @@ void performance_monitor::printOnlyAggregate()
   printf("Aggregate %s: %.3f\n", mflops_dp_metric_name.c_str(), mflops_dp);
   // printf("Total TFlop/s: %.3f\n", mflops*MFLOPS_TO_TFLOPS);
   printf("\n-- memory --\n");
+  printf("Aggregate %s: %.3f\n", ram_data_volume_metric_name.c_str(), ram_data_volume);
   printf("Aggregate %s: %.3f\n", l2_bandwidth_metric_name.c_str(), l2_bw);
   printf("Aggregate %s: %.3f\n", l3_bandwidth_metric_name.c_str(), l3_bw);
   printf("Aggregate %s: %.3f\n", ram_bandwidth_metric_name.c_str(), ram_bw);
