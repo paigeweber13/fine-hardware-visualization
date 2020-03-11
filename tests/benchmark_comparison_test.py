@@ -12,9 +12,9 @@ mem_size_file = './mem_size_comparison'
 
 flops_csv_header = ['manual_duration','manual_num_flops','manual_Mflops', \
                    'likwid_duration','likwid_num_flops','likwid_Mflops']
-mem_csv_header = ['manual_duration','manual_data_size_mb', \
+mem_csv_header = ['manual_duration','manual_data_size_gb', \
                  'manual_bandwidth_mb_per_s','likwid_duration', \
-                 'likwid_data_size_mb','likwid_bandwitdh_mb_per_s']
+                 'likwid_data_size_gb','likwid_bandwitdh_mb_per_s']
 
 def write_csv(filename, header, data):
     print('writing csv to ' + filename)
