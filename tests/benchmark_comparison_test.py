@@ -14,7 +14,7 @@ flops_csv_header = ['manual_duration','manual_num_flops','manual_Mflops', \
                    'likwid_duration','likwid_num_flops','likwid_Mflops']
 mem_csv_header = ['manual_duration','manual_data_size_gb', \
                  'manual_bandwidth_mb_per_s','likwid_duration', \
-                 'likwid_data_size_gb','likwid_bandwitdh_mb_per_s']
+                 'likwid_data_size_gb','likwid_bandwidth_mb_per_s']
 
 def write_csv(filename, header, data):
     print('writing csv to ' + filename)
@@ -94,6 +94,27 @@ def plot_results():
     plt.legend(['Mflop/s calculated manually', 'Mflop/s as reported by likwid'])
     plt.show()
     plt.savefig(flops_file + '.png')
+
+    mem_size_data = pandas.read_csv(mem_size_file + '.csv')
+    plt.figure(figsize=(10,7))
+    plt.plot(mem_size_data['manual_data_size_gb'], 
+             mem_size_data['manual_bandwidth_mb_per_s'])
+    plt.plot(mem_size_data['manual_data_size_gb'],
+             mem_size_data['likwid_bandwidth_mb_per_s'])
+
+    for xyt in zip(mem_size_data['manual_data_size_gb'],
+                   mem_size_data['manual_bandwidth_mb_per_s'],
+                   mem_size_data['manual_duration']):
+        plt.annotate("{:.3f}s".format(xyt[2]), xy=xyt[:2])
+
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Amount of data transferred (GB)')
+    plt.ylabel('Bandwidth, Mbytes/s')
+    plt.legend(['Bandwidth calculated manually', 
+                'Bandwidth as reported by likwid'])
+    plt.show()
+    plt.savefig(mem_size_file + '.png')
 
 def parse_cli_options():
     parser = argparse.ArgumentParser(

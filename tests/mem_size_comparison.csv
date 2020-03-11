@@ -1,4 +1,4 @@
-manual_duration,manual_data_size_gb,manual_bandwidth_mb_per_s,likwid_duration,likwid_data_size_gb,likwid_bandwitdh_mb_per_s
+manual_duration,manual_data_size_gb,manual_bandwidth_mb_per_s,likwid_duration,likwid_data_size_gb,likwid_bandwidth_mb_per_s
 0.006215,0.4,64360.4,0.0106187,0.22303,21003.4
 0.02242,0.8,35682.4,0.021944,0.220462,22247.3
 0.046313,1.6,34547.5,0.045886,0.758958,23866.5
