@@ -78,7 +78,7 @@ def run_mem_size_tests():
 
 def plot_results():
     flop_data = pandas.read_csv(flops_file + '.csv')
-    plt.figure(figsize=(10,7))
+    plt.figure(1, figsize=(10,7))
     plt.plot(flop_data['manual_num_flops'], flop_data['manual_Mflops'])
     plt.plot(flop_data['manual_num_flops'], flop_data['likwid_Mflops'])
 
@@ -92,18 +92,17 @@ def plot_results():
     plt.xlabel('Number of SP FP operations')
     plt.ylabel('Computation Rate, Mflop/s')
     plt.legend(['Mflop/s calculated manually', 'Mflop/s as reported by likwid'])
-    plt.show()
     plt.savefig(flops_file + '.png')
 
     mem_size_data = pandas.read_csv(mem_size_file + '.csv')
-    plt.figure(figsize=(10,7))
+    plt.figure(2, figsize=(10,7))
     plt.plot(mem_size_data['manual_data_size_gb'], 
              mem_size_data['manual_bandwidth_mb_per_s'])
     plt.plot(mem_size_data['manual_data_size_gb'],
              mem_size_data['likwid_bandwidth_mb_per_s'])
 
     for xyt in zip(mem_size_data['manual_data_size_gb'],
-                   mem_size_data['manual_bandwidth_mb_per_s'],
+                   mem_size_data['manual_bandwidth_mb_per_s'] * 1.01,
                    mem_size_data['manual_duration']):
         plt.annotate("{:.3f}s".format(xyt[2]), xy=xyt[:2])
 
@@ -113,8 +112,9 @@ def plot_results():
     plt.ylabel('Bandwidth, Mbytes/s')
     plt.legend(['Bandwidth calculated manually', 
                 'Bandwidth as reported by likwid'])
-    plt.show()
     plt.savefig(mem_size_file + '.png')
+
+    plt.show()
 
 def parse_cli_options():
     parser = argparse.ArgumentParser(
