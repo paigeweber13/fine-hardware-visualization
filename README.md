@@ -71,9 +71,17 @@ To build and run the (currently limited) test suite, run `make tests`
    - some related intrinsics:
      - streamingread is a non-temporal read (so it goes into queue as
        LEAST-recently read thing instead of most-recently read thing)
+   - aligning memory is proving to be harder than aligning flops. Amount of
+     memory reported as transferred by likwid changes each time. However, it
+     also never exceeds the manually calculated amount
+     - possible causes include:
+     - some iterations of loop getting optimized out?
+     - getting optimized to memcpy?
  - try to align manual FLOP benchmark with likwid benchmark
    - does difference decrease as computation size increases?
+     - YES
    - make graphs of different metrics for different numbers of iterations
+     - DONE
  - make convolution into a case study
    - google error I get when trying to instrument entire pipeline
    - nothing is reporting as being saturated... but maybe we are saturating one
