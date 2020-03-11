@@ -18,9 +18,9 @@ enum test_type { none, flops, mem, both };
 
 struct bw_results {
   double duration_seconds;
-  double mb_transferred;
+  double gb_transferred;
   double bandwidth;
-  // double thing_computed;
+  double thing_computed;
 };
 
 struct flop_results {
@@ -41,7 +41,8 @@ bw_results bandwidth_rw_bench_compare(
 
   const unsigned num_inner_iterations = 10;
   const double kb_to_mb = 1e-3;
-  std::uint64_t num_doubles = size_kib * KILO_BYTE_SIZE/BYTES_PER_DOUBLE;
+  const double kb_to_gb = 1e-6;
+  const double gb_to_mb = 1e3;
 
   unsigned num_threads;
   double duration;
@@ -49,10 +50,12 @@ bw_results bandwidth_rw_bench_compare(
 
   const char * tag = "RAM";
   // align to cache line, which is 512 bits or 64 bytes
+  std::size_t array_size_bytes = size_kib * KILO_BYTE_SIZE;
+  std::uint64_t num_doubles = array_size_bytes/BYTES_PER_DOUBLE;
   double * array = static_cast<double *>(
-    aligned_alloc(64, size_kib * KILO_BYTE_SIZE));
+    aligned_alloc(64, array_size_bytes));
   double * copy_array = static_cast<double *>(
-    aligned_alloc(64, size_kib * KILO_BYTE_SIZE));
+    aligned_alloc(64, array_size_bytes));
 
 #pragma omp parallel
   {
@@ -72,7 +75,8 @@ bw_results bandwidth_rw_bench_compare(
         performance_monitor::startRegion(tag);
         start_time = std::chrono::high_resolution_clock::now();
       }
-      for (k = 0; k < num_inner_iterations; k++)
+
+      for (k = 0; k < num_inner_iterations; k++){
         for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
         {
           // Loading 256-bits into memory address of array
@@ -80,6 +84,8 @@ bw_results bandwidth_rw_bench_compare(
           // Storing 256-bits from buffer into address of cpy_arr
           _mm256_store_pd(copy_array + j, buffer);
         }
+      }
+
       //Get time snapshot just for one iteration
       if (i == num_iterations / 2)
       {
@@ -95,11 +101,11 @@ bw_results bandwidth_rw_bench_compare(
   }
 
   bw_results results;
-  results.mb_transferred = num_inner_iterations * NUM_MEM_OPERATIONS_PER_ITER 
-                         * size_kib * kb_to_mb * num_threads;
+  results.gb_transferred = num_inner_iterations * NUM_MEM_OPERATIONS_PER_ITER 
+                         * size_kib * kb_to_gb * num_threads;
   results.duration_seconds = duration * microseconds_to_seconds;
-  results.bandwidth = results.mb_transferred/results.duration_seconds;
-  // results.thing_computed = copy_array[static_cast<size_t>(copy_array[0])];
+  results.bandwidth = gb_to_mb * results.gb_transferred/results.duration_seconds;
+  results.thing_computed = copy_array[static_cast<size_t>(copy_array[0]) % num_doubles];
 
   free(array);
   free(copy_array);
@@ -126,9 +132,9 @@ flop_results flops_bench_compare(std::uint64_t num_iterations){
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
     performance_monitor::startRegion("flops");
-    #pragma omp barrier
+    // #pragma omp barrier
     d = flops_sp(num_iterations);
-    #pragma omp barrier
+    // #pragma omp barrier
     performance_monitor::stopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
@@ -173,7 +179,7 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     std::cout << "total floating point operations: " << sp_flop_results.num_fp_ops << std::endl;
     std::cout << sp_flop_results.mflops << " MFlop/s" << std::endl;
     std::cout << "time taken for memory transfer: " << bandwidth_results.duration_seconds << " seconds." << std::endl;
-    std::cout << "size of data transferred (MB): " << bandwidth_results.mb_transferred << std::endl;
+    std::cout << "size of data transferred (GB): " << bandwidth_results.gb_transferred << std::endl;
     std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
   } else if (o == output_format::csv){
 
@@ -192,7 +198,7 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     // likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s
     if(t == test_type::mem || t == test_type::both){
       std::cout << bandwidth_results.duration_seconds << "," 
-                << bandwidth_results.mb_transferred << "," 
+                << bandwidth_results.gb_transferred << "," 
                 << bandwidth_results.bandwidth << ","
                 << performance_monitor::get_runtimes_by_tag()["RAM"] << ","
                 << performance_monitor::get_ram_data_volume() << ","
