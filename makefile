@@ -23,10 +23,19 @@ SOURCES=$(wildcard lib/*.cpp)
 HEADERS=$(wildcard lib/*.h)
 MAINS=$(wildcard src/*.cpp)
 TEST_MAINS=$(wildcard tests/*.cpp)
-OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+TEST_MAINS_C+=$(wildcard tests/*.c)
+
+LIB_OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+OBJS=$(LIB_OBJS)
+OBJS+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+OBJS+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(OBJ_DIR)/%.o)
+OBJS+=$(MAINS:$(MAIN_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
 ASM+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(ASM_DIR)/%.s)
+ASM+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(ASM_DIR)/%.s)
 ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
+
 EXEC_NAME=fhv
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 BENCH_EXEC_NAME=bench
@@ -40,11 +49,12 @@ init:
 	@mkdir -p $(EXEC_DIR)/tests;
 
 debug:
-	@echo "sources:   $(SOURCES)";
-	@echo "mainfiles: $(MAIN_DIR)";
-	@echo "objects:   $(OBJS)";
-	@echo "exec:      $(EXEC)";
-	@echo "asm:       $(ASM)"; 
+	@echo "sources:       $(SOURCES)";
+	@echo "mainfiles:     $(MAIN_DIR)";
+	@echo "lib objects:   $(LIB_OBJS)";
+	@echo "objects:       $(OBJS)";
+	@echo "exec:          $(EXEC)";
+	@echo "asm:           $(ASM)"; 
 debug: LDFLAGS += -Q --help=target
 # debug: clean build
 
@@ -57,30 +67,50 @@ bench: $(BENCH_EXEC)
 	$(BENCH_EXEC) 3; \
 	$(BENCH_EXEC) 4; 
 
-$(BENCH_EXEC): $(OBJS) src/benchmark.cpp
-	$(CXX) $(OBJS) src/benchmark.cpp $(LDFLAGS) -o $@
+define ld-command
+$(CXX) $(LIB_OBJS) $< $(LDFLAGS) -o $@
+endef
 
-$(EXEC): $(OBJS) src/fhv.cpp
-	$(CXX) $(OBJS) src/fhv.cpp $(LDFLAGS) -o $@
+$(BENCH_EXEC): $(OBJ_DIR)/benchmark.o $(OBJS) 
+	$(ld-command)
 
-bin/tests/benchmark-likwid-vs-manual: $(OBJS) tests/benchmark-likwid-vs-manual.cpp
-	$(CXX) $(OBJS) tests/benchmark-likwid-vs-manual.cpp $(LDFLAGS) -o $@
+$(EXEC): src/fhv.cpp $(OBJS) 
+	$(CXX) $(LIB_OBJS) $< $(LDFLAGS) -o $@
+
+bin/tests/benchmark-likwid-vs-manual: $(LIB_OBJS) tests/benchmark-likwid-vs-manual.cpp
+	$(CXX) $(LIB_OBJS) tests/benchmark-likwid-vs-manual.cpp $(LDFLAGS) -o $@
 
 run-tests/benchmark-likwid-vs-manual: bin/tests/benchmark-likwid-vs-manual
 	bin/tests/benchmark-likwid-vs-manual
 
-bin/tests/thread_migration: $(OBJS) tests/thread_migration.cpp
-	$(CXX) $(OBJS) tests/thread_migration.cpp $(LDFLAGS) -o $@
+bin/tests/thread_migration: $(LIB_OBJS) tests/thread_migration.cpp
+	$(CXX) $(LIB_OBJS) tests/thread_migration.cpp $(LDFLAGS) -o $@
 
 run-tests/thread_migration: bin/tests/thread_migration
 	bin/tests/thread_migration 0; \
 	# bin/tests/thread_migration 1; \
 	bin/tests/thread_migration 2;
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp init
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+define compile-command
+$(CXX) $(CXXFLAGS) -c $< -o $@
+endef
 
-bin/tests/likwid_minimal: $(OBJS) tests/likwid_minimal.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp init
+	$(compile-command)
+
+$(OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp init
+	$(compile-command)
+
+$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c init
+	$(compile-command)
+
+$(OBJ_DIR)/%.o: $(MAIN_DIR)/%.cpp init
+	$(compile-command)
+
+objs: $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) -o $@
+
+bin/tests/likwid_minimal: $(LIB_OBJS) tests/likwid_minimal.c
 	gcc tests/likwid_minimal.c -L/usr/local/lib -march=native -mtune=native -fopenmp -llikwid -o bin/tests/likwid_minimal
 
 run-tests/likwid_minimal: bin/tests/likwid_minimal
@@ -97,6 +127,9 @@ $(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp
 	$(asm-command)
 
 $(ASM_DIR)/%.s: $(TEST_DIR)/%.cpp
+	$(asm-command)
+
+$(ASM_DIR)/%.s: $(TEST_DIR)/%.c
 	$(asm-command)
 
 $(ASM_DIR)/%.s: $(MAIN_DIR)/%.cpp
