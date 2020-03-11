@@ -81,6 +81,12 @@ def plot_results():
     plt.figure(figsize=(10,7))
     plt.plot(flop_data['manual_num_flops'], flop_data['manual_Mflops'])
     plt.plot(flop_data['manual_num_flops'], flop_data['likwid_Mflops'])
+
+    for xyt in zip(flop_data['manual_num_flops'],
+                   flop_data['manual_Mflops'] * .7, 
+                   flop_data['manual_duration']):
+        plt.annotate("{:.3f}s".format(xyt[2]), xy=xyt[:2])
+
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Number of SP FP operations')
