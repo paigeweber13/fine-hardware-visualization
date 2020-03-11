@@ -106,37 +106,41 @@ $(EXEC): $(OBJ_DIR)/fhv.o $(LIB_OBJS) | $(EXEC_DIR)
 	$(ld-command)
 
 ### rules to compile sources
+$(OBJS): | $(OBJ_DIR)
+
 define compile-command
 $(CXX) $(CXXFLAGS) -c $< -o $@
 endef
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(compile-command)
 
-$(OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp
 	$(compile-command)
 
-$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
 	$(compile-command)
 
-$(OBJ_DIR)/%.o: $(MAIN_DIR)/%.cpp | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(MAIN_DIR)/%.cpp
 	$(compile-command)
 
 ### rules to create assembly files
+$(ASM): | $(ASM_DIR)
+
 define asm-command
 $(CXX) $(CXXFLAGS) $(CXXASSEMBLYFLAGS) $< -o $@
 endef
 
-$(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp | $(ASM_DIR)
+$(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp 
 	$(asm-command)
 
-$(ASM_DIR)/%.s: $(TEST_DIR)/%.cpp | $(ASM_DIR)
+$(ASM_DIR)/%.s: $(TEST_DIR)/%.cpp
 	$(asm-command)
 
-$(ASM_DIR)/%.s: $(TEST_DIR)/%.c | $(ASM_DIR)
+$(ASM_DIR)/%.s: $(TEST_DIR)/%.c
 	$(asm-command)
 
-$(ASM_DIR)/%.s: $(MAIN_DIR)/%.cpp | $(ASM_DIR)
+$(ASM_DIR)/%.s: $(MAIN_DIR)/%.cpp
 	$(asm-command)
 
 ### manual commands for each test
