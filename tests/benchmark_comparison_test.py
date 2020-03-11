@@ -59,7 +59,7 @@ def run_mem_iteration_tests():
     write_csv(mem_iter_file + '.csv', mem_csv_header, output)
 
 def run_mem_size_tests():
-    num_mem_iterations = 10
+    num_mem_iterations = 20
     mem_size = 5000
     output = []
     while mem_size < 1000001:
