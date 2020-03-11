@@ -77,6 +77,10 @@ def run_mem_size_tests():
     write_csv(mem_size_file + '.csv', mem_csv_header, output)
 
 def plot_results():
+    # FLOPS: computation rate per number of computations
+
+    # comparing likwid's reported values and manually calculated ones
+
     flop_data = pandas.read_csv(flops_file + '.csv')
     plt.figure(1, figsize=(10,7))
     plt.plot(flop_data['manual_num_flops'], flop_data['manual_Mflops'])
@@ -89,10 +93,16 @@ def plot_results():
 
     plt.xscale('log')
     plt.yscale('log')
+    plt.title('Comparing  computation rates reported by' \
+        ' likwid and manually calculated computation rates')
     plt.xlabel('Number of SP FP operations')
     plt.ylabel('Computation Rate, Mflop/s')
     plt.legend(['Mflop/s calculated manually', 'Mflop/s as reported by likwid'])
     plt.savefig(flops_file + '.png')
+
+    # MEMORY: bandwidth per amount of data transferred
+
+    # comparing likwid's reported values and manually calculated ones
 
     mem_size_data = pandas.read_csv(mem_size_file + '.csv')
     plt.figure(2, figsize=(10,7))
@@ -108,11 +118,36 @@ def plot_results():
 
     plt.xscale('log')
     plt.yscale('log')
+    plt.title('Comparing bandwidth reported by likwid and manually ' \
+        'calculated bandwidth')
     plt.xlabel('Amount of data transferred (GB)')
     plt.ylabel('Bandwidth, Mbytes/s')
     plt.legend(['Bandwidth calculated manually', 
                 'Bandwidth as reported by likwid'])
     plt.savefig(mem_size_file + '.png')
+
+    # MEMORY: amount of data transferred per trial
+
+    # comparing likwid's reported values and manually calculated ones
+
+    plt.figure(3, figsize=(10,7))
+    trial_nums = range(len(mem_size_data['manual_data_size_gb']))
+    plt.plot(trial_nums, mem_size_data['manual_data_size_gb'])
+    plt.plot(trial_nums, mem_size_data['likwid_data_size_gb'])
+
+    for xyt in zip(trial_nums,
+                   mem_size_data['manual_data_size_gb'],
+                   mem_size_data['manual_duration']):
+        plt.annotate("{:.3f}s".format(xyt[2]), xy=(xyt[0] - 0.5, xyt[1]))
+
+    # plt.yscale('log')
+    plt.title('Comparing amount of data transferred as reported by likwid ' \
+        'and manually calculated amount of data transferred')
+    plt.xlabel('Trial #')
+    plt.ylabel('Amount of data transferred (GB)')
+    plt.legend(['Amount of data calculated manually', 
+                'Amoutn of data as reported by likwid'])
+    plt.savefig(mem_size_file + 'size.png')
 
     plt.show()
 
