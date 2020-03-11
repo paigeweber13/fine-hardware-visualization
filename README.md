@@ -122,9 +122,13 @@ also possible to benchmark your machine by running `make bench`.
    things: 
    - manual benchmark now counts read and write in each iteration (2 ops per
      iteration) 
-   - found some related intrinsics: streamingread is a non-temporal read (so it
-     goes into queue as LEAST-recently read thing instead of most-recently
-     read thing)
+   - found some related intrinsics: 
+     - _mm256_stream_load_si256 reads non-temporally
+     - _mm256_stream_pd stores non-templorally
+     - streaming loads only seem to be supported with integer data for some
+       reason 
+     - (non-temporal means it goes into queue as LEAST-recently read thing
+       instead of most-recently read thing)
    - aligning memory is proving to be harder than aligning flops. Amount of
      memory reported as transferred by likwid changes each time. However, it
      also never exceeds the manually calculated amount
