@@ -8,8 +8,8 @@ applications.
 - [Prerequisites](#prerequisites)
 - [Running](#running)
 - [Usage Notes](#usage-notes)
-- [Architecture of Program](#architecture-of-program)
 - [Goals:](#goals)
+- [Architecture of Program](#architecture-of-program)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
   - [Long-term:](#long-term)
@@ -37,13 +37,21 @@ applications.
    Also installable on ubuntu with `sudo apt install nlohmann-json-dev` 
  - **boost/program_options:** available on [the boost
    website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
-   install libboost-program-options1.65-dev`
+   install libboost-program-options-dev`
 
 # Running
-To build and run the (currently limited) test suite, run `make tests`
+To build and run the (currently limited) test suite, run `make tests`. It is
+also possible to benchmark your machine by running `make bench`. 
 
 # Usage Notes
  - Region names must not have spaces
+
+# Goals:
+ - main goal is to give people new to HPC something they can use to:
+   - understand how their application maps to the architecture
+   - give suggestions on how to improveme their application
+ - apply this to graph problems: kernels in graph problems tend to change
+   behavior throughout execution
 
 # Architecture of Program
  - Identify hardware architecture
@@ -53,35 +61,16 @@ To build and run the (currently limited) test suite, run `make tests`
  - Compare actual utilization with peak on an piece-by-piece basis
  - Visualize that
 
-# Goals:
- - main goal is to give people new to HPC something they can use to:
-   - understand how their application maps to the architecture
-   - give suggestions on how to improveme their application
- - apply this to graph problems: kernels in graph problems tend to change
-   behavior throughout execution
-
 # TODO:
 ## Immediate:
- - try to align manual memory benchmark and likwid benchmark:
-   - seems that only reads are getting counted by likwid?
-   - Don't forget you have to read for ownership before you write to a cache
-     line 
-   - manual benchmark doesn't count how there's a read and then a write in each
-     iteration
-   - some related intrinsics:
-     - streamingread is a non-temporal read (so it goes into queue as
-       LEAST-recently read thing instead of most-recently read thing)
-   - aligning memory is proving to be harder than aligning flops. Amount of
-     memory reported as transferred by likwid changes each time. However, it
-     also never exceeds the manually calculated amount
-     - possible causes include:
-     - some iterations of loop getting optimized out?
-     - getting optimized to memcpy?
- - try to align manual FLOP benchmark with likwid benchmark
-   - does difference decrease as computation size increases?
-     - YES
-   - make graphs of different metrics for different numbers of iterations
-     - DONE
+ - align manual mem benchmark with likwid report:
+   - create plot
+   - track reads and writes through all levels of cache
+     - tracking L1 should give us a better idea of if the amount of data we are
+       reporting as read/written is correct because everything goes through L1
+     - if there is no read for ownership in L3, we expect ratio of reads:writes
+       to be 2:1 in cache and 1:1 in RAM
+ - make plot of flops by time instead of number of iterations
  - make convolution into a case study
    - google error I get when trying to instrument entire pipeline
    - nothing is reporting as being saturated... but maybe we are saturating one
@@ -101,7 +90,6 @@ To build and run the (currently limited) test suite, run `make tests`
 
 ## Long-term:
 ### Problems to fix:
- - manual benchmark off by a factor of 2 - investigate
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
      region
@@ -130,23 +118,36 @@ To build and run the (currently limited) test suite, run `make tests`
 
 # Accomplishments:
 ## 2020-03-03 through 2020-03-10
- - try to align manual memory benchmark and likwid benchmark:
+ - tried to align manual memory benchmark and likwid benchmark, learned a few
+   things: 
+   - manual benchmark now counts read and write in each iteration (2 ops per
+     iteration) 
+   - found some related intrinsics: streamingread is a non-temporal read (so it
+     goes into queue as LEAST-recently read thing instead of most-recently
+     read thing)
+   - aligning memory is proving to be harder than aligning flops. Amount of
+     memory reported as transferred by likwid changes each time. However, it
+     also never exceeds the manually calculated amount
    - likwid measures:
-   - Memory load bandwidth [MBytes/s]  1.0E-06*DRAM_READS*64.0/time
-   - Memory evict bandwidth [MBytes/s]  1.0E-06*DRAM_WRITES*64.0/time
+     - Memory load bandwidth [MBytes/s]  1.0E-06*DRAM_READS*64.0/time
+     - Memory evict bandwidth [MBytes/s]  1.0E-06*DRAM_WRITES*64.0/time
    - so it seems likwid measures read and write. Does not seem to count the
      read for ownership part of the write as a read operation, as there were
      about 20% more reads than writes in benchmark, which is expected to be at
      least double the number of writes if read for ownership is counted.
- - try to align manual FLOP benchmark with likwid benchmark
- - make convolution into a case study
- - CLI which benchmarks and process JSON into svg
+   - maybe there's no read for ownership since L3 cache is shared across all
+     cores and there's only one processor
+ - aligned manual FLOP benchmark with likwid benchmark
+   - made graphs to show reports from each, they get closer as time spent
+     computing increases
+ - CLI 
+   - ended up writing cli for manual vs likwid because that's what I was
+     working with the most. Still useful to figure out program options
    - couldn't get program_options to work, either from apt or when building from
      source. Would get linker errors even with supplied examples
      - PROBLEM WAS THE ORDER OF FLAGS GIVEN TO G++ WOW I SPENT LIKE 2 HOURS ON
        THIS. You have to put -lboost_program_options AFTER the file you're
        linking 
- - generate svg
 
 ## 2020-02-25 through 2020-03-03
  - double check bandwidth by doing manual calculations
