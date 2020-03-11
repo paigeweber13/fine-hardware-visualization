@@ -70,6 +70,8 @@ also possible to benchmark your machine by running `make bench`.
        reporting as read/written is correct because everything goes through L1
      - if there is no read for ownership in L3, we expect ratio of reads:writes
        to be 2:1 in cache and 1:1 in RAM
+     - do all sizes from what will fit in L1 through big enough to exceed L3 to
+       see if the rate of reads to writes decreases when we hit RAM
  - make plot of flops by time instead of number of iterations
  - make convolution into a case study
    - google error I get when trying to instrument entire pipeline
