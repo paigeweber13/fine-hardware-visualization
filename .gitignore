@@ -1,8 +1,20 @@
-*.tar.gz
+# binaries and intermediate files
 bin
 obj
-asm
+
+# torq
 *.e*
 *.o*
+
+# fhv output
 *.json
+
+# data and plots
 *.csv
+*.png
+
+# archives
+*.tar.gz
+
+# assembly
+asm
