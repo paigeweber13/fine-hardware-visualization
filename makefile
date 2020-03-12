@@ -39,11 +39,9 @@ ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
 
 EXEC_NAME=fhv
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
-BENCH_EXEC_NAME=bench
-BENCH_EXEC=$(EXEC_DIR)/$(BENCH_EXEC_NAME)
 
 ### meta-rules for easier calling
-build: $(EXEC) $(BENCH_EXEC)
+build: $(EXEC)
 
 tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
 
@@ -52,15 +50,8 @@ assembly: $(ASM)
 fhv: $(EXEC)
 	$(EXEC)
 
-bench: $(BENCH_EXEC)
-	$(BENCH_EXEC) 0; \
-	$(BENCH_EXEC) 1; \
-	$(BENCH_EXEC) 2; \
-	$(BENCH_EXEC) 3; \
-	$(BENCH_EXEC) 4; 
-
-cph-bench: $(BENCH_EXEC)
-	qsub -q copperhead -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 $(BENCH_EXEC_NAME).sh
+cph-bench: $(EXEC)
+	qsub -q copperhead -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 bench.sh
 
 cph: $(EXEC)
 	qsub -q copperhead -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 $(EXEC_NAME).sh
@@ -79,7 +70,7 @@ debug: LDFLAGS += -Q --help=target
 # debug: clean build
 
 clean:
-	rm -f $(OBJS) $(EXEC) $(BENCH_EXEC)
+	rm -f $(OBJS) $(EXEC)
 
 ### rules to create directories
 $(EXEC_DIR):
@@ -98,9 +89,6 @@ $(ASM_DIR):
 define ld-command
 $(CXX) $(LIB_OBJS) $< $(LDFLAGS) -o $@
 endef
-
-$(BENCH_EXEC): $(OBJ_DIR)/benchmark.o $(LIB_OBJS) | $(EXEC_DIR)
-	$(ld-command)
 
 $(EXEC): $(OBJ_DIR)/fhv.o $(LIB_OBJS) | $(EXEC_DIR)
 	$(ld-command)
