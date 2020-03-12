@@ -213,7 +213,8 @@ void simple_test(){
 
 int main(int argc, char* argv[])
 {
-  po::options_description desc("Allowed options");
+  po::options_description desc(
+    "Comparing manual benchmarks with those from likwid");
   desc.add_options()
     ("help,h", "produce this help message")
     ("simple,s", "run a single simple test")
