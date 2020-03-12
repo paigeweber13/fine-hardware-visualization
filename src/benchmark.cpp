@@ -40,43 +40,38 @@ void benchmark_flops(precision p)
   performance_monitor::printComparison();
 }
 
-void benchmark_l2_bw(){
-  performance_monitor::init("L2");
-  std::cout << "starting L2 rw bandwidth benchmark" << std::endl;
-  // 10000 iterations for a good average
-  // 100 kilobytes to fit well inside L2 cache
-  bandwidth_rw(10000, 100);
+void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
+                         uint64_t mem_size_kb){
+  // memory type becomes the performance group. Typically this is "L2", "L3",
+  // or "RAM"
+  performance_monitor::init(memory_type.c_str());
+  std::cout << "starting " << memory_type << 
+               " rw bandwidth benchmark" << std::endl;
+
+  bandwidth_rw(num_iterations, mem_size_kb);
 
   performance_monitor::close();
   // performance_monitor::printDetailedResults();
   performance_monitor::printOnlyAggregate();
   performance_monitor::printComparison();
+}
+
+void benchmark_l2_bw(){
+  // 10000 iterations for a good average
+  // 100 kilobytes to fit well inside L2 cache
+  benchmark_memory_bw("L2", 10000, 100);
 }
 
 void benchmark_l3_bw(){
-  performance_monitor::init("L3");
-  std::cout << "starting L3 rw bandwidth benchmark" << std::endl;
   // 1000 iterations for a good average
   // 1000 kilobytes to fit well inside L3 cache
-  bandwidth_rw(1000, 1000);
-
-  performance_monitor::close();
-  // performance_monitor::printDetailedResults();
-  performance_monitor::printOnlyAggregate();
-  performance_monitor::printComparison();
+  benchmark_memory_bw("L3", 1000, 1000);
 }
 
 void benchmark_ram_bw(){
-  performance_monitor::init("MEM_DP");
-  std::cout << "starting RAM rw bandwidth benchmark" << std::endl;
   // 10 iterations for a good average
   // 100000 kilobytes (100MB) so it can't all be cached
-  bandwidth_rw(10, 100000);
-
-  performance_monitor::close();
-  // performance_monitor::printDetailedResults();
-  performance_monitor::printOnlyAggregate();
-  performance_monitor::printComparison();
+  benchmark_memory_bw("MEM", 10, 100000);
 }
 
 int main(int argc, char *argv[])
