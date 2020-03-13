@@ -1,42 +1,36 @@
 #include "performance_monitor.h"
 
+int performance_monitor::num_threads;
+
+std::map<std::string, double> performance_monitor::runtimes_by_tag;
 std::map<std::string, double> performance_monitor::aggregate_events;
 std::map<std::string, double> performance_monitor::aggregate_metrics;
+std::map<std::string, double> performance_monitor::saturation;
 
+// number of flops
 const std::string performance_monitor::total_sp_flops_event_name("total sp flops");
 const std::string performance_monitor::sp_scalar_flops_event_name("FP_ARITH_INST_RETIRED_SCALAR_SINGLE");
 const std::string performance_monitor::sp_avx_128_flops_event_name("FP_ARITH_INST_RETIRED_128B_PACKED_SINGLE");
 const std::string performance_monitor::sp_avx_256_flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
 
+// flop rates
 const std::string performance_monitor::mflops_metric_name = "SP [MFLOP/s]";
 const std::string performance_monitor::mflops_dp_metric_name = "DP [MFLOP/s]";
 
+// memory volume
 const std::string performance_monitor::ram_data_volume_metric_name = "Memory data volume [GBytes]";
 
+// memory bandwidth
 const std::string performance_monitor::l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
 const std::string performance_monitor::l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
 const std::string performance_monitor::ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
 
+// filenames
 const std::string performance_monitor::likwidOutputFilepath = "/tmp/test_marker.out";
 const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
+
+// misc
 const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
-
-std::map<std::string, double> performance_monitor::runtimes_by_tag;
-int performance_monitor::num_threads;
-
-float performance_monitor::mflops;
-float performance_monitor::mflops_saturation;
-float performance_monitor::mflops_dp;
-float performance_monitor::mflops_dp_saturation;
-
-float performance_monitor::ram_data_volume;
-
-float performance_monitor::l2_bw;
-float performance_monitor::l2_bw_saturation;
-float performance_monitor::l3_bw;
-float performance_monitor::l3_bw_saturation;
-float performance_monitor::ram_bw;
-float performance_monitor::ram_bw_saturation;
 
 void performance_monitor::init(){
   init("MEM_DP|FLOPS_SP|L3|L2");
@@ -105,8 +99,6 @@ void performance_monitor::stopRegion(const char * tag)
   int count;
 
   LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
-  // printf("Tag %s: Thread %d got %d events, runtime %f s, call count %d\n",
-  //        tag, omp_get_thread_num(), nevents, time, count);
 
   if(runtimes_by_tag.count(tag)){
     runtimes_by_tag[tag] = fmax(runtimes_by_tag[tag], time);
@@ -183,17 +175,16 @@ void performance_monitor::getAggregateResults(){
 
 void performance_monitor::compareActualWithbench()
 {
-  mflops_saturation = aggregate_metrics[mflops_metric_name] /
-                      EXPERIENTIAL_SP_RATE_MFLOPS;
-  mflops_dp_saturation = aggregate_metrics[mflops_dp_metric_name] /
-                         EXPERIENTIAL_DP_RATE_MFLOPS;
-  // l1_bw_saturation = l1_bw/EXPERIENTIAL_RW_BW_L1;
-  l2_bw_saturation = aggregate_metrics[l2_bandwidth_metric_name] /
-                     EXPERIENTIAL_RW_BW_L2;
-  l3_bw_saturation = aggregate_metrics[l3_bandwidth_metric_name] /
-                     EXPERIENTIAL_RW_BW_L3;
-  ram_bw_saturation = aggregate_metrics[ram_bandwidth_metric_name] /
-                      EXPERIENTIAL_RW_BW_RAM;
+  saturation[mflops_metric_name] =
+      aggregate_metrics[mflops_metric_name] / EXPERIENTIAL_SP_RATE_MFLOPS;
+  saturation[mflops_dp_metric_name] =
+      aggregate_metrics[mflops_dp_metric_name] / EXPERIENTIAL_DP_RATE_MFLOPS;
+  saturation[l2_bandwidth_metric_name] =
+      aggregate_metrics[l2_bandwidth_metric_name] / EXPERIENTIAL_RW_BW_L2;
+  saturation[l3_bandwidth_metric_name] =
+      aggregate_metrics[l3_bandwidth_metric_name] / EXPERIENTIAL_RW_BW_L3;
+  saturation[ram_bandwidth_metric_name] =
+      aggregate_metrics[ram_bandwidth_metric_name] / EXPERIENTIAL_RW_BW_RAM;
 }
 
 void performance_monitor::printResults()
@@ -249,37 +240,26 @@ void performance_monitor::printOnlyAggregate()
   // unnecessary, compareActualWithBench() calls this and it is called in close
   // getAggregateResults();
 
-  printf("----- begin aggregate performance_monitor report -----\n");
-  // std::cout << "results_by_tag size: " + std::to_string(runtimes_by_tag.size())
-  //            + "\n";
+  std::cout << "----- begin performance_monitor report -----\n";
+  std::cout << "--- runtimes by tag: \n";
   for (std::map<std::string, double>::iterator it=runtimes_by_tag.begin(); 
        it!=runtimes_by_tag.end(); ++it){
     std::cout << "Runtime for " + it->first + ": "
                + std::to_string(it->second) + "\n";
   }
-  printf("\n-- computation --\n");
-  printf("Total FP ops: %.3e\n", aggregate_events[total_sp_flops_event_name]);
-  printf("\n-- computation rates --\n");
-  printf("Aggregate %s: %.3f\n", mflops_metric_name.c_str(), mflops);
-  printf("Aggregate %s: %.3f\n", mflops_dp_metric_name.c_str(), mflops_dp);
-  // printf("Total TFlop/s: %.3f\n", mflops*MFLOPS_TO_TFLOPS);
-  printf("\n-- memory --\n");
-  printf("Aggregate %s: %.3f\n", ram_data_volume_metric_name.c_str(), ram_data_volume);
-  printf("Aggregate %s: %.3f\n", l2_bandwidth_metric_name.c_str(), l2_bw);
-  printf("Aggregate %s: %.3f\n", l3_bandwidth_metric_name.c_str(), l3_bw);
-  printf("Aggregate %s: %.3f\n", ram_bandwidth_metric_name.c_str(), ram_bw);
-  printf("----- end performance_monitor report -----\n");
-  printf("\n");
+  std::cout << std::endl;
 
   std::cout << "----- begin aggregate performance_monitor report -----\n";
   std::cout << "--- aggregate events: \n";
   for (auto it=aggregate_events.begin(); it!=aggregate_events.end(); ++it)
     std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
   std::cout << std::endl;
+
   std::cout << "--- aggregate metrics: \n";
   for (auto it=aggregate_metrics.begin(); it!=aggregate_metrics.end(); ++it)
     std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
   std::cout << std::endl;
+
   std::cout << "----- end aggregate performance_monitor report -----\n";
   std::cout << std::endl;
 }
@@ -287,107 +267,78 @@ void performance_monitor::printOnlyAggregate()
 void performance_monitor::printComparison(){
   // unnecessary, it is called in close
   // compareActualWithbench();
-  printf("----- begin saturation level performance_monitor report -----\n");
-  printf("Percentage of available SP flop performance used: %.3f\n",
-         mflops_saturation);
-  printf("Percentage of available DP flop performance used: %.3f\n",
-         mflops_dp_saturation);
-  // printf("Percentage of available L1 bandwidth used: %.3f\n",
-  //        l1_bw_saturation);
-  printf("Percentage of available L2 bandwidth used: %.3f\n",
-         l2_bw_saturation);
-  printf("Percentage of available L3 bandwidth used: %.3f\n",
-         l3_bw_saturation);
-  printf("Percentage of available RAM bandwidth used: %.3f\n",
-         ram_bw_saturation);
-  printf("----- end saturation level performance_monitor report -----\n");
-  printf("\n");
+
+  std::cout << 
+    "----- begin saturation level performance_monitor report -----\n";
+  for (auto it=saturation.begin(); it!=saturation.end(); ++it)
+    std::cout << "Percentage of available " << it->first << " used: " 
+      << it->second << '\n';
+  std::cout << std::endl;
+  std::cout << "----- end saturation level performance_monitor report -----\n";
+  std::cout << std::endl;
 }
 
 void performance_monitor::resultsToJson(){
-  json results = {
-    {"saturation", {
-      {"flops_dp", mflops_dp_saturation},
-      {"flops_sp", mflops_saturation},
-      {"l2", l2_bw_saturation},
-      {"l3", l3_bw_saturation},
-      {"ram", ram_bw_saturation},
-    }},
-  };
+  json results;
+  for (auto it=saturation.begin(); it!=saturation.end(); ++it)
+    results["saturation"][it->first] = it->second;
 
   std::ofstream o(jsonResultOutputFilepath);
   o << std::setw(4) << results << std::endl;
 }
 
-
-std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
+const std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
 	return runtimes_by_tag;
+}
+
+const std::map<std::string,double> performance_monitor::get_aggregate_events() {
+	return aggregate_events;
+}
+
+const std::map<std::string,double> performance_monitor::get_aggregate_metrics() {
+	return aggregate_metrics;
+}
+
+const std::map<std::string,double> performance_monitor::get_saturation() {
+	return saturation;
+}
+
+const std::string performance_monitor::get_total_sp_flops_event_name(){
+  return total_sp_flops_event_name;
+}
+
+const std::string performance_monitor::get_sp_scalar_flops_event_name(){
+  return sp_scalar_flops_event_name;
+}
+
+const std::string performance_monitor::get_sp_avx_256_flops_event_name(){
+  return sp_avx_256_flops_event_name;
+}
+
+const std::string performance_monitor::get_sp_avx_128_flops_event_name(){
+  return sp_avx_128_flops_event_name;
 }
 
 const std::string performance_monitor::get_mflops_metric_name(){
   return mflops_metric_name;
 }
 
-float performance_monitor::getMFlops(){
-  return mflops;
-}
-
-float performance_monitor::get_mflops_saturation(){
-  return mflops_saturation;
-}
-
 const std::string performance_monitor::get_mflops_dp_metric_name(){
   return mflops_dp_metric_name;
-}
-
-float performance_monitor::get_mflops_dp(){
-  return mflops_dp;
-}
-
-float performance_monitor::get_mflops_dp_saturation(){
-  return mflops_dp_saturation;
-}
-
-const std::string performance_monitor::get_ram_data_volume_metric_name(){
-  return ram_data_volume_metric_name;
-}
-
-float performance_monitor::get_ram_data_volume(){
-  return ram_data_volume;
 }
 
 const std::string performance_monitor::get_l2_bandwidth_metric_name(){
   return l2_bandwidth_metric_name;
 }
 
-float performance_monitor::get_l2_bw(){
-  return l2_bw;
-}
-
-float performance_monitor::get_l2_bw_saturation(){
-  return l2_bw_saturation;
-}
-
 const std::string performance_monitor::get_l3_bandwidth_metric_name(){
   return l3_bandwidth_metric_name;
-}
-
-float performance_monitor::get_l3_bw(){
-  return l3_bw;
-}
-
-float performance_monitor::get_l3_bw_saturation(){
-  return l3_bw_saturation;
 }
 
 const std::string performance_monitor::get_ram_bandwidth_metric_name(){
   return ram_bandwidth_metric_name;
 }
 
-float performance_monitor::get_ram_bw(){
-  return ram_bw;
-}
-
-float performance_monitor::get_ram_bw_saturation(){
-  return ram_bw_saturation;
+const std::string performance_monitor::get_ram_data_volume_metric_name(){
+  return ram_data_volume_metric_name;
 }
