@@ -3,6 +3,7 @@
 std::map<std::string, double> performance_monitor::aggregate_events;
 std::map<std::string, double> performance_monitor::aggregate_metrics;
 
+const std::string performance_monitor::total_sp_flops_event_name("total sp flops");
 const std::string performance_monitor::sp_scalar_flops_event_name("FP_ARITH_INST_RETIRED_SCALAR_SINGLE");
 const std::string performance_monitor::sp_avx_128_flops_event_name("FP_ARITH_INST_RETIRED_128B_PACKED_SINGLE");
 const std::string performance_monitor::sp_avx_256_flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
@@ -22,8 +23,6 @@ const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
 int performance_monitor::num_threads;
-
-float performance_monitor::num_flops;
 
 float performance_monitor::mflops;
 float performance_monitor::mflops_saturation;
@@ -130,14 +129,22 @@ void performance_monitor::getAggregateResults(){
   float event_value, metric_value;
   const char * event_name, * metric_name;
 
-  num_flops = 0.;
-  mflops = 0.;
-  mflops_dp = 0.;
-  l2_bw = 0.;
-  l3_bw = 0.;
-  ram_bw = 0.;
-
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
+
+  // initialize everything to 0
+  aggregate_events[total_sp_flops_event_name] = 0.;
+  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  {
+    gid = perfmon_getGroupOfRegion(i);
+    for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
+      event_name = perfmon_getEventName(gid, k);
+      aggregate_events[event_name] = 0.;
+    }
+    for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+      metric_name = perfmon_getMetricName(gid, k);
+      aggregate_metrics[metric_name] = 0.;
+    }
+  }
 
   for (int t = 0; t < num_threads; t++)
   {
@@ -148,14 +155,18 @@ void performance_monitor::getAggregateResults(){
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         if(event_value > 0){
+          aggregate_events[event_name] += event_value;
+
           if(sp_scalar_flops_event_name.compare(event_name) == 0){
-            num_flops += event_value;
+            aggregate_events[total_sp_flops_event_name] += event_value;
           }
           else if(sp_avx_128_flops_event_name.compare(event_name) == 0){
-            num_flops += event_value * OPS_PER_SP_128_VECTOR;
+            aggregate_events[total_sp_flops_event_name] += 
+              event_value * OPS_PER_SP_128_VECTOR;
           }
           else if(sp_avx_256_flops_event_name.compare(event_name) == 0){
-            num_flops += event_value * OPS_PER_SP_256_VECTOR;
+            aggregate_events[total_sp_flops_event_name] += 
+              event_value * OPS_PER_SP_256_VECTOR;
           }
         }
       }
@@ -163,29 +174,7 @@ void performance_monitor::getAggregateResults(){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         if(!isnan(metric_value)){
-          if(aggregate_metrics.count(metric_name)){
-            aggregate_metrics[metric_name] += metric_value;
-          } else {
-            aggregate_metrics[metric_name] = metric_value;
-          }
-          // if(mflops_metric_name.compare(metric_name) == 0){
-          //   mflops += metric_value;
-          // }
-          // else if(mflops_dp_metric_name.compare(metric_name) == 0){
-          //   mflops_dp += metric_value;
-          // }
-          // else if(l2_bandwidth_metric_name.compare(metric_name) == 0){
-          //   l2_bw += metric_value;
-          // }
-          // else if(l3_bandwidth_metric_name.compare(metric_name) == 0){
-          //   l3_bw += metric_value;
-          // }
-          // else if(ram_data_volume_metric_name.compare(metric_name) == 0){
-          //   ram_data_volume += metric_value;
-          // }
-          // else if(ram_bandwidth_metric_name.compare(metric_name) == 0){
-          //   ram_bw += metric_value;
-          // }
+          aggregate_metrics[metric_name] += metric_value;
         }
       }
     }
@@ -269,7 +258,7 @@ void performance_monitor::printOnlyAggregate()
                + std::to_string(it->second) + "\n";
   }
   printf("\n-- computation --\n");
-  printf("Total FP ops: %.3e\n", num_flops);
+  printf("Total FP ops: %.3e\n", aggregate_events[total_sp_flops_event_name]);
   printf("\n-- computation rates --\n");
   printf("Aggregate %s: %.3f\n", mflops_metric_name.c_str(), mflops);
   printf("Aggregate %s: %.3f\n", mflops_dp_metric_name.c_str(), mflops_dp);
@@ -283,8 +272,14 @@ void performance_monitor::printOnlyAggregate()
   printf("\n");
 
   std::cout << "----- begin aggregate performance_monitor report -----\n";
+  std::cout << "--- aggregate events: \n";
+  for (auto it=aggregate_events.begin(); it!=aggregate_events.end(); ++it)
+    std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
+  std::cout << std::endl;
+  std::cout << "--- aggregate metrics: \n";
   for (auto it=aggregate_metrics.begin(); it!=aggregate_metrics.end(); ++it)
     std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
+  std::cout << std::endl;
   std::cout << "----- end aggregate performance_monitor report -----\n";
   std::cout << std::endl;
 }
@@ -327,10 +322,6 @@ void performance_monitor::resultsToJson(){
 
 std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
 	return runtimes_by_tag;
-}
-
-float performance_monitor::get_num_flops(){
-  return num_flops;
 }
 
 const std::string performance_monitor::get_mflops_metric_name(){

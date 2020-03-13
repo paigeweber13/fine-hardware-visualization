@@ -44,7 +44,6 @@ class performance_monitor {
 
     // ------ getters and setters ----- //
     static std::map<std::string,double> get_runtimes_by_tag();
-    static float get_num_flops();
 
     static const std::string get_mflops_metric_name();
     static float getMFlops();
@@ -79,10 +78,10 @@ class performance_monitor {
     static std::map<std::string, double> aggregate_events;
     static std::map<std::string, double> aggregate_metrics;
     // --- computation
+    static const std::string total_sp_flops_event_name;
     static const std::string sp_scalar_flops_event_name;
     static const std::string sp_avx_256_flops_event_name;
     static const std::string sp_avx_128_flops_event_name;
-    static float num_flops;
 
     static const std::string mflops_metric_name;
     static float mflops;
