@@ -16,6 +16,7 @@ applications.
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
 - [Accomplishments:](#accomplishments)
+  - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
   - [2020-03-03 through 2020-03-10](#2020-03-03-through-2020-03-10)
   - [2020-02-25 through 2020-03-03](#2020-02-25-through-2020-03-03)
   - [2020-02-18 through 25](#2020-02-18-through-25)
@@ -73,6 +74,10 @@ also possible to benchmark your machine by running `make bench`.
      - do all sizes from what will fit in L1 through big enough to exceed L3 to
        see if the rate of reads to writes decreases when we hit RAM
        - TODO NEXT: extend benchmark to do this!
+   - the counter "COREWB" (Counts the number of modified cachelines written
+     back.) may be useful here
+      - doesn't work on my arch (skylake). It works on Haswell according to the
+        intel developer's guide
  - make plot of flops by time instead of number of iterations
  - make convolution into a case study
    - google error I get when trying to instrument entire pipeline
@@ -112,6 +117,9 @@ also possible to benchmark your machine by running `make bench`.
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
  - software engineering
+   - combine benchmark in fhv with benchmark-likwid-vs-manual
+     - rewrite computation_measurements to optionally include manual results
+     - update CLI to optionally include manual results
    - rename "computation_measurements" to "measurements"?
    - replace printf statements with cout
    - combine all memory bandwidth functions
@@ -120,6 +128,13 @@ also possible to benchmark your machine by running `make bench`.
    - create visualization from output data
 
 # Accomplishments:
+## 2020-03-10 through 2020-03-17
+ - trying to build a deliverable as quickly as possible has caused some
+   problems with unmaintainable code, so I spent some time this week on
+   software engineering stuff
+   - improved performance monitor to automatically aggregate every event and
+     metric 
+
 ## 2020-03-03 through 2020-03-10
  - tried to align manual memory benchmark and likwid benchmark, learned a few
    things: 
