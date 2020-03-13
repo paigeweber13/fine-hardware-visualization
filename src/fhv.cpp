@@ -1,3 +1,8 @@
+// things CLI will need to do:
+//  - benchmark machine
+//  - create visualization from output data
+
+#include <boost/program_options.hpp>
 #include <chrono>
 #include <immintrin.h>
 #include <iostream>
@@ -11,12 +16,11 @@ const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
 
 enum precision { SINGLE_P, DOUBLE_P };
 
-void benchmark_flops(precision p)
-{
-  __m256 d_s;
-  __m256d d_d;
-  __m256i e;
+using namespace std;
+namespace po = boost::program_options;
 
+void benchmark_flops(precision p, uint64_t num_iter)
+{
   if (p == precision::SINGLE_P){
     performance_monitor::init("FLOPS_SP");
     std::cout << "starting single precision flop benchmark" << std::endl;
@@ -28,9 +32,9 @@ void benchmark_flops(precision p)
   {
     performance_monitor::startRegion("flops");
     if(p == precision::SINGLE_P){
-      d_s = flops_sp(FLOAT_NUM_ITERATIONS);
+      flops_sp(num_iter);
     } else if (p == precision::DOUBLE_P){
-      d_d = flops_dp(FLOAT_NUM_ITERATIONS);
+      flops_dp(num_iter);
     }
     performance_monitor::stopRegion("flops");
   }
@@ -48,7 +52,7 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
   std::cout << "starting " << memory_type << 
                " rw bandwidth benchmark" << std::endl;
 
-  bandwidth_rw(num_iterations, mem_size_kb);
+  bandwidth_rw(memory_type.c_str(), num_iterations, mem_size_kb);
 
   performance_monitor::close();
   // performance_monitor::printDetailedResults();
@@ -71,40 +75,107 @@ void benchmark_l3_bw(){
 void benchmark_ram_bw(){
   // 10 iterations for a good average
   // 100000 kilobytes (100MB) so it can't all be cached
-  benchmark_memory_bw("MEM", 10, 100000);
+  benchmark_memory_bw("MEM", 20, 100000);
 }
 
 int main(int argc, char *argv[])
 {
   if (argc < 2)
   {
-    std::cout << "Usage: " << argv[0] << " 0|1" << std::endl;
-    std::cout << "       0 for FLOPS_SP benchmark" << std::endl;
-    std::cout << "       1 for FLOPS_DP benchmark" << std::endl;
-    std::cout << "       2 for L2 r/w bandwidth benchmark" << std::endl;
-    std::cout << "       3 for L3 r/w bandwidth benchmark" << std::endl;
-    std::cout << "       4 for RAM r/w bandwidth benchmark" << std::endl;
+    std::cout << "no options provided, running all benchmarks.\n";
+    std::cout << "alternatively, pass '-h' for more options\n";
+    // sleep a couple seconds?
+    benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
+    benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
+    benchmark_l2_bw();
+    benchmark_l3_bw();
+    benchmark_ram_bw();
+    return 0;
+  }
+
+  std::uint64_t sp_flop_num_iterations;
+  std::uint64_t dp_flop_num_iterations;
+
+  // each argument vector has num_iterations, mem_size_kb
+  std::vector<std::uint64_t> l2_args = {100000, 100};
+  std::vector<std::uint64_t> l3_args = {10000, 1000};
+  std::vector<std::uint64_t> ram_args = {20, 100000};
+
+  po::options_description desc(
+    "Benchmarking machine with likwid");
+  desc.add_options()
+    ("help,h", "produce this help message")
+    ("flops_sp,s", po::value<std::uint64_t>(&sp_flop_num_iterations)->
+                   implicit_value(FLOAT_NUM_ITERATIONS), 
+                   "benchmark single-precision flops")
+    ("flops_dp,d", po::value<std::uint64_t>(&dp_flop_num_iterations)->
+                   implicit_value(FLOAT_NUM_ITERATIONS), 
+                   "benchmark double-precision flops")
+    ("L2,2", po::value<std::vector<std::uint64_t>>(&l2_args)->
+              multitoken()->zero_tokens(),
+              ("benchmark L2 cache bandwidth. May be followed by number "
+               "of iterations and size of data transfer in kilobytes. "
+               "Default: " + to_string(l2_args[0]) + " " + 
+               to_string(l2_args[1])).c_str()
+              )
+    ("L3,3", po::value<std::vector<std::uint64_t>>(&l3_args)->
+              multitoken()->zero_tokens(),
+              ("benchmark L3 cache bandwidth. May be followed by number "
+               "of iterations and size of data transfer in kilobytes. "
+               "Default: " + to_string(l3_args[0]) + " " + 
+               to_string(l3_args[1])).c_str()
+              )
+    ("mem,m", po::value<std::vector<std::uint64_t>>(&ram_args)->
+              multitoken()->zero_tokens(),
+              ("benchmark memory (ram) bandwidth. May be followed by number "
+               "of iterations and size of data transfer in kilobytes. "
+               "Default: " + to_string(ram_args[0]) + " " + 
+               to_string(ram_args[1])).c_str()
+              );
+
+  po::variables_map vm;
+  try
+  {
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).run(),
+        vm);
+    po::notify(vm);
+  }
+  catch (po::error &e)
+  {
+    cerr << "ERROR: " << e.what() << endl
+         << endl
+         << desc << endl;
     return 1;
   }
 
-  int choice = std::stoi(argv[1]);
-
-  switch (choice)
+  if (vm.count("help"))
   {
-  case 0:
-    benchmark_flops(precision::SINGLE_P);
-    break;
-  case 1:
-    benchmark_flops(precision::DOUBLE_P);
-    break;
-  case 2:
-    benchmark_l2_bw();
-    break;
-  case 3:
-    benchmark_l3_bw();
-    break;
-  case 4:
-    benchmark_ram_bw();
-    break;
+    cout << desc << "\n";
   }
+  else
+  {
+    if (vm.count("L2"))
+    {
+      benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+    }
+    if (vm.count("L3"))
+    {
+      benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+    }
+    if (vm.count("mem"))
+    {
+      benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+    }
+    if (vm.count("flops_sp"))
+    {
+      benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
+    }
+    if (vm.count("flops_dp"))
+    {
+      benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+    }
+  }
+
+  return 0;
 }
