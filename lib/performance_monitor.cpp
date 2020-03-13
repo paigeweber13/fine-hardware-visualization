@@ -7,24 +7,6 @@ std::map<std::string, double> performance_monitor::aggregate_events;
 std::map<std::string, double> performance_monitor::aggregate_metrics;
 std::map<std::string, double> performance_monitor::saturation;
 
-// number of flops
-const std::string performance_monitor::total_sp_flops_event_name("total sp flops");
-const std::string performance_monitor::sp_scalar_flops_event_name("FP_ARITH_INST_RETIRED_SCALAR_SINGLE");
-const std::string performance_monitor::sp_avx_128_flops_event_name("FP_ARITH_INST_RETIRED_128B_PACKED_SINGLE");
-const std::string performance_monitor::sp_avx_256_flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
-
-// flop rates
-const std::string performance_monitor::mflops_metric_name = "SP [MFLOP/s]";
-const std::string performance_monitor::mflops_dp_metric_name = "DP [MFLOP/s]";
-
-// memory volume
-const std::string performance_monitor::ram_data_volume_metric_name = "Memory data volume [GBytes]";
-
-// memory bandwidth
-const std::string performance_monitor::l2_bandwidth_metric_name = "L2 bandwidth [MBytes/s]";
-const std::string performance_monitor::l3_bandwidth_metric_name = "L3 bandwidth [MBytes/s]";
-const std::string performance_monitor::ram_bandwidth_metric_name = "Memory bandwidth [MBytes/s]";
-
 // filenames
 const std::string performance_monitor::likwidOutputFilepath = "/tmp/test_marker.out";
 const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
@@ -149,14 +131,14 @@ void performance_monitor::getAggregateResults(){
         if(event_value > 0){
           aggregate_events[event_name] += event_value;
 
-          if(sp_scalar_flops_event_name.compare(event_name) == 0){
+          if(strcmp(sp_scalar_flops_event_name, event_name) == 0){
             aggregate_events[total_sp_flops_event_name] += event_value;
           }
-          else if(sp_avx_128_flops_event_name.compare(event_name) == 0){
+          else if(strcmp(sp_avx_128_flops_event_name, event_name) == 0){
             aggregate_events[total_sp_flops_event_name] += 
               event_value * OPS_PER_SP_128_VECTOR;
           }
-          else if(sp_avx_256_flops_event_name.compare(event_name) == 0){
+          else if(strcmp(sp_avx_256_flops_event_name, event_name) == 0){
             aggregate_events[total_sp_flops_event_name] += 
               event_value * OPS_PER_SP_256_VECTOR;
           }
@@ -301,44 +283,4 @@ const std::map<std::string,double> performance_monitor::get_aggregate_metrics() 
 
 const std::map<std::string,double> performance_monitor::get_saturation() {
 	return saturation;
-}
-
-const std::string performance_monitor::get_total_sp_flops_event_name(){
-  return total_sp_flops_event_name;
-}
-
-const std::string performance_monitor::get_sp_scalar_flops_event_name(){
-  return sp_scalar_flops_event_name;
-}
-
-const std::string performance_monitor::get_sp_avx_256_flops_event_name(){
-  return sp_avx_256_flops_event_name;
-}
-
-const std::string performance_monitor::get_sp_avx_128_flops_event_name(){
-  return sp_avx_128_flops_event_name;
-}
-
-const std::string performance_monitor::get_mflops_metric_name(){
-  return mflops_metric_name;
-}
-
-const std::string performance_monitor::get_mflops_dp_metric_name(){
-  return mflops_dp_metric_name;
-}
-
-const std::string performance_monitor::get_l2_bandwidth_metric_name(){
-  return l2_bandwidth_metric_name;
-}
-
-const std::string performance_monitor::get_l3_bandwidth_metric_name(){
-  return l3_bandwidth_metric_name;
-}
-
-const std::string performance_monitor::get_ram_bandwidth_metric_name(){
-  return ram_bandwidth_metric_name;
-}
-
-const std::string performance_monitor::get_ram_data_volume_metric_name(){
-  return ram_data_volume_metric_name;
 }

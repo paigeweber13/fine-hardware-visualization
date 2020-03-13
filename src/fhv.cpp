@@ -70,22 +70,51 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
   bandwidth_rw(memory_type.c_str(), num_iterations, mem_size_kb);
 }
 
-void benchmark_all(){
-    performance_monitor::init("FLOPS_SP|FLOPS_DP|L2|L3|MEM");
-    benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
-    likwid_markerNextGroup();
-    benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
-    likwid_markerNextGroup();
-    benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
-    likwid_markerNextGroup();
-    benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
-    likwid_markerNextGroup();
-    benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+void benchmark_cache_and_memory(std::uint64_t num_iterations,
+                          std::uint64_t data_size_kb)
+{
+  performance_monitor::init("L2|L3|MEM");
+  benchmark_memory_bw("L2", num_iterations, data_size_kb);
+  likwid_markerNextGroup();
+  benchmark_memory_bw("L3", num_iterations, data_size_kb);
+  likwid_markerNextGroup();
+  benchmark_memory_bw("MEM", num_iterations, data_size_kb);
+}
 
-    performance_monitor::close();
-    // performance_monitor::printDetailedResults();
-    performance_monitor::printOnlyAggregate();
-    performance_monitor::printComparison();
+void benchmark_all()
+{
+  performance_monitor::init("FLOPS_SP|FLOPS_DP|L2|L3|MEM");
+  benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
+  likwid_markerNextGroup();
+  benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
+  likwid_markerNextGroup();
+  benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+  likwid_markerNextGroup();
+  benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+  likwid_markerNextGroup();
+  benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+}
+
+void print_csv_header()
+{
+  std::cout << "L2 bandwidth [MBytes/s],"
+               "L2 data volume [GBytes],"
+               "L2D evict bandwidth [MBytes/s],"
+               "L2D evict data volume [GBytes],"
+               "L2D load bandwidth [MBytes/s],"
+               "L2D load data volume [GBytes],"
+               "L3 bandwidth [MBytes/s],"
+               "L3 data volume [GBytes],"
+               "L3D evict bandwidth [MBytes/s],"
+               "L3D evict data volume [GBytes],"
+               "L3D load bandwidth [MBytes/s],"
+               "L3D load data volume [GBytes],"
+               "Memory bandwidth [MBytes/s],"
+               "Memory data volume [GBytes],"
+               "Memory evict bandwidth [MBytes/s],"
+               "Memory evict data volume [GBytes],"
+               "Memory load bandwidth [MBytes/s],"
+               "Memory load data volume [GBytes]\n";
 }
 
 int main(int argc, char *argv[])
@@ -93,6 +122,8 @@ int main(int argc, char *argv[])
   // places where argument values will be stored
   std::uint64_t sp_flop_num_iterations;
   std::uint64_t dp_flop_num_iterations;
+
+  std::vector<std::uint64_t> cache_and_memory_args;
 
   std::string perfmon_output_filename;
   output_format o = pretty;
@@ -124,26 +155,31 @@ int main(int argc, char *argv[])
               "of iterations and size of data transfer in kilobytes. "
               "Default: " + to_string(l2_args[0]) + " " + 
               to_string(l2_args[1])).c_str()
-             )
+              )
     ("L3,3", po::value<std::vector<std::uint64_t>>(&l3_args)->
              multitoken()->zero_tokens(),
              ("benchmark L3 cache bandwidth. May be followed by number "
               "of iterations and size of data transfer in kilobytes. "
               "Default: " + to_string(l3_args[0]) + " " + 
               to_string(l3_args[1])).c_str()
-             )
+              )
     ("mem,m", po::value<std::vector<std::uint64_t>>(&ram_args)->
               multitoken()->zero_tokens(),
               ("benchmark memory (ram) bandwidth. May be followed by number "
                "of iterations and size of data transfer in kilobytes. "
                "Default: " + to_string(ram_args[0]) + " " + 
                to_string(ram_args[1])).c_str()
-              )
+               )
     ("benchmark-all,b", "run all benchmarks")
-    ("visualize,c", "output benchmark results in csv-style format:\n"
-                    "")
+    ("benchmark-cache-and-memory",
+      po::value<std::vector<std::uint64_t>>(&cache_and_memory_args)->
+        multitoken(),
+      "benchmark cache and memory. Will run benchmark once for each cache and "
+        "once for ram.")
+    ("csv-style-output,c", "output benchmark results in a csv-style format:\n")
+    ("print-csv-header", "print header of csv")
     ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
-                    "a visualization from json data output in program "
+                    "a visualization from json data output in program " 
                     "instrumentation")
     ;
 
@@ -167,7 +203,7 @@ int main(int argc, char *argv[])
   {
     cout << desc << "\n"
          << "Currently, only one type of benchmark can be specified per run \n"
-         << "of this CLI. This means, for instance, that if -2, -3, and -s\n"
+         << "of this CLI. This means, for instance, that if -2, -b, and -s\n"
          << "supplied, only one will run. The benchmark that runs is \n"
          << "undefined.\n";
     return 0;
@@ -178,13 +214,24 @@ int main(int argc, char *argv[])
   {
     o = output_format::csv;
   }
-  if (vm.count("benchmark-all"))
+  if (vm.count("print-csv-header"))
   {
-    benchmark_all();
+    print_csv_header();
   }
+
   else
   {
-    if (vm.count("L2"))
+    // This plock is where the benchark is ran
+    if (vm.count("benchmark-all"))
+    {
+      benchmark_all();
+    }
+    else if (vm.count("benchmark-cache-and-memory"))
+    {
+      benchmark_cache_and_memory(cache_and_memory_args[0],
+                                 cache_and_memory_args[1]);
+    }
+    else if (vm.count("L2"))
     {
       performance_monitor::init("L2");
       benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
@@ -211,9 +258,34 @@ int main(int argc, char *argv[])
     }
 
     performance_monitor::close();
-    // performance_monitor::printDetailedResults();
-    performance_monitor::printOnlyAggregate();
-    performance_monitor::printComparison();
+
+    if(o == pretty){
+      // performance_monitor::printDetailedResults();
+      performance_monitor::printOnlyAggregate();
+      performance_monitor::printComparison();
+    }
+    else if (o == csv){
+      auto e = performance_monitor::get_aggregate_metrics();
+      std::cout << e[l2_bandwidth_metric_name] << ","
+                << e[l2_data_volume_name] << ","
+                << e[l2_evict_bandwidth_name] << ","
+                << e[l2_evict_data_volume_name] << ","
+                << e[l2_load_bandwidth_name] << ","
+                << e[l2_load_data_volume_name] << ","
+                << e[l3_bandwidth_metric_name] << ","
+                << e[l3_data_volume_name] << ","
+                << e[l3_evict_bandwidth_name] << ","
+                << e[l3_evict_data_volume_name] << ","
+                << e[l3_load_bandwidth_name] << ","
+                << e[l3_load_data_volume_name] << ","
+                << e[ram_bandwidth_metric_name] << ","
+                << e[ram_data_volume_metric_name] << ","
+                << e[ram_evict_bandwidth_name] << ","
+                << e[ram_evict_data_volume_name] << ","
+                << e[ram_load_bandwidth_name] << ","
+                << e[ram_load_data_volume_name] << ","
+                ;
+    }
   }
 
   // visualization things
