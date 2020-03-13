@@ -72,7 +72,8 @@ __m256d flops_dp(std::uint64_t num_iterations)
   return a;
 }
 
-void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
+void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
+                  std::uint64_t size_kib)
 {
   // reduction(max:ticks) previously at the end of this pragma
 
@@ -80,7 +81,6 @@ void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib)
   std::uint64_t i, j;
   __m256d buffer;
 
-  const char * tag = "L2";
   // align to cache line, which is 512 bits or 64 bytes
   double * array = static_cast<double *>(
     aligned_alloc(64, size_kib * KILO_BYTE_SIZE));

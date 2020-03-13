@@ -16,4 +16,5 @@
 __m256 flops_sp(std::uint64_t);
 __m256d flops_dp(std::uint64_t);
 __m256i iops(std::uint64_t);
-void bandwidth_rw(std::uint64_t num_iterations, std::uint64_t size_kib);
+void bandwidth_rw(const char *tag,
+                  std::uint64_t num_iterations, std::uint64_t size_kib);
