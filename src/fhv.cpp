@@ -11,21 +11,38 @@
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
 
+using namespace std;
+namespace po = boost::program_options;
+
+// ---- default values
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
 const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
 
-enum precision { SINGLE_P, DOUBLE_P };
+// each argument vector has num_iterations, mem_size_kb
 
-using namespace std;
-namespace po = boost::program_options;
+// 100000 iterations for a good average
+// 100 kilobytes to fit well inside L2 cache
+std::vector<std::uint64_t> l2_args = {100000, 100};
+
+// 10000 iterations for a good average
+// 1000 kilobytes to fit well inside L3 cache
+std::vector<std::uint64_t> l3_args = {10000, 1000};
+
+// 20 iterations for a good average
+// 100000 kilobytes (100MB) so it can't all be cached
+std::vector<std::uint64_t> ram_args = {20, 100000};
+
+// enums
+enum precision { SINGLE_P, DOUBLE_P };
+enum output_format { pretty, csv };
 
 void benchmark_flops(precision p, uint64_t num_iter)
 {
   if (p == precision::SINGLE_P){
-    performance_monitor::init("FLOPS_SP");
+    // performance_monitor::init("FLOPS_SP");
     std::cout << "starting single precision flop benchmark" << std::endl;
   } else if (p == precision::DOUBLE_P){
-    performance_monitor::init("FLOPS_DP");
+    // performance_monitor::init("FLOPS_DP");
     std::cout << "starting double precision flop benchmark" << std::endl;
   }
 #pragma omp parallel
@@ -48,7 +65,7 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
                          uint64_t mem_size_kb){
   // memory type becomes the performance group. Typically this is "L2", "L3",
   // or "RAM"
-  performance_monitor::init(memory_type.c_str());
+  // performance_monitor::init(memory_type.c_str());
   std::cout << "starting " << memory_type << 
                " rw bandwidth benchmark" << std::endl;
 
@@ -60,50 +77,39 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
   performance_monitor::printComparison();
 }
 
-void benchmark_l2_bw(){
-  // 10000 iterations for a good average
-  // 100 kilobytes to fit well inside L2 cache
-  benchmark_memory_bw("L2", 10000, 100);
-}
-
-void benchmark_l3_bw(){
-  // 1000 iterations for a good average
-  // 1000 kilobytes to fit well inside L3 cache
-  benchmark_memory_bw("L3", 1000, 1000);
-}
-
-void benchmark_ram_bw(){
-  // 10 iterations for a good average
-  // 100000 kilobytes (100MB) so it can't all be cached
-  benchmark_memory_bw("MEM", 20, 100000);
+void benchmark_all(){
+    performance_monitor::init("FLOPS_SP|FLOPS_DP|L2|L3|MEM");
+    benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
+    likwid_markerNextGroup();
+    benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
+    likwid_markerNextGroup();
+    benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+    likwid_markerNextGroup();
+    benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+    likwid_markerNextGroup();
+    benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
 }
 
 int main(int argc, char *argv[])
 {
+  // places where argument values will be stored
+  std::uint64_t sp_flop_num_iterations;
+  std::uint64_t dp_flop_num_iterations;
+
+  std::string perfmon_output_filename;
+  output_format o = pretty;
+
+  // behavior if no arguments are supplied
   if (argc < 2)
   {
     std::cout << "no options provided, running all benchmarks.\n";
     std::cout << "alternatively, pass '-h' for more options\n";
     // sleep a couple seconds?
-    benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
-    benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
-    benchmark_l2_bw();
-    benchmark_l3_bw();
-    benchmark_ram_bw();
+    benchmark_all();
     return 0;
   }
 
-  // places where argument values will be stored
-  std::uint64_t sp_flop_num_iterations;
-  std::uint64_t dp_flop_num_iterations;
-
-  // each argument vector has num_iterations, mem_size_kb
-  std::vector<std::uint64_t> l2_args = {100000, 100};
-  std::vector<std::uint64_t> l3_args = {10000, 1000};
-  std::vector<std::uint64_t> ram_args = {20, 100000};
-
-  std::string perfmon_output_filename;
-
+  // behavior with arguments
   po::options_description desc(
     "Benchmarking machine with likwid");
   desc.add_options()
@@ -135,6 +141,9 @@ int main(int argc, char *argv[])
                "Default: " + to_string(ram_args[0]) + " " + 
                to_string(ram_args[1])).c_str()
               )
+    ("benchmark-all,b", "run all benchmarks")
+    ("visualize,c", "output benchmark results in csv-style format:\n"
+                    "")
     ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
                     "a visualization from json data output in program "
                     "instrumentation")
@@ -158,34 +167,51 @@ int main(int argc, char *argv[])
 
   if (vm.count("help"))
   {
-    cout << desc << "\n";
+    cout << desc << "\n"
+         << "Currently, only one type of benchmark can be specified per run \n"
+         << "of this CLI. This means, for instance, that if -2, -3, and -s\n"
+         << "supplied, only one will run. The benchmark that runs is \n"
+         << "undefined.\n";
+    return 0;
   }
-  else
+
+  // benchmark things
+  if(vm.count("csv-style-output")){
+    o  = output_format::csv;
+  }
+  if(vm.count("benchmark-all")){
+    benchmark_all();
+  }
+  else if (vm.count("L2"))
   {
-    if (vm.count("L2"))
-    {
-      benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
-    }
-    if (vm.count("L3"))
-    {
-      benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
-    }
-    if (vm.count("mem"))
-    {
-      benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
-    }
-    if (vm.count("flops_sp"))
-    {
-      benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
-    }
-    if (vm.count("flops_dp"))
-    {
-      benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
-    }
-    if (vm.count("visualize"))
-    {
-      // visualize(perfmon_output_filename, output_filename);
-    }
+    performance_monitor::init("L2");
+    benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+  }
+  else if (vm.count("L3"))
+  {
+    performance_monitor::init("L3");
+    benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+  }
+  else if (vm.count("mem"))
+  {
+    performance_monitor::init("MEM");
+    benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+  }
+  else if (vm.count("flops_sp"))
+  {
+    performance_monitor::init("FLOPS_SP");
+    benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
+  }
+  else if (vm.count("flops_dp"))
+  {
+    performance_monitor::init("FLOPS_DP");
+    benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+  }
+
+  // visualization things
+  if (vm.count("visualize"))
+  {
+    // visualize(perfmon_output_filename, output_filename);
   }
 
   return 0;
