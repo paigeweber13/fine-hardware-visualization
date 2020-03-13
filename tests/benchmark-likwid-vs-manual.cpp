@@ -221,9 +221,11 @@ int main(int argc, char* argv[])
     ("csv-style-output,c", "Output results in a csv style instead of the "
       "detailed pretty output. Order of output follows.\n"
       "for flops:\n"
-      "manual_duration,manual_num_flops,manual_Mflops,likwid_duration,likwid_num_flops,likwid_Mflops\n"
+      "manual_duration,manual_num_flops,manual_Mflops,"
+      "likwid_duration,likwid_num_flops,likwid_Mflops\n"
       "for mem:\n"
-      "manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s\n"
+      "manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,"
+      "likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s\n"
     )
     ("flops-test,f", po::value<std::uint64_t>(), 
       "Run a flop benchmark. Must be follwed by the number of iterations to "
