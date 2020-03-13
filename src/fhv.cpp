@@ -47,18 +47,16 @@ void benchmark_flops(precision p, uint64_t num_iter)
   }
 #pragma omp parallel
   {
-    performance_monitor::startRegion("flops");
     if(p == precision::SINGLE_P){
+      performance_monitor::startRegion("flops_sp");
       flops_sp(num_iter);
+      performance_monitor::stopRegion("flops_sp");
     } else if (p == precision::DOUBLE_P){
+      performance_monitor::startRegion("flops_dp");
       flops_dp(num_iter);
+      performance_monitor::stopRegion("flops_dp");
     }
-    performance_monitor::stopRegion("flops");
   }
-  performance_monitor::close();
-  // performance_monitor::printDetailedResults();
-  performance_monitor::printOnlyAggregate();
-  performance_monitor::printComparison();
 }
 
 void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
@@ -70,11 +68,6 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
                " rw bandwidth benchmark" << std::endl;
 
   bandwidth_rw(memory_type.c_str(), num_iterations, mem_size_kb);
-
-  performance_monitor::close();
-  // performance_monitor::printDetailedResults();
-  performance_monitor::printOnlyAggregate();
-  performance_monitor::printComparison();
 }
 
 void benchmark_all(){
@@ -88,6 +81,11 @@ void benchmark_all(){
     benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
     likwid_markerNextGroup();
     benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+
+    performance_monitor::close();
+    // performance_monitor::printDetailedResults();
+    performance_monitor::printOnlyAggregate();
+    performance_monitor::printComparison();
 }
 
 int main(int argc, char *argv[])
@@ -176,36 +174,46 @@ int main(int argc, char *argv[])
   }
 
   // benchmark things
-  if(vm.count("csv-style-output")){
-    o  = output_format::csv;
+  if (vm.count("csv-style-output"))
+  {
+    o = output_format::csv;
   }
-  if(vm.count("benchmark-all")){
+  if (vm.count("benchmark-all"))
+  {
     benchmark_all();
   }
-  else if (vm.count("L2"))
+  else
   {
-    performance_monitor::init("L2");
-    benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
-  }
-  else if (vm.count("L3"))
-  {
-    performance_monitor::init("L3");
-    benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
-  }
-  else if (vm.count("mem"))
-  {
-    performance_monitor::init("MEM");
-    benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
-  }
-  else if (vm.count("flops_sp"))
-  {
-    performance_monitor::init("FLOPS_SP");
-    benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
-  }
-  else if (vm.count("flops_dp"))
-  {
-    performance_monitor::init("FLOPS_DP");
-    benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+    if (vm.count("L2"))
+    {
+      performance_monitor::init("L2");
+      benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+    }
+    else if (vm.count("L3"))
+    {
+      performance_monitor::init("L3");
+      benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+    }
+    else if (vm.count("mem"))
+    {
+      performance_monitor::init("MEM");
+      benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+    }
+    else if (vm.count("flops_sp"))
+    {
+      performance_monitor::init("FLOPS_SP");
+      benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
+    }
+    else if (vm.count("flops_dp"))
+    {
+      performance_monitor::init("FLOPS_DP");
+      benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+    }
+
+    performance_monitor::close();
+    // performance_monitor::printDetailedResults();
+    performance_monitor::printOnlyAggregate();
+    performance_monitor::printComparison();
   }
 
   // visualization things
