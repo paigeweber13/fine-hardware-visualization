@@ -50,7 +50,7 @@ also possible to benchmark your machine by running `make bench`.
 # Goals:
  - main goal is to give people new to HPC something they can use to:
    - understand how their application maps to the architecture
-   - give suggestions on how to improveme their application
+   - give suggestions on how to improve their application
  - apply this to graph problems: kernels in graph problems tend to change
    behavior throughout execution
 
@@ -74,6 +74,10 @@ also possible to benchmark your machine by running `make bench`.
      - do all sizes from what will fit in L1 through big enough to exceed L3 to
        see if the rate of reads to writes decreases when we hit RAM
        - TODO NEXT: extend benchmark to do this!
+       - In doing this, I dramatically modified performance_monitor. Things
+         that need to be tested:
+          - likwid v manual output
+          - all methods in performance_monitor
    - the counter "COREWB" (Counts the number of modified cachelines written
      back.) may be useful here
       - doesn't work on my arch (skylake). It works on Haswell according to the
@@ -106,7 +110,7 @@ also possible to benchmark your machine by running `make bench`.
    inside the actual convolution does work.
 
 ### Features to add:
- - expand suite of test software that has balanced/inbalanced usage
+ - expand suite of test software that has balanced/imbalanced usage
    - consider standard benchmarks
      - like NAS parallel benchmarks
  - improve benchmark
@@ -142,7 +146,7 @@ also possible to benchmark your machine by running `make bench`.
      iteration) 
    - found some related intrinsics: 
      - _mm256_stream_load_si256 reads non-temporally
-     - _mm256_stream_pd stores non-templorally
+     - _mm256_stream_pd stores non-temporally
      - streaming loads only seem to be supported with integer data for some
        reason 
      - (non-temporal means it goes into queue as LEAST-recently read thing
@@ -245,7 +249,7 @@ information about DP flops
  - likwid_startCounters() should be run once in sequential part of code,
    otherwise counters were getting restarted and results were not correct. I
    moved it to "init" in performance_monitor.
- - can use likwid-accesD to avoid need for sudo. This also monitors at hardware
+ - can use likwid-accessD to avoid need for sudo. This also monitors at hardware
    level, results are consistent with using direct access.
 
 ### Integer operations:
@@ -317,15 +321,15 @@ information about DP flops
  - move single thread from core 0 to core 2
    - seems that if you start region on one core and stop on another, nothing
      is reported
-   - starting region on one core, siwtching to another, doing work,
-     siwtching back to first, and stopping region causes only first core to
+   - starting region on one core, switching to another, doing work,
+     switching back to first, and stopping region causes only first core to
      report work
    - results inconsistent.... not sure what this means yet
 
 ## before 2020-02-11
  - evaluated both likwid and papi for use
  - investigated likwid-bench
- - basic research on likwid-accesD vs direct access
+ - basic research on likwid-accessD vs direct access
  - Got likwid marker to measure code
    - investigated brandon's code
    - got my code working
@@ -338,7 +342,7 @@ information about DP flops
 ### Some notes on what does and doesn't get counted:
 FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE STAT counts one vector operation as
 one retired instruction. 
-It counds one vector FMA operation as 2 retired instructions
+It counts one vector FMA operation as 2 retired instructions
 
 AVX SP MFLOP/s counts vector operation as 8 floating point operations: This
 is what we want
