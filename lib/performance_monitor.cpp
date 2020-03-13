@@ -1,5 +1,8 @@
 #include "performance_monitor.h"
 
+std::map<std::string, double> performance_monitor::aggregate_events;
+std::map<std::string, double> performance_monitor::aggregate_metrics;
+
 const std::string performance_monitor::sp_scalar_flops_event_name("FP_ARITH_INST_RETIRED_SCALAR_SINGLE");
 const std::string performance_monitor::sp_avx_128_flops_event_name("FP_ARITH_INST_RETIRED_128B_PACKED_SINGLE");
 const std::string performance_monitor::sp_avx_256_flops_event_name("FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE");
@@ -160,24 +163,29 @@ void performance_monitor::getAggregateResults(){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         if(!isnan(metric_value)){
-          if(mflops_metric_name.compare(metric_name) == 0){
-            mflops += metric_value;
+          if(aggregate_metrics.count(metric_name)){
+            aggregate_metrics[metric_name] += metric_value;
+          } else {
+            aggregate_metrics[metric_name] = metric_value;
           }
-          else if(mflops_dp_metric_name.compare(metric_name) == 0){
-            mflops_dp += metric_value;
-          }
-          else if(l2_bandwidth_metric_name.compare(metric_name) == 0){
-            l2_bw += metric_value;
-          }
-          else if(l3_bandwidth_metric_name.compare(metric_name) == 0){
-            l3_bw += metric_value;
-          }
-          else if(ram_data_volume_metric_name.compare(metric_name) == 0){
-            ram_data_volume += metric_value;
-          }
-          else if(ram_bandwidth_metric_name.compare(metric_name) == 0){
-            ram_bw += metric_value;
-          }
+          // if(mflops_metric_name.compare(metric_name) == 0){
+          //   mflops += metric_value;
+          // }
+          // else if(mflops_dp_metric_name.compare(metric_name) == 0){
+          //   mflops_dp += metric_value;
+          // }
+          // else if(l2_bandwidth_metric_name.compare(metric_name) == 0){
+          //   l2_bw += metric_value;
+          // }
+          // else if(l3_bandwidth_metric_name.compare(metric_name) == 0){
+          //   l3_bw += metric_value;
+          // }
+          // else if(ram_data_volume_metric_name.compare(metric_name) == 0){
+          //   ram_data_volume += metric_value;
+          // }
+          // else if(ram_bandwidth_metric_name.compare(metric_name) == 0){
+          //   ram_bw += metric_value;
+          // }
         }
       }
     }
@@ -186,12 +194,17 @@ void performance_monitor::getAggregateResults(){
 
 void performance_monitor::compareActualWithbench()
 {
-  mflops_saturation = mflops/EXPERIENTIAL_SP_RATE_MFLOPS;
-  mflops_dp_saturation = mflops_dp/EXPERIENTIAL_DP_RATE_MFLOPS;
+  mflops_saturation = aggregate_metrics[mflops_metric_name] /
+                      EXPERIENTIAL_SP_RATE_MFLOPS;
+  mflops_dp_saturation = aggregate_metrics[mflops_dp_metric_name] /
+                         EXPERIENTIAL_DP_RATE_MFLOPS;
   // l1_bw_saturation = l1_bw/EXPERIENTIAL_RW_BW_L1;
-  l2_bw_saturation = l2_bw/EXPERIENTIAL_RW_BW_L2;
-  l3_bw_saturation = l3_bw/EXPERIENTIAL_RW_BW_L3;
-  ram_bw_saturation = ram_bw/EXPERIENTIAL_RW_BW_RAM;
+  l2_bw_saturation = aggregate_metrics[l2_bandwidth_metric_name] /
+                     EXPERIENTIAL_RW_BW_L2;
+  l3_bw_saturation = aggregate_metrics[l3_bandwidth_metric_name] /
+                     EXPERIENTIAL_RW_BW_L3;
+  ram_bw_saturation = aggregate_metrics[ram_bandwidth_metric_name] /
+                      EXPERIENTIAL_RW_BW_RAM;
 }
 
 void performance_monitor::printResults()
@@ -248,8 +261,8 @@ void performance_monitor::printOnlyAggregate()
   // getAggregateResults();
 
   printf("----- begin aggregate performance_monitor report -----\n");
-  std::cout << "results_by_tag size: " + std::to_string(runtimes_by_tag.size())
-             + "\n";
+  // std::cout << "results_by_tag size: " + std::to_string(runtimes_by_tag.size())
+  //            + "\n";
   for (std::map<std::string, double>::iterator it=runtimes_by_tag.begin(); 
        it!=runtimes_by_tag.end(); ++it){
     std::cout << "Runtime for " + it->first + ": "
@@ -268,6 +281,12 @@ void performance_monitor::printOnlyAggregate()
   printf("Aggregate %s: %.3f\n", ram_bandwidth_metric_name.c_str(), ram_bw);
   printf("----- end performance_monitor report -----\n");
   printf("\n");
+
+  std::cout << "----- begin aggregate performance_monitor report -----\n";
+  for (auto it=aggregate_metrics.begin(); it!=aggregate_metrics.end(); ++it)
+    std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
+  std::cout << "----- end aggregate performance_monitor report -----\n";
+  std::cout << std::endl;
 }
 
 void performance_monitor::printComparison(){

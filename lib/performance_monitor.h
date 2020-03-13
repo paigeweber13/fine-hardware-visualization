@@ -76,6 +76,8 @@ class performance_monitor {
     static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
+    static std::map<std::string, double> aggregate_events;
+    static std::map<std::string, double> aggregate_metrics;
     // --- computation
     static const std::string sp_scalar_flops_event_name;
     static const std::string sp_avx_256_flops_event_name;
