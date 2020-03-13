@@ -147,7 +147,7 @@ def plot_results():
     plt.ylabel('Amount of data transferred (GB)')
     plt.legend(['Amount of data calculated manually', 
                 'Amoutn of data as reported by likwid'])
-    plt.savefig(mem_size_file + 'size.png')
+    plt.savefig(mem_size_file + '_sizes.png')
 
     plt.show()
 

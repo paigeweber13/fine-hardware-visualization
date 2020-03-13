@@ -113,7 +113,7 @@ bw_results bandwidth_rw_bench_compare(
 }
 
 flop_results flops_bench_compare(std::uint64_t num_iterations){
-  //                                         100 000 000 one hundred million
+  //                                            100 000 000 one hundred million
   // const std::uint64_t FLOAT_NUM_ITERATIONS = 100000000;
 
   // we do 4 fma, so 8 total operations on 8 floats each
@@ -183,26 +183,34 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
   } else if (o == output_format::csv){
 
+    auto events = performance_monitor::get_aggregate_events();
+    auto metrics = performance_monitor::get_aggregate_metrics();
+    auto runtimes = performance_monitor::get_runtimes_by_tag();
+
     // manual_duration,manual_num_flops,manual_Mflops,
     // likwid_duration,likwid_num_flops,likwid_Mflops
     if(t == test_type::flops || t == test_type::both){
       std::cout << sp_flop_results.duration_seconds << "," 
                 << sp_flop_results.num_fp_ops << "," 
                 << sp_flop_results.mflops << ","
-                << performance_monitor::get_runtimes_by_tag()["flops"] << ","
-                << performance_monitor::get_num_flops() << ","
-                << performance_monitor::getMFlops() << "\n";
+                << runtimes["flops"] << ","
+                << events[performance_monitor::get_total_sp_flops_event_name()]
+                << ","
+                << metrics[performance_monitor::get_mflops_metric_name()]
+                << "\n";
     }
 
     // manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,
-    // likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s
+    // likwid_duration,likwid_data_size_mb,likwid_bandwidth_mb_per_s
     if(t == test_type::mem || t == test_type::both){
       std::cout << bandwidth_results.duration_seconds << "," 
                 << bandwidth_results.gb_transferred << "," 
                 << bandwidth_results.bandwidth << ","
-                << performance_monitor::get_runtimes_by_tag()["RAM"] << ","
-                << performance_monitor::get_ram_data_volume() << ","
-                << performance_monitor::get_ram_bw() << "\n";
+                << runtimes["RAM"] << ","
+                << metrics[performance_monitor::
+                           get_ram_data_volume_metric_name()] << ","
+                << metrics[performance_monitor::
+                           get_ram_bandwidth_metric_name()] << "\n";
     }
   }
 }
@@ -225,7 +233,7 @@ int main(int argc, char* argv[])
       "likwid_duration,likwid_num_flops,likwid_Mflops\n"
       "for mem:\n"
       "manual_duration,manual_data_size_mb,manual_bandwidth_mb_per_s,"
-      "likwid_duration,likwid_data_size_mb,likwid_bandwitdh_mb_per_s\n"
+      "likwid_duration,likwid_data_size_mb,likwid_bandwidth_mb_per_s\n"
     )
     ("flops-test,f", po::value<std::uint64_t>(), 
       "Run a flop benchmark. Must be follwed by the number of iterations to "

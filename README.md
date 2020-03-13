@@ -77,7 +77,9 @@ also possible to benchmark your machine by running `make bench`.
        - In doing this, I dramatically modified performance_monitor. Things
          that need to be tested:
           - likwid v manual output
-          - all methods in performance_monitor
+          - performance_monitor
+            - seems to work, ran bench with a couple different things and got
+              reasonable results
    - the counter "COREWB" (Counts the number of modified cachelines written
      back.) may be useful here
       - doesn't work on my arch (skylake). It works on Haswell according to the
@@ -138,6 +140,8 @@ also possible to benchmark your machine by running `make bench`.
    software engineering stuff
    - improved performance monitor to automatically aggregate every event and
      metric 
+ - this dramatic refactoring has made me aware of the need for unit tests....
+   should we do that soon?
 
 ## 2020-03-03 through 2020-03-10
  - tried to align manual memory benchmark and likwid benchmark, learned a few
