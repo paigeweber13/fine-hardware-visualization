@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
     return 0;
   }
 
+  // places where argument values will be stored
   std::uint64_t sp_flop_num_iterations;
   std::uint64_t dp_flop_num_iterations;
 
@@ -100,6 +101,8 @@ int main(int argc, char *argv[])
   std::vector<std::uint64_t> l2_args = {100000, 100};
   std::vector<std::uint64_t> l3_args = {10000, 1000};
   std::vector<std::uint64_t> ram_args = {20, 100000};
+
+  std::string perfmon_output_filename;
 
   po::options_description desc(
     "Benchmarking machine with likwid");
@@ -112,26 +115,30 @@ int main(int argc, char *argv[])
                    implicit_value(FLOAT_NUM_ITERATIONS), 
                    "benchmark double-precision flops")
     ("L2,2", po::value<std::vector<std::uint64_t>>(&l2_args)->
-              multitoken()->zero_tokens(),
-              ("benchmark L2 cache bandwidth. May be followed by number "
-               "of iterations and size of data transfer in kilobytes. "
-               "Default: " + to_string(l2_args[0]) + " " + 
-               to_string(l2_args[1])).c_str()
-              )
+             multitoken()->zero_tokens(),
+             ("benchmark L2 cache bandwidth. May be followed by number "
+              "of iterations and size of data transfer in kilobytes. "
+              "Default: " + to_string(l2_args[0]) + " " + 
+              to_string(l2_args[1])).c_str()
+             )
     ("L3,3", po::value<std::vector<std::uint64_t>>(&l3_args)->
-              multitoken()->zero_tokens(),
-              ("benchmark L3 cache bandwidth. May be followed by number "
-               "of iterations and size of data transfer in kilobytes. "
-               "Default: " + to_string(l3_args[0]) + " " + 
-               to_string(l3_args[1])).c_str()
-              )
+             multitoken()->zero_tokens(),
+             ("benchmark L3 cache bandwidth. May be followed by number "
+              "of iterations and size of data transfer in kilobytes. "
+              "Default: " + to_string(l3_args[0]) + " " + 
+              to_string(l3_args[1])).c_str()
+             )
     ("mem,m", po::value<std::vector<std::uint64_t>>(&ram_args)->
               multitoken()->zero_tokens(),
               ("benchmark memory (ram) bandwidth. May be followed by number "
                "of iterations and size of data transfer in kilobytes. "
                "Default: " + to_string(ram_args[0]) + " " + 
                to_string(ram_args[1])).c_str()
-              );
+              )
+    ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
+                    "a visualization from json data output in program "
+                    "instrumentation")
+    ;
 
   po::variables_map vm;
   try
@@ -174,6 +181,10 @@ int main(int argc, char *argv[])
     if (vm.count("flops_dp"))
     {
       benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+    }
+    if (vm.count("visualize"))
+    {
+      // visualize(perfmon_output_filename, output_filename);
     }
   }
 
