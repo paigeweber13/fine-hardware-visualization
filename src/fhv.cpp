@@ -38,13 +38,6 @@ enum output_format { pretty, csv };
 
 void benchmark_flops(precision p, uint64_t num_iter)
 {
-  if (p == precision::SINGLE_P){
-    // performance_monitor::init("FLOPS_SP");
-    std::cout << "starting single precision flop benchmark" << std::endl;
-  } else if (p == precision::DOUBLE_P){
-    // performance_monitor::init("FLOPS_DP");
-    std::cout << "starting double precision flop benchmark" << std::endl;
-  }
 #pragma omp parallel
   {
     if(p == precision::SINGLE_P){
@@ -64,9 +57,6 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
   // memory type becomes the performance group. Typically this is "L2", "L3",
   // or "RAM"
   // performance_monitor::init(memory_type.c_str());
-  std::cout << "starting " << memory_type << 
-               " rw bandwidth benchmark" << std::endl;
-
   bandwidth_rw(memory_type.c_str(), num_iterations, mem_size_kb);
 }
 
@@ -84,14 +74,24 @@ void benchmark_cache_and_memory(std::uint64_t num_iterations,
 void benchmark_all()
 {
   performance_monitor::init("FLOPS_SP|FLOPS_DP|L2|L3|MEM");
+
+  std::cout << "starting single precision flop benchmark" << std::endl;
   benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
   likwid_markerNextGroup();
+
+  std::cout << "starting double precision flop benchmark" << std::endl;
   benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
   likwid_markerNextGroup();
+
+  std::cout << "starting L2 cache rw bandwidth benchmark" << std::endl;
   benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
   likwid_markerNextGroup();
+
+  std::cout << "starting L3 cache rw bandwidth benchmark" << std::endl;
   benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
   likwid_markerNextGroup();
+
+  std::cout << "starting RAM rw bandwidth benchmark" << std::endl;
   benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
 }
 
