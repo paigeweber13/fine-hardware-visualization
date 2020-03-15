@@ -23,12 +23,13 @@ def get_header():
 def run_tests():
     output = []
     data_size_kb = 10
-    start_num_iterations = 200000
-    minimum_num_iter = 3
+    num_iter = 2000
+    # start_num_iterations = 200000
+    # minimum_num_iter = 3
 
-    while data_size_kb < 1000001:
-        num_iter = int(max(start_num_iterations/data_size_kb, 
-                           minimum_num_iter))
+    while data_size_kb < 15000:
+        # num_iter = int(max(start_num_iterations/data_size_kb, 
+        #                    minimum_num_iter))
         command = [
             fhv_bin_location, '--benchmark-cache-and-memory', 
             str(num_iter), str(data_size_kb),
@@ -42,34 +43,41 @@ def run_tests():
         elapsed_time = time.time() - start_time
         print(' {:.3f}s'.format(elapsed_time))
         output.append(child.stdout.decode().strip().split(','))
-        data_size_kb *= 10
+        data_size_kb *= 2
 
     write_csv(results_file + '.csv', get_header(), output)
 
 def plot_results():
     data =  pandas.read_csv(results_file + '.csv')
     plt.figure(1, figsize=(10,7))
-    trial_nums = range(len(data['L2D evict data volume [GBytes]']))
-    plt.plot(trial_nums, data['L2D evict data volume [GBytes]'],
+
+    # trial_nums = range(len(data['L2D evict data volume [GBytes]']))
+    plt.plot(data['Single iteration size'], 
+             data['L2D evict data volume [GBytes]'],
              color='midnightblue')
-    plt.plot(trial_nums, data['L2D load data volume [GBytes]'],
+    plt.plot(data['Single iteration size'], 
+             data['L2D load data volume [GBytes]'],
              color='cornflowerblue')
-    plt.plot(trial_nums, data['L3 evict data volume [GBytes]'],
+    plt.plot(data['Single iteration size'], 
+             data['L3 evict data volume [GBytes]'],
              color='darkred')
-    plt.plot(trial_nums, data['L3 load data volume [GBytes]'],
+    plt.plot(data['Single iteration size'], 
+             data['L3 load data volume [GBytes]'],
              color='red')
-    plt.plot(trial_nums, data['Memory evict data volume [GBytes]'],
+    plt.plot(data['Single iteration size'], 
+             data['Memory evict data volume [GBytes]'],
              color='darkgreen')
-    plt.plot(trial_nums, data['Memory load data volume [GBytes]'],
+    plt.plot(data['Single iteration size'], 
+             data['Memory load data volume [GBytes]'],
              color='seagreen')
-    print(data)
-    print(data['Memory evict data volume [GBytes]'])
-    print(data['Memory load data volume [GBytes]'])
+    # print(data)
+    # print(data['Memory evict data volume [GBytes]'])
+    # print(data['Memory load data volume [GBytes]'])
 
     # plt.xscale('log')
     # plt.yscale('log')
     plt.title('Comparing read and write volumes through cache and memory')
-    plt.xlabel('Trial number')
+    plt.xlabel('Size of one iteration (KBytes)')
     plt.ylabel('Memory volume (GBytes)')
     plt.legend([
         'L2D evict data volume [GBytes]',
