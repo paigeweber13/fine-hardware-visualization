@@ -21,15 +21,21 @@ def run_tests():
     output = []
     data_size_kb = 10
     start_num_iterations = 200000
+    minimum_num_iter = 3
 
     while data_size_kb < 1000001:
-        print('running memory with data size ' + str(data_size_kb),
+        num_iter = int(max(start_num_iterations/data_size_kb, 
+                           minimum_num_iter))
+        command = [
+            fhv_bin_location, '--benchmark-cache-and-memory', 
+            str(num_iter), str(data_size_kb),
+            '-c']
+        # print('running command:', ' '.join(command))
+        print('running memory with data size ' + str(data_size_kb) + ' and '
+              'number of iterations ' + str(num_iter),
               end='', flush=True)
         start_time = time.time()
-        child = subprocess.run(
-            [fhv_bin_location, '--benchmark-cache-and-memory', 
-             str(int(start_num_iterations/data_size_kb)), str(data_size_kb),
-             '-c'], stdout=subprocess.PIPE)
+        child = subprocess.run(command, stdout=subprocess.PIPE)
         elapsed_time = time.time() - start_time
         print(' {:.3f}s'.format(elapsed_time))
         output.append(child.stdout.decode().strip().split(','))
