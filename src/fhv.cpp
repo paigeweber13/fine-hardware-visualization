@@ -97,7 +97,9 @@ void benchmark_all()
 
 void print_csv_header()
 {
-  std::cout << "L2 bandwidth [MBytes/s],"
+  std::cout << "Single iteration size,"
+               "Number of iterations,"
+               "L2 bandwidth [MBytes/s],"
                "L2 data volume [GBytes],"
                "L2D evict bandwidth [MBytes/s],"
                "L2D evict data volume [GBytes],"
@@ -124,6 +126,11 @@ int main(int argc, char *argv[])
   std::uint64_t dp_flop_num_iterations;
 
   std::vector<std::uint64_t> cache_and_memory_args;
+
+  // for use with csv output: keeps a consistent name no matter what vector is
+  // used for arguments
+  std::uint64_t num_memory_iter = 0;
+  std::uint64_t memory_size_kb = 0;
 
   std::string perfmon_output_filename;
   output_format o = pretty;
@@ -218,7 +225,6 @@ int main(int argc, char *argv[])
   {
     print_csv_header();
   }
-
   else
   {
     // This plock is where the benchark is ran
@@ -228,21 +234,29 @@ int main(int argc, char *argv[])
     }
     else if (vm.count("benchmark-cache-and-memory"))
     {
+      num_memory_iter = cache_and_memory_args[0];
+      memory_size_kb = cache_and_memory_args[1];
       benchmark_cache_and_memory(cache_and_memory_args[0],
                                  cache_and_memory_args[1]);
     }
     else if (vm.count("L2"))
     {
+      num_memory_iter = l2_args[0];
+      memory_size_kb = l2_args[1];
       performance_monitor::init("L2");
       benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
     }
     else if (vm.count("L3"))
     {
+      num_memory_iter = l3_args[0];
+      memory_size_kb = l3_args[1];
       performance_monitor::init("L3");
       benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
     }
     else if (vm.count("mem"))
     {
+      num_memory_iter = ram_args[0];
+      memory_size_kb = ram_args[1];
       performance_monitor::init("MEM");
       benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
     }
@@ -266,7 +280,9 @@ int main(int argc, char *argv[])
     }
     else if (o == csv){
       auto e = performance_monitor::get_aggregate_metrics();
-      std::cout << e[l2_bandwidth_metric_name] << ","
+      std::cout << memory_size_kb << ","
+                << num_memory_iter << ","
+                << e[l2_bandwidth_metric_name] << ","
                 << e[l2_data_volume_name] << ","
                 << e[l2_evict_bandwidth_name] << ","
                 << e[l2_evict_data_volume_name] << ","
@@ -283,7 +299,7 @@ int main(int argc, char *argv[])
                 << e[ram_evict_bandwidth_name] << ","
                 << e[ram_evict_data_volume_name] << ","
                 << e[ram_load_bandwidth_name] << ","
-                << e[ram_load_data_volume_name] << ","
+                << e[ram_load_data_volume_name] << "\n"
                 ;
     }
   }
