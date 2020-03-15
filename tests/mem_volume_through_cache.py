@@ -1,4 +1,7 @@
+import argparse
 import csv
+import matplotlib.pyplot as plt
+import pandas
 import subprocess
 import time
 
@@ -43,8 +46,59 @@ def run_tests():
 
     write_csv(results_file + '.csv', get_header(), output)
 
+def plot_results():
+    data =  pandas.read_csv(results_file + '.csv')
+    plt.figure(1, figsize=(10,7))
+    trial_nums = range(len(data['L2D evict data volume [GBytes]']))
+    plt.plot(trial_nums, data['L2D evict data volume [GBytes]'],
+             color='midnightblue')
+    plt.plot(trial_nums, data['L2D load data volume [GBytes]'],
+             color='cornflowerblue')
+    plt.plot(trial_nums, data['L3 evict data volume [GBytes]'],
+             color='darkred')
+    plt.plot(trial_nums, data['L3 load data volume [GBytes]'],
+             color='red')
+    plt.plot(trial_nums, data['Memory evict data volume [GBytes]'],
+             color='darkgreen')
+    plt.plot(trial_nums, data['Memory load data volume [GBytes]'],
+             color='seagreen')
+    print(data)
+    print(data['Memory evict data volume [GBytes]'])
+    print(data['Memory load data volume [GBytes]'])
+
+    # plt.xscale('log')
+    # plt.yscale('log')
+    plt.title('Comparing read and write volumes through cache and memory')
+    plt.xlabel('Trial number')
+    plt.ylabel('Memory volume (GBytes)')
+    plt.legend([
+        'L2D evict data volume [GBytes]',
+        'L2D load data volume [GBytes]',
+        'L3 evict data volume [GBytes]',
+        'L3 load data volume [GBytes]',
+        'Memory evict data volume [GBytes]',
+        'Memory load data volume [GBytes]',
+    ])
+
+    plt.savefig(results_file + '.png')
+
+    plt.show()
+
+def parse_cli_options():
+    parser = argparse.ArgumentParser(
+        description='Compare memory volume through cache and ram')
+    parser.add_argument('--run-tests', '-r', action='store_true')
+    parser.add_argument('--plot-results', '-p', action='store_true')
+
+    return parser.parse_args()
+
 def main():
-    run_tests()
+    args = parse_cli_options()
+
+    if args.run_tests:
+        run_tests()
+    if args.plot_results:
+        plot_results()
 
 if __name__ == '__main__':
     main()
