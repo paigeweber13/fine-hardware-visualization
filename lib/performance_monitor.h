@@ -41,10 +41,10 @@
 
 #define l3_bandwidth_metric_name "L3 bandwidth [MBytes/s]"
 #define l3_data_volume_name "L3 data volume [GBytes]"
-#define l3_evict_bandwidth_name "L3D evict bandwidth [MBytes/s]"
-#define l3_evict_data_volume_name "L3D evict data volume [GBytes]"
-#define l3_load_bandwidth_name "L3D load bandwidth [MBytes/s]"
-#define l3_load_data_volume_name "L3D load data volume [GBytes]"
+#define l3_evict_bandwidth_name "L3 evict bandwidth [MBytes/s]"
+#define l3_evict_data_volume_name "L3 evict data volume [GBytes]"
+#define l3_load_bandwidth_name "L3 load bandwidth [MBytes/s]"
+#define l3_load_data_volume_name "L3 load data volume [GBytes]"
 
 // memory volume and bandwidth
 #define ram_bandwidth_metric_name "Memory bandwidth [MBytes/s]"
