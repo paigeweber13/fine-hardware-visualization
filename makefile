@@ -94,7 +94,7 @@ $(EXEC): $(OBJ_DIR)/fhv.o $(LIB_OBJS) | $(EXEC_DIR)
 	$(ld-command)
 
 ### rules to compile sources
-$(OBJS): | $(OBJ_DIR)
+$(OBJS): $(HEADERS) | $(OBJ_DIR)
 
 define compile-command
 $(CXX) $(CXXFLAGS) -c $< -o $@
