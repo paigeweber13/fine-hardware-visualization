@@ -154,6 +154,31 @@ def plot_results():
                 'Amoutn of data as reported by likwid'])
     plt.savefig(mem_size_file + '_sizes.png')
 
+
+    # MEMORY: ratio of manually calculated data volume to likwid-reported data
+    # volume
+
+    plt.figure(4, figsize=(10,7))
+    trial_nums = range(len(mem_size_data['manual_data_size_gb']))
+    plt.plot(trial_nums, 
+             mem_size_data['manual_data_size_gb']/
+             mem_size_data['likwid_data_size_gb'])
+
+    for xyt in zip(trial_nums,
+                   mem_size_data['manual_data_size_gb']/
+                   mem_size_data['likwid_data_size_gb'],
+                   mem_size_data['manual_duration']):
+        plt.annotate("{:.3f}s".format(xyt[2]), xy=(xyt[0] + 0.1, xyt[1]))
+
+    plt.axhline(y=1)
+    plt.annotate("1:1", (0, 1.1))
+    # plt.yscale('log')
+    plt.title('ratio of manually calculated data volume to likwid-reported ' \
+              'data volume')
+    plt.xlabel('Trial #')
+    plt.ylabel('Ratio of manually calculated volume to likwid-reported volume')
+    plt.savefig(mem_size_file + '_size_ratio.png')
+
     # plt.show()
 
 def parse_cli_options():
