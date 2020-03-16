@@ -17,6 +17,12 @@ applications.
     - [Features to add:](#features-to-add)
 - [Accomplishments:](#accomplishments)
   - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
+    - [Memory: tried to align memory manual calculations with likwid report](#memory-tried-to-align-memory-manual-calculations-with-likwid-report)
+    - [Convolution as a case study](#convolution-as-a-case-study)
+      - [When both groups were started/stopped:](#when-both-groups-were-startedstopped)
+      - [When only actual convolution was inside group:](#when-only-actual-convolution-was-inside-group)
+      - [Analysis](#analysis)
+    - [QOL and software engineering](#qol-and-software-engineering)
   - [2020-03-03 through 2020-03-10](#2020-03-03-through-2020-03-10)
   - [2020-02-25 through 2020-03-03](#2020-02-25-through-2020-03-03)
   - [2020-02-18 through 25](#2020-02-18-through-25)
@@ -67,17 +73,21 @@ also possible to benchmark your machine by running `make bench`.
  - questions:
    - Should I read up on caching and try to better understand that??
    - or work on convolution and getting finer-grained data from core?
+   - or something else for this week?
 
  - make convolution into a case study
-   - google error I get when trying to instrument entire pipeline
-   - nothing is reporting as being saturated... but maybe we are saturating one
-     scalar single precision float unit? 
-   - must be something with CPU, because memory is not the bandwidth. 
-   - identify how many instructions are getting piped from the front end to the
-     back end?
-   - metric for number of instructions decoded?
    - identify types of instructions, identify parts of ports that are being
      used? 
+   - PORT_USAGE: split into 2 groups
+   - identify how many instructions are getting piped from the front end to the
+     back end?
+   - look into metric for number of instructions decoded?
+   - Visualize usage
+   - aggregate results by region?? Are nested regions allowed?
+   - nothing is reporting as being saturated... but maybe we are saturating one
+     scalar single precision float unit? 
+   - must be something with CPU, because memory is not the bottleneck. 
+
  - CLI which benchmarks and process JSON into svg
  - generate svg
    - main part of program dumps info, second part reads and evaluates and creates
@@ -118,33 +128,69 @@ also possible to benchmark your machine by running `make bench`.
 
 # Accomplishments:
 ## 2020-03-10 through 2020-03-17
-Big advancements
- - tried to align memory manual with likwid
-   - likwid is reporting less data transferred, even in best case manually
-     calculated transfer amounts are 1.25x the likwid reported ones
-   - compared ratio of reads to writes in each level of cache/memory
-     - expected ratio to be 2:1 in cache and 1:1 in memory.. not the case
-     - at high volumes, L2 was 2:1, ram was about 1.5:1, and L3 was about 1:1
-   - compared volume of data through every level of cache/memory
-     - expected volume to match at higher volumes. This was the case.
+### Memory: tried to align memory manual calculations with likwid report
+ - likwid is reporting less data transferred, even in best case manually
+   calculated transfer amounts are 1.25x the likwid reported ones
+ - compared ratio of reads to writes in each level of cache/memory
+   - expected ratio to be 2:1 in cache and 1:1 in memory.. not the case
+   - at high volumes, L2 was 2:1, ram was about 1.5:1, and L3 was about 1:1
+ - compared volume of data through every level of cache/memory
+   - expected volume to match at higher volumes. This was the case.
+ - for everything above, see charts in `./tests/` for more info
  - the counter "COREWB" (Counts the number of modified cachelines written
    back.) may be useful here
     - doesn't work on my arch (skylake). It works on Haswell according to the
       intel developer's guide
 
-QOL and software engineering
+### Convolution as a case study
+ - worked on debugging why entire_program region doesn't work
+   - Initial theories proved not to be correct. Some things I considered:
+     - likwid doesn't allow nested groups. But, even after removing inner group
+       was not fixed
+     - trying to initialize in a parallel block caused it to fail because the
+       threads were getting destroyed or something, but even when starting and
+       stopping the group in a sequential block, no results.
+   - googled the error I got, only result was to the source code where the
+     error is printed
+   - I'm not even sure how to ask a question about this. Maybe need to make a
+     minimal example to post to discussion board? Just ask "what's wrong?"?
+ - discovered PORT_USAGE performance group that we can look into to analyze
+   stuff inside the core. Will need to split it into two groups though
+
+#### When both groups were started/stopped:
+----- begin saturation level performance_monitor report -----
+Percentage of available DP [MFLOP/s] used: 1.05821e-05
+Percentage of available L2 bandwidth [MBytes/s] used: 0.0242764
+Percentage of available L3 bandwidth [MBytes/s] used: 0.0197555
+Percentage of available Memory bandwidth [MBytes/s] used: 0.108281
+Percentage of available SP [MFLOP/s] used: 0.0298234
+----- end saturation level performance_monitor report -----
+
+#### When only actual convolution was inside group:
+----- begin saturation level performance_monitor report -----
+Percentage of available DP [MFLOP/s] used: 8.11656e-06
+Percentage of available L2 bandwidth [MBytes/s] used: 0.0215583
+Percentage of available L3 bandwidth [MBytes/s] used: 0.0364879
+Percentage of available Memory bandwidth [MBytes/s] used: 0.0938187
+Percentage of available SP [MFLOP/s] used: 0.0249263
+----- end saturation level performance_monitor report -----
+
+#### Analysis
+Results are similar.... saturation levels differ on speedtest but the kernel is
+also bigger
+
+### QOL and software engineering
  - Performance monitor now automatically aggregates all metrics and events
  - flops plots now have annotated times of execution
- - trying to build a deliverable as quickly as possible has caused some
-   problems with unmaintainable code, so I spent some time this week on
-   software engineering stuff
+ - Figured out how to supply multiple performance groups in code
+ - **Software Engineering:** trying to build a deliverable as quickly as
+   possible has caused some problems with unmaintainable code, so I spent some
+   time this week on software engineering stuff
    - improved performance monitor to automatically aggregate every event and
      metric 
-     - this dramatic refactoring has made me aware of the need for unit
-       tests.... should we do that soon?
+     - this dramatic refactoring has made me aware of the need for **unit
+       tests**.... should we do that soon?
    - would be nice to combine benchmark and benchmark_compare_likwid_manual
-   - would be nice to look at number of iterations again: resolve differences
-     in benchmark and benchmark_compare_likwid_manual
 
 ## 2020-03-03 through 2020-03-10
  - tried to align manual memory benchmark and likwid benchmark, learned a few
