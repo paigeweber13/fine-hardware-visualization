@@ -23,13 +23,13 @@ def get_header():
 def run_tests():
     output = []
     data_size_kb = 10
-    num_iter = 2000
-    # start_num_iterations = 200000
-    # minimum_num_iter = 3
+    # num_iter = 2000
+    start_num_iterations = 2000000
+    minimum_num_iter = 3
 
-    while data_size_kb < 15000:
-        # num_iter = int(max(start_num_iterations/data_size_kb, 
-        #                    minimum_num_iter))
+    while data_size_kb < 4500000:
+        num_iter = int(max(start_num_iterations/data_size_kb, 
+                           minimum_num_iter))
         command = [
             fhv_bin_location, '--benchmark-cache-and-memory', 
             str(num_iter), str(data_size_kb),
@@ -70,6 +70,8 @@ def plot_results():
         'L2D load data volume [GBytes]',
         'L2D evict data volume [GBytes]',
     ])
+    plt.axvline(x=3072)
+    plt.annotate("Max L3 capacity", (3200, 1e-4))
 
     plt.savefig(results_file + '_l2.png')
 
@@ -93,6 +95,8 @@ def plot_results():
         'L3 load data volume [GBytes]',
         'L3 evict data volume [GBytes]',
     ])
+    plt.axvline(x=3072)
+    plt.annotate("Max L3 capacity", (3200, 1e-4))
 
     plt.savefig(results_file + '_l3.png')
     
@@ -115,6 +119,8 @@ def plot_results():
         'Memory load data volume [GBytes]',
         'Memory evict data volume [GBytes]',
     ])
+    plt.axvline(x=3072)
+    plt.annotate("Max L3 capacity", (3200, 1e-4))
 
     plt.savefig(results_file + '_memory.png')
 
@@ -128,35 +134,36 @@ def plot_results():
                  / data['Memory evict data volume [GBytes]']
 
     # cap ratios
-    max_ratio = 4
-    l2_ratios = l2_ratios.clip(0,max_ratio)
-    l3_ratios = l3_ratios.clip(0,max_ratio)
-    mem_ratios = mem_ratios.clip(0,max_ratio)
+    # max_ratio = 4
+    # l2_ratios = l2_ratios.clip(0,max_ratio)
+    # l3_ratios = l3_ratios.clip(0,max_ratio)
+    # mem_ratios = mem_ratios.clip(0,max_ratio)
+    # print('NOTE: ratios are capped at {:d}. Some are very large (in the ' \
+    #       'order of 10^2) but are capped for visibility'.format(max_ratio))
 
-
-    # print(data['L2D load data volume [GBytes]'])
-    # print(data['L2D evict data volume [GBytes]'])
-    # print('l2 ratios: \n', l2_ratios)
-    # print('l3 ratios: \n', l3_ratios)
-    # print('mem ratios: \n', mem_ratios)
-    print('NOTE: ratios are capped at {:d}. Some are very large (in the ' \
-          'order of 10^2) but are capped for visibility'.format(max_ratio))
-
-    plt.plot(data['Single iteration size'], l2_ratios,
-             color='midnightblue')
-    plt.plot(data['Single iteration size'], l3_ratios,
-             color='darkred')
     plt.plot(data['Single iteration size'], mem_ratios,
              color='darkgreen')
+    plt.plot(data['Single iteration size'], l3_ratios,
+             color='darkred')
+    plt.plot(data['Single iteration size'], l2_ratios,
+             color='midnightblue')
 
     plt.title('Comparing ratios of reads:writes through cache and memory')
     plt.xlabel('Size of one iteration (KBytes)')
     plt.ylabel('Ratio of read:write volumes')
     plt.legend([
-        'L2',
-        'L3',
         'Memory',
+        'L3',
+        'L2',
     ])
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.axvline(x=3072)
+    plt.annotate("Max L3 capacity", (3200, 3))
+    plt.axhline(y=1)
+    plt.annotate("1:1 ratio", (10, 1.1))
+    plt.axhline(y=2)
+    plt.annotate("2:1 ratio", (10, 2.1))
 
     plt.savefig(results_file + '_ratios.png')
 
@@ -186,10 +193,14 @@ def plot_results():
         'L3',
         'Memory',
     ])
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.axvline(x=3072)
+    plt.annotate("Max L3 capacity", (3200, 1e-4))
 
     plt.savefig(results_file + '_total_volume.png')
 
-    plt.show()
+    # plt.show()
 
 def parse_cli_options():
     parser = argparse.ArgumentParser(
