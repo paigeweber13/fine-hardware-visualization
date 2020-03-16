@@ -64,27 +64,10 @@ also possible to benchmark your machine by running `make bench`.
 
 # TODO:
 ## Immediate:
- - align manual mem benchmark with likwid report:
-   - create plot
-   - track reads and writes through all levels of cache
-     - tracking L1 should give us a better idea of if the amount of data we are
-       reporting as read/written is correct because everything goes through L1
-     - if there is no read for ownership in L3, we expect ratio of reads:writes
-       to be 2:1 in cache and 1:1 in RAM
-     - do all sizes from what will fit in L1 through big enough to exceed L3 to
-       see if the rate of reads to writes decreases when we hit RAM
-       - TODO NEXT: extend benchmark to do this!
-       - In doing this, I dramatically modified performance_monitor. Things
-         that need to be tested:
-          - likwid v manual output
-          - performance_monitor
-            - seems to work, ran bench with a couple different things and got
-              reasonable results
-   - the counter "COREWB" (Counts the number of modified cachelines written
-     back.) may be useful here
-      - doesn't work on my arch (skylake). It works on Haswell according to the
-        intel developer's guide
- - make plot of flops by time instead of number of iterations
+ - questions:
+   - Should I read up on caching and try to better understand that??
+   - or work on convolution and getting finer-grained data from core?
+
  - make convolution into a case study
    - google error I get when trying to instrument entire pipeline
    - nothing is reporting as being saturated... but maybe we are saturating one
@@ -135,13 +118,33 @@ also possible to benchmark your machine by running `make bench`.
 
 # Accomplishments:
 ## 2020-03-10 through 2020-03-17
+Big advancements
+ - tried to align memory manual with likwid
+   - likwid is reporting less data transferred, even in best case manually
+     calculated transfer amounts are 1.25x the likwid reported ones
+   - compared ratio of reads to writes in each level of cache/memory
+     - expected ratio to be 2:1 in cache and 1:1 in memory.. not the case
+     - at high volumes, L2 was 2:1, ram was about 1.5:1, and L3 was about 1:1
+   - compared volume of data through every level of cache/memory
+     - expected volume to match at higher volumes. This was the case.
+ - the counter "COREWB" (Counts the number of modified cachelines written
+   back.) may be useful here
+    - doesn't work on my arch (skylake). It works on Haswell according to the
+      intel developer's guide
+
+QOL and software engineering
+ - Performance monitor now automatically aggregates all metrics and events
+ - flops plots now have annotated times of execution
  - trying to build a deliverable as quickly as possible has caused some
    problems with unmaintainable code, so I spent some time this week on
    software engineering stuff
    - improved performance monitor to automatically aggregate every event and
      metric 
- - this dramatic refactoring has made me aware of the need for unit tests....
-   should we do that soon?
+     - this dramatic refactoring has made me aware of the need for unit
+       tests.... should we do that soon?
+   - would be nice to combine benchmark and benchmark_compare_likwid_manual
+   - would be nice to look at number of iterations again: resolve differences
+     in benchmark and benchmark_compare_likwid_manual
 
 ## 2020-03-03 through 2020-03-10
  - tried to align manual memory benchmark and likwid benchmark, learned a few
