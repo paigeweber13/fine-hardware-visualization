@@ -78,8 +78,9 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
   // reduction(max:ticks) previously at the end of this pragma
 
   // unsigned thr_num;
-  std::uint64_t i, j;
+  std::uint64_t i, j, k;
   __m256d buffer;
+  std::uint64_t inner_iterations = 1;
 
   // align to cache line, which is 512 bits or 64 bytes
   double * array = static_cast<double *>(
@@ -103,7 +104,7 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
         //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
         performance_monitor::startRegion(tag);
       }
-      for (int k = 0; k < 100; k++)
+      for (k = 0; k < inner_iterations; k++)
         for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
         {
           // Loading 256-bits into memory address of array

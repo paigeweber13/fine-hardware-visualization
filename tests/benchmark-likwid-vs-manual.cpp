@@ -39,7 +39,7 @@ bw_results bandwidth_rw_bench_compare(
   // I'm no longer getting huge bandwidth numbers but my manual calculations
   // differ from likwid by a factor of 2
 
-  const unsigned num_inner_iterations = 10;
+  const unsigned num_inner_iterations = 1;
   const double kb_to_mb = 1e-3;
   const double kb_to_gb = 1e-6;
   const double gb_to_mb = 1e3;
