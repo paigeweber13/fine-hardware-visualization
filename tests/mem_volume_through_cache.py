@@ -160,6 +160,35 @@ def plot_results():
 
     plt.savefig(results_file + '_ratios.png')
 
+    ### VOLUME IN CACHE/MEMORY COMPARISON
+    plt.figure(5, figsize=(10,7))
+
+
+    # print(data['L2D load data volume [GBytes]'])
+    # print(data['L2D evict data volume [GBytes]'])
+    # print('l2 ratios: \n', l2_ratios)
+    # print('l3 ratios: \n', l3_ratios)
+    # print('mem ratios: \n', mem_ratios)
+
+    plt.plot(data['Single iteration size'], data['L2 data volume [GBytes]'],
+             color='midnightblue')
+    plt.plot(data['Single iteration size'], data['L3 data volume [GBytes]'],
+             color='darkred')
+    plt.plot(data['Single iteration size'],
+             data['Memory data volume [GBytes]'],
+             color='darkgreen')
+
+    plt.title('Comparing total data volume through cache and memory')
+    plt.xlabel('Size of one iteration (KBytes)')
+    plt.ylabel('Total data volume')
+    plt.legend([
+        'L2',
+        'L3',
+        'Memory',
+    ])
+
+    plt.savefig(results_file + '_total_volume.png')
+
     plt.show()
 
 def parse_cli_options():
