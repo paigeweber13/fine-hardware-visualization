@@ -59,10 +59,15 @@ def run_mem_iteration_tests():
     write_csv(mem_iter_file + '.csv', mem_csv_header, output)
 
 def run_mem_size_tests():
-    num_mem_iterations = 20
     mem_size = 5000
     output = []
-    while mem_size < 1000001:
+
+    start_num_iterations = 2000000
+    minimum_num_iter = 3
+
+    while mem_size < 4000001:
+        num_mem_iterations = int(max(start_num_iterations/mem_size, 
+                           minimum_num_iter))
         print('running memory with ' + str(num_mem_iterations) + ' iterations'\
               ' and size ' + str(mem_size), end='', flush=True)
         start_time = time.time()
@@ -140,7 +145,7 @@ def plot_results():
                    mem_size_data['manual_duration']):
         plt.annotate("{:.3f}s".format(xyt[2]), xy=(xyt[0] - 0.5, xyt[1]))
 
-    # plt.yscale('log')
+    plt.yscale('log')
     plt.title('Comparing amount of data transferred as reported by likwid ' \
         'and manually calculated amount of data transferred')
     plt.xlabel('Trial #')
@@ -149,7 +154,7 @@ def plot_results():
                 'Amoutn of data as reported by likwid'])
     plt.savefig(mem_size_file + '_sizes.png')
 
-    plt.show()
+    # plt.show()
 
 def parse_cli_options():
     parser = argparse.ArgumentParser(
