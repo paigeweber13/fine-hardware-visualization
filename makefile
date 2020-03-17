@@ -1,15 +1,16 @@
 CXX=g++
-CXXFLAGS=-g -Wall -std=c++1y -I$(INC_DIR) -march=native -mtune=native \
+CXXFLAGS=-g -Wall -std=c++14 $(INC_DIRS) -march=native -mtune=native \
   -fopenmp -O3 -DLIKWID_PERFMON
-LDFLAGS=-L$(LIB_DIR) $(LIBS) -march=native -mtune=native -fopenmp
+LDFLAGS=$(LIB_DIRS) $(LIBS) -march=native -mtune=native -fopenmp
 CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 
 # make sure likwid is installed to this prefix
 # manual install to this directory is preferred because then we can run without
 # sudo permission
 PREFIX=/usr/local
-INC_DIR=$(PREFIX)/include
-LIB_DIR=$(PREFIX)/lib
+INC_DIRS=-I$(PREFIX)/include
+INC_DIRS+=-I./lib
+LIB_DIRS=-L$(PREFIX)/lib
 LIBS=-llikwid -lboost_program_options
 
 MAIN_DIR=src
