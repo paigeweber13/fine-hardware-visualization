@@ -130,13 +130,19 @@ also possible to benchmark your machine by running `make bench`.
 ## 2020-03-10 through 2020-03-17
 ### Memory: tried to align memory manual calculations with likwid report
  - likwid is reporting less data transferred, even in best case manually
-   calculated transfer amounts are 1.25x the likwid reported ones
+   calculated transfer amounts are 1.25x the likwid reported ones. See
+   `./tests/mem_size_comparison_size_ratio.png` 
  - compared ratio of reads to writes in each level of cache/memory
-   - expected ratio to be 2:1 in cache and 1:1 in memory.. not the case
-   - at high volumes, L2 was 2:1, ram was about 1.5:1, and L3 was about 1:1
- - compared volume of data through every level of cache/memory
-   - expected volume to match at higher volumes. This was the case.
- - for everything above, see charts in `./tests/` for more info
+   - expected ratio to be 2:1 in cache and 1:1 in memory.. not the case
+   - at small volumes, ratio of reads to writes was very high: maybe writeback
+     just hasn't happened while we're instrumenting things?
+   - at high volumes, L2 was 2:1, ram was about 1.5:1, and L3 was about 1:1
+     (see the chart `./tests/mem_volume_through_cache_ratios.png`)
+ - compared volume of data through every level of cache/memory (see the charts
+   mem_volume_through_cache_X.png where X is l2, l3, and memory)
+   - expected volume reported in RAM and caches to match at higher volumes.
+     This was the case except for with L2, which was significantly lower. See
+     mem_volume_through_cache_total_volume.png
  - the counter "COREWB" (Counts the number of modified cachelines written
    back.) may be useful here
     - doesn't work on my arch (skylake). It works on Haswell according to the
@@ -150,6 +156,9 @@ also possible to benchmark your machine by running `make bench`.
      - trying to initialize in a parallel block caused it to fail because the
        threads were getting destroyed or something, but even when starting and
        stopping the group in a sequential block, no results.
+     - maybe it was getting counted but just not in all threads or something?
+       But aggregate results were the same whether the region `entire` was
+       specified or not
    - googled the error I got, only result was to the source code where the
      error is printed
    - I'm not even sure how to ask a question about this. Maybe need to make a
