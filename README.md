@@ -16,6 +16,7 @@ applications.
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
 - [Accomplishments:](#accomplishments)
+  - [2020-03-17 through 2020-03-24](#2020-03-17-through-2020-03-24)
   - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
     - [Memory: tried to align memory manual calculations with likwid report](#memory-tried-to-align-memory-manual-calculations-with-likwid-report)
     - [Convolution as a case study](#convolution-as-a-case-study)
@@ -38,10 +39,12 @@ applications.
 # Prerequisites
  - **likwid:** it is preferred you build likwid from source and install to
    `/usr/local`, as this is the only confirmed way to use `likwid-accessD`
-   without root permissions. Alternatively, you can also install it with your
-   package manger (ex. `sudo apt install likwid` on ubuntu)
- - **nlohmann/json:** available [on github](https://github.com/nlohmann/json).
-   Also installable on ubuntu with `sudo apt install nlohmann-json-dev` 
+   without root permissions. Instructions to do this are available
+   [here](https://github.com/RRZE-HPC/likwid) Alternatively, you can also
+   install it with your package manger (ex. `sudo apt install likwid` on
+   ubuntu)
+ - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
+   in ./lib
  - **boost/program_options:** available on [the boost
    website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
    install libboost-program-options-dev`
@@ -70,29 +73,36 @@ also possible to benchmark your machine by running `make bench`.
 
 # TODO:
 ## Immediate:
- - questions:
-   - Should I read up on caching and try to better understand that??
-   - or work on convolution and getting finer-grained data from core?
-   - or something else for this week?
+ - memory
+   - count L1 instructions to get an idea of data volume through L1
+   - read what every programmer should know about memory
+   - Load/store ratio: "DATA" performance group
+
+ - look into approaches of others
+   - what are people using these counters for?
+   - Is anyone doing things like this?
 
  - make convolution into a case study
+   - nothing is reporting as being saturated... but maybe we are saturating one
+     scalar single precision float unit? 
+   - must be something with CPU, because memory is not the bottleneck. 
+   - "entire_program" region doesn't work: remove everything but region and
+     then rebuild from there
+   - look at ports! - is there a counter for total number of uops dispatched
+     - uops_issued_any
+   - PORT_USAGE: split into 2 groups
    - identify types of instructions, identify parts of ports that are being
      used? 
-   - PORT_USAGE: split into 2 groups
    - identify how many instructions are getting piped from the front end to the
      back end?
    - look into metric for number of instructions decoded?
    - Visualize usage
    - aggregate results by region?? Are nested regions allowed?
-   - nothing is reporting as being saturated... but maybe we are saturating one
-     scalar single precision float unit? 
-   - must be something with CPU, because memory is not the bottleneck. 
 
  - CLI which benchmarks and process JSON into svg
- - generate svg
    - main part of program dumps info, second part reads and evaluates and creates
      svg
-      - use json?
+   - generate svg
    - libcairo is an option for graphics
 
 ## Long-term:
@@ -127,6 +137,8 @@ also possible to benchmark your machine by running `make bench`.
    - create visualization from output data
 
 # Accomplishments:
+## 2020-03-17 through 2020-03-24
+
 ## 2020-03-10 through 2020-03-17
 ### Memory: tried to align memory manual calculations with likwid report
  - likwid is reporting less data transferred, even in best case manually
