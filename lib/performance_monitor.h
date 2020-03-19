@@ -54,6 +54,10 @@
 #define ram_evict_data_volume_name "Memory evict data volume [GBytes]"
 #define ram_load_bandwidth_name "Memory load bandwidth [MBytes/s]"
 #define ram_load_data_volume_name "Memory load data volume [GBytes]"
+
+// other memroy/cache stuff
+#define load_to_store_ratio_metric_name "Load to store ratio"
+
 // ---- End names of things ---- //
 
 using json = nlohmann::json;

@@ -63,12 +63,14 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
 void benchmark_cache_and_memory(std::uint64_t num_iterations,
                           std::uint64_t data_size_kb)
 {
-  performance_monitor::init("L2|L3|MEM");
+  performance_monitor::init("L2|L3|MEM|DATA");
   benchmark_memory_bw("L2", num_iterations, data_size_kb);
   likwid_markerNextGroup();
   benchmark_memory_bw("L3", num_iterations, data_size_kb);
   likwid_markerNextGroup();
   benchmark_memory_bw("MEM", num_iterations, data_size_kb);
+  likwid_markerNextGroup();
+  benchmark_memory_bw("DATA", num_iterations, data_size_kb);
 }
 
 void benchmark_all()
@@ -99,6 +101,7 @@ void print_csv_header()
 {
   std::cout << "Single iteration size,"
                "Number of iterations,"
+               "Load to store ratio,"
                "L2 bandwidth [MBytes/s],"
                "L2 data volume [GBytes],"
                "L2D evict bandwidth [MBytes/s],"
@@ -282,6 +285,7 @@ int main(int argc, char *argv[])
       auto e = performance_monitor::get_aggregate_metrics();
       std::cout << memory_size_kb << ","
                 << num_memory_iter << ","
+                << e[load_to_store_ratio_metric_name] << ","
                 << e[l2_bandwidth_metric_name] << ","
                 << e[l2_data_volume_name] << ","
                 << e[l2_evict_bandwidth_name] << ","

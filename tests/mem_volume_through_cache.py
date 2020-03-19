@@ -200,6 +200,21 @@ def plot_results():
 
     plt.savefig(results_file + '_total_volume.png')
 
+    ### LOAD/STORE RATIO
+    plt.figure(6, figsize=(10,7))
+
+    plt.plot(data['Single iteration size'], data['Load to store ratio'])
+
+    plt.title('Load to store ratio for different iteration sizes')
+    plt.xlabel('Size of one iteration (KBytes)')
+    plt.ylabel('Load to store ratio')
+    plt.xscale('log')
+    # plt.yscale('log')
+    plt.axvline(x=3072)
+    plt.annotate("Max L3 capacity", (3200, 1e-4))
+
+    plt.savefig(results_file + '_load_to_store.png')
+
     # plt.show()
 
 def parse_cli_options():
