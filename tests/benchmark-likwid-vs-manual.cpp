@@ -194,8 +194,8 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                 << sp_flop_results.num_fp_ops << "," 
                 << sp_flop_results.mflops << ","
                 << runtimes["flops"] << ","
-                << events[total_sp_flops_event_name] << ","
-                << metrics[mflops_metric_name]
+                << events["FLOPS_SP"][total_sp_flops_event_name] << ","
+                << metrics["FLOPS_SP"][mflops_metric_name]
                 << "\n";
     }
 
@@ -206,8 +206,8 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                 << bandwidth_results.gb_transferred << "," 
                 << bandwidth_results.bandwidth << ","
                 << runtimes["RAM"] << ","
-                << metrics[ram_data_volume_metric_name] << ","
-                << metrics[ram_bandwidth_metric_name] << "\n";
+                << metrics["MEM"][ram_data_volume_metric_name] << ","
+                << metrics["MEM"][ram_bandwidth_metric_name] << "\n";
     }
   }
 }

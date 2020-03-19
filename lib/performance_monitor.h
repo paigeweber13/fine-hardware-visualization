@@ -91,10 +91,10 @@ class performance_monitor {
     static void resultsToJson();
 
     // ------ getters ----- //
-    const static std::map<std::string,double> get_runtimes_by_tag();
-    const static std::map<std::string,double> get_aggregate_events();
-    const static std::map<std::string,double> get_aggregate_metrics();
-    const static std::map<std::string,double> get_saturation();
+    const static std::map<std::string, double> get_runtimes_by_tag();
+    const static std::map<std::string, std::map<std::string, double>> get_aggregate_events();
+    const static std::map<std::string, std::map<std::string, double>> get_aggregate_metrics();
+    const static std::map<std::string, double> get_saturation();
 
   private:
     // ------ attributes ------ //
@@ -108,8 +108,8 @@ class performance_monitor {
     static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
-    static std::map<std::string, double> aggregate_events;
-    static std::map<std::string, double> aggregate_metrics;
+    static std::map<std::string, std::map<std::string, double>> aggregate_events;
+    static std::map<std::string, std::map<std::string, double>> aggregate_metrics;
     static std::map<std::string, double> saturation;
 
 };

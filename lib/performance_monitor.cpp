@@ -3,8 +3,8 @@
 int performance_monitor::num_threads;
 
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
-std::map<std::string, double> performance_monitor::aggregate_events;
-std::map<std::string, double> performance_monitor::aggregate_metrics;
+std::map<std::string, std::map<std::string, double>> performance_monitor::aggregate_events;
+std::map<std::string, std::map<std::string, double>> performance_monitor::aggregate_metrics;
 std::map<std::string, double> performance_monitor::saturation;
 
 // filenames
@@ -82,6 +82,9 @@ void performance_monitor::stopRegion(const char * tag)
 
   LIKWID_MARKER_GET(tag, &nevents, events, &time, &count);
 
+  // if there are multiple runs of the same tag this will report the longest of
+  // all runs. Maybe it would be better to have an average? This isn't widely
+  // used now so it isn't a big concern
   if(runtimes_by_tag.count(tag)){
     runtimes_by_tag[tag] = fmax(runtimes_by_tag[tag], time);
   } else {
@@ -105,18 +108,22 @@ void performance_monitor::getAggregateResults(){
 
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
 
+  char * groupName;
+
   // initialize everything to 0
-  aggregate_events[total_sp_flops_event_name] = 0.;
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   {
     gid = perfmon_getGroupOfRegion(i);
+    groupName = perfmon_getGroupName(gid);
+    aggregate_events[groupName][total_sp_flops_event_name] = 0.;
+
     for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
       event_name = perfmon_getEventName(gid, k);
-      aggregate_events[event_name] = 0.;
+      aggregate_events[groupName][event_name] = 0.;
     }
     for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
       metric_name = perfmon_getMetricName(gid, k);
-      aggregate_metrics[metric_name] = 0.;
+      aggregate_metrics[groupName][metric_name] = 0.;
     }
   }
 
@@ -125,21 +132,23 @@ void performance_monitor::getAggregateResults(){
     for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
     {
       gid = perfmon_getGroupOfRegion(i);
+      groupName = perfmon_getGroupName(gid);
+
       for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         if(event_value > 0){
-          aggregate_events[event_name] += event_value;
+          aggregate_events[groupName][event_name] += event_value;
 
           if(strcmp(sp_scalar_flops_event_name, event_name) == 0){
-            aggregate_events[total_sp_flops_event_name] += event_value;
+            aggregate_events[groupName][total_sp_flops_event_name] += event_value;
           }
           else if(strcmp(sp_avx_128_flops_event_name, event_name) == 0){
-            aggregate_events[total_sp_flops_event_name] += 
+            aggregate_events[groupName][total_sp_flops_event_name] += 
               event_value * OPS_PER_SP_128_VECTOR;
           }
           else if(strcmp(sp_avx_256_flops_event_name, event_name) == 0){
-            aggregate_events[total_sp_flops_event_name] += 
+            aggregate_events[groupName][total_sp_flops_event_name] += 
               event_value * OPS_PER_SP_256_VECTOR;
           }
         }
@@ -148,7 +157,7 @@ void performance_monitor::getAggregateResults(){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         if(!isnan(metric_value)){
-          aggregate_metrics[metric_name] += metric_value;
+          aggregate_metrics[groupName][metric_name] += metric_value;
         }
       }
     }
@@ -157,16 +166,33 @@ void performance_monitor::getAggregateResults(){
 
 void performance_monitor::compareActualWithbench()
 {
-  saturation[mflops_metric_name] =
-      aggregate_metrics[mflops_metric_name] / EXPERIENTIAL_SP_RATE_MFLOPS;
-  saturation[mflops_dp_metric_name] =
-      aggregate_metrics[mflops_dp_metric_name] / EXPERIENTIAL_DP_RATE_MFLOPS;
-  saturation[l2_bandwidth_metric_name] =
-      aggregate_metrics[l2_bandwidth_metric_name] / EXPERIENTIAL_RW_BW_L2;
-  saturation[l3_bandwidth_metric_name] =
-      aggregate_metrics[l3_bandwidth_metric_name] / EXPERIENTIAL_RW_BW_L3;
-  saturation[ram_bandwidth_metric_name] =
-      aggregate_metrics[ram_bandwidth_metric_name] / EXPERIENTIAL_RW_BW_RAM;
+  int gid;
+  char * groupName;
+  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  {
+    gid = perfmon_getGroupOfRegion(i);
+    groupName = perfmon_getGroupName(gid);
+    saturation[mflops_metric_name] =
+        fmax(saturation[mflops_metric_name], 
+             aggregate_metrics[groupName][mflops_metric_name] 
+             / EXPERIENTIAL_SP_RATE_MFLOPS);
+    saturation[mflops_dp_metric_name] =
+        fmax(saturation[mflops_dp_metric_name],
+             aggregate_metrics[groupName][mflops_dp_metric_name] 
+             / EXPERIENTIAL_DP_RATE_MFLOPS);
+    saturation[l2_bandwidth_metric_name] =
+        fmax(saturation[l2_bandwidth_metric_name],
+             aggregate_metrics[groupName][l2_bandwidth_metric_name] 
+             / EXPERIENTIAL_RW_BW_L2);
+    saturation[l3_bandwidth_metric_name] =
+        fmax(saturation[l3_bandwidth_metric_name],
+             aggregate_metrics[groupName][l3_bandwidth_metric_name] 
+             / EXPERIENTIAL_RW_BW_L3);
+    saturation[ram_bandwidth_metric_name] =
+        fmax(saturation[ram_bandwidth_metric_name],
+             aggregate_metrics[groupName][ram_bandwidth_metric_name] 
+             / EXPERIENTIAL_RW_BW_RAM);
+  }
 }
 
 void performance_monitor::printResults()
@@ -232,14 +258,26 @@ void performance_monitor::printOnlyAggregate()
   std::cout << std::endl;
 
   std::cout << "----- begin aggregate performance_monitor report -----\n";
-  std::cout << "--- aggregate events: \n";
+  std::cout << "--- aggregate events by group: \n";
   for (auto it=aggregate_events.begin(); it!=aggregate_events.end(); ++it)
-    std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
+  {
+    std::cout << "- Aggregate events for group " << it->first << '\n';
+    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2){
+      std::cout << "Aggregate " << it2->first << ": " << it2->second << '\n';
+    }
+    std::cout << std::endl;
+  }
   std::cout << std::endl;
 
-  std::cout << "--- aggregate metrics: \n";
+  std::cout << "--- aggregate metrics by group: \n";
   for (auto it=aggregate_metrics.begin(); it!=aggregate_metrics.end(); ++it)
-    std::cout << "Aggregate " << it->first << ": " << it->second << '\n';
+  {
+    std::cout << "- Aggregate metrics for group " << it->first << '\n';
+    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2){
+      std::cout << "Aggregate " << it2->first << ": " << it2->second << '\n';
+    }
+    std::cout << std::endl;
+  }
   std::cout << std::endl;
 
   std::cout << "----- end aggregate performance_monitor report -----\n";
@@ -253,34 +291,36 @@ void performance_monitor::printComparison(){
   std::cout << 
     "----- begin saturation level performance_monitor report -----\n";
   for (auto it=saturation.begin(); it!=saturation.end(); ++it)
+  {
     std::cout << "Percentage of available " << it->first << " used: " 
       << it->second << '\n';
+  }
   std::cout << std::endl;
   std::cout << "----- end saturation level performance_monitor report -----\n";
   std::cout << std::endl;
 }
 
 void performance_monitor::resultsToJson(){
-  json results;
-  for (auto it=saturation.begin(); it!=saturation.end(); ++it)
-    results["saturation"][it->first] = it->second;
+  // json results;
+  // for (auto it=saturation.begin(); it!=saturation.end(); ++it)
+  //   results["saturation"][it->first] = it->second;
 
-  std::ofstream o(jsonResultOutputFilepath);
-  o << std::setw(4) << results << std::endl;
+  // std::ofstream o(jsonResultOutputFilepath);
+  // o << std::setw(4) << results << std::endl;
 }
 
 const std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
 	return runtimes_by_tag;
 }
 
-const std::map<std::string,double> performance_monitor::get_aggregate_events() {
+const std::map<std::string,std::map<std::string, double>> performance_monitor::get_aggregate_events() {
 	return aggregate_events;
 }
 
-const std::map<std::string,double> performance_monitor::get_aggregate_metrics() {
+const std::map<std::string,std::map<std::string, double>> performance_monitor::get_aggregate_metrics() {
 	return aggregate_metrics;
 }
 
-const std::map<std::string,double> performance_monitor::get_saturation() {
+const std::map<std::string, double> performance_monitor::get_saturation() {
 	return saturation;
 }
