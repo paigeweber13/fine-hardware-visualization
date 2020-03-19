@@ -9,10 +9,6 @@ obj
 # fhv output
 *.json
 
-# data and plots
-*.csv
-*.png
-
 # archives
 *.tar.gz
 
