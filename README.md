@@ -17,6 +17,8 @@ applications.
     - [Features to add:](#features-to-add)
 - [Accomplishments:](#accomplishments)
   - [2020-03-17 through 2020-03-24](#2020-03-17-through-2020-03-24)
+    - [Memory](#memory)
+    - [What other people are doing](#what-other-people-are-doing)
   - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
     - [Memory: tried to align memory manual calculations with likwid report](#memory-tried-to-align-memory-manual-calculations-with-likwid-report)
     - [Convolution as a case study](#convolution-as-a-case-study)
@@ -142,6 +144,7 @@ also possible to benchmark your machine by running `make bench`.
 
 # Accomplishments:
 ## 2020-03-17 through 2020-03-24
+### Memory
  - MEM_INST_RETIRED_ALL_LOAD/STORE count all retired load/store instructions,
    respecitvely. See Table 19-3 of "Performance monitoring events" in intel
    developer's guide
@@ -150,7 +153,31 @@ also possible to benchmark your machine by running `make bench`.
  - Tried to get absolute measurement of volume of data transferred. 
    - Couldn't find counter of L1 memory instructions besides evict/read (which
      we already use in L2 measurements) so I tried using
-     MEM_INSTR_RETIRED_LOADS_ALL. See `tests/mem_volume_through_cache_total_volume.png`
+     MEM_INSTR_RETIRED_LOADS_ALL. See
+     `tests/mem_volume_through_cache_total_volume.png`
+     
+### What other people are doing
+ - browsed some projects on github
+   - searching "hardware counters" turned up countless projects that just
+     expose hardware counters in language X
+   - a few small projects: [cpm](https://github.com/wichtounet/cpm) had last
+     commit in 2018, ~40 stars
+ - stumbled into a cool project called
+   ["Kerncraft"](https://github.com/RRZE-HPC/kerncraft)
+   - There's an [academic
+     paper](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1)
+     about it
+   - by same group that owns likwid (RRZE-HPC)
+   - active: last commit today
+   - somewhat popular, ~50 stars.
+   - uses likwid and IACA (Intel Architecture Code Analyzer, a static analysis
+     tool)
+   - this project seems to focus on memory and caching
+   - not yet super sure how it works and what it produces, I'll download it and
+     play with it
+ - [Intel PCM](https://software.intel.com/en-us/articles/intel-performance-counter-monitor)
+   - does not visualize hardware but visualizes memory usage compared to
+     computation intensive things
 
 ## 2020-03-10 through 2020-03-17
 ### Memory: tried to align memory manual calculations with likwid report
