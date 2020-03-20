@@ -177,6 +177,14 @@ def plot_results():
     # print('l3 ratios: \n', l3_ratios)
     # print('mem ratios: \n', mem_ratios)
 
+    plt.plot(data['Single iteration size'], 
+             data['Total volume by retired instructions [GBytes]'],
+             color='black')
+    plt.plot(data['Single iteration size'], 
+             # num ops per run * num processors * single iteration size * kb to
+             # gb
+             2 * 4 * data['Single iteration size'] * 1e-6,
+             color='orange')
     plt.plot(data['Single iteration size'], data['L2 data volume [GBytes]'],
              color='midnightblue')
     plt.plot(data['Single iteration size'], data['L3 data volume [GBytes]'],
@@ -189,6 +197,8 @@ def plot_results():
     plt.xlabel('Size of one iteration (KBytes)')
     plt.ylabel('Total data volume')
     plt.legend([
+        'Total volume by retired instructions',
+        'Manually calculated volume',
         'L2',
         'L3',
         'Memory',

@@ -14,6 +14,8 @@
 using namespace std;
 namespace po = boost::program_options;
 
+#define BYTES_TO_GBYTES 1e-9
+
 // ---- default values
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
 const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
@@ -102,6 +104,9 @@ void print_csv_header()
   std::cout << "Single iteration size,"
                "Number of iterations,"
                "Load to store ratio,"
+               "Load volume by retired instructions [GBytes],"
+               "Store volume by retired instructions [GBytes],"
+               "Total volume by retired instructions [GBytes],"
                "L2 bandwidth [MBytes/s],"
                "L2 data volume [GBytes],"
                "L2D evict bandwidth [MBytes/s],"
@@ -282,28 +287,36 @@ int main(int argc, char *argv[])
       performance_monitor::printComparison();
     }
     else if (o == csv){
-      auto e = performance_monitor::get_aggregate_metrics();
+      auto e = performance_monitor::get_aggregate_events();
+      auto m = performance_monitor::get_aggregate_metrics();
       std::cout << memory_size_kb << ","
                 << num_memory_iter << ","
-                << e["DATA"][load_to_store_ratio_metric_name] << ","
-                << e["L2"][l2_bandwidth_metric_name] << ","
-                << e["L2"][l2_data_volume_name] << ","
-                << e["L2"][l2_evict_bandwidth_name] << ","
-                << e["L2"][l2_evict_data_volume_name] << ","
-                << e["L2"][l2_load_bandwidth_name] << ","
-                << e["L2"][l2_load_data_volume_name] << ","
-                << e["L3"][l3_bandwidth_metric_name] << ","
-                << e["L3"][l3_data_volume_name] << ","
-                << e["L3"][l3_evict_bandwidth_name] << ","
-                << e["L3"][l3_evict_data_volume_name] << ","
-                << e["L3"][l3_load_bandwidth_name] << ","
-                << e["L3"][l3_load_data_volume_name] << ","
-                << e["MEM"][ram_bandwidth_metric_name] << ","
-                << e["MEM"][ram_data_volume_metric_name] << ","
-                << e["MEM"][ram_evict_bandwidth_name] << ","
-                << e["MEM"][ram_evict_data_volume_name] << ","
-                << e["MEM"][ram_load_bandwidth_name] << ","
-                << e["MEM"][ram_load_data_volume_name] << "\n"
+                << m["DATA"][load_to_store_ratio_metric_name] << ","
+                << e["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
+                   * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
+                << e["DATA"]["MEM_INST_RETIRED_ALL_STORES"] 
+                   * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
+                << (e["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
+                   + e["DATA"]["MEM_INST_RETIRED_ALL_STORES"])
+                   * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
+                << m["L2"][l2_bandwidth_metric_name] << ","
+                << m["L2"][l2_data_volume_name] << ","
+                << m["L2"][l2_evict_bandwidth_name] << ","
+                << m["L2"][l2_evict_data_volume_name] << ","
+                << m["L2"][l2_load_bandwidth_name] << ","
+                << m["L2"][l2_load_data_volume_name] << ","
+                << m["L3"][l3_bandwidth_metric_name] << ","
+                << m["L3"][l3_data_volume_name] << ","
+                << m["L3"][l3_evict_bandwidth_name] << ","
+                << m["L3"][l3_evict_data_volume_name] << ","
+                << m["L3"][l3_load_bandwidth_name] << ","
+                << m["L3"][l3_load_data_volume_name] << ","
+                << m["MEM"][ram_bandwidth_metric_name] << ","
+                << m["MEM"][ram_data_volume_metric_name] << ","
+                << m["MEM"][ram_evict_bandwidth_name] << ","
+                << m["MEM"][ram_evict_data_volume_name] << ","
+                << m["MEM"][ram_load_bandwidth_name] << ","
+                << m["MEM"][ram_load_data_volume_name] << "\n"
                 ;
     }
   }
