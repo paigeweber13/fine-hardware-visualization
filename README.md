@@ -55,6 +55,8 @@ also possible to benchmark your machine by running `make bench`.
 
 # Usage Notes
  - Region names must not have spaces
+ - Chapter 19 of volume 3 of the Intel software developer's manual (page 3605
+   in the combined digital version) has hardware counter names
 
 # Goals:
  - main goal is to give people new to HPC something they can use to:
@@ -74,9 +76,7 @@ also possible to benchmark your machine by running `make bench`.
 # TODO:
 ## Immediate:
  - memory
-   - count L1 instructions to get an idea of data volume through L1
    - read what every programmer should know about memory
-   - Load/store ratio: "DATA" performance group
 
  - look into approaches of others
    - what are people using these counters for?
@@ -113,6 +113,20 @@ also possible to benchmark your machine by running `make bench`.
  - in convolution, the "entire_program" tag, which is designed to measure
    across all stages of code, doesn't work. However, the tag "convolution"
    inside the actual convolution does work.
+ - software engineering
+   - make benchmark stuff in fhv.cpp separate file
+     - combine with computation_measurements and just make it "benchmark"?
+   - combine benchmark in fhv with benchmark-likwid-vs-manual
+     - rewrite computation_measurements to optionally include manual results
+     - update CLI to optionally include manual results
+   - rename "computation_measurements" to "measurements"?
+   - replace printf statements with cout
+   - combine all memory bandwidth functions
+   - make it consistent when using variable name and raw string to refer to
+     counters
+ - things CLI will need to do:
+   - benchmark machine
+   - create visualization from output data
 
 ### Features to add:
  - expand suite of test software that has balanced/imbalanced usage
@@ -125,19 +139,18 @@ also possible to benchmark your machine by running `make bench`.
    - improve software engineering: make it consistent what calls likwid, etc.
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
- - software engineering
-   - combine benchmark in fhv with benchmark-likwid-vs-manual
-     - rewrite computation_measurements to optionally include manual results
-     - update CLI to optionally include manual results
-   - rename "computation_measurements" to "measurements"?
-   - replace printf statements with cout
-   - combine all memory bandwidth functions
- - things CLI will need to do:
-   - benchmark machine
-   - create visualization from output data
 
 # Accomplishments:
 ## 2020-03-17 through 2020-03-24
+ - MEM_INST_RETIRED_ALL_LOAD/STORE count all retired load/store instructions,
+   respecitvely. See Table 19-3 of "Performance monitoring events" in intel
+   developer's guide
+ - using these to get load/store ratios gave us ratios of 4-6x reads to writes
+   (see `tests/mem_volume_through_cache_load_to_store.png`)
+ - Tried to get absolute measurement of volume of data transferred. 
+   - Couldn't find counter of L1 memory instructions besides evict/read (which
+     we already use in L2 measurements) so I tried using
+     MEM_INSTR_RETIRED_LOADS_ALL. See `tests/mem_volume_through_cache_total_volume.png`
 
 ## 2020-03-10 through 2020-03-17
 ### Memory: tried to align memory manual calculations with likwid report
