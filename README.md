@@ -61,11 +61,18 @@ also possible to benchmark your machine by running `make bench`.
    in the combined digital version) has hardware counter names
 
 # Goals:
- - main goal is to give people new to HPC something they can use to:
-   - understand how their application maps to the architecture
-   - give suggestions on how to improve their application
- - apply this to graph problems: kernels in graph problems tend to change
-   behavior throughout execution
+"I think we have a shot at doing something other people don't do" - Dr. Saule
+
+Dr. Saule mentioned two ways this project will be useful
+ - help better understand code and how the author can improve it
+ - help better understand the architecture
+
+We want people new to HPC to be able to 
+ - understand how their application maps to the architecture
+ - give suggestions on how to improve their application
+
+Additionally, we hope to apply this to graph problems: kernels in graph
+problems tend to change behavior throughout execution
 
 # Architecture of Program
  - Identify hardware architecture
@@ -77,12 +84,16 @@ also possible to benchmark your machine by running `make bench`.
 
 # TODO:
 ## Immediate:
- - memory
-   - read what every programmer should know about memory
-
  - look into approaches of others
    - what are people using these counters for?
    - Is anyone doing things like this?
+   - Intel PCM
+   - Kerncraft - Read paper!
+   - HPC toolkit "Tau" out of Oak Ridge
+   - other laboratory toolkits
+   - Vampir
+   - Vtune
+   - NVidia GPU tool
 
  - make convolution into a case study
    - nothing is reporting as being saturated... but maybe we are saturating one
@@ -101,9 +112,19 @@ also possible to benchmark your machine by running `make bench`.
    - Visualize usage
    - aggregate results by region?? Are nested regions allowed?
 
+ - memory
+   - "we need to understand how accurate these counters are and how they map to
+     what we expect them to do"
+   - read what every programmer should know about memory
+   - inspect assembly: are we using instructions that load less than a
+     cacheline? 
+      - should have equal load and store instructions
+
  - CLI which benchmarks and process JSON into svg
-   - main part of program dumps info, second part reads and evaluates and creates
-     svg
+   - this will probably just come as I work on other stuff, because it'll be
+     easier to visualize than read text
+   - main part of program dumps info, second part reads and evaluates and
+     creates svg
    - generate svg
    - libcairo is an option for graphics
 
@@ -160,8 +181,8 @@ also possible to benchmark your machine by running `make bench`.
  - browsed some projects on github
    - searching "hardware counters" turned up countless projects that just
      expose hardware counters in language X
-   - a few small projects: [cpm](https://github.com/wichtounet/cpm) had last
-     commit in 2018, ~40 stars
+ - a few small projects: [cpm](https://github.com/wichtounet/cpm) had last
+   commit in 2018, ~40 stars
  - stumbled into a cool project called
    ["Kerncraft"](https://github.com/RRZE-HPC/kerncraft)
    - There's an [academic
