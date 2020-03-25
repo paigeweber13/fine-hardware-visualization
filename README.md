@@ -88,12 +88,33 @@ problems tend to change behavior throughout execution
    - what are people using these counters for?
    - Is anyone doing things like this?
    - Intel PCM
-   - Kerncraft - Read paper!
+   - Kerncraft - Read
+     [paper](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1)!
+     - uses IACA to generate in-core predictions
+     - chooses to use theoretical performance numbers for some things and
+       benchmarks for others. The choice is complicated but detailed in Fig. 1
+       of their paper
    - HPC toolkit "Tau" out of Oak Ridge
    - other laboratory toolkits
    - Vampir
    - Vtune
-   - NVidia GPU tool
+   - IACA (Intel Architecture Core Analyzer)
+   - [NVidia GPU
+     tools](https://developer.nvidia.com/performance-analysis-tools)
+   - The following are mentioned in the kerncraft paper:
+     - PBound - extracts information like arithmetic operations and
+       loads/stores from source code. Does not consider cache effects or
+       parallel execution. Model is "rather idealized" [[kerncraft
+       paper]](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1)
+     - ExaSAT - source code analysis with emphasis on data travel through cache
+       levels. Does not include compiler optimizations in measurements. Can
+       measure message-passing overhead
+     - Roofline Model Toolkit
+       - seems to also be called the Empirical Roofline Toolkit (ERT)
+       - attempts to **generate hardware models**, like we do.
+     - MAQAO
+       - does runtime analysis
+
 
  - make convolution into a case study
    - nothing is reporting as being saturated... but maybe we are saturating one
