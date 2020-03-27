@@ -94,6 +94,16 @@ problems tend to change behavior throughout execution
      - chooses to use theoretical performance numbers for some things and
        benchmarks for others. The choice is complicated but detailed in Fig. 1
        of their paper
+     - unable to instrument multi-stage programs. You can only instrument a
+       loop 
+     - was interested in a tool mentioned on page 9 of the report which
+       benchmarks the system and may also generate a topology `.yml`. 
+       - In the paper it was called `likwid_bench_auto.py` but seems to have been
+         renamed to `kerncraft/models/benchmark.py`
+       - to run it, I installed kerncraft with `pip install kerncraft` and then
+         ran `likwid_bench_auto` in bash. So name of executable is still the
+         same 
+       - seems to do a lot of the same stuff we want to do with a benchmark...
    - HPC toolkit "Tau" out of Oak Ridge
    - other laboratory toolkits
    - Vampir
@@ -158,7 +168,7 @@ problems tend to change behavior throughout execution
    across all stages of code, doesn't work. However, the tag "convolution"
    inside the actual convolution does work.
  - software engineering
-   - make benchmark stuff in fhv.cpp separate file
+   - move benchmark stuff in fhv.cpp to separate file
      - combine with computation_measurements and just make it "benchmark"?
    - combine benchmark in fhv with benchmark-likwid-vs-manual
      - rewrite computation_measurements to optionally include manual results
