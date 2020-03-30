@@ -4,6 +4,7 @@
 const unsigned NUM_SOCKETS = 1;
 const unsigned CORES_PER_SOCKET = 2;
 const unsigned THREADS_PER_CORE = 2;
+const double CLOCK_RATE_GHZ = 2.9;
 
 const unsigned SOCKET_THREADS [1][4] = {{0, 2, 1, 3}};
 
