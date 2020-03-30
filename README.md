@@ -22,6 +22,10 @@ applications.
   - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
     - [What other people are doing](#what-other-people-are-doing)
     - [Memory](#memory)
+      - [For the final 3 iterations:](#for-the-final-3-iterations)
+        - [Manually calculated volumes:](#manually-calculated-volumes)
+        - [Using intrinsic](#using-intrinsic)
+        - [Direct assignment](#direct-assignment)
   - [2020-03-17 through 2020-03-24](#2020-03-17-through-2020-03-24)
     - [Memory](#memory-1)
     - [What other people are doing](#what-other-people-are-doing-1)
@@ -227,8 +231,17 @@ it. The benchmark tool should be evaluated, we can draw from it.
    `other similar tools` section.
 
 ### Memory
-Inspected assembly. Short answer is: yes, there is one read and one write
-instruction per iteration. Pertinent lines seem to include just two commands:
+Inspected assembly. Summary of findings:
+ - compared intrinsics and assignment with operator=
+ - There is one read and one write instruction per iteration in both cases
+ - data volumes as calculated from number of retired instructions are off by a
+   factor of 2. Is this because the instructions only move *half* a cacheline
+   for some reason? Is that even possible? A vector of doubles is 256 bytes, so
+   half a cacheline.
+ - I was trying to use intrinsic for aligned values at unaligned addresses.
+   What is the behavior when this happens?
+ - when using operator=, volumes reported by likwid are higher and closer to
+   manually calculated vallues
 
 ```
 vmovapd	(%r14,%rax,8), %ymm0	# MEM[base: array_12, index: j_31, step: 8, offset: 0B], _22
@@ -245,6 +258,50 @@ packed double-precision floating-point values". And it looks like I didn't
 think about alignment while writing the benchmark because I try to do a load in
 the middle of a cache line. So maybe those instructions just don't happen? I
 don't know how the hardware handles invalid commands.
+
+Another theory: since vmovapd only moves a vector of doubles, maybe that just
+means my manually calculated data is off because it is only 32 bytes per
+instruction, not 64? "Volume by retired instructions" is off by about a factor
+of two, so this sounds reasonable.
+
+I tried switching to regular assignment without intrinsics and the assembly
+instead uses **vmovsd** (vector move scalar double... seems like an oxymoron)
+and now includes what seems to be six per iteration. However, there are a lot
+of complicated jump statements and likwid reports the same number of retired
+instructions so it's probably still just two per loop. 
+
+Strangely, memory volume as reported by likwid was higher in L3 and Memory when
+using direct assignment instead of the instrinsic. These higher values were
+closer to calculated volumes. Why?
+
+#### For the final 3 iterations:
+##### Manually calculated volumes: 
+Name: manually calculated volume, dtype: float64
+16     5.24288
+17    10.48576
+18    20.97152
+
+##### Using intrinsic
+Name: L3 data volume [GBytes], dtype: float64
+16     3.743730
+17     7.029880
+18    14.544200
+
+Name: Memory data volume [GBytes], dtype: float64
+16     1.969470
+17     8.604530
+18    10.764700
+
+##### Direct assignment
+Name: L3 data volume [GBytes], dtype: float64
+16     5.010750
+17    10.298100
+18    21.149400
+
+Name: Memory data volume [GBytes], dtype: float64
+16     3.650170
+17     8.718550
+18    21.705100
 
 ## 2020-03-17 through 2020-03-24
 ### Memory

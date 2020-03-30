@@ -50,6 +50,32 @@ def run_tests():
 def plot_results():
     data =  pandas.read_csv(results_file + '.csv')
 
+    # num ops per run * num processors * single iteration size * kb to
+    # gb
+    manually_calculated_volume = 2 * 4 * data['Single iteration size'] * 1e-6
+    manually_calculated_volume.name = 'manually calculated volume'
+    # print(type(manually_calculated_volume))
+
+    print(" ========= DATA ========= ")
+    print("manually calculated volume")
+    print(manually_calculated_volume)
+    print()
+    print("volume by retired instructions")
+    print(data["Total volume by retired instructions [GBytes]"])
+    print()
+    print("L2 volume according to likwid")
+    print(data["L2 data volume [GBytes]"])
+    print()
+    print("L3 volume according to likwid")
+    print(data["L3 data volume [GBytes]"])
+    print()
+    print("memory volume according to likwid")
+    print(data["Memory data volume [GBytes]"])
+    print()
+    print("manually calculated volume")
+    print(manually_calculated_volume)
+    print()
+
     ### RAW VOLUME - L2
     plt.figure(1, figsize=(10,7))
 
@@ -181,9 +207,7 @@ def plot_results():
              data['Total volume by retired instructions [GBytes]'],
              color='black')
     plt.plot(data['Single iteration size'], 
-             # num ops per run * num processors * single iteration size * kb to
-             # gb
-             2 * 4 * data['Single iteration size'] * 1e-6,
+             manually_calculated_volume,
              color='orange')
     plt.plot(data['Single iteration size'], data['L2 data volume [GBytes]'],
              color='midnightblue')
