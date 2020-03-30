@@ -21,8 +21,9 @@ applications.
 - [Accomplishments:](#accomplishments)
   - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
     - [What other people are doing](#what-other-people-are-doing)
-  - [2020-03-17 through 2020-03-24](#2020-03-17-through-2020-03-24)
     - [Memory](#memory)
+  - [2020-03-17 through 2020-03-24](#2020-03-17-through-2020-03-24)
+    - [Memory](#memory-1)
     - [What other people are doing](#what-other-people-are-doing-1)
   - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
     - [Memory: tried to align memory manual calculations with likwid report](#memory-tried-to-align-memory-manual-calculations-with-likwid-report)
@@ -111,12 +112,10 @@ problems tend to change behavior throughout execution
    - aggregate results by region?? Are nested regions allowed?
 
  - memory
-   - "we need to understand how accurate these counters are and how they map to
-     what we expect them to do"
    - read what every programmer should know about memory
    - inspect assembly: are we using instructions that load less than a
-     cacheline? 
-      - should have equal load and store instructions
+     cacheline? Is that why data volume as calculated by num_instructions * 64
+     bytes is larger than likwid reported data?
 
  - CLI which benchmarks and process JSON into svg
    - this will probably just come as I work on other stuff, because it'll be
@@ -145,9 +144,7 @@ problems tend to change behavior throughout execution
    - combine all memory bandwidth functions
    - make it consistent when using variable name and raw string to refer to
      counters
- - things CLI will need to do:
-   - benchmark machine
-   - create visualization from output data
+ - a few warnings in the code, mostly unused variables
 
 ### Features to add:
  - expand suite of test software that has balanced/imbalanced usage
@@ -160,6 +157,9 @@ problems tend to change behavior throughout execution
    - improve software engineering: make it consistent what calls likwid, etc.
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
+ - create CLI that will:
+   - benchmark machine
+   - create visualization from output data
 
 # Other similar tools:
 ## Kerncraft:
@@ -186,10 +186,11 @@ it. The benchmark tool should be evaluated, we can draw from it.
    automatically detected
    - honestly we might just have to write .yml files for intel
      architectures that have enough information for visualizations to be
-     created
+     created. A lot of the information can be scraped from the output of things
+     like `likwid-topology` and `cat /proc/cpuinfo` but not everything.
  - kerncraft does automatically benchmark a lot of great things (bandwidths
    are a notable example) but also provides much more information than we
-   are just planning on benchmarking
+   are planning on getting from our benchmarks 
  - I feel like I could spend weeks just learning everything about kerncraft
 
 ## Others:
@@ -221,8 +222,29 @@ it. The benchmark tool should be evaluated, we can draw from it.
 # Accomplishments:
 ## 2020-03-24 through 2020-03-30
 ### What other people are doing
+ - feel like I could spend weeks just learning about what other tools do
  - Read a lot about kerncraft, [added a section on it](#kerncraft) in the
    `other similar tools` section.
+
+### Memory
+Inspected assembly. Short answer is: yes, there is one read and one write
+instruction per iteration. Pertinent lines seem to include just two commands:
+
+```
+vmovapd	(%r14,%rax,8), %ymm0	# MEM[base: array_12, index: j_31, step: 8, offset: 0B], _22
+vmovapd %ymm0, 0(%r13,%rax,8) # _22, MEM[base: copy_array_11, index: j_31, step: 8, offset: 0B]
+```
+
+seems to correspond with loading `array + j` into `buffer` and then storing
+`buffer` into `copy_array + j`
+
+Can this instruction load less than a cache line? Cache line size is 64 bytes
+or 512 bits. In this case, the command could move only 256 bits per call
+(half a cache line). However, movapd is the instruction for "move *aligned*
+packed double-precision floating-point values". And it looks like I didn't
+think about alignment while writing the benchmark because I try to do a load in
+the middle of a cache line. So maybe those instructions just don't happen? I
+don't know how the hardware handles invalid commands.
 
 ## 2020-03-17 through 2020-03-24
 ### Memory
