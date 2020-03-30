@@ -15,10 +15,15 @@ applications.
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
+- [Other similar tools:](#other-similar-tools)
+  - [Kerncraft:](#kerncraft)
+  - [Others:](#others)
 - [Accomplishments:](#accomplishments)
+  - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
+    - [What other people are doing](#what-other-people-are-doing)
   - [2020-03-17 through 2020-03-24](#2020-03-17-through-2020-03-24)
     - [Memory](#memory)
-    - [What other people are doing](#what-other-people-are-doing)
+    - [What other people are doing](#what-other-people-are-doing-1)
   - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
     - [Memory: tried to align memory manual calculations with likwid report](#memory-tried-to-align-memory-manual-calculations-with-likwid-report)
     - [Convolution as a case study](#convolution-as-a-case-study)
@@ -87,44 +92,6 @@ problems tend to change behavior throughout execution
  - look into approaches of others
    - what are people using these counters for?
    - Is anyone doing things like this?
-   - Intel PCM
-   - Kerncraft - Read
-     [paper](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1)!
-     - uses IACA to generate in-core predictions
-     - chooses to use theoretical performance numbers for some things and
-       benchmarks for others. The choice is complicated but detailed in Fig. 1
-       of their paper
-     - unable to instrument multi-stage programs. You can only instrument a
-       loop 
-     - was interested in a tool mentioned on page 9 of the report which
-       benchmarks the system and may also generate a topology `.yml`. 
-       - In the paper it was called `likwid_bench_auto.py` but seems to have been
-         renamed to `kerncraft/models/benchmark.py`
-       - to run it, I installed kerncraft with `pip install kerncraft` and then
-         ran `likwid_bench_auto` in bash. So name of executable is still the
-         same 
-       - seems to do a lot of the same stuff we want to do with a benchmark...
-   - HPC toolkit "Tau" out of Oak Ridge
-   - other laboratory toolkits
-   - Vampir
-   - Vtune
-   - IACA (Intel Architecture Core Analyzer)
-   - [NVidia GPU
-     tools](https://developer.nvidia.com/performance-analysis-tools)
-   - The following are mentioned in the kerncraft paper:
-     - PBound - extracts information like arithmetic operations and
-       loads/stores from source code. Does not consider cache effects or
-       parallel execution. Model is "rather idealized" [[kerncraft
-       paper]](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1)
-     - ExaSAT - source code analysis with emphasis on data travel through cache
-       levels. Does not include compiler optimizations in measurements. Can
-       measure message-passing overhead
-     - Roofline Model Toolkit
-       - seems to also be called the Empirical Roofline Toolkit (ERT)
-       - attempts to **generate hardware models**, like we do.
-     - MAQAO
-       - does runtime analysis
-
 
  - make convolution into a case study
    - nothing is reporting as being saturated... but maybe we are saturating one
@@ -194,7 +161,69 @@ problems tend to change behavior throughout execution
  - have LIKWID_THREADS environment variable get set dynamically instead of hard
    coded
 
+# Other similar tools:
+## Kerncraft:
+There's a
+[paper](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1) about
+it. The benchmark tool should be evaluated, we can draw from it.
+
+ - uses IACA to generate in-core predictions
+ - chooses to use theoretical performance numbers for some things and
+   benchmarks for others. The choice is complicated but detailed in Fig. 1
+   of their paper
+ - unable to instrument multi-stage programs. You can only instrument a
+   loop 
+ - was interested in a tool mentioned on page 9 of the report which
+   benchmarks the system and may also generate a topology `.yml`. 
+   - In the paper it was called `likwid_bench_auto.py` but seems to have been
+     renamed to `kerncraft/models/benchmark.py`
+   - to run it, I installed kerncraft with `pip install kerncraft` and then
+     ran `likwid_bench_auto` in bash. So name of executable is still the
+     same 
+   - seems to do **a lot of the same stuff we want to do with a benchmark**...
+ - for benchmark to have useful data, you have to fill out a .yml file
+   about your machine. With our program, we would like architecture to be
+   automatically detected
+   - honestly we might just have to write .yml files for intel
+     architectures that have enough information for visualizations to be
+     created
+ - kerncraft does automatically benchmark a lot of great things (bandwidths
+   are a notable example) but also provides much more information than we
+   are just planning on benchmarking
+ - I feel like I could spend weeks just learning everything about kerncraft
+
+## Others:
+ - Intel PCM
+ - HPC toolkit "Tau" out of Oak Ridge
+ - other laboratory toolkits
+ - Vampir
+ - Vtune
+ - IACA (Intel Architecture Core Analyzer)
+   - has reached end of life according to intel website. LLVM-MCA should be
+     considered as a replacement
+ - LLVM-MCA
+ - [NVidia GPU
+   tools](https://developer.nvidia.com/performance-analysis-tools)
+ - The following are mentioned in the kerncraft paper:
+   - PBound - extracts information like arithmetic operations and
+     loads/stores from source code. Does not consider cache effects or
+     parallel execution. Model is "rather idealized" [[kerncraft
+     paper]](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1)
+   - ExaSAT - source code analysis with emphasis on data travel through cache
+     levels. Does not include compiler optimizations in measurements. Can
+     measure message-passing overhead
+   - Roofline Model Toolkit
+     - seems to also be called the Empirical Roofline Toolkit (ERT)
+     - attempts to **generate hardware models**, like we do.
+   - MAQAO
+     - does runtime analysis
+
 # Accomplishments:
+## 2020-03-24 through 2020-03-30
+### What other people are doing
+ - Read a lot about kerncraft, [added a section on it](#kerncraft) in the
+   `other similar tools` section.
+
 ## 2020-03-17 through 2020-03-24
 ### Memory
  - MEM_INST_RETIRED_ALL_LOAD/STORE count all retired load/store instructions,
