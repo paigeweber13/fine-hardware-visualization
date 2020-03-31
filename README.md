@@ -228,6 +228,14 @@ it. The benchmark tool should be evaluated, we can draw from it.
 
 # Accomplishments:
 ## 2020-03-24 through 2020-03-30
+Feeling a little overwhelmed. I've struggled this week and it's made me aware
+of how little I know. I feel like I need to learn about:
+ - how likwid works. Read the documentation and examples.
+ - how caching and memory works
+ - what exactly other people are doing
+
+Not to mention actually building this library
+
 ### What other people are doing
  - feel like I could spend weeks just learning about what other tools do
  - Read a lot about kerncraft, [added a section on it](#kerncraft) in the
@@ -260,8 +268,8 @@ Inspected assembly. Summary of findings:
    factor of 2. Is this because the instructions only move *half* a cacheline
    for some reason? Is that even possible? A vector of doubles is 256 bytes, so
    half a cacheline.
- - I was trying to use intrinsic for aligned values at unaligned addresses.
-   What is the behavior when this happens?
+ - I realized when using intrinsics, I was trying to use intrinsic for aligned
+   values at unaligned addresses. What is the behavior when this happens?
  - when using operator=, volumes reported by likwid are higher and closer to
    manually calculated vallues
 
