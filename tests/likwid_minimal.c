@@ -12,6 +12,7 @@
 //  - likwid-perfctr -C S0:0 -g L3 -g FLOPS_DP -M 1 -m ./a.out
 //  - likwid-perfctr -C S0:0 -g FP_ARITH_INST_RETIRED_SCALAR_DOUBLE:PMC0,L2_LINES_IN_ALL:PMC1 -M 1 -m ./a.out   
 
+#include <omp.h>
 #include <likwid.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +21,7 @@ int main()
 {
   printf("\n\nThis is a minimal example of how the likwid marker api works\n");
 
-  const char *filepath = "/tmp/likwid.out";
+  // const char *filepath = "/tmp/likwid.out";
 
   // setenv("LIKWID_EVENTS", "FLOPS_DP", 1);
   // setenv("LIKWID_MODE", "1", 1);
@@ -29,23 +30,33 @@ int main()
   // setenv("LIKWID_FORCE", "1", 1);
 
   likwid_markerInit();
-  likwid_pinThread(0);
+
+  #pragma omp parallel
+  {
+    likwid_markerThreadInit();
+  }
 
   double a, b, c;
   a = 1.8;
   b = 3.2;
 
   perfmon_startCounters();
+  #pragma omp parallel
+  {
   for (int j = 0; j < 4; j++)
   {
-    printf("iteration %d\n", j);
-    likwid_markerNextGroup();
+    printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
+    likwid_markerRegisterRegion("double_flops");
     likwid_markerStartRegion("double_flops");
+    #pragma omp barrier
     for (int i = 0; i < 10000000; i++)
     {
       c = a * b + c;
     }
+    #pragma omp barrier
     likwid_markerStopRegion("double_flops");
+    likwid_markerNextGroup();
+  }
   }
   perfmon_stopCounters();
 
