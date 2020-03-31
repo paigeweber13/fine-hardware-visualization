@@ -21,6 +21,7 @@ applications.
 - [Accomplishments:](#accomplishments)
   - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
     - [What other people are doing](#what-other-people-are-doing)
+    - [Convolution as a case study](#convolution-as-a-case-study)
     - [Memory](#memory)
       - [For the final 3 iterations:](#for-the-final-3-iterations)
         - [Manually calculated volumes:](#manually-calculated-volumes)
@@ -31,7 +32,7 @@ applications.
     - [What other people are doing](#what-other-people-are-doing-1)
   - [2020-03-10 through 2020-03-17](#2020-03-10-through-2020-03-17)
     - [Memory: tried to align memory manual calculations with likwid report](#memory-tried-to-align-memory-manual-calculations-with-likwid-report)
-    - [Convolution as a case study](#convolution-as-a-case-study)
+    - [Convolution as a case study](#convolution-as-a-case-study-1)
       - [When both groups were started/stopped:](#when-both-groups-were-startedstopped)
       - [When only actual convolution was inside group:](#when-only-actual-convolution-was-inside-group)
       - [Analysis](#analysis)
@@ -114,6 +115,8 @@ problems tend to change behavior throughout execution
    - look into metric for number of instructions decoded?
    - Visualize usage
    - aggregate results by region?? Are nested regions allowed?
+   - if we want to instrument convolution, will need to adjust fhv to report by
+     region. Currently only reports by group (i.e. FLOPS_SP or L2)
 
  - memory
    - read what every programmer should know about memory
@@ -228,7 +231,26 @@ it. The benchmark tool should be evaluated, we can draw from it.
 ### What other people are doing
  - feel like I could spend weeks just learning about what other tools do
  - Read a lot about kerncraft, [added a section on it](#kerncraft) in the
-   `other similar tools` section.
+   `other similar tools` section. Highlights follow:
+   - only instruments loops, not multi-stage programs
+   - does an automatic benchmark
+   - seems architecture information has to be manually written
+ - one of my biggest questions: How can we better take advantage of what other
+   people are using?
+   - use likwid-perfctr command line? But then we'd have to scrape the output
+     to use results programmatically
+   - use likwid_benchmark_auto.py to benchmark code?
+
+### Convolution as a case study
+Commenting the line `likwid_markerNextGroup()` caused it to work with two
+regions 
+
+Tried to calculate port usage. Created 3 custom groups so we could calculate
+port usage. Currently exploring if UOPS_EXECUTED_CORE or UOPS_EXECUTED_THREAD
+provides counts that are the same as summing all UOPS_DISPATCHED_PORT_PORT_*
+
+Really struggled with getting errors in likwid. I feel like I need to spend
+more time reading the documentation.
 
 ### Memory
 Inspected assembly. Summary of findings:
