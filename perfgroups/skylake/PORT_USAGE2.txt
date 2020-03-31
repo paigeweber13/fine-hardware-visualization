@@ -1,0 +1,29 @@
+SHORT  Execution port utilization, part 1: ports 0-2
+
+EVENTSET
+FIXC0 INSTR_RETIRED_ANY
+FIXC1 CPU_CLK_UNHALTED_CORE
+FIXC2 CPU_CLK_UNHALTED_REF
+PMC0  UOPS_EXECUTED_CORE
+PMC1  UOPS_DISPATCHED_PORT_PORT_3
+PMC2  UOPS_DISPATCHED_PORT_PORT_4
+PMC3  UOPS_DISPATCHED_PORT_PORT_5
+
+METRICS
+Runtime (RDTSC) [s] time
+Runtime unhalted [s] FIXC1*inverseClock
+Clock [MHz]  1.E-06*(FIXC1/FIXC2)/inverseClock
+CPI  FIXC1/FIXC0
+Port3 usage ratio PMC1/PMC0
+Port4 usage ratio PMC2/PMC0
+Port5 usage ratio PMC3/PMC0
+
+LONG
+Formulas:
+Port3 usage ratio = UOPS_DISPATCHED_PORT_PORT_3/UOPS_EXECUTED_CORE
+Port4 usage ratio = UOPS_DISPATCHED_PORT_PORT_4/UOPS_EXECUTED_CORE
+Port5 usage ratio = UOPS_DISPATCHED_PORT_PORT_5/UOPS_EXECUTED_CORE
+-
+This group measures the execution port utilization in a CPU core. The group can
+only be measured when HyperThreading is disabled because only then each CPU core
+can program eight counters.

@@ -38,6 +38,10 @@ ASM+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(ASM_DIR)/%.s)
 ASM+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(ASM_DIR)/%.s)
 ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
 
+SYSTEM_PERFGROUPS_DIR=/usr/local/share/likwid/
+PERFGROUPS_ROOT_DIR_NAME=perfgroups
+PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
+
 EXEC_NAME=fhv
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 
@@ -50,6 +54,8 @@ assembly: $(ASM)
 
 fhv: $(EXEC)
 	$(EXEC)
+
+perfgroups: $(PERFGROUPS_DIRS)
 
 cph-bench: $(EXEC)
 	qsub -q copperhead -d $(shell pwd) -l nodes=1:ppn=16 -l walltime=01:00:00 bench.sh
@@ -85,6 +91,20 @@ $(TEST_EXEC_DIR):
 
 $(ASM_DIR):
 	mkdir $(ASM_DIR)
+
+### rules to copy perfgroups
+.PHONY: $(PERFGROUPS_DIRS)
+
+define copy-command
+sudo cp $(wildcard $@/*) $(SYSTEM_PERFGROUPS_DIR)$@/
+endef
+
+$(PERFGROUPS_DIRS):
+	@echo sudo permission needed to copy to system directory. This will override
+	@echo previously-copied groups but not groups shipped with likwid.
+	@echo
+	@echo "$(copy-command)"
+	@$(copy-command)
 
 ### rules to link executables
 define ld-command
