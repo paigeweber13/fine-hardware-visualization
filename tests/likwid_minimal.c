@@ -10,7 +10,7 @@
 // some other command examples, since I've been using this to test lots of
 // stuff:
 //  - likwid-perfctr -C S0:0 -g L3 -g FLOPS_DP -M 1 -m ./a.out
-//  - likwid-perfctr -C S0:0 -g FP_ARITH_INST_RETIRED_SCALAR_DOUBLE:PMC0,L2_LINES_IN_ALL:PMC1 -M 1 -m ./a.out   
+//  - likwid-perfctr -C S0:0 -g FP_ARITH_INST_RETIRED_SCALAR_DOUBLE:PMC0,L2_LINES_IN_ALL:PMC1 -M 1 -m ./a.out
 
 #include <omp.h>
 #include <likwid.h>
@@ -31,34 +31,34 @@ int main()
 
   likwid_markerInit();
 
-  #pragma omp parallel
+#pragma omp parallel
   {
     likwid_markerThreadInit();
+    likwid_markerRegisterRegion("double_flops");
   }
 
   double a, b, c;
   a = 1.8;
   b = 3.2;
 
-  perfmon_startCounters();
-  #pragma omp parallel
+// perfmon_startCounters();
+#pragma omp parallel
   {
-  for (int j = 0; j < 4; j++)
-  {
-    printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
-    likwid_markerRegisterRegion("double_flops");
-    likwid_markerStartRegion("double_flops");
-    #pragma omp barrier
-    for (int i = 0; i < 10000000; i++)
+    for (int j = 0; j < 4; j++)
     {
-      c = a * b + c;
+      printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
+      likwid_markerStartRegion("double_flops");
+#pragma omp barrier
+      for (int i = 0; i < 10000000; i++)
+      {
+        c = a * b + c;
+      }
+#pragma omp barrier
+      likwid_markerStopRegion("double_flops");
+      likwid_markerNextGroup();
     }
-    #pragma omp barrier
-    likwid_markerStopRegion("double_flops");
-    likwid_markerNextGroup();
   }
-  }
-  perfmon_stopCounters();
+  // perfmon_stopCounters();
 
   printf("final c: %f\n", c);
 
