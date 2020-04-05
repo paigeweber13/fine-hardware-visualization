@@ -12,6 +12,8 @@ applications.
 - [Architecture of Program](#architecture-of-program)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
+    - [Summary:](#summary)
+    - [Detailed todo](#detailed-todo)
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
@@ -22,6 +24,8 @@ applications.
   - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
     - [What other people are doing](#what-other-people-are-doing)
     - [Convolution as a case study](#convolution-as-a-case-study)
+      - [Investigating port usage](#investigating-port-usage)
+      - [Applying port usage information to convolution](#applying-port-usage-information-to-convolution)
     - [Memory](#memory)
       - [For the final 3 iterations:](#for-the-final-3-iterations)
         - [Manually calculated volumes:](#manually-calculated-volumes)
@@ -95,8 +99,17 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
+### Summary:
 Daily: 1/2 hour memory, 1/2 hour convolution, 2 hours other people
 
+Components of work:
+ - make performance_monitor aggregate and report by region in addition to
+   group. performance_monitor already aggregates by group.
+ - 1/2 hour read "what every programmer should know about memory"
+ - read Kerncraft paper
+ - try to use kerncraft and other performance monitoring suites
+
+### Detailed todo
  - look into approaches of others
    - what are people using these counters for?
    - Is anyone doing things like this?
@@ -230,10 +243,34 @@ it. The benchmark tool should be evaluated, we can draw from it.
 
 # Accomplishments:
 ## 2020-03-24 through 2020-03-30
+Main points:
+ - using my "performance_monitor" adds another layer of complexity that makes
+   it hard to debug problems. I barely know how to use likwid, and I'm already
+   writing my own library?
+ - have a way to measure usage by ports, but it only kind of works
+   - sometimes, likwid hangs on the part where it analyzes results
+ - instrumenting entire "convolution" program works if you don't have the call
+   to next_group, with some exceptions (see next point)
+ - making the number of iterations a multiple of the number of groups
+   *sometimes* fixes the preceding 2 problems.
+   - this only works sometimes, and seems to work more frequently with lower
+     numbers of groups (the max number of groups I've been able to successfuly
+     do is 6). In general, it feels very non-deterministic and it's very
+     frustrating. 
+ - vector of doubles is only half the size of a cacheline. Considering every
+   operation as one cacheline worth of transfer seems to be the reason those
+   values are higher by a factor of 2. But why is vmovapd (move **aligned**
+   packed double) allowing us to move *half* a cacheline worth of data? Why am
+   I able to use this intrinsic without error even when I supply an address
+   halfway through a cacheline?
+ - using `operator=` instead of intrinsics gives higher transfer volumes that
+   are closer to manually calculated volumes
+
 Feeling a little overwhelmed. I've struggled this week and it's made me aware
 of how little I know. I feel like I need to learn about:
  - how likwid works. Read the documentation and examples.
  - how caching and memory works
+ - how floating-point arithmetic works
  - what exactly other people are doing
 
 Not to mention actually building this library
@@ -255,6 +292,7 @@ Not to mention actually building this library
 Commenting the line `likwid_markerNextGroup()` caused it to work with two
 regions 
 
+#### Investigating port usage
 Tried to calculate port usage. Created 3 custom groups so we could calculate
 port usage. Currently exploring if UOPS_EXECUTED_CORE, UOPS_EXECUTED_THREAD, or
 UOPS_ISSUED_ANY provides counts that are the same as summing all
@@ -352,6 +390,19 @@ I've run this program a few times and I only seem to get this result (1.84e19)
 sometimes. And sometimes I get that result on the value for PORT_7. I believe
 it's a bug or an error of some kind. Seems to behave better if the number of
 iterations is increased.
+
+#### Applying port usage information to convolution
+If the number of iterations where `likwid_markerNextGroup()` is called is a
+multiple of the number of groups, things USUALLY behave well. If not:
+
+Trying to just tack on port_usage groups to the existing MEM_DP|FLOPS_SP etc.
+makes likwid hang indefinitely on its analysis after convolution is run.
+
+instrumenting "entire_program" works if I comment out likwid_markerNextGroup()
+OR if the number of iterations is a multiple of the number of groups.
+Sometimes. This is very non-deterministic and it's frustrating. Making the
+number of iterations a multiple of the number of groups SOMETIMES works, but as
+the number of groups increases it seems to work less well.
 
 ### Memory
 Inspected assembly. Summary of findings:
