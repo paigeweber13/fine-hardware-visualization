@@ -95,6 +95,8 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
+Daily: 1/2 hour memory, 1/2 hour convolution, 2 hours other people
+
  - look into approaches of others
    - what are people using these counters for?
    - Is anyone doing things like this?
@@ -254,11 +256,91 @@ Commenting the line `likwid_markerNextGroup()` caused it to work with two
 regions 
 
 Tried to calculate port usage. Created 3 custom groups so we could calculate
-port usage. Currently exploring if UOPS_EXECUTED_CORE or UOPS_EXECUTED_THREAD
-provides counts that are the same as summing all UOPS_DISPATCHED_PORT_PORT_*
+port usage. Currently exploring if UOPS_EXECUTED_CORE, UOPS_EXECUTED_THREAD, or
+UOPS_ISSUED_ANY provides counts that are the same as summing all
+UOPS_DISPATCHED_PORT_PORT_*
 
 Really struggled with getting errors in likwid. I feel like I need to spend
 more time reading the documentation.
+
+Ran a test that counts each of UOPS_EXECUTED_CORE, UOPS_EXECUTED_THREAD, and
+UOPS_ISSUED_ANY. On one core, these are the results I get: 
+
++-----------------------+---------+----------+
+|         Event         | Counter |  Core 0  |
++-----------------------+---------+----------+
+|   INSTR_RETIRED_ANY   |  FIXC0  | 30003500 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  | 40271970 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  | 33897450 |
+|   UOPS_EXECUTED_CORE  |   PMC0  | 27690410 |
+|  UOPS_EXECUTED_THREAD |   PMC1  | 20082810 |
+|    UOPS_ISSUED_ANY    |   PMC2  | 20121590 |
++-----------------------+---------+----------+
+
+I summed up the individual port counts by running the same program multiple
+times with different ports counted each time:
+
+PORT 0  |  4979574
+PORT 1  |  5024232
+PORT 2  |  861
+PORT 3  |  924
+PORT 4  |  801
+PORT 5  |  10317
+PORT 6  |  10004330
+PORT 7  |  363
+
+SUM     |  2.00E+07
+
+UOPS_EXECUTED_THREAD (from above): 2.01E+07
+UOPS_ISSUED_ANY (from above): 2.01E+07
+
+Here, both UOPS_EXECUTED_THREAD and UOPS_ISSUED_ANY seem to match with the sum
+of all ports. However, when I run the same code in parallel, things get weird:
+
++----------------------------+---------+-----------+
+|            Event           | Counter |    Sum    |
++----------------------------+---------+-----------+
+|   INSTR_RETIRED_ANY STAT   |  FIXC0  | 120495560 |
+| CPU_CLK_UNHALTED_CORE STAT |  FIXC1  | 166349120 |
+|  CPU_CLK_UNHALTED_REF STAT |  FIXC2  | 143447620 |
+|   UOPS_EXECUTED_CORE STAT  |   PMC0  | 161796390 |
+|  UOPS_EXECUTED_THREAD STAT |   PMC1  |  80585430 |
+|    UOPS_ISSUED_ANY STAT    |   PMC2  |  80664620 |
++----------------------------+---------+-----------+
+
+(the numbers reported below are the sums of counters in each core)
+
+PORT 0  |  19960933
+PORT 1  |  20443779
+PORT 2  |  60018
+PORT 3  |  485226
+PORT 4  |  1.84E+19
+PORT 5  |  578111
+PORT 6  |  42519460
+PORT 7  |  568032
+
+SUM     |  1.84E+19
+
+UOPS_EXECUTED_THREAD (from above): 8.09E+07
+UOPS_ISSUED_ANY (from above): 8.10E+07
+
+Notice that the number of operations reported on port 4 are incredibly high.
+Here's the core-by-core results:
+
++-----------------------------+---------+----------+----------+----------+--------------+
+|            Event            | Counter |  Core 0  |  Core 1  |  Core 2  |    Core 3    |
++-----------------------------+---------+----------+----------+----------+--------------+
+|      INSTR_RETIRED_ANY      |  FIXC0  | 30946300 | 30944860 | 42940730 |     30895580 |
+|    CPU_CLK_UNHALTED_CORE    |  FIXC1  | 60802980 | 58707880 | 55233110 |     59092460 |
+|     CPU_CLK_UNHALTED_REF    |  FIXC2  | 52916970 | 51040180 | 48027820 |     51370380 |
+|      UOPS_EXECUTED_CORE     |   PMC0  | 58303410 | 41440210 | 54157630 |     41846800 |
+| UOPS_DISPATCHED_PORT_PORT_3 |   PMC1  |    68465 |    85618 |  2454614 |        61633 |
+| UOPS_DISPATCHED_PORT_PORT_4 |   PMC2  |      903 |    21707 |  1959782 | 1.844674e+19 |
+| UOPS_DISPATCHED_PORT_PORT_5 |   PMC3  |   126036 |    64438 |  3186109 |       102977 |
++-----------------------------+---------+----------+----------+----------+--------------+
+
+For some reason, core 3 reports huge numbers for uops dispatched on port 4.
+Odd. 
 
 ### Memory
 Inspected assembly. Summary of findings:
