@@ -340,7 +340,18 @@ Here's the core-by-core results:
 +-----------------------------+---------+----------+----------+----------+--------------+
 
 For some reason, core 3 reports huge numbers for uops dispatched on port 4.
-Odd. 
+Odd. I looked at the skylake architecture again, port 4 is responsible for one
+thing only: storing data. With this in mind, one core having more UOPS would
+make sense, maybe the hardware only allows one core at a time to do store
+operations because issuing operations is certainly not the bottleneck in memory
+write performance. However, this does not explain the sheer volume of
+instructions. How does 1.8e19 instructions make sense when there were only
+5.9e7 cycles?
+
+I've run this program a few times and I only seem to get this result (1.84e19)
+sometimes. And sometimes I get that result on the value for PORT_7. I believe
+it's a bug or an error of some kind. Seems to behave better if the number of
+iterations is increased.
 
 ### Memory
 Inspected assembly. Summary of findings:
