@@ -17,6 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void copy(double * arr, double * copy_arr, size_t n){
+  for (size_t i = 0; i < n; i++){
+    copy_arr[i] = arr[i];
+  }
+}
+
 int main()
 {
   printf("\n\nThis is a minimal example of how the likwid marker api works\n");
@@ -35,16 +41,21 @@ int main()
   {
     likwid_markerThreadInit();
     likwid_markerRegisterRegion("double_flops");
+    likwid_markerRegisterRegion("copy");
   }
 
   double a, b, c;
   a = 1.8;
   b = 3.2;
 
+  size_t n = 256;
+  double arr[n];
+  double copy_arr[n];
+
 // perfmon_startCounters();
 #pragma omp parallel
   {
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 8; j++)
     {
       printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
       likwid_markerStartRegion("double_flops");
@@ -55,6 +66,12 @@ int main()
       }
 #pragma omp barrier
       likwid_markerStopRegion("double_flops");
+      likwid_markerStartRegion("copy");
+      for (int i = 0; i < 1000; i++){
+        copy(arr, copy_arr, n);
+      }
+#pragma omp barrier
+      likwid_markerStopRegion("copy");
       likwid_markerNextGroup();
     }
   }
@@ -68,6 +85,10 @@ int main()
   // segfault, but I can call either twice in a row and be fine. This only
   // happens when running the program on its own. If wrapped in likwid-perfctr
   // (see comment block before inlcudes), this doesn't happen
+
+  // About the above comment: I discovered that perfmon is a lower-level
+  // library used by likwid. So calling likwid_* will automatically take care
+  // of the perfmon_* stuff
 
   // likwid_markerClose();
   likwid_markerClose();
