@@ -10,6 +10,7 @@ applications.
 - [Usage Notes](#usage-notes)
 - [Goals:](#goals)
 - [Architecture of Program](#architecture-of-program)
+- [Ownership and licensing](#ownership-and-licensing)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
     - [Summary:](#summary)
@@ -23,6 +24,7 @@ applications.
 - [Accomplishments:](#accomplishments)
   - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
     - [Playing with likwid_minimal.c](#playing-with-likwidminimalc)
+    - [Improvements to performance_monitor](#improvements-to-performancemonitor)
     - [What other people are doing](#what-other-people-are-doing)
     - [Convolution as a case study](#convolution-as-a-case-study)
       - [Investigating port usage](#investigating-port-usage)
@@ -55,12 +57,14 @@ applications.
     - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
 # Prerequisites
- - **likwid:** it is preferred you build likwid from source and install to
-   `/usr/local`, as this is the only confirmed way to use `likwid-accessD`
-   without root permissions. Instructions to do this are available
-   [here](https://github.com/RRZE-HPC/likwid) Alternatively, you can also
-   install it with your package manger (ex. `sudo apt install likwid` on
-   ubuntu)
+ - **likwid-4.3.4:** version 4.3.4 is required, as this is the only version
+   confirmed to use `likwid-accessD` without root permissions. And also does
+   not have the bug where likwid hangs on likwid_markerClose when too many
+   groups or regions are specified. If this version is available with your
+   package manager, use that. Otherwise, build it from source. Instructions to
+   do this are available [here](https://github.com/RRZE-HPC/likwid)
+ - additional perfgroups not included with likwid-4.3.4 . These can be
+   installed by running `make perfgroups` in the root directory.
  - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
    in ./lib
  - **boost/program_options:** available on [the boost
@@ -68,8 +72,14 @@ applications.
    install libboost-program-options-dev`
 
 # Running
-To build and run the (currently limited) test suite, run `make tests`. It is
-also possible to benchmark your machine by running `make bench`. 
+**warning:** in an effort to reduce workload until I get a minimal proof of
+concept, I've stopped maintaining basically everything in this repository
+(benchmarks, tests are notable examples). So don't expect `make tests` (test
+suite) or `make bench` to work right now.
+
+What still works:
+ - minimal example of likwid: `make run-tests/likwid-minimal`
+ - minimal example of perfmon: `make run-tests/fhv-minimal`
 
 # Usage Notes
  - Region names must not have spaces
@@ -97,6 +107,15 @@ problems tend to change behavior throughout execution
  - Measure what actual utilization of memory/processor is
  - Compare actual utilization with peak on an piece-by-piece basis
  - Visualize that
+
+# Ownership and licensing
+ - nlohmann/json is included with this repository under the MIT license. See
+   `lib/nlohmann/json.hpp` for full license
+ - perfgroups/skylake/MEM*.txt are taken from the [likwid
+   project](https://github.com/RRZE-HPC/likwid/tree/master/groups/skylake) This
+   is allowed under likwid's license, GNU GPL v3 (see `LICENSE` or [likwid's
+   license file](https://github.com/RRZE-HPC/likwid/blob/master/COPYING). 
+ - this repository is licensed under GNU GPL v3 (see `LICENSE`)
 
 # TODO:
 ## Immediate:
@@ -269,8 +288,14 @@ Main points:
    halfway through a cacheline?
  - using `operator=` instead of intrinsics gives higher transfer volumes that
    are closer to manually calculated volumes
- - behavior changes if I compile with gcc or g++
- - not more than a few regions or groups work
+ - for likwid_minimal:
+   - behavior changes if I compile with gcc or g++
+   - not more than a few regions or groups work
+ - between `benchamrk`, `benchmark-likwid-vs-manual`, `thread_migration`, and
+   `convolution` there is a LOT to change whenever I make changes to
+   performance_monitor. For now I'm going to leave them broken and just update
+   fhv_minimal. If we use them in the future I think I'm going to switch to
+   just calling likwid until fhv is more stable
 
 Feeling a little overwhelmed. I've struggled this week and it's made me aware
 of how little I know. I feel like I need to learn about:
@@ -282,6 +307,9 @@ of how little I know. I feel like I need to learn about:
 Not to mention actually building this library
 
 ### Playing with likwid_minimal.c
+Through the likwid-users group, I discovered that you have to put barriers
+betwen stop/start regions
+
 Noticed some really weird behavior. 
  - reproduced bug in convolution where if I supply too many groups, program
    hangs on likwid_markerClose.
@@ -291,6 +319,12 @@ Noticed some really weird behavior.
      https://groups.google.com/forum/#!topic/likwid-users/XDLIHYdeRy4 
  - if I compile with g++ things work perfectly. If I compile with gcc, I get
    the error "WARN: Stopping an unknown/not-started region double_flops"
+
+### Improvements to performance_monitor
+ - now separates sequential and parallel regions, which are registered in init
+ - overloaded init to allow specifying a number of threads instead of
+   enumerating them in a c string
+ - created wrapper function for nextGroup 
 
 ### What other people are doing
  - feel like I could spend weeks just learning about what other tools do
