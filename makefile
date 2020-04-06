@@ -177,3 +177,8 @@ run-tests/likwid_minimal: bin/tests/likwid_minimal
 run-tests/port-counter: bin/tests/likwid_minimal
 	likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
 
+bin/tests/fhv_minimal: $(OBJ_DIR)/fhv_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
+	$(ld-command)
+
+run-tests/fhv_minimal: bin/tests/fhv_minimal
+	bin/tests/fhv_minimal
