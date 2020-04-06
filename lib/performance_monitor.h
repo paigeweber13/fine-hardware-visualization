@@ -71,8 +71,39 @@ class performance_monitor {
 
     // ------ functions ------ //
     // actual functionality
-    static void init();
-    static void init(const char * event_group);
+
+    // does a default set of groups that allows fhv to work normally. Also
+    // automatically uses the default number of threads created by openMP as
+    // below 
+    static void init(const char * parallel_regions,
+                     const char * sequential_regions);
+
+    // automatically uses the default number of threads created by openMP,
+    // which is probably the max number of threads supported by the hardware
+    static void init(const char * event_group, 
+                     const char * parallel_regions,
+                     const char * sequential_regions);
+
+    // lets you choose a number of threads and automatically chooses the first
+    // num_threads threads to create a list_of_threads
+    static void init(const char * event_group,
+                     const char * parallel_regions,
+                     const char * sequential_regions,
+                     int num_threads);
+
+    // lets you specify everything manually
+    //   event_group should be of the format "FLOPS_SP|L2|..."
+    //   parallel_regions and sequential_regions should be of the format
+    //    "region1,region2,..."
+    //   parallel_regions are regions that will be executed in a parallel block
+    //   sequential_regions are regions that will be executed in sequential
+    //    code 
+    //   list_of_threads should be of the format "0,2,..."
+    static void init(const char * event_group,
+                     const char * parallel_regions,
+                     const char * sequential_regions,
+                     const char * list_of_threads);
+
     static void startRegion(const char * tag);
     static void stopRegion(const char * tag);
     static void close();

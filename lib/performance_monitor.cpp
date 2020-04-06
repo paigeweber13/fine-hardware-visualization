@@ -14,11 +14,50 @@ const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_out
 // misc
 const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 
-void performance_monitor::init(){
-  init("MEM_DP|FLOPS_SP|L3|L2");
+void performance_monitor::init(const char * parallel_regions,
+                               const char * sequential_regions)
+{
+  init("MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
+       parallel_regions, sequential_regions);
 }
 
-void performance_monitor::init(const char * event_group)
+void
+performance_monitor::init(const char * event_group, 
+                          const char * parallel_regions,
+                          const char * sequential_regions)
+{
+  int num_threads;
+#pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+
+  init(event_group, parallel_regions, sequential_regions, num_threads);
+}
+
+void
+performance_monitor::init(const char * event_group, 
+                          const char * parallel_regions,
+                          const char * sequential_regions,
+                          int num_threads)
+{
+  std::string likwid_threads_string;
+  for(int i = 0; i < num_threads; i++){
+    likwid_threads_string += std::to_string(i);
+    if(i != num_threads - 1){
+      likwid_threads_string += ',';
+    }
+  }
+  const char * list_of_threads = likwid_threads_string.c_str();
+
+  init(event_group, parallel_regions, sequential_regions, list_of_threads);
+}
+
+void
+performance_monitor::init(const char * event_group, 
+                          const char * parallel_regions,
+                          const char * sequential_regions,
+                          const char * list_of_threads)
 {
   remove(likwidOutputFilepath.c_str());
   // TODO: use omp_get_thread_nums() to build string for LIKWID_THREADS
@@ -27,12 +66,16 @@ void performance_monitor::init(const char * event_group)
   setenv("LIKWID_MODE", accessmode.c_str(), 1);
   setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); // output filepath
   // unfortunately, this likwid_threads envvar is absolutely necessary
-  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+  setenv("LIKWID_THREADS", list_of_threads, 1); // list of threads
   // forces likwid to take control of registers even if they are in use
   setenv("LIKWID_FORCE", "1", 1);
 
   // likwid marker init reads the environment variables above
   likwid_markerInit();
+
+  std::string parallel_regions_string(parallel_regions);
+  std::string sequential_regions_string(sequential_regions);
+  std::string delimiter = ",";
 
 #pragma omp parallel
   {
@@ -44,13 +87,36 @@ void performance_monitor::init(const char * event_group)
     // Init marker api for current thread
     likwid_markerThreadInit(); 
 
-    // optionally pin each thread to single core
-    likwid_pinThread(omp_get_thread_num()); 
+    // initialize every parallel region supplied
+    size_t pos = 0;
+    std::string token;
+    while ((pos = parallel_regions_string.find(delimiter)) != std::string::npos)
+    {
+        token = parallel_regions_string.substr(0, pos);
+        std::cout << token << std::endl;
+        likwid_markerRegisterRegion(token.c_str());
+        parallel_regions_string.erase(0, pos + delimiter.length());
+    }
 
-    num_threads = omp_get_num_threads();
+    // optionally pin each thread to single core
+    // likwid_pinThread(omp_get_thread_num()); 
+
+    // num_threads = omp_get_num_threads();
   }
 
-  perfmon_startCounters();
+  // initialize every parallel region supplied
+  size_t pos = 0;
+  std::string token;
+  while((pos = sequential_regions_string.find(delimiter)) != std::string::npos)
+  {
+      token = sequential_regions_string.substr(0, pos);
+      std::cout << token << std::endl;
+      likwid_markerRegisterRegion(token.c_str());
+      sequential_regions_string.erase(0, pos + delimiter.length());
+  }
+
+  // handled by likwid_markerInit();
+  // perfmon_startCounters();
 
   // printf("Thread count initialized to %d\n", num_threads);
   // printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
@@ -66,7 +132,7 @@ void performance_monitor::startRegion(const char * tag)
   // BUT highly recommended when using accessD according to
   // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
 
-  likwid_markerRegisterRegion(tag);
+  // likwid_markerRegisterRegion(tag);
 
   likwid_markerStartRegion(tag);
 }
