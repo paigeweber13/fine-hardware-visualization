@@ -85,13 +85,20 @@ performance_monitor::init(const char * event_group,
     // Init marker api for current thread
     likwid_markerThreadInit(); 
 
+    // about 'likwid_markerRegisterRegion:`
+
+    // optional according to
+    // https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
+
+    // BUT highly recommended when using accessD according to
+    // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
+
     // initialize every parallel region supplied
     size_t pos = 0;
     std::string token;
     while ((pos = parallel_regions_string.find(delimiter)) != std::string::npos)
     {
         token = parallel_regions_string.substr(0, pos);
-        std::cout << token << std::endl;
         likwid_markerRegisterRegion(token.c_str());
         parallel_regions_string.erase(0, pos + delimiter.length());
     }
@@ -106,7 +113,6 @@ performance_monitor::init(const char * event_group,
   while((pos = sequential_regions_string.find(delimiter)) != std::string::npos)
   {
       token = sequential_regions_string.substr(0, pos);
-      std::cout << token << std::endl;
       likwid_markerRegisterRegion(token.c_str());
       sequential_regions_string.erase(0, pos + delimiter.length());
   }
@@ -117,14 +123,6 @@ performance_monitor::init(const char * event_group,
 
 void performance_monitor::startRegion(const char * tag)
 {
-  // about 'likwid_markerRegisterRegion:`
-
-  // optional according to
-  // https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
-
-  // BUT highly recommended when using accessD according to
-  // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
-
   likwid_markerStartRegion(tag);
 }
 
