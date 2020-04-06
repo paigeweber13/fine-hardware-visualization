@@ -22,6 +22,7 @@ applications.
   - [Others:](#others)
 - [Accomplishments:](#accomplishments)
   - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
+    - [Playing with likwid_minimal.c](#playing-with-likwidminimalc)
     - [What other people are doing](#what-other-people-are-doing)
     - [Convolution as a case study](#convolution-as-a-case-study)
       - [Investigating port usage](#investigating-port-usage)
@@ -247,6 +248,9 @@ Main points:
  - using my "performance_monitor" adds another layer of complexity that makes
    it hard to debug problems. I barely know how to use likwid, and I'm already
    writing my own library?
+   - I feel like I am trying to reinvent the wheel... maybe instead of writing
+     wrappers for "init" and "close" and such we can just require them to use
+     the likwid calls but have a separate close/print/etc.
  - have a way to measure usage by ports, but it only kind of works
    - sometimes, likwid hangs on the part where it analyzes results
  - instrumenting entire "convolution" program works if you don't have the call
@@ -265,6 +269,8 @@ Main points:
    halfway through a cacheline?
  - using `operator=` instead of intrinsics gives higher transfer volumes that
    are closer to manually calculated volumes
+ - behavior changes if I compile with gcc or g++
+ - not more than a few regions or groups work
 
 Feeling a little overwhelmed. I've struggled this week and it's made me aware
 of how little I know. I feel like I need to learn about:
@@ -274,6 +280,17 @@ of how little I know. I feel like I need to learn about:
  - what exactly other people are doing
 
 Not to mention actually building this library
+
+### Playing with likwid_minimal.c
+Noticed some really weird behavior. 
+ - reproduced bug in convolution where if I supply too many groups, program
+   hangs on likwid_markerClose.
+   - ran likwid_minimal with the command `likwid-perfctr -C S0:0-3 -g FLOPS_DP
+     -g MEM -g L3 -g L2 -M 1 -m ./likwid_minimal` to reproduce
+   - asked about this on the likwid_users group: see
+     https://groups.google.com/forum/#!topic/likwid-users/XDLIHYdeRy4 
+ - if I compile with g++ things work perfectly. If I compile with gcc, I get
+   the error "WARN: Stopping an unknown/not-started region double_flops"
 
 ### What other people are doing
  - feel like I could spend weeks just learning about what other tools do
