@@ -6,7 +6,7 @@ import subprocess
 import time
 
 fhv_bin_location = '../bin/fhv'
-results_file = './mem_volume_through_cache'
+results_file = './data/mem_volume_through_cache'
 
 def write_csv(filename, header, data):
     print('writing csv to ' + filename)

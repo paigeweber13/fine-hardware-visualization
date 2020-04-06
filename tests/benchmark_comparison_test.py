@@ -6,9 +6,9 @@ import subprocess
 import time
 
 benchmark_comparison_bin_location = '../bin/tests/benchmark-likwid-vs-manual'
-flops_file = './flops_comparison'
-mem_iter_file = './mem_iter_comparison'
-mem_size_file = './mem_size_comparison'
+flops_file = './data/flops_comparison'
+mem_iter_file = './data/mem_iter_comparison'
+mem_size_file = './data/mem_size_comparison'
 
 flops_csv_header = ['manual_duration','manual_num_flops','manual_Mflops', \
                    'likwid_duration','likwid_num_flops','likwid_Mflops']
