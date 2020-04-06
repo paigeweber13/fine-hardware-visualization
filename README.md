@@ -169,12 +169,11 @@ Components of work:
 
 ## Long-term:
 ### Problems to fix:
+ - make benchmark, benchmark-likwid-vs-manual, and thread_migration use likwid
+   instead of fhv to reduce complexity
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
      region
- - in convolution, the "entire_program" tag, which is designed to measure
-   across all stages of code, doesn't work. However, the tag "convolution"
-   inside the actual convolution does work.
  - software engineering
    - move benchmark stuff in fhv.cpp to separate file
      - combine with computation_measurements and just make it "benchmark"?
