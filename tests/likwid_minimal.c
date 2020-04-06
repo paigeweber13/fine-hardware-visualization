@@ -47,6 +47,7 @@ int main()
   double a, b, c;
   a = 1.8;
   b = 3.2;
+  c = 0.0;
 
   size_t n = 256;
   double arr[n];
