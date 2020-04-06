@@ -106,6 +106,7 @@ class performance_monitor {
 
     static void startRegion(const char * tag);
     static void stopRegion(const char * tag);
+    static void nextGroup();
     static void close();
 
     // building data to print

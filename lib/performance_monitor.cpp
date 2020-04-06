@@ -60,13 +60,16 @@ performance_monitor::init(const char * event_group,
                           const char * list_of_threads)
 {
   remove(likwidOutputFilepath.c_str());
-  // TODO: use omp_get_thread_nums() to build string for LIKWID_THREADS
 
   setenv("LIKWID_EVENTS", event_group, 1);
   setenv("LIKWID_MODE", accessmode.c_str(), 1);
-  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); // output filepath
-  // unfortunately, this likwid_threads envvar is absolutely necessary
-  setenv("LIKWID_THREADS", list_of_threads, 1); // list of threads
+
+  // output filepath
+  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); 
+  
+  // list of threads to use
+  setenv("LIKWID_THREADS", list_of_threads, 1);
+
   // forces likwid to take control of registers even if they are in use
   setenv("LIKWID_FORCE", "1", 1);
 
@@ -79,11 +82,6 @@ performance_monitor::init(const char * event_group,
 
 #pragma omp parallel
   {
-    // Brandon's code includdes the comment "Read on mailing list dont need to
-    // do this unless not already pinning" above the call to
-    // likwid_markerThreadInit. I cannot find anything like this in the mailing
-    // list... what does it mean?
-
     // Init marker api for current thread
     likwid_markerThreadInit(); 
 
@@ -100,8 +98,6 @@ performance_monitor::init(const char * event_group,
 
     // optionally pin each thread to single core
     // likwid_pinThread(omp_get_thread_num()); 
-
-    // num_threads = omp_get_num_threads();
   }
 
   // initialize every parallel region supplied
@@ -115,24 +111,19 @@ performance_monitor::init(const char * event_group,
       sequential_regions_string.erase(0, pos + delimiter.length());
   }
 
-  // handled by likwid_markerInit();
-  // perfmon_startCounters();
-
   // printf("Thread count initialized to %d\n", num_threads);
   // printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
 }
 
 void performance_monitor::startRegion(const char * tag)
 {
-  // about 'likwid_markerRegisterRegion: 
+  // about 'likwid_markerRegisterRegion:`
 
   // optional according to
   // https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
 
   // BUT highly recommended when using accessD according to
   // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
-
-  // likwid_markerRegisterRegion(tag);
 
   likwid_markerStartRegion(tag);
 }
@@ -156,6 +147,10 @@ void performance_monitor::stopRegion(const char * tag)
   } else {
     runtimes_by_tag[tag] = time;
   }
+}
+
+void performance_monitor::nextGroup(){
+  likwid_markerNextGroup();
 }
 
 void performance_monitor::close(){
