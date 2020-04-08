@@ -172,7 +172,7 @@ bin/tests/likwid_minimal: $(OBJ_DIR)/likwid_minimal.o $(LIB_OBJS) | $(TEST_EXEC_
 	$(ld-command)
 
 run-tests/likwid_minimal: bin/tests/likwid_minimal
-	likwid-perfctr -C S0:0-3 -g L3 -g FLOPS_DP -M 1 -m bin/tests/likwid_minimal
+	likwid-perfctr -C S0:0-3 -g L2 -g L3 -g MEM -g FLOPS_DP -M 1 -m bin/tests/likwid_minimal
 
 run-tests/port-counter: bin/tests/likwid_minimal
 	likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
