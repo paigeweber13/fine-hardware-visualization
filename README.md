@@ -318,6 +318,10 @@ Noticed some really weird behavior.
      https://groups.google.com/forum/#!topic/likwid-users/XDLIHYdeRy4 
  - if I compile with g++ things work perfectly. If I compile with gcc, I get
    the error "WARN: Stopping an unknown/not-started region double_flops"
+ - v5.0.1 is buggy, v4.3.4 does not support counters for memory (like MBOX0C1)
+   - the bug is detailed here:
+     https://groups.google.com/forum/#!topic/likwid-users/XDLIHYdeRy4 
+   - v5.0.1 was fixed with commit [52d450](https://github.com/RRZE-HPC/likwid/commit/52d45038ba7dbc7e41c0d44818367fb891257b47)
 
 ### Improvements to performance_monitor
  - now separates sequential and parallel regions, which are registered in init
