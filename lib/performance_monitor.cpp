@@ -50,7 +50,37 @@ performance_monitor::init(const char * event_group,
   }
   const char * list_of_threads = likwid_threads_string.c_str();
 
+  // std::cout << "list of threads: " << list_of_threads << "\n";
+
   init(event_group, parallel_regions, sequential_regions, list_of_threads);
+}
+
+void
+registerRegions(
+    const char *regions)
+{
+  if (strcmp(regions, "") == 0)
+    return;
+
+  std::string regions_string(regions);
+  std::string delimiter = ",";
+
+  size_t start_pos = 0;
+  size_t end_pos = 0;
+  std::string token;
+  do
+  {
+    end_pos = regions_string.find(delimiter, start_pos);
+    if (end_pos != std::string::npos)
+      token = regions_string.substr(start_pos, end_pos - start_pos);
+    else
+      token = regions_string.substr(start_pos, end_pos);
+
+    std::cout << "registering region " + token + " on thread " +
+                     std::to_string(omp_get_thread_num()) + "\n";
+    likwid_markerRegisterRegion(token.c_str());
+    start_pos = end_pos + delimiter.length();
+  } while (end_pos != std::string::npos);
 }
 
 void
@@ -76,9 +106,6 @@ performance_monitor::init(const char * event_group,
   // likwid marker init reads the environment variables above
   likwid_markerInit();
 
-  std::string parallel_regions_string(parallel_regions);
-  std::string sequential_regions_string(sequential_regions);
-  std::string delimiter = ",";
 
 #pragma omp parallel
   {
@@ -94,28 +121,14 @@ performance_monitor::init(const char * event_group,
     // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
 
     // initialize every parallel region supplied
-    size_t pos = 0;
-    std::string token;
-    while ((pos = parallel_regions_string.find(delimiter)) != std::string::npos)
-    {
-        token = parallel_regions_string.substr(0, pos);
-        likwid_markerRegisterRegion(token.c_str());
-        parallel_regions_string.erase(0, pos + delimiter.length());
-    }
+    registerRegions(parallel_regions);
 
     // optionally pin each thread to single core
     // likwid_pinThread(omp_get_thread_num()); 
   }
 
-  // initialize every parallel region supplied
-  size_t pos = 0;
-  std::string token;
-  while((pos = sequential_regions_string.find(delimiter)) != std::string::npos)
-  {
-      token = sequential_regions_string.substr(0, pos);
-      likwid_markerRegisterRegion(token.c_str());
-      sequential_regions_string.erase(0, pos + delimiter.length());
-  }
+  // initialize every sequential region supplied
+  registerRegions(sequential_regions);
 
   // printf("Thread count initialized to %d\n", num_threads);
   // printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
