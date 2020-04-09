@@ -78,14 +78,18 @@ int main()
   }
   // perfmon_stopCounters();
 
+  // these may not be necessary? I'm trying to prevent actual work from being
+  // optimized out by the compiler...
   printf("final c: %f\n", c);
+  printf("final random part of copy_arr: %f\n", 
+         copy_arr[( (size_t) c ) % n]);
 
   // print results here if you want
 
   // calling both 'likwid_markerClose()' and 'perfmon_finalize()' causes
   // segfault, but I can call either twice in a row and be fine. This only
   // happens when running the program on its own. If wrapped in likwid-perfctr
-  // (see comment block before inlcudes), this doesn't happen
+  // (see comment block before includes), this doesn't happen
 
   // About the above comment: I discovered that perfmon is a lower-level
   // library used by likwid. So calling likwid_* will automatically take care
