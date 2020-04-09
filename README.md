@@ -13,8 +13,9 @@ applications.
 - [Ownership and licensing](#ownership-and-licensing)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
-    - [Summary:](#summary)
-    - [Detailed todo](#detailed-todo)
+    - [What other people do](#what-other-people-do)
+    - [Exploration](#exploration)
+    - [Likwid stability issues](#likwid-stability-issues)
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
@@ -103,8 +104,11 @@ problems tend to change behavior throughout execution
 
 # Architecture of Program
  - Identify hardware architecture
- - Identify peak FLOP/s, memory bandwidth, etc.
- - Identify latency
+ - Identify peak FLOP/s, memory bandwidth, latency etc.
+   - there are lots of benchmarks that could help us with this. See:
+     - `likwid_bench_auto` script included with kerncraft
+     - `likwid-bench` utility included with likwid
+     - [NAS parallel benchmarks](https://www.nas.nasa.gov/publications/npb.html)
  - Measure what actual utilization of memory/processor is
  - Compare actual utilization with peak on an piece-by-piece basis
  - Visualize that
@@ -115,104 +119,51 @@ problems tend to change behavior throughout execution
  - this repository is licensed under GNU GPL v3 (see `LICENSE`)
 
 # TODO:
- - archive old todos
- - look into what other people are doing (Dr. Saule will read kerncraft paper,
-   move on to something else)
- - convert tests and practice stuff to use likwid
- - use just part of performance_monitor that aggregates results at the end
- - investigate port usage inconvolution
- - mem instructions retired * 32 bytes instead of 64
-   - then double check that code with Dr. Saule
-
 ## Immediate:
-### Summary:
-Daily: 1/2 hour memory, 1/2 hour convolution, 2 hours other people
+ - [ ] archive old todos
 
-Components of work:
- - make performance_monitor aggregate and report by region in addition to
-   group. performance_monitor already aggregates by group.
- - 1/2 hour read "what every programmer should know about memory"
- - read Kerncraft paper
- - try to use kerncraft and other performance monitoring suites
+### What other people do
+ - [ ] look into what other people are doing (Dr. Saule will read kerncraft paper,
+       move on to something else)
 
-### Detailed todo
- - stability issues with likwid
-   - port counters sometimes reporting 1.8e19 for values
-   - convolution sometimes not instrumenting one region?
-     - compiler optimization?
+### Exploration
+ - [ ] make benchmark, benchmark-likwid-vs-manual, and thread_migration use
+       likwid instead of performance_monitor wrapper
+ - [ ] combine benchmark in fhv with benchmark- [ ]likwid- [ ]vs- [ ]manual
+   - [ ] rewrite computation_measurements to optionally include manual results
+   - [ ] update CLI to optionally include manual results
+ - [ ] use just part of performance_monitor that aggregates results at the end
+ - [ ] make performance_monitor aggregate and report by region in addition to
+       group. performance_monitor already aggregates by group.
+ - [ ] investigate port usage in convolution: do numbers make sense?
+ - [ ] mem instructions retired * 32 bytes instead of 64
+   - [ ] then double check that code with Dr. Saule
 
- - look into approaches of others
-   - what are people using these counters for?
-   - Is anyone doing things like this?
+### Likwid stability issues
+ - [ ] port counters sometimes reporting 1.8e19 for values
+ - [ ] convolution sometimes not instrumenting one region?
+   - [ ] compiler optimization?
 
- - make convolution into a case study
-   - do port numbers make sense?
-   - nothing is reporting as being saturated... but maybe we are saturating one
-     scalar single precision float unit? 
-   - must be something with CPU, because memory is not the bottleneck. 
-   - "entire_program" region doesn't work: remove everything but region and
-     then rebuild from there
-   - look at ports! - is there a counter for total number of uops dispatched
-     - uops_issued_any
-   - PORT_USAGE: split into 2 groups
-   - identify types of instructions, identify parts of ports that are being
-     used? 
-   - identify how many instructions are getting piped from the front end to the
-     back end?
-   - look into metric for number of instructions decoded?
-   - Visualize usage
-   - aggregate results by region?? Are nested regions allowed?
-   - if we want to instrument convolution, will need to adjust fhv to report by
-     region. Currently only reports by group (i.e. FLOPS_SP or L2)
-
- - memory
-   - read what every programmer should know about memory
-   - inspect assembly: are we using instructions that load less than a
-     cacheline? Is that why data volume as calculated by num_instructions * 64
-     bytes is larger than likwid reported data?
-
- - CLI which benchmarks and process JSON into svg
-   - this will probably just come as I work on other stuff, because it'll be
-     easier to visualize than read text
-   - main part of program dumps info, second part reads and evaluates and
-     creates svg
-   - generate svg
-   - libcairo is an option for graphics
+To accomplish this, I plan a typical daily usage of time as follows: 1 hour
+toying with likwid and my examples, then 1 hour researching other people's
+work, repeat until the day is done.
 
 ## Long-term:
 ### Problems to fix:
- - make benchmark, benchmark-likwid-vs-manual, and thread_migration use likwid
-   instead of fhv to reduce complexity
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
      region
- - software engineering
-   - move benchmark stuff in fhv.cpp to separate file
-     - combine with computation_measurements and just make it "benchmark"?
-   - combine benchmark in fhv with benchmark-likwid-vs-manual
-     - rewrite computation_measurements to optionally include manual results
-     - update CLI to optionally include manual results
-   - rename "computation_measurements" to "measurements"?
-   - replace printf statements with cout
-   - combine all memory bandwidth functions
-   - make it consistent when using variable name and raw string to refer to
-     counters
- - a few warnings in the code, mostly unused variables
 
 ### Features to add:
  - expand suite of test software that has balanced/imbalanced usage
    - consider standard benchmarks
-     - like NAS parallel benchmarks
  - improve benchmark
+   - consider other benchmark tools (see ["architecture of program"
+     section](#architecture-of-program))
    - have it check bandwidth for all types of memory/cache
    - have it check architecture to know what size of caches
    - have it populate architecture.h
    - improve software engineering: make it consistent what calls likwid, etc.
- - have LIKWID_THREADS environment variable get set dynamically instead of hard
-   coded
- - create CLI that will:
-   - benchmark machine
-   - create visualization from output data
 
 # Other similar tools:
 ## Kerncraft:
