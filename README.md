@@ -22,7 +22,8 @@ applications.
   - [Kerncraft:](#kerncraft)
   - [Others:](#others)
 - [Accomplishments:](#accomplishments)
-  - [2020-03-24 through 2020-03-30](#2020-03-24-through-2020-03-30)
+  - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
+  - [2020-03-24 through 2020-04-09](#2020-03-24-through-2020-04-09)
     - [Playing with likwid_minimal.c](#playing-with-likwidminimalc)
     - [Improvements to performance_monitor](#improvements-to-performancemonitor)
     - [What other people are doing](#what-other-people-are-doing)
@@ -111,13 +112,18 @@ problems tend to change behavior throughout execution
 # Ownership and licensing
  - nlohmann/json is included with this repository under the MIT license. See
    `lib/nlohmann/json.hpp` for full license
- - perfgroups/skylake/MEM*.txt are taken from the [likwid
-   project](https://github.com/RRZE-HPC/likwid/tree/master/groups/skylake) This
-   is allowed under likwid's license, GNU GPL v3 (see `LICENSE` or [likwid's
-   license file](https://github.com/RRZE-HPC/likwid/blob/master/COPYING). 
  - this repository is licensed under GNU GPL v3 (see `LICENSE`)
 
 # TODO:
+ - archive old todos
+ - look into what other people are doing (Dr. Saule will read kerncraft paper,
+   move on to something else)
+ - convert tests and practice stuff to use likwid
+ - use just part of performance_monitor that aggregates results at the end
+ - investigate port usage inconvolution
+ - mem instructions retired * 32 bytes instead of 64
+   - then double check that code with Dr. Saule
+
 ## Immediate:
 ### Summary:
 Daily: 1/2 hour memory, 1/2 hour convolution, 2 hours other people
@@ -130,11 +136,17 @@ Components of work:
  - try to use kerncraft and other performance monitoring suites
 
 ### Detailed todo
+ - stability issues with likwid
+   - port counters sometimes reporting 1.8e19 for values
+   - convolution sometimes not instrumenting one region?
+     - compiler optimization?
+
  - look into approaches of others
    - what are people using these counters for?
    - Is anyone doing things like this?
 
  - make convolution into a case study
+   - do port numbers make sense?
    - nothing is reporting as being saturated... but maybe we are saturating one
      scalar single precision float unit? 
    - must be something with CPU, because memory is not the bottleneck. 
@@ -233,6 +245,10 @@ it. The benchmark tool should be evaluated, we can draw from it.
    are a notable example) but also provides much more information than we
    are planning on getting from our benchmarks 
  - I feel like I could spend weeks just learning everything about kerncraft
+ - skipped ahead to usage and samples of results
+   - not really sure how to interpret them
+   - presented some cache/memory data
+   - presented some information on how things scale
 
 ## Others:
  - Intel PCM
@@ -261,7 +277,12 @@ it. The benchmark tool should be evaluated, we can draw from it.
      - does runtime analysis
 
 # Accomplishments:
-## 2020-03-24 through 2020-03-30
+## 2020-04-09 through 2020-04-16
+Stuff from last week:
+ - Switched intrinsics to operator= (see [memory section](#memory)), compared
+   compiler-produced assembly
+
+## 2020-03-24 through 2020-04-09
 Main points:
  - using my "performance_monitor" adds another layer of complexity that makes
    it hard to debug problems. I barely know how to use likwid, and I'm already
@@ -269,32 +290,41 @@ Main points:
    - I feel like I am trying to reinvent the wheel... maybe instead of writing
      wrappers for "init" and "close" and such we can just require them to use
      the likwid calls but have a separate close/print/etc.
- - have a way to measure usage by ports, but it only kind of works
-   - sometimes, likwid hangs on the part where it analyzes results
+ - have a way to measure usage by ports
  - instrumenting entire "convolution" program works if you don't have the call
    to next_group, with some exceptions (see next point)
  - making the number of iterations a multiple of the number of groups
-   *sometimes* fixes the preceding 2 problems.
+   *sometimes* fixes the preceding problem.
    - this only works sometimes, and seems to work more frequently with lower
      numbers of groups (the max number of groups I've been able to successfuly
      do is 6). In general, it feels very non-deterministic and it's very
      frustrating. 
+   - needs more investigation now that bug has been fixed
  - vector of doubles is only half the size of a cacheline. Considering every
    operation as one cacheline worth of transfer seems to be the reason those
    values are higher by a factor of 2. But why is vmovapd (move **aligned**
    packed double) allowing us to move *half* a cacheline worth of data? Why am
    I able to use this intrinsic without error even when I supply an address
    halfway through a cacheline?
+   - "aligned" does mean aligned to cacheline boundary BUT it also means that
+     if you have a double aligned to cacheline, the next double still counts as
+     "aligned" for those purposes.
+   - internally the memory controller manages an entire cache line but gives
+     the core just a part of a cache line
  - using `operator=` instead of intrinsics gives higher transfer volumes that
    are closer to manually calculated volumes
- - for likwid_minimal:
-   - behavior changes if I compile with gcc or g++
-   - not more than a few regions or groups work
+ - improved likwid_minimal
+   - behavior changes if I compile with gcc or g++: maybe copy is getting
+     optimized out?
  - between `benchamrk`, `benchmark-likwid-vs-manual`, `thread_migration`, and
    `convolution` there is a LOT to change whenever I make changes to
    performance_monitor. For now I'm going to leave them broken and just update
    fhv_minimal. If we use them in the future I think I'm going to switch to
    just calling likwid until fhv is more stable
+ - found it difficult to search through the vast amount of stuff other people
+   are doing
+ - in the case of kerncraft, they present a roofline model by level of cache
+   and memory as well as a scalability model
 
 Feeling a little overwhelmed. I've struggled this week and it's made me aware
 of how little I know. I feel like I need to learn about:
@@ -344,7 +374,7 @@ Noticed some really weird behavior.
 
 ### Convolution as a case study
 Commenting the line `likwid_markerNextGroup()` caused it to work with two
-regions 
+regions. Switched to raw likwid instead of using my performance_monitor wrapper
 
 #### Investigating port usage
 Tried to calculate port usage. Created 3 custom groups so we could calculate
