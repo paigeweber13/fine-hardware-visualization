@@ -49,14 +49,63 @@ performance_monitor::init(const char * event_group,
     }
   }
   const char * list_of_threads = likwid_threads_string.c_str();
-
   // std::cout << "list of threads: " << list_of_threads << "\n";
 
   init(event_group, parallel_regions, sequential_regions, list_of_threads);
 }
 
 void
-registerRegions(
+performance_monitor::setEnvironmentVariables(
+  const char * event_group)
+{
+  int num_threads;
+#pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+
+  setEnvironmentVariables(event_group, num_threads);
+}
+
+void
+performance_monitor::setEnvironmentVariables(
+  const char * event_group,
+  int num_threads)
+{
+  std::string likwid_threads_string;
+  for(int i = 0; i < num_threads; i++){
+    likwid_threads_string += std::to_string(i);
+    if(i != num_threads - 1){
+      likwid_threads_string += ',';
+    }
+  }
+  const char * list_of_threads = likwid_threads_string.c_str();
+
+  setEnvironmentVariables(event_group, list_of_threads);
+}
+
+void
+performance_monitor::setEnvironmentVariables(
+  const char * event_group,
+  const char * list_of_threads)
+{
+  remove(likwidOutputFilepath.c_str());
+
+  setenv("LIKWID_EVENTS", event_group, 1);
+  setenv("LIKWID_MODE", accessmode.c_str(), 1);
+
+  // output filepath
+  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); 
+  
+  // list of threads to use
+  setenv("LIKWID_THREADS", list_of_threads, 1);
+
+  // forces likwid to take control of registers even if they are in use
+  setenv("LIKWID_FORCE", "1", 1);
+}
+
+void
+performance_monitor::registerRegions(
     const char *regions)
 {
   if (strcmp(regions, "") == 0)
@@ -89,19 +138,7 @@ performance_monitor::init(const char * event_group,
                           const char * sequential_regions,
                           const char * list_of_threads)
 {
-  remove(likwidOutputFilepath.c_str());
-
-  setenv("LIKWID_EVENTS", event_group, 1);
-  setenv("LIKWID_MODE", accessmode.c_str(), 1);
-
-  // output filepath
-  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); 
-  
-  // list of threads to use
-  setenv("LIKWID_THREADS", list_of_threads, 1);
-
-  // forces likwid to take control of registers even if they are in use
-  setenv("LIKWID_FORCE", "1", 1);
+  setEnvironmentVariables(event_group, list_of_threads);
 
   // likwid marker init reads the environment variables above
   likwid_markerInit();

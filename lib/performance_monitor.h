@@ -72,6 +72,8 @@ class performance_monitor {
     // ------ functions ------ //
     // actual functionality
 
+    // NOTE: ALL INIT ROUTINES ARE BROKEN
+
     // does a default set of groups that allows fhv to work normally. Also
     // automatically uses the default number of threads created by openMP as
     // below 
@@ -103,6 +105,13 @@ class performance_monitor {
                      const char * parallel_regions,
                      const char * sequential_regions,
                      const char * list_of_threads);
+
+    static void setEnvironmentVariables(const char * regions);
+    static void setEnvironmentVariables(const char * regions,
+                                        int num_threads);
+    static void setEnvironmentVariables(const char * regions,
+                                        const char * list_of_threads);
+    static void registerRegions(const char * regions);
 
     static void startRegion(const char * tag);
     static void stopRegion(const char * tag);
