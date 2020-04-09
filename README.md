@@ -129,7 +129,7 @@ problems tend to change behavior throughout execution
 ### Exploration
  - [ ] make benchmark, benchmark-likwid-vs-manual, and thread_migration use
        likwid instead of performance_monitor wrapper
- - [ ] combine benchmark in fhv with benchmark- [ ]likwid- [ ]vs- [ ]manual
+ - [ ] combine benchmark in fhv with benchmark-likwid-vs-manual
    - [ ] rewrite computation_measurements to optionally include manual results
    - [ ] update CLI to optionally include manual results
  - [ ] use just part of performance_monitor that aggregates results at the end
