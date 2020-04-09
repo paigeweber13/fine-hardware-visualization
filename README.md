@@ -127,6 +127,8 @@ problems tend to change behavior throughout execution
        move on to something else)
 
 ### Exploration
+ - [ ] specifying groups with environment variables seems to cause regions to
+       fail. Investigate
  - [ ] make benchmark, benchmark-likwid-vs-manual, and thread_migration use
        likwid instead of performance_monitor wrapper
  - [ ] combine benchmark in fhv with benchmark-likwid-vs-manual
