@@ -174,9 +174,16 @@ bin/tests/likwid_minimal: $(OBJ_DIR)/likwid_minimal.o $(LIB_OBJS) | $(TEST_EXEC_
 	$(ld-command)
 
 run-tests/likwid_minimal: bin/tests/likwid_minimal
+	bin/tests/likwid_minimal
+
+run-tests/likwid_minimal-cli: bin/tests/likwid_minimal
+	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
+	# commented out 
 	likwid-perfctr -C S0:0-3 -g L2 -g L3 -g MEM -g FLOPS_DP -M 1 -m bin/tests/likwid_minimal
 
-run-tests/port-counter: bin/tests/likwid_minimal
+run-tests/port-counter-cli: bin/tests/likwid_minimal
+	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
+	# commented out 
 	likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
 
 bin/tests/fhv_minimal: $(OBJ_DIR)/fhv_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
