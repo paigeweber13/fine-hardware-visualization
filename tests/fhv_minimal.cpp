@@ -17,26 +17,29 @@ int main()
   printf("\n\nThis is a minimal example of how the fhv performance_monitor "
          "api works\n");
 
-  // ---- performance_monitor initialization (currently broken)
-  // performance_monitor::init(
-  //   "MEM|FLOPS_DP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
-  //   // "MEM|FLOPS_DP|L3|L2",
-  //   "double_flops,copy", "");
+  // ---- performance_monitor initialization
+  performance_monitor::init(
+    // "MEM|FLOPS_DP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
+    "MEM|FLOPS_DP|L3|L2",
+    "double_flops,copy", "");
 
   // ---- begin likwid initialization
 
-  performance_monitor::setEnvironmentVariables(
-    "MEM|FLOPS_DP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3");
-  likwid_markerInit();
+  // performance_monitor::setEnvironmentVariables(
+  //   "MEM|FLOPS_DP|L3|L2",
+  //   "0,1,2,3");
+  //   "MEM|FLOPS_DP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3");
 
-#pragma omp parallel
-  {
-    likwid_markerThreadInit();
-    likwid_markerRegisterRegion("double_flops");
-    likwid_markerRegisterRegion("copy");
-  }
+//   likwid_markerInit();
 
-  perfmon_startCounters();
+// #pragma omp parallel
+//   {
+//     likwid_markerThreadInit();
+//     likwid_markerRegisterRegion("double_flops");
+//     likwid_markerRegisterRegion("copy");
+//     likwid_pinThread(omp_get_thread_num());
+//   }
+
   // ---- end likwid initialization
 
   double a, b, c;
@@ -80,8 +83,9 @@ int main()
   printf("final random part of copy_arr: %f\n", 
          copy_arr[( (size_t) c ) % n]);
 
+  // likwid_markerClose();
   performance_monitor::close();
-  // currently broken
+  // performance_monitor::printDetailedResults();
   performance_monitor::printOnlyAggregate();
   performance_monitor::printComparison();
 }

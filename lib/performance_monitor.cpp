@@ -54,35 +54,35 @@ performance_monitor::init(const char * event_group,
   init(event_group, parallel_regions, sequential_regions, list_of_threads);
 }
 
-void
-performance_monitor::setEnvironmentVariables(
-  const char * event_group)
-{
-  int num_threads;
-#pragma omp parallel
-  {
-    num_threads = omp_get_num_threads();
-  }
+// void
+// performance_monitor::setEnvironmentVariables(
+//   const char * event_group)
+// {
+//   int num_threads;
+// #pragma omp parallel
+//   {
+//     num_threads = omp_get_num_threads();
+//   }
 
-  setEnvironmentVariables(event_group, num_threads);
-}
+//   setEnvironmentVariables(event_group, num_threads);
+// }
 
-void
-performance_monitor::setEnvironmentVariables(
-  const char * event_group,
-  int num_threads)
-{
-  std::string likwid_threads_string;
-  for(int i = 0; i < num_threads; i++){
-    likwid_threads_string += std::to_string(i);
-    if(i != num_threads - 1){
-      likwid_threads_string += ',';
-    }
-  }
-  const char * list_of_threads = likwid_threads_string.c_str();
+// void
+// performance_monitor::setEnvironmentVariables(
+//   const char * event_group,
+//   int num_threads)
+// {
+//   std::string likwid_threads_string;
+//   for(int i = 0; i < num_threads; i++){
+//     likwid_threads_string += std::to_string(i);
+//     if(i != num_threads - 1){
+//       likwid_threads_string += ',';
+//     }
+//   }
+//   const char * list_of_threads = likwid_threads_string.c_str();
 
-  setEnvironmentVariables(event_group, list_of_threads);
-}
+//   setEnvironmentVariables(event_group, list_of_threads);
+// }
 
 void
 performance_monitor::setEnvironmentVariables(
@@ -160,8 +160,12 @@ performance_monitor::init(const char * event_group,
     // initialize every parallel region supplied
     registerRegions(parallel_regions);
 
-    // optionally pin each thread to single core
-    // likwid_pinThread(omp_get_thread_num()); 
+    // pin each thread to single core. If you don't do this, many "stopping
+    // non-started region x" errors will happen 
+    likwid_pinThread(omp_get_thread_num()); 
+
+    // needed because we use it to print results later
+    num_threads = omp_get_num_threads();
   }
 
   // initialize every sequential region supplied
@@ -202,7 +206,6 @@ void performance_monitor::nextGroup(){
 }
 
 void performance_monitor::close(){
-  perfmon_stopCounters();
   likwid_markerClose();
 
   getAggregateResults();
