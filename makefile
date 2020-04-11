@@ -7,7 +7,9 @@ CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 # make sure likwid is installed to this prefix
 # manual install to this directory is preferred because then we can run without
 # sudo permission
-PREFIX=/usr/local
+PREFIX=/usr/local/likwid-master
+# PREFIX=/usr/local/likwid-v4.3.4
+# PREFIX=/usr/local
 INC_DIRS=-I$(PREFIX)/include
 INC_DIRS+=-I./lib
 LIB_DIRS=-L$(PREFIX)/lib
