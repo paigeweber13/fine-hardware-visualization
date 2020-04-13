@@ -163,9 +163,6 @@ performance_monitor::init(const char * event_group,
     // pin each thread to single core. If you don't do this, many "stopping
     // non-started region x" errors will happen 
     likwid_pinThread(omp_get_thread_num()); 
-
-    // needed because we use it to print results later
-    num_threads = omp_get_num_threads();
   }
 
   // initialize every sequential region supplied
@@ -213,17 +210,48 @@ void performance_monitor::close(){
   resultsToJson();
 }
 
-void performance_monitor::getAggregateResults(){
+void performance_monitor::printRegionGroupEventAndMetricData(){
   int gid;
+
+  printf("\n\n ----- Region, Group, Event, and Metric Data ----- \n\n");
+  perfmon_readMarkerFile(likwidOutputFilepath.c_str());
+  printf("number of regions: %d\n", perfmon_getNumberOfRegions());
+
+  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  {
+    gid = perfmon_getGroupOfRegion(i);
+    printf("Region %s with %d events and %d metrics\n", 
+           perfmon_getTagOfRegion(i),
+           perfmon_getEventsOfRegion(i),
+           perfmon_getMetricsOfRegion(i));
+    printf("    This region has associated group with id %d and name %s\n",
+           gid, perfmon_getGroupName(gid));
+  }
+
+  printf("\nnumber of groups: %d\n", perfmon_getNumberOfGroups());
+  for (int i = 0; i < perfmon_getNumberOfGroups(); i++) {
+    printf("group %s\n", perfmon_getGroupName(i));
+  }
+}
+
+void performance_monitor::getAggregateResults(){
+  int gid, num_threads;
   float event_value, metric_value;
-  const char * event_name, * metric_name;
+  const char *event_name, *metric_name;
+
+#pragma omp parallel
+  {
+    // needed because we use it to print results later
+    num_threads = omp_get_num_threads();
+  }
 
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
 
   char * groupName;
 
   // initialize everything to 0
-  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  // for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  for (int i = 0; i < perfmon_getNumberOfGroups(); i++)
   {
     gid = perfmon_getGroupOfRegion(i);
     groupName = perfmon_getGroupName(gid);
@@ -241,7 +269,8 @@ void performance_monitor::getAggregateResults(){
 
   for (int t = 0; t < num_threads; t++)
   {
-    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    // for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    for (int i = 0; i < perfmon_getNumberOfGroups(); i++)
     {
       gid = perfmon_getGroupOfRegion(i);
       groupName = perfmon_getGroupName(gid);
@@ -278,6 +307,16 @@ void performance_monitor::getAggregateResults(){
 
 void performance_monitor::compareActualWithbench()
 {
+  if(aggregate_events.size() == 0){
+    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+              << " before printing\n"
+              << "aggregate results. If you are getting this error and you did"
+              << " run getAggregateResults,\n"
+              << "No metrics have been aggregated. Pleases submit a bug report"
+              << "\n";
+    return;
+  }
+
   int gid;
   char * groupName;
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -316,11 +355,17 @@ void performance_monitor::printResults()
 
 void performance_monitor::printDetailedResults()
 {
-  int gid;
+  int gid, num_threads;
   float event_value, metric_value;
-  const char * event_name, * counter_name, * metric_name;
+  const char *event_name, *counter_name, *metric_name;
 
-  printf("----- begin performance_monitor report -----\n");
+#pragma omp parallel
+  {
+    // needed because we use it to print results later
+    num_threads = omp_get_num_threads();
+  }
+
+  printf("\n\n ----- Detailed performance_monitor report ----- \n\n");
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
   printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -353,6 +398,7 @@ void performance_monitor::printDetailedResults()
       printf("\n");
     }
   }
+  printf("\n\n ----- end detailed performance_monitor report ----- \n\n");
 }
 
 void performance_monitor::printOnlyAggregate()
@@ -360,8 +406,15 @@ void performance_monitor::printOnlyAggregate()
   // unnecessary, compareActualWithBench() calls this and it is called in close
   // getAggregateResults();
 
-  std::cout << "----- begin performance_monitor report -----\n";
-  std::cout << "--- runtimes by tag: \n";
+  std::cout << "\n\n----- aggregate performance_monitor report -----\n\n";
+  if(aggregate_events.size() == 0){
+    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+              << " before printing\n"
+              << "aggregate results\n";
+    return;
+  }
+
+  std::cout << " --- runtimes by tag: \n";
   for (std::map<std::string, double>::iterator it=runtimes_by_tag.begin(); 
        it!=runtimes_by_tag.end(); ++it){
     std::cout << "Runtime for " + it->first + ": "
@@ -369,11 +422,10 @@ void performance_monitor::printOnlyAggregate()
   }
   std::cout << std::endl;
 
-  std::cout << "----- begin aggregate performance_monitor report -----\n";
-  std::cout << "--- aggregate events by group: \n";
+  std::cout << " --- aggregate events by group: \n";
   for (auto it=aggregate_events.begin(); it!=aggregate_events.end(); ++it)
   {
-    std::cout << "- Aggregate events for group " << it->first << '\n';
+    std::cout << " - Aggregate events for group " << it->first << '\n';
     for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2){
       std::cout << "Aggregate " << it2->first << ": " << it2->second << '\n';
     }
@@ -381,10 +433,10 @@ void performance_monitor::printOnlyAggregate()
   }
   std::cout << std::endl;
 
-  std::cout << "--- aggregate metrics by group: \n";
+  std::cout << " --- aggregate metrics by group: \n";
   for (auto it=aggregate_metrics.begin(); it!=aggregate_metrics.end(); ++it)
   {
-    std::cout << "- Aggregate metrics for group " << it->first << '\n';
+    std::cout << " - Aggregate metrics for group " << it->first << '\n';
     for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2){
       std::cout << "Aggregate " << it2->first << ": " << it2->second << '\n';
     }
@@ -392,16 +444,20 @@ void performance_monitor::printOnlyAggregate()
   }
   std::cout << std::endl;
 
-  std::cout << "----- end aggregate performance_monitor report -----\n";
+  std::cout << " ----- end aggregate performance_monitor report -----\n";
   std::cout << std::endl;
 }
 
 void performance_monitor::printComparison(){
-  // unnecessary, it is called in close
-  // compareActualWithbench();
+  if(aggregate_events.size() == 0){
+    std::cout << "ERROR: you must run "
+              << "performance_monitor::compareActualWithBench before\n"
+              << "printing comparison.\n";
+    return;
+  }
 
   std::cout << 
-    "----- begin saturation level performance_monitor report -----\n";
+    "\n\n ----- saturation level performance_monitor report -----\n\n";
   for (auto it=saturation.begin(); it!=saturation.end(); ++it)
   {
     std::cout << "Percentage of available " << it->first << " used: " 
