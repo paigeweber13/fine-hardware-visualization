@@ -3,9 +3,12 @@
 int performance_monitor::num_threads;
 
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
-std::map<std::string, std::map<std::string, double>> performance_monitor::aggregate_events;
-std::map<std::string, std::map<std::string, double>> performance_monitor::aggregate_metrics;
-std::map<std::string, double> performance_monitor::saturation;
+std::map<std::string, std::map<std::string, std::map<std::string, double>>> 
+  performance_monitor::aggregate_events;
+std::map<std::string, std::map<std::string, std::map<std::string, double>>>
+  performance_monitor::aggregate_metrics;
+std::map<std::string, std::map<std::string, double>>
+  performance_monitor::saturation;
 
 // filenames
 const std::string performance_monitor::likwidOutputFilepath = "/tmp/test_marker.out";
@@ -206,7 +209,7 @@ void performance_monitor::close(){
   likwid_markerClose();
 
   getAggregateResults();
-  compareActualWithbench();
+  compareActualWithBench();
   resultsToJson();
 }
 
@@ -234,7 +237,29 @@ void performance_monitor::printRegionGroupEventAndMetricData(){
   }
 }
 
-void performance_monitor::getAggregateResults(){
+// note on getAggregateResults: I've considered also aggregating across groups
+// and regions (see commented lines in this function)
+
+// This doesn't always make sense and isn't terribly useful right now, so it's
+// commented out.
+
+// the "all_groups" keyword takes the place of a group name. it is calculated
+// for each region and includes all metrics
+// from all groups. This only makes sense if the set of stuff checked by each
+// group is mutually exclusive with the other groups, but this is almost
+// always the case. The only time I can think of when this is not the case is
+// if someone specifies both the "MEM_DP" group and the "FLOPS_DP" group.
+// Likewise, specifying both "MEM_SP" and "FLOPS_SP" would mess up the
+// results.
+
+// the "all_regions" keyword takes the place of a region tag and only
+// supports one group: the "all_groups" keyword. This only makes sense
+// sometimes. For example: what if you have two regions "work_part_1" and
+// "work_part_2" that both do lots of DP FP operations. It doesn't make
+// sense to ADD the FLOP/S rates from both regions together...
+
+void performance_monitor::getAggregateResults()
+{
   int gid, num_threads;
   float event_value, metric_value;
   const char *event_name, *metric_name;
@@ -248,30 +273,40 @@ void performance_monitor::getAggregateResults(){
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
 
   char * groupName;
+  char * regionName;
 
   // initialize everything to 0
-  // for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
-  for (int i = 0; i < perfmon_getNumberOfGroups(); i++)
+
+  // there is a region for every region/group combo, so we only need one outer
+  // for loop
+  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   {
+    regionName = perfmon_getTagOfRegion(i);
     gid = perfmon_getGroupOfRegion(i);
     groupName = perfmon_getGroupName(gid);
-    aggregate_events[groupName][total_sp_flops_event_name] = 0.;
+    aggregate_events[regionName][groupName][total_sp_flops_event_name] = 0.;
+    // aggregate_events[regionName][all_groups_keyword][total_sp_flops_event_name] = 0.;
+    // aggregate_events[all_regions_keyword][all_groups_keyword][total_sp_flops_event_name] = 0.;
 
     for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
       event_name = perfmon_getEventName(gid, k);
-      aggregate_events[groupName][event_name] = 0.;
+      aggregate_events[regionName][groupName][event_name] = 0.;
+      // aggregate_events[regionName][all_groups_keyword][event_name] = 0.;
+      // aggregate_events[all_regions_keyword][all_groups_keyword][event_name] = 0.;
     }
-    for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+    for (int k = 0; k < perfmon_getMetricsOfRegion(i); k++){
       metric_name = perfmon_getMetricName(gid, k);
-      aggregate_metrics[groupName][metric_name] = 0.;
+      aggregate_metrics[regionName][groupName][metric_name] = 0.;
+      // aggregate_metrics[regionName][all_groups_keyword][metric_name] = 0.;
+      // aggregate_metrics[all_regions_keyword][all_groups_keyword][metric_name] = 0.;
     }
   }
 
   for (int t = 0; t < num_threads; t++)
   {
-    // for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
-    for (int i = 0; i < perfmon_getNumberOfGroups(); i++)
+    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
     {
+      regionName = perfmon_getTagOfRegion(i);
       gid = perfmon_getGroupOfRegion(i);
       groupName = perfmon_getGroupName(gid);
 
@@ -279,33 +314,60 @@ void performance_monitor::getAggregateResults(){
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         if(event_value > 0){
-          aggregate_events[groupName][event_name] += event_value;
+          aggregate_events[regionName][groupName][event_name] += event_value;
+          // aggregate_events[regionName][all_groups_keyword][event_name] +=
+          //   event_value;
+          // aggregate_events[all_regions_keyword][all_groups_keyword]
+          //   [event_name] += event_value;
 
           if(strcmp(sp_scalar_flops_event_name, event_name) == 0){
-            aggregate_events[groupName][total_sp_flops_event_name] += event_value;
+            aggregate_events[regionName][groupName][total_sp_flops_event_name] 
+              += event_value;
+            // aggregate_events[regionName][all_groups_keyword]
+            //   [total_sp_flops_event_name] += event_value;
+            // aggregate_events[all_regions_keyword][all_groups_keyword]
+            //   [total_sp_flops_event_name] += event_value;
           }
           else if(strcmp(sp_avx_128_flops_event_name, event_name) == 0){
-            aggregate_events[groupName][total_sp_flops_event_name] += 
-              event_value * OPS_PER_SP_128_VECTOR;
+            aggregate_events[regionName][groupName][total_sp_flops_event_name]
+              += event_value * OPS_PER_SP_128_VECTOR;
+            // aggregate_events[regionName][all_groups_keyword]
+            //   [total_sp_flops_event_name]
+            //   += event_value * OPS_PER_SP_128_VECTOR;
+            // aggregate_events[all_regions_keyword][all_groups_keyword]
+            //   [total_sp_flops_event_name]
+            //   += event_value * OPS_PER_SP_128_VECTOR;
           }
           else if(strcmp(sp_avx_256_flops_event_name, event_name) == 0){
-            aggregate_events[groupName][total_sp_flops_event_name] += 
-              event_value * OPS_PER_SP_256_VECTOR;
+            aggregate_events[regionName][groupName][total_sp_flops_event_name]
+              += event_value * OPS_PER_SP_256_VECTOR;
+            // aggregate_events[regionName][all_groups_keyword]
+            //   [total_sp_flops_event_name]
+            //   += event_value * OPS_PER_SP_256_VECTOR;
+            // aggregate_events[all_regions_keyword][all_groups_keyword]
+            //   [total_sp_flops_event_name]
+            //   += event_value * OPS_PER_SP_256_VECTOR;
           }
         }
       }
+
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         if(!isnan(metric_value)){
-          aggregate_metrics[groupName][metric_name] += metric_value;
+          aggregate_metrics[regionName][groupName][metric_name]
+            += metric_value;
+          // aggregate_metrics[regionName][all_groups_keyword][metric_name]
+          //   += metric_value;
+          // aggregate_metrics[all_regions_keyword][all_groups_keyword]
+          //   [metric_name] += metric_value;
         }
       }
     }
   }
 }
 
-void performance_monitor::compareActualWithbench()
+void performance_monitor::compareActualWithBench()
 {
   if(aggregate_events.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
@@ -317,32 +379,68 @@ void performance_monitor::compareActualWithbench()
     return;
   }
 
-  int gid;
-  char * groupName;
-  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  const char * regionName;
+  const char * metricGroupName;
+  const char * metricName;
+  float referenceBenchmarkValue;
+
+  // getNumberOfRegions actually returns num_regions * num_groups
+  int num_regions = perfmon_getNumberOfRegions()/perfmon_getNumberOfGroups();
+
+  std::vector<const char *> saturationMetricGroups = {
+    likwid_group_flops_sp,
+    likwid_group_flops_dp,
+    likwid_group_l2,
+    likwid_group_l3,
+    likwid_group_mem,
+  };
+
+  std::vector<const char *> saturation_metrics = {
+    mflops_metric_name,
+    mflops_dp_metric_name,
+    l2_bandwidth_metric_name,
+    l3_bandwidth_metric_name,
+    ram_bandwidth_metric_name,
+  };
+
+  std::vector<float> saturationBenchmarkReferences = {
+    EXPERIENTIAL_SP_RATE_MFLOPS,
+    EXPERIENTIAL_DP_RATE_MFLOPS,
+    EXPERIENTIAL_RW_BW_L2,
+    EXPERIENTIAL_RW_BW_L3,
+    EXPERIENTIAL_RW_BW_RAM,
+  };
+
+  // initialize all_regions part to 0
+  for (size_t j = 0; j < saturation_metrics.size(); j++){
+    metricName = saturation_metrics[j];
+    saturation[all_regions_keyword][metricName] = 0.;
+  }
+
+  for (int i = 0; i < num_regions; i++)
   {
-    gid = perfmon_getGroupOfRegion(i);
-    groupName = perfmon_getGroupName(gid);
-    saturation[mflops_metric_name] =
-        fmax(saturation[mflops_metric_name], 
-             aggregate_metrics[groupName][mflops_metric_name] 
-             / EXPERIENTIAL_SP_RATE_MFLOPS);
-    saturation[mflops_dp_metric_name] =
-        fmax(saturation[mflops_dp_metric_name],
-             aggregate_metrics[groupName][mflops_dp_metric_name] 
-             / EXPERIENTIAL_DP_RATE_MFLOPS);
-    saturation[l2_bandwidth_metric_name] =
-        fmax(saturation[l2_bandwidth_metric_name],
-             aggregate_metrics[groupName][l2_bandwidth_metric_name] 
-             / EXPERIENTIAL_RW_BW_L2);
-    saturation[l3_bandwidth_metric_name] =
-        fmax(saturation[l3_bandwidth_metric_name],
-             aggregate_metrics[groupName][l3_bandwidth_metric_name] 
-             / EXPERIENTIAL_RW_BW_L3);
-    saturation[ram_bandwidth_metric_name] =
-        fmax(saturation[ram_bandwidth_metric_name],
-             aggregate_metrics[groupName][ram_bandwidth_metric_name] 
-             / EXPERIENTIAL_RW_BW_RAM);
+    regionName = perfmon_getTagOfRegion(i);
+
+    for (size_t j = 0; j < saturation_metrics.size(); j++){
+      metricGroupName = saturationMetricGroups[j];
+      metricName = saturation_metrics[j];
+      referenceBenchmarkValue = saturationBenchmarkReferences[j];
+
+      saturation[regionName][metricName] =
+        aggregate_metrics[regionName][metricGroupName][metricName] 
+        / referenceBenchmarkValue;
+      saturation[all_regions_keyword][metricName] +=
+        saturation[regionName][metricName];
+    }
+  }
+
+  for (size_t i = 0; i < saturation_metrics.size(); i++)
+  {
+    metricName = saturation_metrics[i];
+
+    // it doesn't make sense to sum saturation values, so we find the average of
+    // saturations to get saturation across regions
+    saturation[all_regions_keyword][metricName] /= num_regions;
   }
 }
 
@@ -414,31 +512,46 @@ void performance_monitor::printOnlyAggregate()
     return;
   }
 
-  std::cout << " --- runtimes by tag: \n";
-  for (std::map<std::string, double>::iterator it=runtimes_by_tag.begin(); 
-       it!=runtimes_by_tag.end(); ++it){
-    std::cout << "Runtime for " + it->first + ": "
-               + std::to_string(it->second) + "\n";
-  }
-  std::cout << std::endl;
+  // TODO: fix runtimes (enforce calling performance_monitor::stopRegion
+  // instead of likwid_markerStopRegion?)
 
-  std::cout << " --- aggregate events by group: \n";
-  for (auto it=aggregate_events.begin(); it!=aggregate_events.end(); ++it)
+  // std::cout << " --- runtimes by tag: \n";
+  // for (std::map<std::string, double>::iterator it=runtimes_by_tag.begin();
+  //      it!=runtimes_by_tag.end(); ++it){
+  //   std::cout << "Runtime for " + it->first + ": "
+  //              + std::to_string(it->second) + "\n";
+  // }
+  // std::cout << std::endl;
+
+  std::cout << " --- aggregate events: \n";
+  for (auto it = aggregate_events.begin(); it != aggregate_events.end(); ++it)
   {
-    std::cout << " - Aggregate events for group " << it->first << '\n';
-    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2){
-      std::cout << "Aggregate " << it2->first << ": " << it2->second << '\n';
+    std::cout << "\n\n -- Aggregate events for region " << it->first << "\n";
+    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+    {
+      std::cout << "\n - Aggregate events for group " << it2->first << '\n';
+      for (auto it3 = it2->second.begin(); it3 != it2->second.end(); ++it3)
+      {
+        std::cout << "Aggregate " << it3->first << ": " << it3->second
+                  << '\n';
+      }
     }
     std::cout << std::endl;
   }
   std::cout << std::endl;
 
-  std::cout << " --- aggregate metrics by group: \n";
-  for (auto it=aggregate_metrics.begin(); it!=aggregate_metrics.end(); ++it)
+  std::cout << " --- aggregate metrics: \n";
+  for (auto it = aggregate_metrics.begin(); it != aggregate_metrics.end(); ++it)
   {
-    std::cout << " - Aggregate metrics for group " << it->first << '\n';
-    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2){
-      std::cout << "Aggregate " << it2->first << ": " << it2->second << '\n';
+    std::cout << "\n\n -- Aggregate metrics for region " << it->first << "\n";
+    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+    {
+      std::cout << "\n - Aggregate metrics for group " << it2->first << '\n';
+      for (auto it3 = it2->second.begin(); it3 != it2->second.end(); ++it3)
+      {
+        std::cout << "Aggregate " << it3->first << ": " << it3->second
+                  << '\n';
+      }
     }
     std::cout << std::endl;
   }
@@ -460,8 +573,12 @@ void performance_monitor::printComparison(){
     "\n\n ----- saturation level performance_monitor report -----\n\n";
   for (auto it=saturation.begin(); it!=saturation.end(); ++it)
   {
-    std::cout << "Percentage of available " << it->first << " used: " 
-      << it->second << '\n';
+    std::cout << "\nRegion " << it->first << ":\n";
+    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2)
+    {
+      std::cout << "Percentage of available " << it2->first << " used: "
+        << it2->second << '\n';
+    }
   }
   std::cout << std::endl;
   std::cout << "----- end saturation level performance_monitor report -----\n";
@@ -481,14 +598,20 @@ const std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
 	return runtimes_by_tag;
 }
 
-const std::map<std::string,std::map<std::string, double>> performance_monitor::get_aggregate_events() {
+const std::map<std::string,std::map<std::string, std::map<std::string, double>>> 
+performance_monitor::get_aggregate_events() 
+{
 	return aggregate_events;
 }
 
-const std::map<std::string,std::map<std::string, double>> performance_monitor::get_aggregate_metrics() {
+const std::map<std::string,std::map<std::string, std::map<std::string, double>>> 
+performance_monitor::get_aggregate_metrics() 
+{
 	return aggregate_metrics;
 }
 
-const std::map<std::string, double> performance_monitor::get_saturation() {
+const std::map<std::string, std::map<std::string, double>>
+performance_monitor::get_saturation()
+{
 	return saturation;
 }

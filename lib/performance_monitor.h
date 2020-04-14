@@ -22,6 +22,18 @@
 #define OPS_PER_SP_128_VECTOR 4
 
 // ---- Names of things ---- //
+// group names
+#define likwid_group_flops_sp "FLOPS_SP"
+#define likwid_group_flops_dp "FLOPS_DP"
+#define likwid_group_l2 "L2"
+#define likwid_group_l3 "L3"
+#define likwid_group_mem "MEM"
+
+// custom keywords
+// #define group_sum_by_region_keyword "group_sum_by_region"
+#define all_groups_keyword "all_groups"
+#define all_regions_keyword "all_regions"
+
 // number of flops
 #define total_sp_flops_event_name "total sp flops"
 #define sp_scalar_flops_event_name "FP_ARITH_INST_RETIRED_SCALAR_SINGLE"
@@ -117,13 +129,31 @@ class performance_monitor {
     static void close();
 
     // building data to print
+
+    // sum events and metrics across threads. Organize by region and group
+
     static void getAggregateResults();
-    static void compareActualWithbench();
+    static void compareActualWithBench();
 
     // print results
+
+    // debug info about what groups and regions were found
+    static void printRegionGroupEventAndMetricData();
+
+    // print everything, utility function that does everything below
     static void printResults();
+
+    // print everything per core
     static void printDetailedResults();
+
+    // print results aggregated across cores
     static void printOnlyAggregate();
+
+    // print comparison between actual rates and theoretical maximums. Also
+    // called "saturation"
+
+    // prints comparison by region, but includes a special region "all_regions"
+    // that supplies the average saturation
     static void printComparison();
 
     // output to json
@@ -131,9 +161,12 @@ class performance_monitor {
 
     // ------ getters ----- //
     const static std::map<std::string, double> get_runtimes_by_tag();
-    const static std::map<std::string, std::map<std::string, double>> get_aggregate_events();
-    const static std::map<std::string, std::map<std::string, double>> get_aggregate_metrics();
-    const static std::map<std::string, double> get_saturation();
+    const static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
+      get_aggregate_events();
+    const static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
+      get_aggregate_metrics();
+    const static std::map<std::string, std::map<std::string, double>>
+      get_saturation();
 
   private:
     // ------ attributes ------ //
@@ -147,8 +180,20 @@ class performance_monitor {
     static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results
-    static std::map<std::string, std::map<std::string, double>> aggregate_events;
-    static std::map<std::string, std::map<std::string, double>> aggregate_metrics;
-    static std::map<std::string, double> saturation;
+
+    // each includes group for "all groups" and region for "all regions"
+
+    // map region to group to event name to metric value
+    static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
+      aggregate_events;
+
+    // map region to group to metric name to metric value
+    static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
+      aggregate_metrics;
+
+    // map region to saturation name to saturation value
+
+    // saturation name matches metric name
+    static std::map<std::string, std::map<std::string, double>> saturation;
 
 };
