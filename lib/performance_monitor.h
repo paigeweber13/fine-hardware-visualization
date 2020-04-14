@@ -23,6 +23,10 @@
 #define OPS_PER_SP_128_VECTOR 4
 
 // ---- Names of things ---- //
+
+// JUSTIFICATION: using defines for these things turns incorrect spellings into
+// compile-time errors instead of runtime errors. This is good!
+
 // group names
 #define likwid_group_flops_sp "FLOPS_SP"
 #define likwid_group_flops_dp "FLOPS_DP"
@@ -72,6 +76,10 @@
 #define load_to_store_ratio_metric_name "Load to store ratio"
 
 // ---- End names of things ---- //
+
+// enums for aggregation type and result type
+enum aggregation_type { sum, average };
+enum result_type { event, metric };
 
 using json = nlohmann::json;
 
@@ -157,21 +165,32 @@ class performance_monitor {
     // that supplies the average saturation
     static void printComparison();
 
+    static void printPortUsageInfo();
+
     // output to json
     static void resultsToJson();
 
     // ------ getters ----- //
     const static std::map<std::string, double> get_runtimes_by_tag();
-    const static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
-      get_aggregate_events();
-    const static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
-      get_aggregate_metrics();
+    const static std::map<
+      aggregation_type, std::map<
+        result_type, std::map<
+          std::string, std::map<
+            std::string, std::map<
+              std::string, double
+            >
+          >
+        >
+      >
+    >
+      get_aggregate_results();
     const static std::map<std::string, std::map<std::string, double>>
       get_saturation();
+    const static std::map<std::string, std::map<std::string, double>>
+      get_average_port_usage_info();
 
   private:
     // ------ attributes ------ //
-    static int num_threads;
 
     // "runtimes by tag" should really be called "max runtime by tag" because
     // that's how it's calculated, but likwid seems to calculate flops on a
@@ -184,17 +203,23 @@ class performance_monitor {
 
     // each includes group for "all groups" and region for "all regions"
 
-    // map region to group to event name to metric value
-    static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
-      aggregate_events;
-
-    // map region to group to metric name to metric value
-    static std::map<std::string, std::map<std::string, std::map<std::string, double>>>
-      aggregate_metrics;
+    // aggregation type -> result type (event or metric) -> region name ->
+    // group name -> metric name -> metric value
+    static std::map<
+      aggregation_type, std::map<
+        result_type, std::map<
+          std::string, std::map<
+            std::string, std::map<
+              std::string, double
+            >
+          >
+        >
+      >
+    >
+      aggregate_results;
 
     // map region to saturation name to saturation value
 
     // saturation name matches metric name
     static std::map<std::string, std::map<std::string, double>> saturation;
-
 };

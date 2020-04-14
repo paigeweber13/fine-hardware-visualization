@@ -131,6 +131,7 @@ problems tend to change behavior throughout execution
        paper, move on to something else)
 
 ### Exploration
+ - [ ] check if averages make sense!!!
  - [x] specifying groups with environment variables seems to cause regions to
        fail. Investigate
        - turns out, pinning threads is NOT optional
@@ -245,6 +246,9 @@ it. The benchmark tool should be evaluated, we can draw from it.
 Stuff from last week:
  - Switched intrinsics to operator= (see [memory section](#memory)), compared
    compiler-produced assembly
+
+Questions:
+ - how do we know port usage numbers make sense?
 
 ### Learning likwid
  - pinning threads is NOT optional. If you don't use cli, you need to do it

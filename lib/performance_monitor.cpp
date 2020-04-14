@@ -1,12 +1,19 @@
 #include "performance_monitor.h"
 
-int performance_monitor::num_threads;
-
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
-std::map<std::string, std::map<std::string, std::map<std::string, double>>> 
-  performance_monitor::aggregate_events;
-std::map<std::string, std::map<std::string, std::map<std::string, double>>>
-  performance_monitor::aggregate_metrics;
+
+std::map<
+  aggregation_type, std::map<
+    result_type, std::map<
+      std::string, std::map<
+        std::string, std::map<
+          std::string, double
+        >
+      >
+    >
+  >
+> performance_monitor::aggregate_results;
+
 std::map<std::string, std::map<std::string, double>>
   performance_monitor::saturation;
 
@@ -237,27 +244,6 @@ void performance_monitor::printRegionGroupEventAndMetricData(){
   }
 }
 
-// note on getAggregateResults: I've considered also aggregating across groups
-// and regions (see commented lines in this function)
-
-// This doesn't always make sense and isn't terribly useful right now, so it's
-// commented out.
-
-// the "all_groups" keyword takes the place of a group name. it is calculated
-// for each region and includes all metrics
-// from all groups. This only makes sense if the set of stuff checked by each
-// group is mutually exclusive with the other groups, but this is almost
-// always the case. The only time I can think of when this is not the case is
-// if someone specifies both the "MEM_DP" group and the "FLOPS_DP" group.
-// Likewise, specifying both "MEM_SP" and "FLOPS_SP" would mess up the
-// results.
-
-// the "all_regions" keyword takes the place of a region tag and only
-// supports one group: the "all_groups" keyword. This only makes sense
-// sometimes. For example: what if you have two regions "work_part_1" and
-// "work_part_2" that both do lots of DP FP operations. It doesn't make
-// sense to ADD the FLOP/S rates from both regions together...
-
 void performance_monitor::getAggregateResults()
 {
   int gid, num_threads;
@@ -284,24 +270,22 @@ void performance_monitor::getAggregateResults()
     regionName = perfmon_getTagOfRegion(i);
     gid = perfmon_getGroupOfRegion(i);
     groupName = perfmon_getGroupName(gid);
-    aggregate_events[regionName][groupName][total_sp_flops_event_name] = 0.;
-    // aggregate_events[regionName][all_groups_keyword][total_sp_flops_event_name] = 0.;
-    // aggregate_events[all_regions_keyword][all_groups_keyword][total_sp_flops_event_name] = 0.;
+    aggregate_results[sum][event][regionName][groupName]
+      [total_sp_flops_event_name] = 0.;
 
     for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
       event_name = perfmon_getEventName(gid, k);
-      aggregate_events[regionName][groupName][event_name] = 0.;
-      // aggregate_events[regionName][all_groups_keyword][event_name] = 0.;
-      // aggregate_events[all_regions_keyword][all_groups_keyword][event_name] = 0.;
+      aggregate_results[sum][event][regionName][groupName][event_name] = 0.;
     }
     for (int k = 0; k < perfmon_getMetricsOfRegion(i); k++){
       metric_name = perfmon_getMetricName(gid, k);
-      aggregate_metrics[regionName][groupName][metric_name] = 0.;
-      // aggregate_metrics[regionName][all_groups_keyword][metric_name] = 0.;
-      // aggregate_metrics[all_regions_keyword][all_groups_keyword][metric_name] = 0.;
+      aggregate_results[sum][metric][regionName][groupName][metric_name] = 0.;
     }
   }
 
+  // populate aggregate maps
+
+  // first, sums
   for (int t = 0; t < num_threads; t++)
   {
     for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -314,37 +298,37 @@ void performance_monitor::getAggregateResults()
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         if(event_value > 0){
-          aggregate_events[regionName][groupName][event_name] += event_value;
-          // aggregate_events[regionName][all_groups_keyword][event_name] +=
+          aggregate_results[sum][event][regionName][groupName][event_name] += event_value;
+          // aggregate_results[regionName][all_groups_keyword][event_name] +=
           //   event_value;
-          // aggregate_events[all_regions_keyword][all_groups_keyword]
+          // aggregate_results[all_regions_keyword][all_groups_keyword]
           //   [event_name] += event_value;
 
           if(strcmp(sp_scalar_flops_event_name, event_name) == 0){
-            aggregate_events[regionName][groupName][total_sp_flops_event_name] 
+            aggregate_results[sum][event][regionName][groupName][total_sp_flops_event_name] 
               += event_value;
-            // aggregate_events[regionName][all_groups_keyword]
+            // aggregate_results[regionName][all_groups_keyword]
             //   [total_sp_flops_event_name] += event_value;
-            // aggregate_events[all_regions_keyword][all_groups_keyword]
+            // aggregate_results[all_regions_keyword][all_groups_keyword]
             //   [total_sp_flops_event_name] += event_value;
           }
           else if(strcmp(sp_avx_128_flops_event_name, event_name) == 0){
-            aggregate_events[regionName][groupName][total_sp_flops_event_name]
+            aggregate_results[sum][event][regionName][groupName][total_sp_flops_event_name]
               += event_value * OPS_PER_SP_128_VECTOR;
-            // aggregate_events[regionName][all_groups_keyword]
+            // aggregate_results[regionName][all_groups_keyword]
             //   [total_sp_flops_event_name]
             //   += event_value * OPS_PER_SP_128_VECTOR;
-            // aggregate_events[all_regions_keyword][all_groups_keyword]
+            // aggregate_results[all_regions_keyword][all_groups_keyword]
             //   [total_sp_flops_event_name]
             //   += event_value * OPS_PER_SP_128_VECTOR;
           }
           else if(strcmp(sp_avx_256_flops_event_name, event_name) == 0){
-            aggregate_events[regionName][groupName][total_sp_flops_event_name]
+            aggregate_results[sum][event][regionName][groupName][total_sp_flops_event_name]
               += event_value * OPS_PER_SP_256_VECTOR;
-            // aggregate_events[regionName][all_groups_keyword]
+            // aggregate_results[regionName][all_groups_keyword]
             //   [total_sp_flops_event_name]
             //   += event_value * OPS_PER_SP_256_VECTOR;
-            // aggregate_events[all_regions_keyword][all_groups_keyword]
+            // aggregate_results[all_regions_keyword][all_groups_keyword]
             //   [total_sp_flops_event_name]
             //   += event_value * OPS_PER_SP_256_VECTOR;
           }
@@ -355,21 +339,43 @@ void performance_monitor::getAggregateResults()
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
         if(!isnan(metric_value)){
-          aggregate_metrics[regionName][groupName][metric_name]
+          aggregate_results[sum][metric][regionName][groupName][metric_name]
             += metric_value;
-          // aggregate_metrics[regionName][all_groups_keyword][metric_name]
+          // aggregate_results[sum][metric][regionName][all_groups_keyword][metric_name]
           //   += metric_value;
-          // aggregate_metrics[all_regions_keyword][all_groups_keyword]
+          // aggregate_results[sum][metric][all_regions_keyword][all_groups_keyword]
           //   [metric_name] += metric_value;
         }
       }
+    }
+  }
+
+  // then, averages
+  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  {
+    regionName = perfmon_getTagOfRegion(i);
+    gid = perfmon_getGroupOfRegion(i);
+    groupName = perfmon_getGroupName(gid);
+
+    for (int k = 0; k < perfmon_getEventsOfRegion(i); k++)
+    {
+      event_name = perfmon_getEventName(gid, k);
+      aggregate_results[average][event][regionName][groupName][event_name] =
+          aggregate_results[sum][event][regionName][groupName][event_name] / num_threads;
+    }
+
+    for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
+    {
+      metric_name = perfmon_getMetricName(gid, k);
+      aggregate_results[average][metric][regionName][groupName][metric_name] =
+          aggregate_results[sum][metric][regionName][groupName][metric_name] / num_threads;
     }
   }
 }
 
 void performance_monitor::compareActualWithBench()
 {
-  if(aggregate_events.size() == 0){
+  if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
               << " before printing\n"
               << "aggregate results. If you are getting this error and you did"
@@ -426,7 +432,7 @@ void performance_monitor::compareActualWithBench()
       metricName = saturation_metrics[j];
       referenceBenchmarkValue = saturationBenchmarkReferences[j];
 
-      if(!aggregate_metrics[regionName].count(metricGroupName))
+      if(!aggregate_results[sum][metric][regionName].count(metricGroupName))
       {
         std::cout << "WARN: group " << metricGroupName << " was not measured."
                   << " Therefore, saturation for " << metricName << " will \n"
@@ -438,7 +444,7 @@ void performance_monitor::compareActualWithBench()
       else
       {
         saturation[regionName][metricName] =
-          aggregate_metrics[regionName][metricGroupName][metricName] 
+          aggregate_results[sum][metric][regionName][metricGroupName][metricName] 
           / referenceBenchmarkValue;
         saturation[all_regions_keyword][metricName] +=
           saturation[regionName][metricName];
@@ -517,7 +523,7 @@ void performance_monitor::printOnlyAggregate()
   // getAggregateResults();
 
   std::cout << "\n\n----- aggregate performance_monitor report -----\n\n";
-  if(aggregate_events.size() == 0){
+  if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
               << " before printing\n"
               << "aggregate results\n";
@@ -535,34 +541,43 @@ void performance_monitor::printOnlyAggregate()
   // }
   // std::cout << std::endl;
 
-  std::cout << " --- aggregate events: \n";
-  for (auto it = aggregate_events.begin(); it != aggregate_events.end(); ++it)
-  {
-    std::cout << "\n\n -- Aggregate events for region " << it->first << "\n";
-    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-    {
-      std::cout << "\n - Aggregate events for group " << it2->first << '\n';
-      for (auto it3 = it2->second.begin(); it3 != it2->second.end(); ++it3)
-      {
-        std::cout << "Aggregate " << it3->first << ": " << it3->second
-                  << '\n';
-      }
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
+  std::string aggregation_type_string;
+  std::string result_type_string;
 
-  std::cout << " --- aggregate metrics: \n";
-  for (auto it = aggregate_metrics.begin(); it != aggregate_metrics.end(); ++it)
+  std::cout << "aggregation type" << " : " 
+            << "result type" <<      " : "
+            << "region name" << " : " 
+            << "group name" << " : " 
+            << "metric name" << " : "
+            << "metric value" << '\n';
+  for (auto it1 = aggregate_results.begin(); it1 != aggregate_results.end(); ++it1)
   {
-    std::cout << "\n\n -- Aggregate metrics for region " << it->first << "\n";
-    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+    if (it1->first == aggregation_type::sum)
+      aggregation_type_string = "sum";
+    else if (it1->first == aggregation_type::average)
+      aggregation_type_string = "average";
+
+    for (auto it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
-      std::cout << "\n - Aggregate metrics for group " << it2->first << '\n';
+      if (it2->first == result_type::event)
+        result_type_string = "event";
+      else if (it2->first == result_type::metric)
+        result_type_string = "metric";
+
       for (auto it3 = it2->second.begin(); it3 != it2->second.end(); ++it3)
       {
-        std::cout << "Aggregate " << it3->first << ": " << it3->second
-                  << '\n';
+        for (auto it4 = it3->second.begin(); it4 != it3->second.end(); ++it4)
+        {
+          for (auto it5 = it4->second.begin(); it5 != it4->second.end(); ++it5)
+          {
+            std::cout << aggregation_type_string << " : " 
+                      << result_type_string <<      " : "
+                      << "region " << it3->first << " : " 
+                      << "group " << it4->first <<  " : " 
+                      << it5->first <<              " : "
+                      << it5->second << '\n';
+          }
+        }
       }
     }
     std::cout << std::endl;
@@ -574,7 +589,31 @@ void performance_monitor::printOnlyAggregate()
 }
 
 void performance_monitor::printComparison(){
-  if(aggregate_events.size() == 0){
+  if(aggregate_results.size() == 0){
+    std::cout << "ERROR: you must run "
+              << "performance_monitor::compareActualWithBench before\n"
+              << "printing comparison.\n";
+    return;
+  }
+
+  std::cout << 
+    "\n\n ----- saturation level performance_monitor report -----\n\n";
+  for (auto it=saturation.begin(); it!=saturation.end(); ++it)
+  {
+    std::cout << "\nRegion " << it->first << ":\n";
+    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2)
+    {
+      std::cout << "Percentage of available " << it2->first << " used: "
+        << it2->second << '\n';
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "----- end saturation level performance_monitor report -----\n";
+  std::cout << std::endl;
+}
+
+void performance_monitor::printPortUsageInfo(){
+  if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run "
               << "performance_monitor::compareActualWithBench before\n"
               << "printing comparison.\n";
@@ -598,6 +637,19 @@ void performance_monitor::printComparison(){
 }
 
 void performance_monitor::resultsToJson(){
+  if(aggregate_results.size() == 0){
+    std::cout << "ERROR: you must run "
+              << "performance_monitor::compareActualWithBench before\n"
+              << "printing comparison.\n";
+    return;
+  }
+  if(aggregate_results.size() == 0){
+    std::cout << "ERROR: you must run "
+              << "performance_monitor::compareActualWithBench before\n"
+              << "printing comparison.\n";
+    return;
+  }
+
   // json results;
   // for (auto it=saturation.begin(); it!=saturation.end(); ++it)
   //   results["saturation"][it->first] = it->second;
@@ -610,16 +662,21 @@ const std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
 	return runtimes_by_tag;
 }
 
-const std::map<std::string,std::map<std::string, std::map<std::string, double>>> 
-performance_monitor::get_aggregate_events() 
-{
-	return aggregate_events;
-}
 
-const std::map<std::string,std::map<std::string, std::map<std::string, double>>> 
-performance_monitor::get_aggregate_metrics() 
+const std::map<
+  aggregation_type, std::map<
+    result_type, std::map<
+      std::string, std::map<
+        std::string, std::map<
+          std::string, double
+        >
+      >
+    >
+  >
+>
+performance_monitor::get_aggregate_results()
 {
-	return aggregate_metrics;
+	return aggregate_results;
 }
 
 const std::map<std::string, std::map<std::string, double>>
