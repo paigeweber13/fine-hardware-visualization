@@ -426,11 +426,23 @@ void performance_monitor::compareActualWithBench()
       metricName = saturation_metrics[j];
       referenceBenchmarkValue = saturationBenchmarkReferences[j];
 
-      saturation[regionName][metricName] =
-        aggregate_metrics[regionName][metricGroupName][metricName] 
-        / referenceBenchmarkValue;
-      saturation[all_regions_keyword][metricName] +=
-        saturation[regionName][metricName];
+      if(!aggregate_metrics[regionName].count(metricGroupName))
+      {
+        std::cout << "WARN: group " << metricGroupName << " was not measured."
+                  << " Therefore, saturation for " << metricName << " will \n"
+                  << "not be calculated and will be reported as NaN.\n";
+
+        saturation[regionName][metricName] = NAN;
+        saturation[all_regions_keyword][metricName] = NAN;
+      }
+      else
+      {
+        saturation[regionName][metricName] =
+          aggregate_metrics[regionName][metricGroupName][metricName] 
+          / referenceBenchmarkValue;
+        saturation[all_regions_keyword][metricName] +=
+          saturation[regionName][metricName];
+      }
     }
   }
 

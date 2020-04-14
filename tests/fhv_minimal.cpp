@@ -23,7 +23,7 @@ int main()
 
   // so 14 group/region combos
   setenv("LIKWID_EVENTS",
-         "MEM|L2|L3|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
+         "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
          1);
   // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
   setenv("LIKWID_MODE", "1", 1);
