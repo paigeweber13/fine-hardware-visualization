@@ -26,15 +26,15 @@ void copy(double * arr, double * copy_arr, size_t n){
 int main()
 {
   printf("\n\nThis is a minimal example of how the likwid marker api works\n");
-  int num_threads;
 
-  const char *filepath = "/tmp/likwid.out";
+  // int num_threads;
+  // const char *filepath = "/tmp/likwid.out";
 
-  setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
-  setenv("LIKWID_MODE", "1", 1);
-  setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
-  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
-  setenv("LIKWID_FORCE", "1", 1);
+  // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
+  // setenv("LIKWID_MODE", "1", 1);
+  // setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
+  // setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+  // setenv("LIKWID_FORCE", "1", 1);
 
   likwid_markerInit();
 
@@ -44,7 +44,7 @@ int main()
     likwid_markerRegisterRegion("double_flops");
     likwid_markerRegisterRegion("copy");
     likwid_pinThread(omp_get_thread_num());
-    num_threads = omp_get_num_threads();
+    // num_threads = omp_get_num_threads();
   }
 
   double a, b, c;
@@ -103,33 +103,33 @@ int main()
   // perfmon_finalize();
   // perfmon_finalize();
 
-  perfmon_readMarkerFile(filepath);
-  printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
-  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
-  {
-    int gid = perfmon_getGroupOfRegion(i);
-    printf("Region %s with %d events and %d metrics\n", perfmon_getTagOfRegion(i),
-           perfmon_getEventsOfRegion(i),
-           perfmon_getMetricsOfRegion(i));
-  }
+  // perfmon_readMarkerFile(filepath);
+  // printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
+  // for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  // {
+  //   int gid = perfmon_getGroupOfRegion(i);
+  //   printf("Region %s with %d events and %d metrics\n", perfmon_getTagOfRegion(i),
+  //          perfmon_getEventsOfRegion(i),
+  //          perfmon_getMetricsOfRegion(i));
+  // }
 
-  for (int t = 0; t < num_threads; t++)
-  {
-    printf("\nMetrics output for hardware thread %d\n", t);
+  // for (int t = 0; t < num_threads; t++)
+  // {
+  //   printf("\nMetrics output for hardware thread %d\n", t);
 
-    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
-    {
-      int gid = perfmon_getGroupOfRegion(i);
-      printf("Region %s\n", perfmon_getTagOfRegion(i));
-      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++)
-        printf("Event %s:%s: %f\n", perfmon_getEventName(gid, k),
-               perfmon_getCounterName(gid, k),
-               perfmon_getResultOfRegionThread(i, k, 0));
-      for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
-        printf("Metric %s: %f\n", perfmon_getMetricName(gid, k),
-               perfmon_getMetricOfRegionThread(i, k, 0));
-      printf("\n");
-    }
-  }
-  remove(filepath);
+  //   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  //   {
+  //     int gid = perfmon_getGroupOfRegion(i);
+  //     printf("Region %s\n", perfmon_getTagOfRegion(i));
+  //     for (int k = 0; k < perfmon_getEventsOfRegion(i); k++)
+  //       printf("Event %s:%s: %f\n", perfmon_getEventName(gid, k),
+  //              perfmon_getCounterName(gid, k),
+  //              perfmon_getResultOfRegionThread(i, k, 0));
+  //     for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
+  //       printf("Metric %s: %f\n", perfmon_getMetricName(gid, k),
+  //              perfmon_getMetricOfRegionThread(i, k, 0));
+  //     printf("\n");
+  //   }
+  // }
+  // remove(filepath);
 }
