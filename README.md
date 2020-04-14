@@ -4,6 +4,9 @@ visualization of their computer architecture and indicate what parts of that
 architecture are most loaded to identify bottlenecks in high-performance
 applications.
 
+This software is in the early stages of development and should not yet be
+assumed to be stable or correct.
+
 - [Fine Hardware Visualization](#fine-hardware-visualization)
 - [Prerequisites](#prerequisites)
 - [Running](#running)
@@ -24,6 +27,7 @@ applications.
   - [Others:](#others)
 - [Accomplishments:](#accomplishments)
   - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
+    - [Learning likwid](#learning-likwid)
   - [2020-03-24 through 2020-04-09](#2020-03-24-through-2020-04-09)
     - [Playing with likwid_minimal.c](#playing-with-likwidminimalc)
     - [Improvements to performance_monitor](#improvements-to-performancemonitor)
@@ -59,14 +63,13 @@ applications.
     - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
 # Prerequisites
- - **likwid-4.3.4:** version 4.3.4 is required, as this is the only version
-   confirmed to use `likwid-accessD` without root permissions. And also does
-   not have the bug where likwid hangs on likwid_markerClose when too many
-   groups or regions are specified. If this version is available with your
-   package manager, use that. Otherwise, build it from source. Instructions to
-   do this are available [here](https://github.com/RRZE-HPC/likwid)
- - additional perfgroups not included with likwid-4.3.4 . These can be
-   installed by running `make perfgroups` in the root directory.
+ - **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
+   for memory counters and is confirmed to use `likwid-accessD` without root
+   permissions. If this version is available with your package manager, use
+   that. Otherwise, build it from source. Instructions to do this are available
+   [here](https://github.com/RRZE-HPC/likwid)
+ - additional perfgroups not included with likwid. These can be installed by
+   running `make perfgroups` in the root directory.
  - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
    in ./lib
  - **boost/program_options:** available on [the boost
@@ -82,6 +85,7 @@ suite) or `make bench` to work right now.
 What still works:
  - minimal example of likwid: `make run-tests/likwid-minimal`
  - minimal example of perfmon: `make run-tests/fhv-minimal`
+ - convolution: `cd convolution-fast && make test`
 
 # Usage Notes
  - Region names must not have spaces
@@ -120,26 +124,29 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
- - [ ] archive old todos
+ - [x] archive old todos
 
 ### What other people do
- - [ ] look into what other people are doing (Dr. Saule will read kerncraft paper,
-       move on to something else)
+ - [ ] look into what other people are doing (Dr. Saule will read kerncraft
+       paper, move on to something else)
 
 ### Exploration
- - [ ] specifying groups with environment variables seems to cause regions to
+ - [x] specifying groups with environment variables seems to cause regions to
        fail. Investigate
- - [ ] make benchmark, benchmark-likwid-vs-manual, and thread_migration use
-       likwid instead of performance_monitor wrapper
- - [ ] combine benchmark in fhv with benchmark-likwid-vs-manual
-   - [ ] rewrite computation_measurements to optionally include manual results
-   - [ ] update CLI to optionally include manual results
+       - turns out, pinning threads is NOT optional
  - [ ] use just part of performance_monitor that aggregates results at the end
- - [ ] make performance_monitor aggregate and report by region in addition to
+ - [x] make performance_monitor aggregate and report by region in addition to
        group. performance_monitor already aggregates by group.
  - [ ] investigate port usage in convolution: do numbers make sense?
  - [ ] mem instructions retired * 32 bytes instead of 64
    - [ ] then double check that code with Dr. Saule
+ - [ ] move performance_monitor defines to separate file. "likwid_defines.hpp"
+ - [ ] simplify performance_monitor 
+ - [ ] create "printHighlights" function that just prints stuff associated with
+       saturation and port usage
+ - [ ] fix output to JSON
+ - [ ] revisit benchmark_likwid_vs_manual to ensure stuff I'm reporting with
+       performance_monitor makes sense
 
 ### Likwid stability issues
  - [ ] port counters sometimes reporting 1.8e19 for values
@@ -152,11 +159,15 @@ work, repeat until the day is done.
 
 ## Long-term:
 ### Problems to fix:
+ - fix benchmark, benchmark-likwid-vs-manual, and thread_migration 
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
      region
 
 ### Features to add:
+ - combine benchmark in fhv with benchmark-likwid-vs-manual
+   - rewrite computation_measurements to optionally include manual results
+   - update CLI to optionally include manual results
  - expand suite of test software that has balanced/imbalanced usage
    - consider standard benchmarks
  - improve benchmark
@@ -234,6 +245,9 @@ it. The benchmark tool should be evaluated, we can draw from it.
 Stuff from last week:
  - Switched intrinsics to operator= (see [memory section](#memory)), compared
    compiler-produced assembly
+
+### Learning likwid
+ - pinning threads is NOT optional. If you don't use cli, you need to do it
 
 ## 2020-03-24 through 2020-04-09
 Main points:
