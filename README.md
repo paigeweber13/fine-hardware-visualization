@@ -28,6 +28,7 @@ assumed to be stable or correct.
 - [Accomplishments:](#accomplishments)
   - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
     - [Learning likwid](#learning-likwid)
+    - [Exploration](#exploration-1)
   - [2020-03-24 through 2020-04-09](#2020-03-24-through-2020-04-09)
     - [Playing with likwid_minimal.c](#playing-with-likwidminimalc)
     - [Improvements to performance_monitor](#improvements-to-performancemonitor)
@@ -132,6 +133,9 @@ problems tend to change behavior throughout execution
 
 ### Exploration
  - [ ] check if averages make sense!!!
+   - [ ] might be a good time to create "printhighlights" function
+ - [ ] create "printHighlights" function that just prints stuff associated with
+       saturation and port usage
  - [x] specifying groups with environment variables seems to cause regions to
        fail. Investigate
        - turns out, pinning threads is NOT optional
@@ -143,8 +147,6 @@ problems tend to change behavior throughout execution
    - [ ] then double check that code with Dr. Saule
  - [ ] move performance_monitor defines to separate file. "likwid_defines.hpp"
  - [ ] simplify performance_monitor 
- - [ ] create "printHighlights" function that just prints stuff associated with
-       saturation and port usage
  - [ ] fix output to JSON
  - [ ] revisit benchmark_likwid_vs_manual to ensure stuff I'm reporting with
        performance_monitor makes sense
@@ -251,7 +253,17 @@ Questions:
  - how do we know port usage numbers make sense?
 
 ### Learning likwid
- - pinning threads is NOT optional. If you don't use cli, you need to do it
+ - pinning threads is NOT optional, but cli does it for you if you use it.
+   - failure to pin threads is what was giving me problems when specifying
+     groups with environment variables
+
+### Exploration
+ - Shifted convolution to use direct likwid calls except to aggregate and print
+   results
+ - For performance_monitor result printing: added ability to average results
+   across core, because summing "port_usage" ratios doesn't really make sense
+   - I haven't looked at convolution now that I've made these changes because I
+     want to verify them again with benchmark_likwid_vs_manual
 
 ## 2020-03-24 through 2020-04-09
 Main points:
