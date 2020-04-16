@@ -125,26 +125,37 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
- - [x] archive old todos
+ - [ ] work on convolution as an example of how we can identify bottlenecks
+
+Goal for end of semester: have good measurements that show that the bottleneck
+changes as you adjust the parameters
+ - do manual measurements with convolution to ensure code behaves that way.
+ - demonstrate it with hardware counters
+ - make this my focus, other stuff can be taken care of as it becomes necessary
 
 ### What other people do
- - [ ] look into what other people are doing (Dr. Saule will read kerncraft
-       paper, move on to something else)
+ - [ ] read kerncraft paper
+ - [ ] investigate another tool
 
 ### Exploration
  - [ ] check if averages make sense!!!
    - [ ] might be a good time to create "printhighlights" function
+   - [ ] use geometric mean if you're trying to mean ratios - compute product
+         and then take the root
  - [ ] create "printHighlights" function that just prints stuff associated with
        saturation and port usage
  - [x] specifying groups with environment variables seems to cause regions to
        fail. Investigate
        - turns out, pinning threads is NOT optional
- - [ ] use just part of performance_monitor that aggregates results at the end
+ - [x] use just part of performance_monitor that aggregates results at the end
  - [x] make performance_monitor aggregate and report by region in addition to
        group. performance_monitor already aggregates by group.
  - [ ] investigate port usage in convolution: do numbers make sense?
  - [ ] mem instructions retired * 32 bytes instead of 64
-   - [ ] then double check that code with Dr. Saule
+   - this is because there are 2 32-byte busses?
+     [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
+   - this architecture only moves 32-bytes (probably because 32-byte
+     vectors are the biggest they can do)
  - [ ] move performance_monitor defines to separate file. "likwid_defines.hpp"
  - [ ] simplify performance_monitor 
  - [ ] fix output to JSON
