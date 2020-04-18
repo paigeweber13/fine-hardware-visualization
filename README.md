@@ -24,6 +24,7 @@ assumed to be stable or correct.
     - [Features to add:](#features-to-add)
 - [Other similar tools:](#other-similar-tools)
   - [Kerncraft:](#kerncraft)
+  - [TAU:](#tau)
   - [Others:](#others)
 - [Accomplishments:](#accomplishments)
   - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
@@ -199,6 +200,8 @@ There's a
 it. The benchmark tool should be evaluated, we can draw from it.
 
  - uses IACA to generate in-core predictions
+ - Big focus on cache and memory and predicting what level requested data comes
+   from (see section 2.4 "Cache Miss Prediction")
  - chooses to use theoretical performance numbers for some things and
    benchmarks for others. The choice is complicated but detailed in Fig. 1
    of their paper
@@ -227,10 +230,23 @@ it. The benchmark tool should be evaluated, we can draw from it.
    - not really sure how to interpret them
    - presented some cache/memory data
    - presented some information on how things scale
+ - hardware counter usage seems to be limited to validation From paper: "The
+   output of likwid-perfctr is used to derive familiar metrics (Gflop/s,
+   MLUP/s, etc.), which in turn are used for validations.
+
+## TAU:
+ - url: https://www.cs.uoregon.edu/research/tau/home.php 
+ - [this tutoral](http://tau.uoregon.edu/tau.ppt) was helpful
+ - mentions a ["topology
+   view"](https://www.cs.uoregon.edu/research/tau/docs/newguide/bk01pt02ch10s04.html)
+   provided by ParaProf that visualizes how performance maps to architecture.
+   This sounds like exactly what we want to do 
+   - doesn't seem to visualize architecture? Still trying to figure out how to
+     interpret this plot
+ - difficult to use
 
 ## Others:
  - Intel PCM
- - HPC toolkit "Tau" out of Oak Ridge
  - other laboratory toolkits
  - Vampir
  - Vtune
