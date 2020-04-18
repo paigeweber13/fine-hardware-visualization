@@ -225,6 +225,11 @@ it. The benchmark tool should be evaluated, we can draw from it.
  - kerncraft does automatically benchmark a lot of great things (bandwidths
    are a notable example) but also provides much more information than we
    are planning on getting from our benchmarks 
+ - As part of their roofline model, they predict the cache miss rate, use that
+   to predict the amount of data needed from each level of cache, and divide
+   that by a measured achievable bandwidth to get a throughput time. They even
+   try to find a benchmark that is similar to the code being tested by
+   analyzing the amount of reads from and writes to memory.
  - I feel like I could spend weeks just learning everything about kerncraft
  - skipped ahead to usage and samples of results
    - not really sure how to interpret them
