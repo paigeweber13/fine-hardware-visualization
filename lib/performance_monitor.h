@@ -78,7 +78,7 @@
 // ---- End names of things ---- //
 
 // enums for aggregation type and result type
-enum aggregation_type { sum, average };
+enum aggregation_type { sum, arithmetic_mean, geometric_mean };
 enum result_type { event, metric };
 
 using json = nlohmann::json;

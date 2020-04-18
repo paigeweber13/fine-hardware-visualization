@@ -360,14 +360,14 @@ void performance_monitor::getAggregateResults()
     for (int k = 0; k < perfmon_getEventsOfRegion(i); k++)
     {
       event_name = perfmon_getEventName(gid, k);
-      aggregate_results[average][event][regionName][groupName][event_name] =
+      aggregate_results[arithmetic_mean][event][regionName][groupName][event_name] =
           aggregate_results[sum][event][regionName][groupName][event_name] / num_threads;
     }
 
     for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
     {
       metric_name = perfmon_getMetricName(gid, k);
-      aggregate_results[average][metric][regionName][groupName][metric_name] =
+      aggregate_results[arithmetic_mean][metric][regionName][groupName][metric_name] =
           aggregate_results[sum][metric][regionName][groupName][metric_name] / num_threads;
     }
   }
@@ -554,8 +554,10 @@ void performance_monitor::printOnlyAggregate()
   {
     if (it1->first == aggregation_type::sum)
       aggregation_type_string = "sum";
-    else if (it1->first == aggregation_type::average)
-      aggregation_type_string = "average";
+    else if (it1->first == aggregation_type::arithmetic_mean)
+      aggregation_type_string = "arithmetic mean";
+    else if (it1->first == aggregation_type::geometric_mean)
+      aggregation_type_string = "geometric mean";
 
     for (auto it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {

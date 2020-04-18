@@ -142,15 +142,11 @@ changes as you adjust the parameters
  - [ ] check if averages make sense!!!
    - [ ] might be a good time to create "printhighlights" function
    - [ ] use geometric mean if you're trying to mean ratios - compute product
-         and then take the root
+         and then take the root.
+     - [x] change "average" aggreagtion_type to "arithmetic_mean"
+     - [ ] add geometric mean aggregation type
  - [ ] create "printHighlights" function that just prints stuff associated with
        saturation and port usage
- - [x] specifying groups with environment variables seems to cause regions to
-       fail. Investigate
-       - turns out, pinning threads is NOT optional
- - [x] use just part of performance_monitor that aggregates results at the end
- - [x] make performance_monitor aggregate and report by region in addition to
-       group. performance_monitor already aggregates by group.
  - [ ] investigate port usage in convolution: do numbers make sense?
  - [ ] mem instructions retired * 32 bytes instead of 64
    - this is because there are 2 32-byte busses?
