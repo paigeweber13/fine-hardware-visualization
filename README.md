@@ -127,6 +127,8 @@ problems tend to change behavior throughout execution
 # TODO:
 ## Immediate:
  - [ ] work on convolution as an example of how we can identify bottlenecks
+   - [ ] look at newest data to analyze how bottleneck for convolution changes
+         as n*m and k change
 
 Goal for end of semester: have good measurements that show that the bottleneck
 changes as you adjust the parameters
