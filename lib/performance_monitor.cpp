@@ -276,10 +276,14 @@ void performance_monitor::getAggregateResults()
     for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
       event_name = perfmon_getEventName(gid, k);
       aggregate_results[sum][event][regionName][groupName][event_name] = 0.;
+      aggregate_results[arithmetic_mean][event][regionName][groupName][event_name] = 0.;
+      aggregate_results[geometric_mean][event][regionName][groupName][event_name] = 1.;
     }
     for (int k = 0; k < perfmon_getMetricsOfRegion(i); k++){
       metric_name = perfmon_getMetricName(gid, k);
       aggregate_results[sum][metric][regionName][groupName][metric_name] = 0.;
+      aggregate_results[arithmetic_mean][metric][regionName][groupName][metric_name] = 0.;
+      aggregate_results[geometric_mean][metric][regionName][groupName][metric_name] = 1.;
     }
   }
 
@@ -298,22 +302,27 @@ void performance_monitor::getAggregateResults()
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         if(event_value > 0){
-          aggregate_results[sum][event][regionName][groupName][event_name] += event_value;
+          aggregate_results[sum][event][regionName][groupName][event_name] 
+            += event_value;
+          aggregate_results[geometric_mean][event][regionName][groupName]
+            [event_name] *= event_value;
+
           // aggregate_results[regionName][all_groups_keyword][event_name] +=
           //   event_value;
           // aggregate_results[all_regions_keyword][all_groups_keyword]
           //   [event_name] += event_value;
 
           if(strcmp(sp_scalar_flops_event_name, event_name) == 0){
-            aggregate_results[sum][event][regionName][groupName][total_sp_flops_event_name] 
-              += event_value;
+            aggregate_results[sum][event][regionName][groupName]
+              [total_sp_flops_event_name] += event_value;
             // aggregate_results[regionName][all_groups_keyword]
             //   [total_sp_flops_event_name] += event_value;
             // aggregate_results[all_regions_keyword][all_groups_keyword]
             //   [total_sp_flops_event_name] += event_value;
           }
           else if(strcmp(sp_avx_128_flops_event_name, event_name) == 0){
-            aggregate_results[sum][event][regionName][groupName][total_sp_flops_event_name]
+            aggregate_results[sum][event][regionName][groupName]
+              [total_sp_flops_event_name]
               += event_value * OPS_PER_SP_128_VECTOR;
             // aggregate_results[regionName][all_groups_keyword]
             //   [total_sp_flops_event_name]
@@ -323,7 +332,8 @@ void performance_monitor::getAggregateResults()
             //   += event_value * OPS_PER_SP_128_VECTOR;
           }
           else if(strcmp(sp_avx_256_flops_event_name, event_name) == 0){
-            aggregate_results[sum][event][regionName][groupName][total_sp_flops_event_name]
+            aggregate_results[sum][event][regionName][groupName]
+              [total_sp_flops_event_name]
               += event_value * OPS_PER_SP_256_VECTOR;
             // aggregate_results[regionName][all_groups_keyword]
             //   [total_sp_flops_event_name]
@@ -341,6 +351,8 @@ void performance_monitor::getAggregateResults()
         if(!isnan(metric_value)){
           aggregate_results[sum][metric][regionName][groupName][metric_name]
             += metric_value;
+          aggregate_results[geometric_mean][metric][regionName][groupName]
+            [metric_name] *= metric_value;
           // aggregate_results[sum][metric][regionName][all_groups_keyword][metric_name]
           //   += metric_value;
           // aggregate_results[sum][metric][all_regions_keyword][all_groups_keyword]
@@ -362,6 +374,13 @@ void performance_monitor::getAggregateResults()
       event_name = perfmon_getEventName(gid, k);
       aggregate_results[arithmetic_mean][event][regionName][groupName][event_name] =
           aggregate_results[sum][event][regionName][groupName][event_name] / num_threads;
+
+      aggregate_results[geometric_mean][event][regionName][groupName]
+        [event_name] = 
+        pow(
+          aggregate_results[geometric_mean][event][regionName][groupName]
+            [event_name],
+          1/(double)num_threads);
     }
 
     for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
