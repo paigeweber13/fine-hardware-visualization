@@ -25,8 +25,10 @@ assumed to be stable or correct.
 - [Other similar tools:](#other-similar-tools)
   - [Kerncraft:](#kerncraft)
   - [TAU:](#tau)
+  - [Vampir](#vampir)
   - [Others:](#others)
 - [Accomplishments:](#accomplishments)
+  - [2020-04-16 through 2020-04-23](#2020-04-16-through-2020-04-23)
   - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
     - [Learning likwid](#learning-likwid)
     - [Exploration](#exploration-1)
@@ -129,6 +131,7 @@ problems tend to change behavior throughout execution
  - [ ] work on convolution as an example of how we can identify bottlenecks
    - [ ] look at newest data to analyze how bottleneck for convolution changes
          as n*m and k change
+ - [x] add geometric mean to performance monitor
 
 Goal for end of semester: have good measurements that show that the bottleneck
 changes as you adjust the parameters
@@ -138,7 +141,6 @@ changes as you adjust the parameters
 
 ### What other people do
  - [ ] read kerncraft paper
- - [ ] investigate another tool
 
 ### Exploration
  - [ ] check if averages make sense!!!
@@ -197,6 +199,8 @@ There's a
 [paper](https://link.springer.com/chapter/10.1007%2F978-3-319-56702-0_1) about
 it. The benchmark tool should be evaluated, we can draw from it.
 
+ - advertises that it can instrument single core and full-socket performance:
+   This is a similar granularity to that which we want to do
  - uses IACA to generate in-core predictions
  - Big focus on cache and memory and predicting what level requested data comes
    from (see section 2.4 "Cache Miss Prediction")
@@ -246,12 +250,21 @@ it. The benchmark tool should be evaluated, we can draw from it.
    This sounds like exactly what we want to do 
    - doesn't seem to visualize architecture? Still trying to figure out how to
      interpret this plot
+   - perhaps it's nodes in a cluster for distributed computing... It does not
+     seem to provide the fine-grained visualization we are trying to create
  - difficult to use
+
+## Vampir
+ - helps identify communication bottlenecks
+ - overhead associated with procedure calling
+ - cache miss rates (associates them with the call to a specific function or
+   functions, which allows the programmer to focus their attention.)
+ - requires a paid license, but there is a free demo version
+ - per-thread granularity
 
 ## Others:
  - Intel PCM
  - other laboratory toolkits
- - Vampir
  - Vtune
  - IACA (Intel Architecture Core Analyzer)
    - has reached end of life according to intel website. LLVM-MCA should be
@@ -274,6 +287,21 @@ it. The benchmark tool should be evaluated, we can draw from it.
      - does runtime analysis
 
 # Accomplishments:
+## 2020-04-16 through 2020-04-23
+ - looked at TAU
+ - looked at vampir
+   - not free?
+ - read more of kerncraft paper
+ - revisited convolution
+   - my theoretical analysis says memory is only the bound at kernel sizes < 5
+   - in practice, I don't see a roofline from memory, but perhaps I'm not using
+     core to the fullest extent?
+   - for now will move on to looking at it with likwid to see if I can gain
+     insights
+ - manually compared fhv_minimal and likwid_minimal counter results to see if
+   they were reasonable. Everything seems good, moving on for now. But we will
+   need formal tests at some point.
+
 ## 2020-04-09 through 2020-04-16
 Stuff from last week:
  - Switched intrinsics to operator= (see [memory section](#memory)), compared
