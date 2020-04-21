@@ -72,7 +72,8 @@ bw_results bandwidth_rw_bench_compare(
         //	start = system_clock::now();
         //	Maybe start likwid region here
         //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        performance_monitor::startRegion(tag);
+        // performance_monitor::startRegion(tag);
+        likwid_markerStartRegion(tag);
         start_time = std::chrono::high_resolution_clock::now();
       }
 
@@ -92,7 +93,8 @@ bw_results bandwidth_rw_bench_compare(
         //	end = system_clock::now();
         //	Maybe stop likwid regin here
         //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        performance_monitor::stopRegion(tag);
+        // performance_monitor::stopRegion(tag);
+        likwid_markerStopRegion(tag);
         end_time = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
       }
@@ -131,11 +133,13 @@ flop_results flops_bench_compare(std::uint64_t num_iterations){
     NUM_CORES = omp_get_num_threads();
     // std::cout << "I am processor #" << omp_get_thread_num() << std::endl;
 
-    performance_monitor::startRegion("flops");
+    // performance_monitor::startRegion("flops");
+    likwid_markerStartRegion("flops");
     // #pragma omp barrier
     d = flops_sp(num_iterations);
     // #pragma omp barrier
-    performance_monitor::stopRegion("flops");
+    // performance_monitor::stopRegion("flops");
+    likwid_markerStopRegion("flops");
   }
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
@@ -152,8 +156,28 @@ flop_results flops_bench_compare(std::uint64_t num_iterations){
 
 void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                  unsigned mem_size_kb, output_format o, test_type t){
-  
-  performance_monitor::init("FLOPS_SP|MEM");
+
+  // performance_monitor::init("FLOPS_SP|MEM");
+  setenv("LIKWID_EVENTS",
+         "FLOPS_SP|MEM",
+         1);
+  // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
+  setenv("LIKWID_MODE", "1", 1);
+  // output filepath
+  setenv("LIKWID_FILEPATH", performance_monitor::likwidOutputFilepath.c_str(),
+         1); 
+  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+  setenv("LIKWID_FORCE", "1", 1);
+
+  likwid_markerInit();
+
+#pragma omp parallel
+  {
+    likwid_markerThreadInit();
+    likwid_markerRegisterRegion("flops");
+    likwid_markerRegisterRegion("RAM");
+    likwid_pinThread(omp_get_thread_num());
+  }
 
   flop_results sp_flop_results;
   bw_results bandwidth_results;
@@ -167,10 +191,11 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     bandwidth_results = bandwidth_rw_bench_compare(num_mem_iter, 
       mem_size_kb);
 
-  performance_monitor::close();
+  // performance_monitor::close();
+  likwid_markerClose();
 
   if (o == output_format::pretty){
-    performance_monitor::printResults();
+    // performance_monitor::printResults();
     std::cout << "---- running benchmark and doing manual timing to compare";
     std::cout << " with likwid results ----" << std::endl;
 
@@ -183,8 +208,7 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
     std::cout << "bandwidth (MB/s): " << bandwidth_results.bandwidth << std::endl;
   } else if (o == output_format::csv){
 
-    auto events = performance_monitor::get_aggregate_events();
-    auto metrics = performance_monitor::get_aggregate_metrics();
+    auto perfmon_results = performance_monitor::get_aggregate_results();
     auto runtimes = performance_monitor::get_runtimes_by_tag();
 
     // manual_duration,manual_num_flops,manual_Mflops,
@@ -194,8 +218,8 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                 << sp_flop_results.num_fp_ops << "," 
                 << sp_flop_results.mflops << ","
                 << runtimes["flops"] << ","
-                << events["FLOPS_SP"][total_sp_flops_event_name] << ","
-                << metrics["FLOPS_SP"][mflops_metric_name]
+                << perfmon_results[arithmetic_mean][event]["flops"]["FLOPS_SP"][total_sp_flops_event_name] << ","
+                << perfmon_results[arithmetic_mean][event]["flops"]["FLOPS_SP"][mflops_metric_name]
                 << "\n";
     }
 
@@ -206,8 +230,9 @@ void custom_test(std::uint64_t num_flop_iter, unsigned num_mem_iter,
                 << bandwidth_results.gb_transferred << "," 
                 << bandwidth_results.bandwidth << ","
                 << runtimes["RAM"] << ","
-                << metrics["MEM"][ram_data_volume_metric_name] << ","
-                << metrics["MEM"][ram_bandwidth_metric_name] << "\n";
+                << perfmon_results[arithmetic_mean][metric]["RAM"]["MEM"][ram_data_volume_metric_name] << ","
+                << perfmon_results[arithmetic_mean][metric]["RAM"]["MEM"][ram_bandwidth_metric_name]
+                << "\n";
     }
   }
 }
