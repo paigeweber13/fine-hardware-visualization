@@ -79,7 +79,7 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
 
   // unsigned thr_num;
   std::uint64_t i, j, k;
-  __m256d buffer;
+  // __m256d buffer;
   std::uint64_t inner_iterations = 1;
 
   // align to cache line, which is 512 bits or 64 bytes
@@ -90,7 +90,7 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
 
   std::uint64_t num_doubles = size_kib * KILO_BYTE_SIZE/BYTES_PER_DOUBLE;
 
-#pragma omp parallel default(shared) private(buffer, i, j)
+#pragma omp parallel default(shared) private(i, j)
   {
 
     // thr_num = omp_get_thread_num();
