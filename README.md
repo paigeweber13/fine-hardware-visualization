@@ -291,6 +291,7 @@ it. The benchmark tool should be evaluated, we can draw from it.
 
 # Accomplishments:
 ## 2020-04-16 through 2020-04-23
+Other Tools:
  - looked at TAU
    - powerful and detailed but seems to target large clusters.
    - not intuitive
@@ -300,23 +301,32 @@ it. The benchmark tool should be evaluated, we can draw from it.
    - does not seem to consider architecture?
    - not free?
  - read more of kerncraft paper
+
+Kernel to use to demonstrate how this tool analyzes changing bottlenecks:
  - revisited convolution
    - my theoretical analysis says memory is only the bound at kernel sizes < 5
    - in practice, I don't see a roofline from memory, but perhaps I'm not using
      core to the fullest extent?
    - for now will move on to looking at it with likwid to see if I can gain
      insights
- - changes to likwid:
-   - added geometric mean
-   - map is built for per-thread results
- - manually compared fhv_minimal and likwid_minimal counter results to see if
-   they were reasonable after these changes. Everything seems good, moving on
-   for now. But we will need formal tests at some point.
- - next steps: 
-   - decide on analyzing convolution or another kernel
-   - use likwid to print the most pertinent information
-   - create json
-   - visualize
+
+improvements to performance_monitor tool:
+ - added geometric mean
+ - map is built for per-thread results
+
+Checking per-thread result map for accuracy:
+ - events are off by a factor of 4 or so
+ - metrics seem to match
+ - events are reported for non existent threads, like
+ - compared new geometric mean and double checked old arithmetic mean with
+   likwid_minimal. Everything seems good, moving on for now. But we will need
+   formal tests at some point.
+
+next steps: 
+ - decide on analyzing convolution or another kernel
+ - use likwid to print the most pertinent information
+ - create json
+ - visualize
 
 Questions:
  - fix up convolution or just switch to other kernel for analysis?
