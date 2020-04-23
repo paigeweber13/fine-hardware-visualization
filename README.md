@@ -129,8 +129,9 @@ problems tend to change behavior throughout execution
 # TODO:
 ## Immediate:
  - [ ] work on convolution as an example of how we can identify bottlenecks
-   - [ ] look at newest data to analyze how bottleneck for convolution changes
+   - [x] look at newest data to analyze how bottleneck for convolution changes
          as n*m and k change
+     - (seems entirely bound by CPU right now)
  - [x] add geometric mean to performance monitor
  - [ ] new per_thread_results seems to be small on events.
    - [ ] also, it reports stuff for threads that I don't have??? Like thread 11
@@ -150,7 +151,7 @@ changes as you adjust the parameters
    - [ ] use geometric mean if you're trying to mean ratios - compute product
          and then take the root.
      - [x] change "average" aggreagtion_type to "arithmetic_mean"
-     - [ ] add geometric mean aggregation type
+     - [x] add geometric mean aggregation type
  - [ ] create "printHighlights" function that just prints stuff associated with
        saturation and port usage
  - [ ] investigate port usage in convolution: do numbers make sense?
@@ -291,7 +292,12 @@ it. The benchmark tool should be evaluated, we can draw from it.
 # Accomplishments:
 ## 2020-04-16 through 2020-04-23
  - looked at TAU
+   - powerful and detailed but seems to target large clusters.
+   - not intuitive
  - looked at vampir
+   - closer to what we are aiming for, as it provides a mapping of function to
+     performance on a fine-grained level
+   - does not seem to consider architecture?
    - not free?
  - read more of kerncraft paper
  - revisited convolution
@@ -300,9 +306,20 @@ it. The benchmark tool should be evaluated, we can draw from it.
      core to the fullest extent?
    - for now will move on to looking at it with likwid to see if I can gain
      insights
+ - changes to likwid:
+   - added geometric mean
+   - map is built for per-thread results
  - manually compared fhv_minimal and likwid_minimal counter results to see if
-   they were reasonable. Everything seems good, moving on for now. But we will
-   need formal tests at some point.
+   they were reasonable after these changes. Everything seems good, moving on
+   for now. But we will need formal tests at some point.
+ - next steps: 
+   - decide on analyzing convolution or another kernel
+   - use likwid to print the most pertinent information
+   - create json
+   - visualize
+
+Questions:
+ - fix up convolution or just switch to other kernel for analysis?
 
 ## 2020-04-09 through 2020-04-16
 Stuff from last week:
