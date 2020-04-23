@@ -94,7 +94,7 @@ class performance_monitor {
 
     // sum events and metrics across threads. Organize by region and group
 
-    static void getAggregateResults();
+    static void buildResultsMaps();
     static void compareActualWithBench();
 
     // print results
@@ -137,6 +137,19 @@ class performance_monitor {
       >
     >
       get_aggregate_results();
+
+    const static std::map<
+      result_type, std::map<
+        int, std::map<
+          std::string, std::map<
+            std::string, std::map<
+              std::string, double
+            >
+          >
+        >
+      >
+    >
+      get_per_thread_results();
     const static std::map<std::string, std::map<std::string, double>>
       get_saturation();
     const static std::map<std::string, std::map<std::string, double>>
@@ -170,6 +183,24 @@ class performance_monitor {
       >
     >
       aggregate_results;
+
+    // in the case of "per_thread_results", "thread" refers to the hardware
+    // thread 
+
+    // result type (event or metric) -> thread number -> region name -> group
+    // name -> thing name -> thing value
+    static std::map<
+      result_type, std::map<
+        int, std::map<
+          std::string, std::map<
+            std::string, std::map<
+              std::string, double
+            >
+          >
+        >
+      >
+    >
+      per_thread_results;
 
     // map region to saturation name to saturation value
 

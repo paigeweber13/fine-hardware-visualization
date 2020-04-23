@@ -14,6 +14,18 @@ std::map<
   >
 > performance_monitor::aggregate_results;
 
+std::map<
+  result_type, std::map<
+    int, std::map<
+      std::string, std::map<
+        std::string, std::map<
+          std::string, double
+        >
+      >
+    >
+  >
+> performance_monitor::per_thread_results;
+
 std::map<std::string, std::map<std::string, double>>
   performance_monitor::saturation;
 
@@ -215,7 +227,7 @@ void performance_monitor::nextGroup(){
 void performance_monitor::close(){
   likwid_markerClose();
 
-  getAggregateResults();
+  buildResultsMaps();
   compareActualWithBench();
   resultsToJson();
 }
@@ -244,7 +256,7 @@ void performance_monitor::printRegionGroupEventAndMetricData(){
   }
 }
 
-void performance_monitor::getAggregateResults()
+void performance_monitor::buildResultsMaps()
 {
   int gid, num_threads;
   float event_value, metric_value;
@@ -287,9 +299,27 @@ void performance_monitor::getAggregateResults()
     }
   }
 
-  // populate aggregate maps
+  for (int i = 0; i < num_threads; i++){
+    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    {
+      regionName = perfmon_getTagOfRegion(i);
+      gid = perfmon_getGroupOfRegion(i);
+      groupName = perfmon_getGroupName(gid);
+      per_thread_results[event][i][regionName][groupName]
+        [total_sp_flops_event_name] = 0.;
 
-  // first, sums
+      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
+        event_name = perfmon_getEventName(gid, k);
+        per_thread_results[event][i][regionName][groupName][event_name] = 0.;
+      }
+      for (int k = 0; k < perfmon_getMetricsOfRegion(i); k++){
+        metric_name = perfmon_getMetricName(gid, k);
+        per_thread_results[metric][i][regionName][groupName][metric_name] = 0.;
+      }
+    }
+  }
+
+  // populate aggregate maps
   for (int t = 0; t < num_threads; t++)
   {
     for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -306,41 +336,22 @@ void performance_monitor::getAggregateResults()
             += event_value;
           aggregate_results[geometric_mean][event][regionName][groupName]
             [event_name] *= event_value;
-
-          // aggregate_results[regionName][all_groups_keyword][event_name] +=
-          //   event_value;
-          // aggregate_results[all_regions_keyword][all_groups_keyword]
-          //   [event_name] += event_value;
+          per_thread_results[event][t][regionName][groupName][event_name]
+            = event_value;
 
           if(strcmp(sp_scalar_flops_event_name, event_name) == 0){
             aggregate_results[sum][event][regionName][groupName]
               [total_sp_flops_event_name] += event_value;
-            // aggregate_results[regionName][all_groups_keyword]
-            //   [total_sp_flops_event_name] += event_value;
-            // aggregate_results[all_regions_keyword][all_groups_keyword]
-            //   [total_sp_flops_event_name] += event_value;
           }
           else if(strcmp(sp_avx_128_flops_event_name, event_name) == 0){
             aggregate_results[sum][event][regionName][groupName]
               [total_sp_flops_event_name]
               += event_value * OPS_PER_SP_128_VECTOR;
-            // aggregate_results[regionName][all_groups_keyword]
-            //   [total_sp_flops_event_name]
-            //   += event_value * OPS_PER_SP_128_VECTOR;
-            // aggregate_results[all_regions_keyword][all_groups_keyword]
-            //   [total_sp_flops_event_name]
-            //   += event_value * OPS_PER_SP_128_VECTOR;
           }
           else if(strcmp(sp_avx_256_flops_event_name, event_name) == 0){
             aggregate_results[sum][event][regionName][groupName]
               [total_sp_flops_event_name]
               += event_value * OPS_PER_SP_256_VECTOR;
-            // aggregate_results[regionName][all_groups_keyword]
-            //   [total_sp_flops_event_name]
-            //   += event_value * OPS_PER_SP_256_VECTOR;
-            // aggregate_results[all_regions_keyword][all_groups_keyword]
-            //   [total_sp_flops_event_name]
-            //   += event_value * OPS_PER_SP_256_VECTOR;
           }
         }
       }
@@ -353,16 +364,14 @@ void performance_monitor::getAggregateResults()
             += metric_value;
           aggregate_results[geometric_mean][metric][regionName][groupName]
             [metric_name] *= metric_value;
-          // aggregate_results[sum][metric][regionName][all_groups_keyword][metric_name]
-          //   += metric_value;
-          // aggregate_results[sum][metric][all_regions_keyword][all_groups_keyword]
-          //   [metric_name] += metric_value;
+          per_thread_results[metric][t][regionName][groupName][metric_name]
+            = metric_value;
         }
       }
     }
   }
 
-  // then, averages
+  // convert sums/products to averages where appropriate
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   {
     regionName = perfmon_getTagOfRegion(i);
@@ -395,10 +404,10 @@ void performance_monitor::getAggregateResults()
 void performance_monitor::compareActualWithBench()
 {
   if(aggregate_results.size() == 0){
-    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+    std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
               << " before printing\n"
               << "aggregate results. If you are getting this error and you did"
-              << " run getAggregateResults,\n"
+              << " run buildResultsMaps,\n"
               << "No metrics have been aggregated. Pleases submit a bug report"
               << "\n";
     return;
@@ -492,60 +501,58 @@ void performance_monitor::printResults()
 
 void performance_monitor::printDetailedResults()
 {
-  int gid, num_threads;
-  float event_value, metric_value;
-  const char *event_name, *counter_name, *metric_name;
-
-#pragma omp parallel
-  {
-    // needed because we use it to print results later
-    num_threads = omp_get_num_threads();
+  if(per_thread_results.size() == 0){
+    std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
+              << " before printing\n"
+              << "detailed, per-thread results\n";
+    return;
   }
+
+  std::string result_type_string;
+  std::string delim = " : ";
 
   printf("\n\n ----- Detailed performance_monitor report ----- \n\n");
-  perfmon_readMarkerFile(likwidOutputFilepath.c_str());
-  printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
-  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
-  {
-    gid = perfmon_getGroupOfRegion(i);
-    printf("Region %s with %d events and %d metrics\n", perfmon_getTagOfRegion(i),
-           perfmon_getEventsOfRegion(i),
-           perfmon_getMetricsOfRegion(i));
-  }
 
-  for (int t = 0; t < num_threads; t++)
+  for (auto it1 = per_thread_results.begin(); it1 != per_thread_results.end(); ++it1)
   {
-    printf("\nMetrics output for hardware thread %d\n", t);
-
-    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    if (it1->first == result_type::event)
+      result_type_string = "event";
+    else if (it1->first == result_type::metric)
+      result_type_string = "metric";
+    for (auto it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
     {
-      gid = perfmon_getGroupOfRegion(i);
-      printf("Region %s with gid %d\n", perfmon_getTagOfRegion(i), gid);
-      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
-        event_name = perfmon_getEventName(gid, k);
-        counter_name = perfmon_getCounterName(gid, k);
-        event_value = perfmon_getResultOfRegionThread(i, k, t);
-        printf("Event %s:%s: %.3f\n", event_name, counter_name, event_value);
+      for (auto it3 = it2->second.begin(); it3 != it2->second.end(); ++it3)
+      {
+        for (auto it4 = it3->second.begin(); it4 != it3->second.end(); ++it4)
+        {
+          for (auto it5 = it4->second.begin(); it5 != it4->second.end(); ++it5)
+          {
+            std::cout << result_type_string << delim
+                      << "thread " << it2->first << delim
+                      << "region " << it3->first << delim
+                      << "group " << it4->first << delim
+                      << it5->first << delim
+                      << it5->second 
+                      << '\n';
+          }
+        }
       }
-      for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
-        metric_name = perfmon_getMetricName(gid, k);
-        metric_value = perfmon_getMetricOfRegionThread(i, k, t);
-        printf("Metric %s: %.3f\n", metric_name, metric_value);
-      }
-      printf("\n");
     }
+    std::cout << std::endl;
   }
+  std::cout << std::endl;
+  
   printf("\n\n ----- end detailed performance_monitor report ----- \n\n");
 }
 
 void performance_monitor::printOnlyAggregate()
 {
   // unnecessary, compareActualWithBench() calls this and it is called in close
-  // getAggregateResults();
+  // buildResultsMaps();
 
   std::cout << "\n\n----- aggregate performance_monitor report -----\n\n";
   if(aggregate_results.size() == 0){
-    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+    std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
               << " before printing\n"
               << "aggregate results\n";
     return;
@@ -637,7 +644,7 @@ void performance_monitor::printComparison(){
 
 void performance_monitor::printHighlights(){
   if(aggregate_results.size() == 0){
-    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+    std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
               << " before printing\n"
               << "result highlights\n";
     return;
@@ -650,13 +657,6 @@ void performance_monitor::printHighlights(){
     return;
   }
   
-  int num_threads;
-  #pragma omp parallel
-  {
-    num_threads = omp_get_num_threads();
-  }
-
-  std::cout << "\n\n ----- performance_monitor highlights report -----\n\n";
   std::vector<std::string> aggregate_highlight_metrics = {
     mflops_metric_name,
     mflops_dp_metric_name,
@@ -692,7 +692,14 @@ void performance_monitor::printHighlights(){
     port7_usage_ratio,
   };
 
-  std::cout << " --- per-thread metric highlights -----\n";
+  int num_threads;
+  #pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+
+  std::cout << "\n\n ----- performance_monitor highlights report -----\n\n";
+  std::cout << " --- port usage info -----\n";
   int gid;
   const char * metric_name;
   double metric_value;
@@ -782,7 +789,7 @@ void performance_monitor::printHighlights(){
 
 void performance_monitor::resultsToJson(){
   if(aggregate_results.size() == 0){
-    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+    std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
               << " before printing\n"
               << "result highlights\n";
     return;
@@ -822,6 +829,21 @@ const std::map<
 performance_monitor::get_aggregate_results()
 {
 	return aggregate_results;
+}
+
+const std::map<
+  result_type, std::map<
+    int, std::map<
+      std::string, std::map<
+        std::string, std::map<
+          std::string, double
+        >
+      >
+    >
+  >
+>
+performance_monitor::get_per_thread_results(){
+  return per_thread_results;
 }
 
 const std::map<std::string, std::map<std::string, double>>

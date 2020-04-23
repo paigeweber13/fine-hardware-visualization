@@ -132,6 +132,8 @@ problems tend to change behavior throughout execution
    - [ ] look at newest data to analyze how bottleneck for convolution changes
          as n*m and k change
  - [x] add geometric mean to performance monitor
+ - [ ] new per_thread_results seems to be small on events.
+   - [ ] also, it reports stuff for threads that I don't have??? Like thread 11
 
 Goal for end of semester: have good measurements that show that the bottleneck
 changes as you adjust the parameters
