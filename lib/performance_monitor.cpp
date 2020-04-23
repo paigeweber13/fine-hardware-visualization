@@ -439,7 +439,7 @@ void performance_monitor::compareActualWithBench()
   // initialize all_regions part to 0
   for (size_t j = 0; j < saturation_metrics.size(); j++){
     metricName = saturation_metrics[j];
-    saturation[all_regions_keyword][metricName] = 0.;
+    saturation[all_regions_keyword][metricName] = 1.;
   }
 
   for (int i = 0; i < num_regions; i++)
@@ -465,7 +465,7 @@ void performance_monitor::compareActualWithBench()
         saturation[regionName][metricName] =
           aggregate_results[sum][metric][regionName][metricGroupName][metricName] 
           / referenceBenchmarkValue;
-        saturation[all_regions_keyword][metricName] +=
+        saturation[all_regions_keyword][metricName] *=
           saturation[regionName][metricName];
       }
     }
@@ -477,7 +477,9 @@ void performance_monitor::compareActualWithBench()
 
     // it doesn't make sense to sum saturation values, so we find the average of
     // saturations to get saturation across regions
-    saturation[all_regions_keyword][metricName] /= num_regions;
+    saturation[all_regions_keyword][metricName] = 
+      pow(saturation[all_regions_keyword][metricName],
+        1/static_cast<double>(num_regions));
   }
 }
 
@@ -610,7 +612,7 @@ void performance_monitor::printOnlyAggregate()
 }
 
 void performance_monitor::printComparison(){
-  if(aggregate_results.size() == 0){
+  if(saturation.size() == 0){
     std::cout << "ERROR: you must run "
               << "performance_monitor::compareActualWithBench before\n"
               << "printing comparison.\n";
@@ -633,41 +635,163 @@ void performance_monitor::printComparison(){
   std::cout << std::endl;
 }
 
-void performance_monitor::printPortUsageInfo(){
+void performance_monitor::printHighlights(){
   if(aggregate_results.size() == 0){
-    std::cout << "ERROR: you must run "
-              << "performance_monitor::compareActualWithBench before\n"
-              << "printing comparison.\n";
+    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+              << " before printing\n"
+              << "result highlights\n";
     return;
   }
 
-  std::cout << 
-    "\n\n ----- saturation level performance_monitor report -----\n\n";
-  for (auto it=saturation.begin(); it!=saturation.end(); ++it)
+  if(saturation.size() == 0){
+    std::cout << "ERROR: you must run "
+              << "performance_monitor::compareActualWithBench before\n"
+              << "printing result highlights.\n";
+    return;
+  }
+  
+  int num_threads;
+  #pragma omp parallel
   {
-    std::cout << "\nRegion " << it->first << ":\n";
-    for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2)
+    num_threads = omp_get_num_threads();
+  }
+
+  std::cout << "\n\n ----- performance_monitor highlights report -----\n\n";
+  std::vector<std::string> aggregate_highlight_metrics = {
+    mflops_metric_name,
+    mflops_dp_metric_name,
+    l2_bandwidth_metric_name,
+    l2_data_volume_name,
+    l2_evict_bandwidth_name,
+    l2_evict_data_volume_name,
+    l2_load_bandwidth_name,
+    l2_load_data_volume_name,
+    l3_bandwidth_metric_name,
+    l3_data_volume_name,
+    l3_evict_bandwidth_name,
+    l3_evict_data_volume_name,
+    l3_load_bandwidth_name,
+    l3_load_data_volume_name,
+    ram_bandwidth_metric_name,
+    ram_data_volume_metric_name,
+    ram_evict_bandwidth_name,
+    ram_evict_data_volume_name
+    ram_load_bandwidth_name,
+    ram_load_data_volume_name,
+    load_to_store_ratio_metric_name,
+  };
+
+  std::vector<std::string> per_core_highlight_metrics = {
+    port0_usage_ratio,
+    port1_usage_ratio,
+    port2_usage_ratio,
+    port3_usage_ratio,
+    port4_usage_ratio,
+    port5_usage_ratio,
+    port6_usage_ratio,
+    port7_usage_ratio,
+  };
+
+  std::cout << " --- per-thread metric highlights -----\n";
+  int gid;
+  const char * metric_name;
+  double metric_value;
+  for (int t = 0; t < num_threads; t++)
+  {
+    std::cout << " - Thread " << t << "\n";
+    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
     {
-      std::cout << "Percentage of available " << it2->first << " used: "
-        << it2->second << '\n';
+      gid = perfmon_getGroupOfRegion(i);
+      const char * region_tag = perfmon_getTagOfRegion(i);
+      const char * group_name = perfmon_getGroupName(gid);
+      if(strstr(group_name, "PORT") != NULL){
+        std::cout << "Region: " << region_tag << "\n";
+        std::cout << "Group: " << group_name << "\n";
+        for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+          metric_name = perfmon_getMetricName(gid, k);
+          metric_value = perfmon_getMetricOfRegionThread(i, k, t);
+
+          for(auto it = per_core_highlight_metrics.begin();
+            it != per_core_highlight_metrics.end();
+            ++it)
+          {
+            if (strcmp(metric_name, (*it).c_str()) == 0){
+              std::cout << metric_name << ": " << metric_value << "\n";
+            }
+          }
+        }
+        std::cout << "\n";
+      }
     }
   }
+
+  std::cout << " --- aggregate highlights -----\n";
+  for( auto it = aggregate_highlight_metrics.begin();
+    it != aggregate_highlight_metrics.end();
+    ++it)
+  {
+    for(int aggregation_type_int = sum; 
+        aggregation_type_int != geometric_mean+1;
+        aggregation_type_int++
+    )
+    {
+      aggregation_type this_aggregation_type = 
+        static_cast<aggregation_type>(aggregation_type_int);
+      
+      std::string aggregation_type_string;
+      if (this_aggregation_type == aggregation_type::sum)
+        aggregation_type_string = "sum";
+      else if (this_aggregation_type == aggregation_type::arithmetic_mean)
+        aggregation_type_string = "arithmetic mean";
+      else if (this_aggregation_type == aggregation_type::geometric_mean)
+        aggregation_type_string = "geometric mean";
+      
+      for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+      {
+        gid = perfmon_getGroupOfRegion(i);
+        const char * region_tag = perfmon_getTagOfRegion(i);
+        const char * group_name = perfmon_getGroupName(gid);
+        std::cout << "Region: " << region_tag << "\n";
+        std::cout << "Group: " << group_name << "\n";
+        for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+          metric_value = aggregate_results
+            [this_aggregation_type]
+            [metric]
+            [region_tag]
+            [group_name]
+            [*it]; // *it is metric name from highlight metrics
+
+          if(metric_value != 0){
+            std::cout << *it << ": "
+                      << aggregation_type_string << ": " 
+                      << metric_value
+                      << '\n';
+          }
+        }
+        std::cout << "\n";
+      }
+    }
+  }
+
+  printComparison();
+
   std::cout << std::endl;
-  std::cout << "----- end saturation level performance_monitor report -----\n";
+  std::cout << " ----- end performance_monitor highlights report -----\n\n";
   std::cout << std::endl;
 }
 
 void performance_monitor::resultsToJson(){
   if(aggregate_results.size() == 0){
-    std::cout << "ERROR: you must run "
-              << "performance_monitor::compareActualWithBench before\n"
-              << "printing comparison.\n";
+    std::cout << "ERROR: you must run performance_monitor::getAggregateResults"
+              << " before printing\n"
+              << "result highlights\n";
     return;
   }
-  if(aggregate_results.size() == 0){
+
+  if(saturation.size() == 0){
     std::cout << "ERROR: you must run "
               << "performance_monitor::compareActualWithBench before\n"
-              << "printing comparison.\n";
+              << "printing result highlights.\n";
     return;
   }
 

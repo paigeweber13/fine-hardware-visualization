@@ -49,6 +49,16 @@
 #define mflops_metric_name "SP [MFLOP/s]"
 #define mflops_dp_metric_name "DP [MFLOP/s]"
 
+// port usage ratios
+#define port0_usage_ratio "Port0 usage ratio"
+#define port1_usage_ratio "Port1 usage ratio"
+#define port2_usage_ratio "Port2 usage ratio"
+#define port3_usage_ratio "Port3 usage ratio"
+#define port4_usage_ratio "Port4 usage ratio"
+#define port5_usage_ratio "Port5 usage ratio"
+#define port6_usage_ratio "Port6 usage ratio"
+#define port7_usage_ratio "Port7 usage ratio"
+
 // cache volume and bandwidth
 #define l2_bandwidth_metric_name "L2 bandwidth [MBytes/s]"
 #define l2_data_volume_name "L2 data volume [GBytes]"
@@ -165,7 +175,7 @@ class performance_monitor {
     // that supplies the average saturation
     static void printComparison();
 
-    static void printPortUsageInfo();
+    static void printHighlights();
 
     // output to json
     static void resultsToJson();
@@ -204,7 +214,7 @@ class performance_monitor {
     // each includes group for "all groups" and region for "all regions"
 
     // aggregation type -> result type (event or metric) -> region name ->
-    // group name -> metric name -> metric value
+    // group name -> thing name -> thing value
     static std::map<
       aggregation_type, std::map<
         result_type, std::map<
