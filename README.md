@@ -12,6 +12,7 @@ assumed to be stable or correct.
 - [Running](#running)
 - [Usage Notes](#usage-notes)
 - [Goals:](#goals)
+  - [By end of semester](#by-end-of-semester)
 - [Architecture of Program](#architecture-of-program)
 - [Ownership and licensing](#ownership-and-licensing)
 - [TODO:](#todo)
@@ -97,7 +98,10 @@ What still works:
    in the combined digital version) has hardware counter names
 
 # Goals:
-"I think we have a shot at doing something other people don't do" - Dr. Saule
+"I think we have a shot at doing something other people don't do" - Dr. Saule.
+So far it seems that nothing is designed to automatically identify and
+visualize the architecture by socket and within the core. Additionally, most of
+these tools are not easy to use.
 
 Dr. Saule mentioned two ways this project will be useful
  - help better understand code and how the author can improve it
@@ -109,6 +113,10 @@ We want people new to HPC to be able to
 
 Additionally, we hope to apply this to graph problems: kernels in graph
 problems tend to change behavior throughout execution
+
+## By end of semester
+Have something that shows how bottleneck changes based on parameters. We are
+less concerned about visualization, just data to confirm.
 
 # Architecture of Program
  - Identify hardware architecture
@@ -128,11 +136,11 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
- - [ ] work on convolution as an example of how we can identify bottlenecks
-   - [x] look at newest data to analyze how bottleneck for convolution changes
-         as n*m and k change
-     - (seems entirely bound by CPU right now)
- - [x] add geometric mean to performance monitor
+ - [ ] halide for convolution
+   - [ ] can halide create c code?
+ - [ ] get highlight performance data to show how bottleneck changes, show that
+       it matches theoretical data
+
  - [ ] new per_thread_results seems to be small on events.
    - [ ] also, it reports stuff for threads that I don't have??? Like thread 11
 
@@ -146,12 +154,6 @@ changes as you adjust the parameters
  - [ ] read kerncraft paper
 
 ### Exploration
- - [ ] check if averages make sense!!!
-   - [ ] might be a good time to create "printhighlights" function
-   - [ ] use geometric mean if you're trying to mean ratios - compute product
-         and then take the root.
-     - [x] change "average" aggreagtion_type to "arithmetic_mean"
-     - [x] add geometric mean aggregation type
  - [ ] create "printHighlights" function that just prints stuff associated with
        saturation and port usage
  - [ ] investigate port usage in convolution: do numbers make sense?
@@ -160,11 +162,7 @@ changes as you adjust the parameters
      [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
    - this architecture only moves 32-bytes (probably because 32-byte
      vectors are the biggest they can do)
- - [ ] move performance_monitor defines to separate file. "likwid_defines.hpp"
- - [ ] simplify performance_monitor 
  - [ ] fix output to JSON
- - [ ] revisit benchmark_likwid_vs_manual to ensure stuff I'm reporting with
-       performance_monitor makes sense
 
 ### Likwid stability issues
  - [ ] port counters sometimes reporting 1.8e19 for values
@@ -266,6 +264,8 @@ it. The benchmark tool should be evaluated, we can draw from it.
  - per-thread granularity
 
 ## Others:
+ - check what Dr. Martin Schultz is up to:
+   https://www.professoren.tum.de/en/schulz-martin/ 
  - Intel PCM
  - other laboratory toolkits
  - Vtune
@@ -294,11 +294,14 @@ it. The benchmark tool should be evaluated, we can draw from it.
 Other Tools:
  - looked at TAU
    - powerful and detailed but seems to target large clusters.
+   - tools are highly specified, but there may be tools for fine-grained
+     modeling 
    - not intuitive
  - looked at vampir
    - closer to what we are aiming for, as it provides a mapping of function to
      performance on a fine-grained level
-   - does not seem to consider architecture?
+   - does not seem to consider architecture beyond standard core-cache-memory
+     common to all modern commodity hardware.
    - not free?
  - read more of kerncraft paper
 
@@ -326,7 +329,7 @@ next steps:
  - decide on analyzing convolution or another kernel
  - use likwid to print the most pertinent information
  - create json
- - visualize
+ - visualize (low-priority)
 
 Questions:
  - fix up convolution or just switch to other kernel for analysis?
