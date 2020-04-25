@@ -136,19 +136,22 @@ less concerned about visualization, just data to confirm.
 
 # TODO:
 ## Immediate:
+Primary focus and goal for end of semester: have good measurements that show
+that the bottleneck changes as you adjust the parameters
+ - do manual measurements with some kernel to ensure code behaves that way.
+ - demonstrate it with hardware counters
+
+Detailed:
  - [ ] halide for convolution
    - [ ] can halide create c code?
  - [ ] get highlight performance data to show how bottleneck changes, show that
        it matches theoretical data
-
- - [ ] new per_thread_results seems to be small on events.
-   - [ ] also, it reports stuff for threads that I don't have??? Like thread 11
-
-Goal for end of semester: have good measurements that show that the bottleneck
-changes as you adjust the parameters
- - do manual measurements with convolution to ensure code behaves that way.
- - demonstrate it with hardware counters
- - make this my focus, other stuff can be taken care of as it becomes necessary
+ - [x] new per_thread_results seems to be small on events.
+   - it's because there's more groups to measure so there are fewer times that
+     any single group is measured
+   - also, results match up with manual calculation
+ - [x] also, it reports stuff for threads that I don't have??? Like thread 11
+   - fixed, had repeated a variable (used i twice in for loops)
 
 ### What other people do
  - [ ] read kerncraft paper
