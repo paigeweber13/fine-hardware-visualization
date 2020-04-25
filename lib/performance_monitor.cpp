@@ -658,7 +658,10 @@ void performance_monitor::printHighlights(){
     return;
   }
   
-  std::vector<std::string> aggregate_highlight_metrics = {
+  std::cout << std::endl;
+  std::cout << "\n ----- performance_monitor highlights report -----\n\n";
+
+  std::vector<std::string> sum_metrics = {
     mflops_metric_name,
     mflops_dp_metric_name,
     l2_bandwidth_metric_name,
@@ -676,116 +679,46 @@ void performance_monitor::printHighlights(){
     ram_bandwidth_metric_name,
     ram_data_volume_metric_name,
     ram_evict_bandwidth_name,
-    ram_evict_data_volume_name
+    ram_evict_data_volume_name,
     ram_load_bandwidth_name,
     ram_load_data_volume_name,
-    load_to_store_ratio_metric_name,
   };
+  std::cout << " ---- key metrics, summed across cores ----\n";
 
-  std::vector<std::string> per_core_highlight_metrics = {
-    port0_usage_ratio,
-    port1_usage_ratio,
-    port2_usage_ratio,
-    port3_usage_ratio,
-    port4_usage_ratio,
-    port5_usage_ratio,
-    port6_usage_ratio,
-    port7_usage_ratio,
-  };
-
-  int num_threads;
-  #pragma omp parallel
+  // for each region
+  for (auto region_it = aggregate_results[sum][metric].begin();
+       region_it != aggregate_results[sum][metric].end();
+       ++region_it)
   {
-    num_threads = omp_get_num_threads();
-  }
+    std::cout << "\nREGION " << region_it->first << "\n";
 
-  std::cout << "\n\n ----- performance_monitor highlights report -----\n\n";
-  std::cout << " --- port usage info -----\n";
-  int gid;
-  const char * metric_name;
-  double metric_value;
-  for (int t = 0; t < num_threads; t++)
-  {
-    std::cout << " - Thread " << t << "\n";
-    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    // for each key metric
+    for (
+        auto key_metric_it = sum_metrics.begin();
+        key_metric_it != sum_metrics.end();
+        ++key_metric_it)
     {
-      gid = perfmon_getGroupOfRegion(i);
-      const char * region_tag = perfmon_getTagOfRegion(i);
-      const char * group_name = perfmon_getGroupName(gid);
-      if(strstr(group_name, "PORT") != NULL){
-        std::cout << "Region: " << region_tag << "\n";
-        std::cout << "Group: " << group_name << "\n";
-        for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
-          metric_name = perfmon_getMetricName(gid, k);
-          metric_value = perfmon_getMetricOfRegionThread(i, k, t);
 
-          for(auto it = per_core_highlight_metrics.begin();
-            it != per_core_highlight_metrics.end();
-            ++it)
-          {
-            if (strcmp(metric_name, (*it).c_str()) == 0){
-              std::cout << metric_name << ": " << metric_value << "\n";
-            }
-          }
-        }
-        std::cout << "\n";
-      }
-    }
-  }
-
-  std::cout << " --- aggregate highlights -----\n";
-  for( auto it = aggregate_highlight_metrics.begin();
-    it != aggregate_highlight_metrics.end();
-    ++it)
-  {
-    for(int aggregation_type_int = sum; 
-        aggregation_type_int != geometric_mean+1;
-        aggregation_type_int++
-    )
-    {
-      aggregation_type this_aggregation_type = 
-        static_cast<aggregation_type>(aggregation_type_int);
-      
-      std::string aggregation_type_string;
-      if (this_aggregation_type == aggregation_type::sum)
-        aggregation_type_string = "sum";
-      else if (this_aggregation_type == aggregation_type::arithmetic_mean)
-        aggregation_type_string = "arithmetic mean";
-      else if (this_aggregation_type == aggregation_type::geometric_mean)
-        aggregation_type_string = "geometric mean";
-      
-      for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+      // for each group
+      for (auto group_it = region_it->second.begin();
+           group_it != region_it->second.end();
+           ++group_it)
       {
-        gid = perfmon_getGroupOfRegion(i);
-        const char * region_tag = perfmon_getTagOfRegion(i);
-        const char * group_name = perfmon_getGroupName(gid);
-        std::cout << "Region: " << region_tag << "\n";
-        std::cout << "Group: " << group_name << "\n";
-        for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
-          metric_value = aggregate_results
-            [this_aggregation_type]
-            [metric]
-            [region_tag]
-            [group_name]
-            [*it]; // *it is metric name from highlight metrics
-
-          if(metric_value != 0){
-            std::cout << *it << ": "
-                      << aggregation_type_string << ": " 
-                      << metric_value
-                      << '\n';
-          }
+        // if this group contains the current key metric:
+        if (group_it->second.count(*key_metric_it))
+        {
+          std::cout << std::setw(40) << *key_metric_it;
+          std::cout << "   " << std::setprecision(10)
+                    << group_it->second[*key_metric_it];
+          std::cout << "\n";
         }
-        std::cout << "\n";
       }
     }
   }
 
   printComparison();
 
-  std::cout << std::endl;
-  std::cout << " ----- end performance_monitor highlights report -----\n\n";
-  std::cout << std::endl;
+  std::cout << "\n ----- end performance_monitor highlights report -----\n\n";
 }
 
 void performance_monitor::resultsToJson(){
