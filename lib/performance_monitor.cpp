@@ -260,7 +260,8 @@ void performance_monitor::buildResultsMaps()
 {
   int gid, num_threads;
   float event_value, metric_value;
-  const char *event_name, *metric_name;
+  const char *event_name, *metric_name, * groupName, * regionName;
+
 
 #pragma omp parallel
   {
@@ -269,9 +270,6 @@ void performance_monitor::buildResultsMaps()
   }
 
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
-
-  char * groupName;
-  char * regionName;
 
   // initialize everything to 0
 
@@ -299,27 +297,27 @@ void performance_monitor::buildResultsMaps()
     }
   }
 
-  for (int i = 0; i < num_threads; i++){
-    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
-    {
-      regionName = perfmon_getTagOfRegion(i);
-      gid = perfmon_getGroupOfRegion(i);
-      groupName = perfmon_getGroupName(gid);
-      per_thread_results[event][i][regionName][groupName]
-        [total_sp_flops_event_name] = 0.;
+  // for (int t = 0; t < num_threads; t++){
+  //   for (int j = 0; j < perfmon_getNumberOfRegions(); j++)
+  //   {
+  //     regionName = perfmon_getTagOfRegion(j);
+  //     gid = perfmon_getGroupOfRegion(j);
+  //     groupName = perfmon_getGroupName(gid);
+  //     per_thread_results[event][t][regionName][groupName]
+  //       [total_sp_flops_event_name] = 0.;
 
-      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
-        event_name = perfmon_getEventName(gid, k);
-        per_thread_results[event][i][regionName][groupName][event_name] = 0.;
-      }
-      for (int k = 0; k < perfmon_getMetricsOfRegion(i); k++){
-        metric_name = perfmon_getMetricName(gid, k);
-        per_thread_results[metric][i][regionName][groupName][metric_name] = 0.;
-      }
-    }
-  }
+  //     for (int k = 0; k < perfmon_getEventsOfRegion(j); k++){
+  //       event_name = perfmon_getEventName(gid, k);
+  //       per_thread_results[event][t][regionName][groupName][event_name] = 0.;
+  //     }
+  //     for (int k = 0; k < perfmon_getMetricsOfRegion(j); k++){
+  //       metric_name = perfmon_getMetricName(gid, k);
+  //       per_thread_results[metric][t][regionName][groupName][metric_name] = 0.;
+  //     }
+  //   }
+  // }
 
-  // populate aggregate maps
+  // populate maps
   for (int t = 0; t < num_threads; t++)
   {
     for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
@@ -329,6 +327,9 @@ void performance_monitor::buildResultsMaps()
       groupName = perfmon_getGroupName(gid);
 
       for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
+        // "getCounterName" gives name like "PMC0"
+
+        // event_name = perfmon_getCounterName(gid, k);
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         if(event_value > 0){
