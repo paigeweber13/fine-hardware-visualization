@@ -62,6 +62,7 @@ int main()
 #pragma omp barrier
       for (int i = 0; i < 10000000; i++)
       {
+        // 1e7 scalar double floating point operations per iteration
         c = a * b + c;
       }
 #pragma omp barrier
@@ -83,11 +84,13 @@ int main()
   likwid_markerClose();
 
   // performance_monitor::printRegionGroupEventAndMetricData();
-  // performance_monitor::printDetailedResults();
 
-  performance_monitor::getAggregateResults();
-  performance_monitor::printOnlyAggregate();
+  performance_monitor::buildResultsMaps();
+  // performance_monitor::printDetailedResults();
+  // performance_monitor::printOnlyAggregate();
 
   performance_monitor::compareActualWithBench();
-  performance_monitor::printComparison();
+  // performance_monitor::printComparison();
+
+  performance_monitor::printHighlights();
 }
