@@ -30,7 +30,9 @@ int main()
   // int num_threads;
   // const char *filepath = "/tmp/likwid.out";
 
-  // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
+  // setenv("LIKWID_EVENTS",
+  //        "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
+  //        1);
   // setenv("LIKWID_MODE", "1", 1);
   // setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
   // setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
