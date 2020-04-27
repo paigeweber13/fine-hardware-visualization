@@ -28,6 +28,7 @@ assumed to be stable or correct.
   - [TAU:](#tau)
   - [Vampir](#vampir)
   - [Others:](#others)
+    - [Works by Martin Schultz:](#works-by-martin-schultz)
 - [Accomplishments:](#accomplishments)
   - [2020-04-16 through 2020-04-23](#2020-04-16-through-2020-04-23)
   - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
@@ -296,6 +297,15 @@ it. The benchmark tool should be evaluated, we can draw from it.
      - attempts to **generate hardware models**, like we do.
    - MAQAO
      - does runtime analysis
+
+### Works by Martin Schultz:
+ - see [their CV](https://www.in.tum.de/caps/mitarbeiter/martin-schulz),
+   specifically the section "journal publications". A few seem pertinient, such
+   as:
+   - "Visualization and analytics for characterizing complex memory performance
+     behaviors"
+   - "Connecting Performance Analysis and Visualization to Advance Extreme
+     Scale" 
 
 # Accomplishments:
 ## 2020-04-16 through 2020-04-23
