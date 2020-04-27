@@ -683,7 +683,7 @@ void performance_monitor::printHighlights(){
     ram_load_bandwidth_name,
     ram_load_data_volume_name,
   };
-  std::cout << " ---- key metrics, summed across cores ----\n";
+  std::cout << " ---- key metrics, summed across threads ----\n";
 
   // for each region
   for (auto region_it = aggregate_results[sum][metric].begin();
@@ -715,6 +715,85 @@ void performance_monitor::printHighlights(){
       }
     }
   }
+
+  std::vector<std::string> per_core_metrics = {
+    port0_usage_ratio,
+    port1_usage_ratio,
+    port2_usage_ratio,
+    port3_usage_ratio,
+    port4_usage_ratio,
+    port5_usage_ratio,
+    port6_usage_ratio,
+    port7_usage_ratio,
+  };
+
+  std::cout << " ---- key metrics, per-thread ----\n";
+
+  int num_threads;
+  #pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+  unsigned value_print_width = 10;
+
+  // for each region
+  for (auto const& region: per_thread_results[metric][0])
+  {
+    std::cout << "\nREGION " << region.first << "\n";
+
+    std::cout << std::setw(40) << "Metric" << "    ";
+    for (int t = 0; t < num_threads; t++)
+    {
+      std::cout << " " 
+                << std::setw(value_print_width)
+                << std::left 
+                << "Thread " + std::to_string(t);
+    }
+    std::cout << "\n";
+
+    // for each key metric
+    for (auto const& key_metric: per_core_metrics)
+    {
+
+      // for each group
+      for (auto const& group: region.second)
+      {
+
+        // if this group contains the current key metric:
+        if (group.second.count(key_metric))
+        {
+          std::cout << std::setw(40) << std::right << key_metric << "    ";
+
+          for (int t = 0; t < num_threads; t++)
+          {
+            std::cout << " "
+                      << std::setprecision(value_print_width-5) 
+                      << std::setw(value_print_width)
+                      << std::left
+                      << per_thread_results.at(metric)
+                                           .at(t)
+                                           .at(region.first)
+                                           .at(group.first)
+                                           .at(key_metric);
+          }
+          // std::cout << "   " << std::setprecision(10)
+          //           << group.second.at(key_metric);
+          std::cout << "\n";
+        }
+      }
+    }
+  }
+
+  std::vector<std::string> geometric_mean_metrics = {
+    port0_usage_ratio,
+    port1_usage_ratio,
+    port2_usage_ratio,
+    port3_usage_ratio,
+    port4_usage_ratio,
+    port5_usage_ratio,
+    port6_usage_ratio,
+    port7_usage_ratio,
+  };
 
   printComparison();
 
