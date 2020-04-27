@@ -634,8 +634,9 @@ void performance_monitor::printComparison(){
     std::cout << "\nRegion " << it->first << ":\n";
     for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2)
     {
-      std::cout << "Percentage of available " << it2->first << " used: "
-        << it2->second << '\n';
+      std::cout << std::setw(60) 
+        << "Percentage of available " + it2->first + " used: "
+        << std::setprecision(2) << it2->second << '\n';
     }
   }
   std::cout << std::endl;
@@ -707,7 +708,7 @@ void performance_monitor::printHighlights(){
         // if this group contains the current key metric:
         if (group_it->second.count(*key_metric_it))
         {
-          std::cout << std::setw(40) << *key_metric_it;
+          std::cout << std::right << std::setw(40) << *key_metric_it;
           std::cout << "   " << std::setprecision(10)
                     << group_it->second[*key_metric_it];
           std::cout << "\n";
@@ -715,6 +716,7 @@ void performance_monitor::printHighlights(){
       }
     }
   }
+  std::cout << "\n";
 
   std::vector<std::string> per_core_metrics = {
     port0_usage_ratio,
@@ -734,7 +736,10 @@ void performance_monitor::printHighlights(){
   {
     num_threads = omp_get_num_threads();
   }
-  unsigned value_print_width = 10;
+  
+  // "thread #" is of length 8, so 8 is the smallest width possible while
+  // maintaining pretty formatting
+  unsigned value_print_width = 8;
 
   // for each region
   for (auto const& region: per_thread_results[metric][0])
@@ -751,6 +756,12 @@ void performance_monitor::printHighlights(){
     }
     std::cout << "\n";
 
+    const unsigned truncation_factor = 1000;
+
+    double metric_value;
+    int intermediate_int;
+    double truncated_double;
+
     // for each key metric
     for (auto const& key_metric: per_core_metrics)
     {
@@ -766,23 +777,29 @@ void performance_monitor::printHighlights(){
 
           for (int t = 0; t < num_threads; t++)
           {
+            metric_value = per_thread_results.at(metric)
+              .at(t)
+              .at(region.first)
+              .at(group.first)
+              .at(key_metric);
+            intermediate_int = 
+              static_cast<int>(metric_value * truncation_factor);
+            truncated_double = 
+              static_cast<double>(intermediate_int) / truncation_factor;
+
             std::cout << " "
                       << std::setprecision(value_print_width-5) 
                       << std::setw(value_print_width)
                       << std::left
-                      << per_thread_results.at(metric)
-                                           .at(t)
-                                           .at(region.first)
-                                           .at(group.first)
-                                           .at(key_metric);
+                      << truncated_double;
           }
-          // std::cout << "   " << std::setprecision(10)
-          //           << group.second.at(key_metric);
           std::cout << "\n";
         }
       }
     }
   }
+
+  std::cout << "\n";
 
   std::vector<std::string> geometric_mean_metrics = {
     port0_usage_ratio,
@@ -794,6 +811,35 @@ void performance_monitor::printHighlights(){
     port6_usage_ratio,
     port7_usage_ratio,
   };
+
+  std::cout << " ---- key metrics, averaged across threads ----\n";
+  std::cout << " ---- averaged using a geometric mean ----\n";
+
+  // for each region
+  for (auto const& region: aggregate_results[geometric_mean][metric] )
+  {
+    std::cout << "\nREGION " << region.first << "\n";
+
+    // for each key metric
+    for (auto const& key_metric: geometric_mean_metrics )
+    {
+
+      // for each group
+      for (auto const& group : region.second)
+      {
+        // if this group contains the current key metric:
+        if (group.second.count(key_metric))
+        {
+          std::cout << std::setw(40) << std::right << key_metric;
+          std::cout << "   " << std::left << std::setprecision(10)
+                    << group.second.at(key_metric);
+          std::cout << "\n";
+        }
+      }
+    }
+  }
+
+  std::cout << "\n";
 
   printComparison();
 
