@@ -297,26 +297,6 @@ void performance_monitor::buildResultsMaps()
     }
   }
 
-  // for (int t = 0; t < num_threads; t++){
-  //   for (int j = 0; j < perfmon_getNumberOfRegions(); j++)
-  //   {
-  //     regionName = perfmon_getTagOfRegion(j);
-  //     gid = perfmon_getGroupOfRegion(j);
-  //     groupName = perfmon_getGroupName(gid);
-  //     per_thread_results[event][t][regionName][groupName]
-  //       [total_sp_flops_event_name] = 0.;
-
-  //     for (int k = 0; k < perfmon_getEventsOfRegion(j); k++){
-  //       event_name = perfmon_getEventName(gid, k);
-  //       per_thread_results[event][t][regionName][groupName][event_name] = 0.;
-  //     }
-  //     for (int k = 0; k < perfmon_getMetricsOfRegion(j); k++){
-  //       metric_name = perfmon_getMetricName(gid, k);
-  //       per_thread_results[metric][t][regionName][groupName][metric_name] = 0.;
-  //     }
-  //   }
-  // }
-
   // populate maps
   for (int t = 0; t < num_threads; t++)
   {
@@ -390,12 +370,19 @@ void performance_monitor::buildResultsMaps()
         pow(
           aggregate_results[geometric_mean][event][regionName][groupName]
             [event_name],
-          1/(double)num_threads);
+          1.0/static_cast<double>(num_threads));
     }
 
     for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
     {
       metric_name = perfmon_getMetricName(gid, k);
+
+      aggregate_results[geometric_mean][metric][regionName][groupName]
+        [metric_name] = 
+        pow(
+          aggregate_results[geometric_mean][metric][regionName][groupName]
+            [metric_name],
+          1.0/static_cast<double>(num_threads));
       aggregate_results[arithmetic_mean][metric][regionName][groupName][metric_name] =
           aggregate_results[sum][metric][regionName][groupName][metric_name] / num_threads;
     }
@@ -485,8 +472,9 @@ void performance_monitor::compareActualWithBench()
   {
     metricName = saturation_metrics[i];
 
-    // it doesn't make sense to sum saturation values, so we find the average of
-    // saturations to get saturation across regions
+    // it doesn't make sense to sum saturation values, so we find the average 
+    // of saturations to get saturation across regions. This average is a
+    // geometric mean, which is the standard for ratios
     saturation[all_regions_keyword][metricName] = 
       pow(saturation[all_regions_keyword][metricName],
         1/static_cast<double>(num_regions));
