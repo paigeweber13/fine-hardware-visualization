@@ -143,16 +143,12 @@ that the bottleneck changes as you adjust the parameters
  - demonstrate it with hardware counters
 
 Detailed:
- - [ ] halide for convolution
-   - [ ] can halide create c code?
- - [ ] get highlight performance data to show how bottleneck changes, show that
-       it matches theoretical data
- - [x] new per_thread_results seems to be small on events.
-   - it's because there's more groups to measure so there are fewer times that
-     any single group is measured
-   - also, results match up with manual calculation
- - [x] also, it reports stuff for threads that I don't have??? Like thread 11
-   - fixed, had repeated a variable (used i twice in for loops)
+ - [ ] find kernel that I can use to demonstrate how bottleneck changes both
+       theoretically and with fhv. Below are some ideas for kernels to use
+   - [ ] halide for convolution
+     - [ ] can halide create c code?
+   - [ ] atlas
+   - [ ] polynomial expansion
 
 ### What other people do
  - [ ] read kerncraft paper
