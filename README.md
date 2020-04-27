@@ -90,7 +90,7 @@ suite) or `make bench` to work right now.
 
 What still works:
  - minimal example of likwid: `make run-tests/likwid-minimal`
- - minimal example of perfmon: `make run-tests/fhv-minimal`
+ - minimal example of the fhv performance monitor: `make run-tests/fhv-minimal`
  - convolution: `cd convolution-fast && make test`
 
 # Usage Notes
@@ -188,6 +188,9 @@ work, repeat until the day is done.
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
      region
+ - sometimes make rule for `run-tests/fhv_minimal` fails with a segmentation
+   fault, seems to be right after compilation but before running. Immediately
+   running the rule again succeeds.
 
 ### Features to add:
  - combine benchmark in fhv with benchmark-likwid-vs-manual
