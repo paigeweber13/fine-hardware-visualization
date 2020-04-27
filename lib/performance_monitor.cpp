@@ -627,6 +627,9 @@ void performance_monitor::printComparison(){
     return;
   }
 
+  const double rounding_factor = 1000.;
+  double metric_value, rounded_metric_value;
+
   std::cout << 
     "\n\n ----- saturation level performance_monitor report -----\n\n";
   for (auto it=saturation.begin(); it!=saturation.end(); ++it)
@@ -634,9 +637,12 @@ void performance_monitor::printComparison(){
     std::cout << "\nRegion " << it->first << ":\n";
     for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2)
     {
+      metric_value = it2->second;
+      rounded_metric_value = 
+        round(metric_value * rounding_factor) / rounding_factor;
       std::cout << std::setw(60) 
         << "Percentage of available " + it2->first + " used: "
-        << std::setprecision(2) << it2->second << '\n';
+        << std::setprecision(3) << rounded_metric_value << '\n';
     }
   }
   std::cout << std::endl;
@@ -658,6 +664,11 @@ void performance_monitor::printHighlights(){
               << "printing result highlights.\n";
     return;
   }
+
+  const double rounding_factor = 1000.;
+
+  double metric_value;
+  double rounded_metric_value;
   
   std::cout << std::endl;
   std::cout << "\n ----- performance_monitor highlights report -----\n\n";
@@ -708,9 +719,13 @@ void performance_monitor::printHighlights(){
         // if this group contains the current key metric:
         if (group_it->second.count(*key_metric_it))
         {
+          metric_value = group_it->second[*key_metric_it];
+          rounded_metric_value = 
+            round(metric_value * rounding_factor) / rounding_factor;
+
           std::cout << std::right << std::setw(40) << *key_metric_it;
           std::cout << "   " << std::setprecision(10)
-                    << group_it->second[*key_metric_it];
+                    << rounded_metric_value;
           std::cout << "\n";
         }
       }
@@ -756,12 +771,6 @@ void performance_monitor::printHighlights(){
     }
     std::cout << "\n";
 
-    const unsigned truncation_factor = 1000;
-
-    double metric_value;
-    int intermediate_int;
-    double truncated_double;
-
     // for each key metric
     for (auto const& key_metric: per_core_metrics)
     {
@@ -782,16 +791,14 @@ void performance_monitor::printHighlights(){
               .at(region.first)
               .at(group.first)
               .at(key_metric);
-            intermediate_int = 
-              static_cast<int>(metric_value * truncation_factor);
-            truncated_double = 
-              static_cast<double>(intermediate_int) / truncation_factor;
+            rounded_metric_value = 
+              round(metric_value * rounding_factor) / rounding_factor;
 
             std::cout << " "
                       << std::setprecision(value_print_width-5) 
                       << std::setw(value_print_width)
                       << std::left
-                      << truncated_double;
+                      << rounded_metric_value;
           }
           std::cout << "\n";
         }
@@ -813,7 +820,7 @@ void performance_monitor::printHighlights(){
   };
 
   std::cout << " ---- key metrics, averaged across threads ----\n";
-  std::cout << " ---- averaged using a geometric mean ----\n";
+  std::cout << " ---- using a geometric mean ----\n";
 
   // for each region
   for (auto const& region: aggregate_results[geometric_mean][metric] )
@@ -830,9 +837,12 @@ void performance_monitor::printHighlights(){
         // if this group contains the current key metric:
         if (group.second.count(key_metric))
         {
+          metric_value = group.second.at(key_metric); 
+          rounded_metric_value = 
+            round(metric_value * rounding_factor) / rounding_factor;
           std::cout << std::setw(40) << std::right << key_metric;
           std::cout << "   " << std::left << std::setprecision(10)
-                    << group.second.at(key_metric);
+                    << rounded_metric_value;
           std::cout << "\n";
         }
       }
