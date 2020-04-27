@@ -169,7 +169,12 @@ Detailed:
 
 ### Likwid stability issues
  - [ ] port counters sometimes reporting 1.8e19 for values
+   - [ ] also noticed L3 bandwidth was in the order of 1e11 or so for an
+         execution of fhv_minimal in the double_flops region. This also doesn't
+         make sense
  - [ ] convolution sometimes not instrumenting one region?
+   - [ ] noticed this also in fhv_minimal. Happens once every 10 executions or
+         so 
    - [ ] compiler optimization?
 
 To accomplish this, I plan a typical daily usage of time as follows: 1 hour
