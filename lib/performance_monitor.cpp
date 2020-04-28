@@ -36,6 +36,16 @@ const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_out
 // misc
 const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 
+// ------ utility functions ------ //
+
+double performance_monitor::dround(double x, unsigned num_decimal_places){
+  double rounding_factor = pow(10., static_cast<double>(num_decimal_places));
+  double rounded_x = round(x * rounding_factor)/rounding_factor;
+  return rounded_x;
+}
+
+// ------ perfmon stuff ------ //
+
 void performance_monitor::init(const char * parallel_regions,
                                const char * sequential_regions)
 {
@@ -615,8 +625,7 @@ void performance_monitor::printComparison(){
     return;
   }
 
-  const double rounding_factor = 1000.;
-  double metric_value, rounded_metric_value;
+  double metric_value;
 
   std::cout << 
     "\n\n ----- saturation level performance_monitor report -----\n\n";
@@ -626,11 +635,13 @@ void performance_monitor::printComparison(){
     for (auto it2=it->second.begin(); it2!=it->second.end(); ++it2)
     {
       metric_value = it2->second;
-      rounded_metric_value = 
-        round(metric_value * rounding_factor) / rounding_factor;
       std::cout << std::setw(60) 
         << "Percentage of available " + it2->first + " used: "
-        << std::setprecision(3) << rounded_metric_value << '\n';
+        << std::setw(7)
+        << std::right
+        << std::setprecision(3)
+        << std::fixed
+        << metric_value << '\n';
     }
   }
   std::cout << std::endl;
@@ -652,8 +663,6 @@ void performance_monitor::printHighlights(){
               << "printing result highlights.\n";
     return;
   }
-
-  const double rounding_factor = 1000.;
 
   double metric_value;
   double rounded_metric_value;
@@ -708,12 +717,18 @@ void performance_monitor::printHighlights(){
         if (group_it->second.count(*key_metric_it))
         {
           metric_value = group_it->second[*key_metric_it];
-          rounded_metric_value = 
-            round(metric_value * rounding_factor) / rounding_factor;
+          // rounded_metric_value = dround(metric_value, 3);
 
+          // TODO:
+          // these should be rounded and presented in scientific notation
           std::cout << std::right << std::setw(40) << *key_metric_it;
-          std::cout << "   " << std::setprecision(10)
-                    << rounded_metric_value;
+          std::cout << " " 
+                    << std::setw(20)
+                    << std::right
+                    << std::scientific
+                    << std::setprecision(3)
+                    << metric_value;
+
           std::cout << "\n";
         }
       }
@@ -779,14 +794,13 @@ void performance_monitor::printHighlights(){
               .at(region.first)
               .at(group.first)
               .at(key_metric);
-            rounded_metric_value = 
-              round(metric_value * rounding_factor) / rounding_factor;
 
             std::cout << " "
-                      << std::setprecision(value_print_width-5) 
+                      << std::setprecision(3) 
+                      << std::fixed
                       << std::setw(value_print_width)
                       << std::left
-                      << rounded_metric_value;
+                      << metric_value;
           }
           std::cout << "\n";
         }
@@ -826,11 +840,14 @@ void performance_monitor::printHighlights(){
         if (group.second.count(key_metric))
         {
           metric_value = group.second.at(key_metric); 
-          rounded_metric_value = 
-            round(metric_value * rounding_factor) / rounding_factor;
+
           std::cout << std::setw(40) << std::right << key_metric;
-          std::cout << "   " << std::left << std::setprecision(10)
-                    << rounded_metric_value;
+          std::cout << " " 
+                    << std::setw(7)
+                    << std::right
+                    << std::fixed
+                    << std::setprecision(3)
+                    << metric_value;
           std::cout << "\n";
         }
       }

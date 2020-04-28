@@ -10,6 +10,7 @@
 #include <math.h>
 #include <nlohmann/json.hpp>
 #include <omp.h>
+#include <sstream>
 #include <stdlib.h>
 #include <string>
 
@@ -156,6 +157,10 @@ class performance_monitor {
       get_average_port_usage_info();
 
   private:
+    // ------ functions ------ //
+    // dround = decimal round
+    static double dround(double x, unsigned num_decimal_places);
+
     // ------ attributes ------ //
 
     // "runtimes by tag" should really be called "max runtime by tag" because
