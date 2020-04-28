@@ -102,7 +102,8 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
         //	start = system_clock::now();
         //	Maybe start likwid region here
         //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        performance_monitor::startRegion(tag);
+        
+        likwid_markerStartRegion(tag);
       }
       for (k = 0; k < inner_iterations; k++)
         for (j = 0; j < num_doubles; j += 1){
@@ -121,7 +122,8 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
         //	end = system_clock::now();
         //	Maybe stop likwid regin here
         //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        performance_monitor::stopRegion(tag);
+        
+        likwid_markerStopRegion(tag);
       }
       asm(""); //Say no to loop optimization
     }
