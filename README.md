@@ -92,6 +92,10 @@ What still works:
  - minimal example of likwid: `make run-tests/likwid-minimal`
  - minimal example of the fhv performance monitor: `make run-tests/fhv-minimal`
  - convolution: `cd convolution-fast && make test`
+ - fhv benchmarks: `make bin/fhv` and then `bin/fhv -s 100000` or the like.
+   Note that sometimes has problems with "stopping non-started region", seems
+   to be when you run benchmark-all. This is noted in the section "problems to
+   fix"
 
 # Usage Notes
  - Region names must not have spaces
@@ -187,6 +191,8 @@ work, repeat until the day is done.
  - sometimes make rule for `run-tests/fhv_minimal` fails with a segmentation
    fault, seems to be right after compilation but before running. Immediately
    running the rule again succeeds.
+ - sometimes get "stopping non-started region" error in fhv. I think it only
+   happens when you run "benchmark-all" (the `-b` flag)
 
 ### Features to add:
  - combine benchmark in fhv with benchmark-likwid-vs-manual
