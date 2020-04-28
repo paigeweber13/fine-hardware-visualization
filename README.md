@@ -30,6 +30,7 @@ assumed to be stable or correct.
   - [Others:](#others)
     - [Works by Martin Schultz:](#works-by-martin-schultz)
 - [Accomplishments:](#accomplishments)
+  - [2020-04-23 through 2020-04-30](#2020-04-23-through-2020-04-30)
   - [2020-04-16 through 2020-04-23](#2020-04-16-through-2020-04-23)
   - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
     - [Learning likwid](#learning-likwid)
@@ -313,6 +314,18 @@ it. The benchmark tool should be evaluated, we can draw from it.
      Scale" 
 
 # Accomplishments:
+## 2020-04-23 through 2020-04-30
+ - added printHighlights function
+ - fixed geometric mean on metrics
+ - confirmed changes to performance_monitor still seems to match manual
+   benchmark and make sense
+   - this was not very rigorous, we still need unittests at some point.
+   - checked that benchmark without comparison still saturates, it does
+   - manually counted the number of flops in fhv_minimal, performance_monitor
+     output matches. 
+   - in any case, I'm just collecting and aggregating data, so the chance for
+     error is lower than if I was building the data myself.
+
 ## 2020-04-16 through 2020-04-23
 Other Tools:
  - looked at TAU
