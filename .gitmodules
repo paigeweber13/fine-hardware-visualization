@@ -11,7 +11,7 @@
 	branch = fhv-test
 
 [submodule "polynomial_expansion"]
-	path = polynomial_expansion
+	path = examples/polynomial_expansion
 	url = https://github.com/esaule/polynomial_expansion.git
 	update = merge
 	branch = master
