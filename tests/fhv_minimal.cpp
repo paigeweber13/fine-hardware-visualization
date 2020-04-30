@@ -93,4 +93,6 @@ int main()
   // performance_monitor::printComparison();
 
   performance_monitor::printHighlights();
+
+  performance_monitor::resultsToJson();
 }

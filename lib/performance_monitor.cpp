@@ -304,6 +304,7 @@ void performance_monitor::buildResultsMaps()
       aggregate_results[sum][metric][regionName][groupName][metric_name] = 0.;
       aggregate_results[arithmetic_mean][metric][regionName][groupName][metric_name] = 0.;
       aggregate_results[geometric_mean][metric][regionName][groupName][metric_name] = 1.;
+      aggregate_results[geometric_mean][metric][all_regions_keyword][groupName][metric_name] = 1.;
     }
   }
 
@@ -355,6 +356,10 @@ void performance_monitor::buildResultsMaps()
             += metric_value;
           aggregate_results[geometric_mean][metric][regionName][groupName]
             [metric_name] *= metric_value;
+
+          aggregate_results[geometric_mean][metric][all_regions_keyword]
+            [groupName][metric_name] *= metric_value;
+
           per_thread_results[metric][t][regionName][groupName][metric_name]
             = metric_value;
         }
@@ -363,6 +368,7 @@ void performance_monitor::buildResultsMaps()
   }
 
   // convert sums/products to averages where appropriate
+
   for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   {
     regionName = perfmon_getTagOfRegion(i);
@@ -395,6 +401,26 @@ void performance_monitor::buildResultsMaps()
           1.0/static_cast<double>(num_threads));
       aggregate_results[arithmetic_mean][metric][regionName][groupName][metric_name] =
           aggregate_results[sum][metric][regionName][groupName][metric_name] / num_threads;
+    }
+
+  }
+
+  int num_regions = perfmon_getNumberOfRegions()/perfmon_getNumberOfGroups();
+
+  for (int i = 0; i < perfmon_getNumberOfGroups(); i++)
+  {
+    gid = i;
+    groupName = perfmon_getGroupName(gid);
+
+    for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
+    {
+      metric_name = perfmon_getMetricName(gid, k);
+      aggregate_results[geometric_mean][metric][all_regions_keyword][groupName]
+        [metric_name] = 
+        pow(
+          aggregate_results[geometric_mean][metric][all_regions_keyword][groupName]
+            [metric_name],
+          1.0/static_cast<double>(num_regions * num_threads));
     }
   }
 }
@@ -665,7 +691,7 @@ void performance_monitor::printHighlights(){
   }
 
   double metric_value;
-  double rounded_metric_value;
+  // double rounded_metric_value;
   
   std::cout << std::endl;
   std::cout << "\n ----- performance_monitor highlights report -----\n\n";
@@ -764,7 +790,7 @@ void performance_monitor::printHighlights(){
   {
     std::cout << "\nREGION " << region.first << "\n";
 
-    std::cout << std::setw(40) << "Metric" << "    ";
+    std::cout << std::right << std::setw(40) << "Metric" << "    ";
     for (int t = 0; t < num_threads; t++)
     {
       std::cout << " " 
@@ -864,24 +890,59 @@ void performance_monitor::printHighlights(){
 void performance_monitor::resultsToJson(){
   if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
-              << " before printing\n"
-              << "result highlights\n";
+              << " before outputting\n"
+              << "to json\n";
     return;
   }
 
   if(saturation.size() == 0){
     std::cout << "ERROR: you must run "
               << "performance_monitor::compareActualWithBench before\n"
-              << "printing result highlights.\n";
+              << "outputting to json.\n";
     return;
   }
 
-  // json results;
-  // for (auto it=saturation.begin(); it!=saturation.end(); ++it)
-  //   results["saturation"][it->first] = it->second;
+  json results;
+  results["saturation"] = saturation;
 
-  // std::ofstream o(jsonResultOutputFilepath);
-  // o << std::setw(4) << results << std::endl;
+  std::vector<std::string> port_usage_metrics = {
+    port0_usage_ratio,
+    port1_usage_ratio,
+    port2_usage_ratio,
+    port3_usage_ratio,
+    port4_usage_ratio,
+    port5_usage_ratio,
+    port6_usage_ratio,
+    port7_usage_ratio,
+  };
+
+  double metric_value;
+
+  // for each region
+  for (auto const& region: aggregate_results[geometric_mean][metric] )
+  {
+
+    // for each key metric
+    for (auto const& port_usage_metric: port_usage_metrics)
+    {
+
+      // for each group
+      for (auto const& group : region.second)
+      {
+        // if this group contains the current key metric:
+        if (group.second.count(port_usage_metric))
+        {
+          metric_value = group.second.at(port_usage_metric);
+
+          results["port_usage"][region.first][port_usage_metric]
+            = metric_value;
+        }
+      }
+    }
+  }
+
+  std::ofstream o(jsonResultOutputFilepath);
+  o << std::setw(4) << results << std::endl;
 }
 
 const std::map<std::string,double> performance_monitor::get_runtimes_by_tag() {
