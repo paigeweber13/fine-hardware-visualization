@@ -1,5 +1,6 @@
 #include "performance_monitor.h"
 
+// declarations
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
 
 std::map<
@@ -29,9 +30,49 @@ std::map<
 std::map<std::string, std::map<std::string, double>>
   performance_monitor::saturation;
 
+int performance_monitor::num_threads;
+
 // filenames
 const std::string performance_monitor::likwidOutputFilepath = "/tmp/test_marker.out";
 const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
+
+// saturation metrics
+const std::vector<const char *> performance_monitor::saturationMetricGroups = {
+  likwid_group_flops_sp,
+  likwid_group_flops_dp,
+  likwid_group_l2,
+  likwid_group_l3,
+  likwid_group_mem,
+};
+
+const std::vector<const char *> performance_monitor::saturation_metrics = {
+  mflops_metric_name,
+  mflops_dp_metric_name,
+  l2_bandwidth_metric_name,
+  l3_bandwidth_metric_name,
+  ram_bandwidth_metric_name,
+};
+
+const std::vector<float> performance_monitor::saturationBenchmarkReferences = {
+  EXPERIENTIAL_SP_RATE_MFLOPS,
+  EXPERIENTIAL_DP_RATE_MFLOPS,
+  EXPERIENTIAL_RW_BW_L2,
+  EXPERIENTIAL_RW_BW_L3,
+  EXPERIENTIAL_RW_BW_RAM,
+};
+
+// port usage metrics
+const std::vector<std::string> performance_monitor::port_usage_metrics = {
+  port0_usage_ratio,
+  port1_usage_ratio,
+  port2_usage_ratio,
+  port3_usage_ratio,
+  port4_usage_ratio,
+  port5_usage_ratio,
+  port6_usage_ratio,
+  port7_usage_ratio,
+};
+
 
 // misc
 const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
@@ -58,10 +99,9 @@ performance_monitor::init(const char * event_group,
                           const char * parallel_regions,
                           const char * sequential_regions)
 {
-  int num_threads;
 #pragma omp parallel
   {
-    num_threads = omp_get_num_threads();
+    performance_monitor::num_threads = omp_get_num_threads();
   }
 
   init(event_group, parallel_regions, sequential_regions, num_threads);
@@ -268,7 +308,8 @@ void performance_monitor::printRegionGroupEventAndMetricData(){
 
 void performance_monitor::buildResultsMaps()
 {
-  int gid, num_threads;
+  // int gid, num_threads;
+  int gid;
   float event_value, metric_value;
   const char *event_name, *metric_name, * groupName, * regionName;
 
@@ -276,7 +317,7 @@ void performance_monitor::buildResultsMaps()
 #pragma omp parallel
   {
     // needed because we use it to print results later
-    num_threads = omp_get_num_threads();
+    performance_monitor::num_threads = omp_get_num_threads();
   }
 
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
@@ -429,8 +470,8 @@ void performance_monitor::compareActualWithBench()
 {
   if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
-              << " before printing\n"
-              << "aggregate results. If you are getting this error and you did"
+              << " before comparing\n"
+              << "actual with bench. If you are getting this error and you did"
               << " run buildResultsMaps,\n"
               << "No metrics have been aggregated. Pleases submit a bug report"
               << "\n";
@@ -444,30 +485,6 @@ void performance_monitor::compareActualWithBench()
 
   // getNumberOfRegions actually returns num_regions * num_groups
   int num_regions = perfmon_getNumberOfRegions()/perfmon_getNumberOfGroups();
-
-  std::vector<const char *> saturationMetricGroups = {
-    likwid_group_flops_sp,
-    likwid_group_flops_dp,
-    likwid_group_l2,
-    likwid_group_l3,
-    likwid_group_mem,
-  };
-
-  std::vector<const char *> saturation_metrics = {
-    mflops_metric_name,
-    mflops_dp_metric_name,
-    l2_bandwidth_metric_name,
-    l3_bandwidth_metric_name,
-    ram_bandwidth_metric_name,
-  };
-
-  std::vector<float> saturationBenchmarkReferences = {
-    EXPERIENTIAL_SP_RATE_MFLOPS,
-    EXPERIENTIAL_DP_RATE_MFLOPS,
-    EXPERIENTIAL_RW_BW_L2,
-    EXPERIENTIAL_RW_BW_L3,
-    EXPERIENTIAL_RW_BW_RAM,
-  };
 
   // initialize all_regions part to 0
   for (size_t j = 0; j < saturation_metrics.size(); j++){
@@ -718,6 +735,9 @@ void performance_monitor::printHighlights(){
     ram_load_bandwidth_name,
     ram_load_data_volume_name,
   };
+
+  auto per_core_metrics = port_usage_metrics;
+
   std::cout << " ---- key metrics, summed across threads ----\n";
 
   // for each region
@@ -762,24 +782,13 @@ void performance_monitor::printHighlights(){
   }
   std::cout << "\n";
 
-  std::vector<std::string> per_core_metrics = {
-    port0_usage_ratio,
-    port1_usage_ratio,
-    port2_usage_ratio,
-    port3_usage_ratio,
-    port4_usage_ratio,
-    port5_usage_ratio,
-    port6_usage_ratio,
-    port7_usage_ratio,
-  };
-
   std::cout << " ---- key metrics, per-thread ----\n";
 
-  int num_threads;
-  #pragma omp parallel
-  {
-    num_threads = omp_get_num_threads();
-  }
+  // int num_threads;
+  // #pragma omp parallel
+  // {
+  //   num_threads = omp_get_num_threads();
+  // }
   
   // "thread #" is of length 8, so 8 is the smallest width possible while
   // maintaining pretty formatting
@@ -836,19 +845,10 @@ void performance_monitor::printHighlights(){
 
   std::cout << "\n";
 
-  std::vector<std::string> geometric_mean_metrics = {
-    port0_usage_ratio,
-    port1_usage_ratio,
-    port2_usage_ratio,
-    port3_usage_ratio,
-    port4_usage_ratio,
-    port5_usage_ratio,
-    port6_usage_ratio,
-    port7_usage_ratio,
-  };
-
   std::cout << " ---- key metrics, averaged across threads ----\n";
   std::cout << " ---- using a geometric mean ----\n";
+
+  auto geometric_mean_metrics = per_core_metrics;
 
   // for each region
   for (auto const& region: aggregate_results[geometric_mean][metric] )
@@ -887,6 +887,105 @@ void performance_monitor::printHighlights(){
   std::cout << "\n ----- end performance_monitor highlights report -----\n\n";
 }
 
+void performance_monitor::printCsvHeader(){
+  std::stringstream header_ss;
+  std::string header;
+  std::string delim = ",";
+  std::string line_end = "\n";
+
+  // for each region
+  header_ss << "region" << delim;
+
+  // for each thing in saturation
+  for (auto const& saturation_metric: saturation_metrics){
+    header_ss << "saturation " << saturation_metric << delim;
+  }
+
+  // for each thread
+  for (int t = 0; t < num_threads; t++){
+
+    // for each key metric
+    for (auto const& port_usage_metric: port_usage_metrics)
+    {
+      header_ss << "thread " << t << " " << port_usage_metric << delim;
+    }
+
+  }
+
+  header = header_ss.str();
+  header.pop_back();
+  header += line_end;
+  
+  std::cout << header;
+}
+
+void performance_monitor::printCsvOutput(){
+  if(aggregate_results.size() == 0){
+    std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
+              << " before outputting\n"
+              << "to csv\n";
+    return;
+  }
+
+  if(saturation.size() == 0){
+    std::cout << "ERROR: you must run "
+              << "performance_monitor::compareActualWithBench before\n"
+              << "outputting to csv.\n";
+    return;
+  }
+
+  double metric_value;
+
+  std::string header = "";
+  std::string delim = ",";
+  std::string line_end = "\n";
+
+  // for each region
+  for (auto const& region: aggregate_results[geometric_mean][metric] )
+  {
+    std::stringstream header_ss;
+    header_ss << region.first << delim;
+
+    // for each thing in saturation
+    for (auto const& this_saturation: saturation.at(region.first)){
+      header_ss << this_saturation.second << delim;
+    }
+
+    // for each thread
+    for (int t = 0; t < num_threads; t++)
+    {
+
+      // for each key metric
+      for (auto const &port_usage_metric : port_usage_metrics)
+      {
+
+        // for each group
+        for (auto const &group : region.second)
+        {
+          // if this group contains the current key metric:
+          if (group.second.count(port_usage_metric))
+          {
+            metric_value = group.second.at(port_usage_metric);
+
+            header_ss << metric_value << delim;
+          }
+
+          // results["port_usage"][region.first][port_usage_metric]
+          //   = metric_value;
+        }
+      }
+    }
+
+    header += header_ss.str();
+    header.pop_back();
+    header += line_end;
+  
+  }
+
+  std::cout << header;
+}
+
+
 void performance_monitor::resultsToJson(){
   if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
@@ -904,17 +1003,6 @@ void performance_monitor::resultsToJson(){
 
   json results;
   results["saturation"] = saturation;
-
-  std::vector<std::string> port_usage_metrics = {
-    port0_usage_ratio,
-    port1_usage_ratio,
-    port2_usage_ratio,
-    port3_usage_ratio,
-    port4_usage_ratio,
-    port5_usage_ratio,
-    port6_usage_ratio,
-    port7_usage_ratio,
-  };
 
   double metric_value;
 

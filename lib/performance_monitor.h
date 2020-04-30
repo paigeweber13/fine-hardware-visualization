@@ -120,6 +120,8 @@ class performance_monitor {
     static void printComparison();
 
     static void printHighlights();
+    static void printCsvHeader();
+    static void printCsvOutput();
 
     // output to json
     static void resultsToJson();
@@ -163,11 +165,23 @@ class performance_monitor {
 
     // ------ attributes ------ //
 
+    // --- constants and magic numbers
+    static int num_threads;
+
+    // names of saturation metrics
+    static const std::vector<const char *> saturationMetricGroups;
+    static const std::vector<const char *> saturation_metrics;
+    static const std::vector<float> saturationBenchmarkReferences;
+
+    // names of port usage metrics
+    static const std::vector<std::string> port_usage_metrics;
+
+    // --- Data
+
     // "runtimes by tag" should really be called "max runtime by tag" because
     // that's how it's calculated, but likwid seems to calculate flops on a
     // per-thread basis so this won't let us double-check the likwid
 
-    // calculations
     static std::map<std::string, double> runtimes_by_tag;
 
     // aggregate results

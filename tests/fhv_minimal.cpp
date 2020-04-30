@@ -95,4 +95,8 @@ int main()
   performance_monitor::printHighlights();
 
   performance_monitor::resultsToJson();
+
+  std::cout << "\n";
+  performance_monitor::printCsvHeader();
+  performance_monitor::printCsvOutput();
 }
