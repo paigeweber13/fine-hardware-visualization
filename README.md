@@ -150,10 +150,19 @@ that the bottleneck changes as you adjust the parameters
 Detailed:
  - [ ] find kernel that I can use to demonstrate how bottleneck changes both
        theoretically and with fhv. Below are some ideas for kernels to use
-   - [ ] halide for convolution
-     - [ ] can halide create c code?
-   - [ ] atlas
    - [ ] polynomial expansion
+     - [ ] Dr. Saule is vectorizing the example from class, we'll try that
+   - [ ] halide for convolution
+     - [ ] halides seems like one of the harder solutions, moving it down the
+           list... 
+     - [ ] can halide create c code? They have a function "compile to c". But
+           it reduces parallel code to serial
+     - [ ] can maybe compile it and then call it from somewhere else. "compile
+           to file" object file.
+     - [ ] possible to work on images already in memory?
+       - see "halide load image" - returns a buffer
+       - need to annotate actual openmp region
+   - [ ] atlas
 
 ### What other people do
  - [ ] read kerncraft paper
@@ -325,6 +334,8 @@ it. The benchmark tool should be evaluated, we can draw from it.
      output matches. 
    - in any case, I'm just collecting and aggregating data, so the chance for
      error is lower than if I was building the data myself.
+ - looked at convolution for kernel to analyze
+ - looked at halide
 
 ## 2020-04-16 through 2020-04-23
 Other Tools:
