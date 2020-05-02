@@ -9,6 +9,9 @@ assumed to be stable or correct.
 
 - [Fine Hardware Visualization](#fine-hardware-visualization)
 - [Prerequisites](#prerequisites)
+  - [Compiled from source](#compiled-from-source)
+  - [Installed via package manager](#installed-via-package-manager)
+  - [Automatically included](#automatically-included)
 - [Running](#running)
 - [Usage Notes](#usage-notes)
 - [Goals:](#goals)
@@ -31,18 +34,29 @@ assumed to be stable or correct.
     - [Works by Martin Schultz:](#works-by-martin-schultz)
 
 # Prerequisites
+## Compiled from source
  - **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
    for memory counters and is confirmed to use `likwid-accessD` without root
    permissions. If this version is available with your package manager, use
    that. Otherwise, build it from source. Instructions to do this are available
-   [here](https://github.com/RRZE-HPC/likwid)
+   [here](https://github.com/RRZE-HPC/likwid). Be sure to change `PREFIX` in
+   the makefile to match wherever likwid is installed
  - additional perfgroups not included with likwid. These can be installed by
    running `make perfgroups` in the root directory.
- - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
-   in ./lib
+
+## Installed via package manager
+The makefile assumes everything here is installed to a prefix already included
+by the compiler and linker. If you choose to install to another directory
+(which will probably only happen if you're building from source) you will need
+to adjust the makefile to include that prefix.
+
  - **boost/program_options:** available on [the boost
    website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
-   install libboost-program-options-dev`
+   install libboost-program-options-dev` on debian-based distributions
+
+## Automatically included
+ - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
+   in ./lib
 
 # Running
 **warning:** in an effort to reduce workload until I get a minimal proof of
@@ -160,6 +174,7 @@ work, repeat until the day is done.
    in init once init routines are working?
 
 ### Features to add:
+ - when nothing is saturated, what do you do? Look in to helping this problem
  - combine benchmark in fhv with benchmark-likwid-vs-manual
    - rewrite computation_measurements to optionally include manual results
    - update CLI to optionally include manual results
