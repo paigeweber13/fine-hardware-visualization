@@ -52,6 +52,9 @@ Hardware Visualization
  - for some reason, polynomial_expansion (both basic and block) are using
    double-precision components even though "float" is used, which should (I
    think) use the single-precision data structure.
+   - header did not match order of the data in lines below.
+ - created plots to demonstrate how fhv can identify bottlenecks and
+   improvements 
 
 # 2020-04-23 through 2020-04-30
  - added printHighlights function
