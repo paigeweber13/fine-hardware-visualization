@@ -224,7 +224,12 @@ int main(int argc, char *argv[])
       "benchmark cache and memory. Will run benchmark once for each cache and "
         "once for ram.")
     ("csv-style-output,c", "output benchmark results in a csv-style format:\n")
-    ("print-csv-header", "print header of csv")
+    ("print-csv-header", "print header of csv used by fhv (this binary). "
+      "The CSV output for which this is the header provides detailed memory "
+      "data.")
+    ("print-perfmon-csv-header", "print header of csv that perfmon uses "
+      "internally. This corresponds with performance_monitor::printCsvOutput "
+      "and provides details about saturation of CPU/memory and port usage.")
     ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
                     "a visualization from json data output in program " 
                     "instrumentation")
@@ -271,6 +276,10 @@ int main(int argc, char *argv[])
   if (vm.count("print-csv-header"))
   {
     print_csv_header();
+  }
+  if (vm.count("print-perfmon-csv-header"))
+  {
+    performance_monitor::printCsvHeader();
   }
   else
   {
