@@ -893,6 +893,11 @@ void performance_monitor::printCsvHeader(){
   std::string delim = ",";
   std::string line_end = "\n";
 
+  #pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+
   // for each region
   header_ss << "region" << delim;
 
@@ -936,19 +941,20 @@ void performance_monitor::printCsvOutput(){
 
   double metric_value;
 
-  std::string header = "";
+  std::string result_csv_line = "";
   std::string delim = ",";
   std::string line_end = "\n";
 
   // for each region
   for (auto const& region: aggregate_results[geometric_mean][metric] )
   {
-    std::stringstream header_ss;
-    header_ss << region.first << delim;
+    std::stringstream result_csv_line_ss;
+    result_csv_line_ss << region.first << delim;
 
-    // for each thing in saturation
-    for (auto const& this_saturation: saturation.at(region.first)){
-      header_ss << this_saturation.second << delim;
+    // for each saturation metric (using names to maintain order with header)
+    for (auto const& saturation_metric: saturation_metrics){
+      result_csv_line_ss << saturation.at(region.first).at(saturation_metric) 
+        << delim;
     }
 
     // for each thread
@@ -967,7 +973,7 @@ void performance_monitor::printCsvOutput(){
           {
             metric_value = group.second.at(port_usage_metric);
 
-            header_ss << metric_value << delim;
+            result_csv_line_ss << metric_value << delim;
           }
 
           // results["port_usage"][region.first][port_usage_metric]
@@ -976,13 +982,13 @@ void performance_monitor::printCsvOutput(){
       }
     }
 
-    header += header_ss.str();
-    header.pop_back();
-    header += line_end;
+    result_csv_line += result_csv_line_ss.str();
+    result_csv_line.pop_back();
+    result_csv_line += line_end;
   
   }
 
-  std::cout << header;
+  std::cout << result_csv_line;
 }
 
 
