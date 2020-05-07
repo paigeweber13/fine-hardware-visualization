@@ -55,6 +55,10 @@ Hardware Visualization
    - header did not match order of the data in lines below.
  - created plots to demonstrate how fhv can identify bottlenecks and
    improvements 
+ - began working on svg diagram of hardware
+   - generates a couple rectangles
+   - started calculating colors, need to pick a data structure to store those
+     in 
 
 # 2020-04-23 through 2020-04-30
  - added printHighlights function
