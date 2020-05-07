@@ -7,13 +7,17 @@ CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 # make sure likwid is installed to this prefix
 # manual install to this directory is preferred because then we can run without
 # sudo permission
-PREFIX=/usr/local/likwid-master
-# PREFIX=/usr/local/likwid-v4.3.4
-# PREFIX=/usr/local
-INC_DIRS=-I$(PREFIX)/include
+LIKWID_PREFIX=/usr/local/likwid-master
+# LIKWID_PREFIX=/usr/local/likwid-v4.3.4
+# LIKWID_PREFIX=/usr/local
+INC_DIRS=-I$(LIKWID_PREFIX)/include
 INC_DIRS+=-I./lib
-LIB_DIRS=-L$(PREFIX)/lib
-LIBS=-llikwid -lboost_program_options
+INC_DIRS+=$(shell pkg-config --cflags cairo)
+
+LIB_DIRS=-L$(LIKWID_PREFIX)/lib
+LIBS=-llikwid
+LIBS+=-lboost_program_options
+LIBS+=$(shell pkg-config --libs cairo)
 
 MAIN_DIR=src
 SRC_DIR=lib
