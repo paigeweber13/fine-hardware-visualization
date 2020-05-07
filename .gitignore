@@ -8,6 +8,7 @@ obj
 
 # fhv output
 *.json
+*.svg
 
 # archives
 *.tar.gz
