@@ -20,6 +20,7 @@ assumed to be stable or correct.
 - [Ownership and licensing](#ownership-and-licensing)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
+    - [Thoughts on coloring of diagram:](#thoughts-on-coloring-of-diagram)
     - [What other people do](#what-other-people-do)
     - [Exploration](#exploration)
     - [Likwid stability issues](#likwid-stability-issues)
@@ -39,20 +40,21 @@ assumed to be stable or correct.
    for memory counters and is confirmed to use `likwid-accessD` without root
    permissions. If this version is available with your package manager, use
    that. Otherwise, build it from source. Instructions to do this are available
-   [here](https://github.com/RRZE-HPC/likwid). Be sure to change `PREFIX` in
-   the makefile to match wherever likwid is installed
+   [here](https://github.com/RRZE-HPC/likwid). Be sure to change
+   `LIKWID_PREFIX` in the makefile to match wherever likwid is installed
  - additional perfgroups not included with likwid. These can be installed by
    running `make perfgroups` in the root directory.
 
 ## Installed via package manager
-The makefile assumes everything here is installed to a prefix already included
-by the compiler and linker. If you choose to install to another directory
-(which will probably only happen if you're building from source) you will need
-to adjust the makefile to include that prefix.
 
  - **boost/program_options:** available on [the boost
    website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
-   install libboost-program-options-dev` on debian-based distributions
+   install libboost-program-options-dev` on debian-based distributions. The
+   makefile assumes boost program options is already in a directory included by
+   gcc.
+ - **cairo:** available [here](https://www.cairographics.org/), also
+   installable with `sudo apt install libcairo2-dev` The makefile uses
+   `pkg-config` to ensure cairo is automatically found and included.
 
 ## Automatically included
  - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
@@ -123,12 +125,45 @@ that the bottleneck changes as you adjust the parameters
  - demonstrate it with hardware counters
 
 Detailed:
- - [x] find kernel that I can use to demonstrate how bottleneck changes both
-       theoretically and with fhv. Below are some ideas for kernels to use
-   - [x] polynomial expansion
-     - [x] Dr. Saule is vectorizing the example from class, we'll try that
- - [ ] visualize results from polynomial_expansion to demonstrate how fhv can
-       identify bottlenecks
+ - [ ] create image that visualizes architecture and saturation levels
+
+ ### Thoughts on coloring of diagram:
+   - ideal is to have everything saturated
+   - how should we color this visualization? More saturated things are more
+     green? Do like a red-to-green scale?
+   - but if only one thing is saturated, that's BAD right? because you want to
+     take the load off that part and put it on others.
+   - but you want EVERYTHING to be loaded.... does that mean best way to color
+     is by difference in lowest to highest saturation level?
+   - what if more saturation -> more color intensity, but the choice of color
+     is based on difference between highest and lowest saturation?
+
+Ideal: everything is 1.0
+
+Good:
+ - everything is 0.5
+
+Bad:
+ - something is 1.0 but other things are 0.0
+ - everything is 0.0 
+
+What if red denotes overuse, gray denotes underuse, and green denotes ideal use
+
+This sounds like the last point, where more saturation means more intensity of
+color, but difference in saturation denotes green or red
+
+Given saturation has a small range but grows from low to high:
+ - constant hue of 125
+ - start at 0.5 value, 0 saturation. Grow to 1.0 value, 1.0 saturation 
+
+Given saturation is high but changes from having a large range to having a low
+range:
+ - constant value of 1.0 and saturation of 1.0
+ - start at hue of 0, grow to hue of 125
+
+Green: Hue around 125
+Red: Hue around 0
+Green -> Red would be 125 -> 0
 
 ### What other people do
  - [ ] read kerncraft paper
