@@ -3,9 +3,12 @@
 //  - create visualization from output data
 
 #include <boost/program_options.hpp>
+#include <cairo.h>
+#include <cairo-svg.h>
 #include <chrono>
 #include <immintrin.h>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <omp.h>
 
 #include "../lib/computation_measurements.h"
@@ -159,6 +162,158 @@ void print_csv_header()
                "Memory load data volume [GBytes]\n";
 }
 
+void cairo_rounded_rectangle(
+  cairo_t * cr,
+  double x, // x pos
+  double y, // y pos
+  double width,
+  double height,
+  double aspect, // corner aspect ratio?
+
+  // corner radius as a fraction of height. E.g. supplying corner radius ratio
+  // of 0.1 will set corner radius to 0.1 * height
+  double corner_radius_ratio 
+  )
+{
+  double corner_radius = height * corner_radius_ratio; 
+
+  double radius = corner_radius / aspect;
+  double degrees = M_PI / 180.0;
+
+  cairo_new_sub_path(cr);
+  cairo_arc(cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
+  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
+  cairo_arc(cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
+  cairo_arc(cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
+  cairo_close_path(cr);
+
+  // fill
+  cairo_set_source_rgb(cr, 0.5, 0.5, 1);
+  cairo_fill_preserve(cr);
+
+  // stroke
+  cairo_set_source_rgba(cr, 0.5, 0, 0, 0.5);
+  cairo_set_line_width(cr, 10.0);
+  cairo_stroke(cr);
+}
+
+void calculate_saturation_colors(
+  cairo_t *cr, 
+  json region_saturation)
+{
+  double min_saturation = 1;
+  double max_saturation = 0;
+  double saturation_average = 1;
+
+  std::cout << "\n printing metrics from json! \n";
+  for (auto const& metric: region_saturation){
+    // metric.first is metric name, metric.second is metric value
+
+    std::cout << metric << std::endl;
+
+    // min_saturation = min(min_saturation, metric.second);
+    // max_saturation = max(max_saturation, metric.second);
+    // saturation_average *= metric.second;
+  }
+
+  // min_saturation should be no smaller than 0
+  min_saturation = max(min_saturation, 0.0);
+  // max_saturation should be no larger than 1
+  max_saturation = min(max_saturation, 1.0);
+  // take root for geometric mean
+  saturation_average = pow(saturation_average, 
+    1.0/static_cast<double>(region_saturation.size()));
+
+  double saturation_range = max_saturation - min_saturation;
+  double color_value = 1.0 - 0.5 * saturation_average;
+  double color_saturation = 1.0 - saturation_average;
+  double color_hue = 125 - 125 * saturation_range;
+
+  // TODO convert HSV to rgb
+
+  // TODO return list of rgb colors
+}
+
+void visualize(std::string perfmon_output_filename){
+  std::string image_output_filename = "perfmon_output.svg";
+
+  // read a JSON file
+  std::ifstream i(perfmon_output_filename);
+  json j;
+  i >> j;
+
+  std::cout << j.dump(4) << std::endl;
+  std::cout << j["saturation"]["copy"] << std::endl;
+
+  // create surface and cairo object
+  cairo_surface_t *surface = cairo_svg_surface_create(
+    image_output_filename.c_str(),
+    800,  //width
+    1200  // height
+  );
+  cairo_t *cr =
+    cairo_create(surface);
+
+  // auto colors = calculate_saturation_colors(cr, j["saturation"]["copy"]);
+
+  double line_thickness = 10.0;
+  cairo_set_line_width(cr, line_thickness);
+
+  std::vector<double> static_color = {
+    102.0 / 255.0, 153.0 / 255.0, 255.0 / 255.0, 0.5
+    };
+
+  // --- draw RAM
+  cairo_rectangle(cr, 50, 50, 700, 200);
+
+  // - fill
+
+  // TODO: should be colored according to saturation level!
+  cairo_set_source_rgba(
+    cr, static_color[0], static_color[1], static_color[2], static_color[3]);
+  cairo_fill_preserve(cr);
+
+  // - stroke
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+
+  // --- draw socket 0
+  cairo_rectangle(cr, 50, 500, 700, 700);
+
+  // - fill
+
+  // TODO: should be colored according to saturation level!
+  cairo_set_source_rgba(
+    cr, static_color[0], static_color[1], static_color[2], static_color[3]);
+  cairo_fill_preserve(cr);
+
+  // - stroke
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+
+  // --- draw L3 cache
+  cairo_rectangle(cr, 200, 400, 400, 100);
+
+  // - fill
+
+  // TODO: should be colored according to saturation level!
+  cairo_set_source_rgba(
+    cr, static_color[0], static_color[1], static_color[2], static_color[3]);
+  cairo_fill_preserve(cr);
+
+  // - stroke
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+
+  // --- connect L3 cache to RAM
+
+  // --- done drawing things, clean up
+
+  // svg file automatically gets written to disk
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
+
 int main(int argc, char *argv[])
 {
   // places where argument values will be stored
@@ -231,8 +386,9 @@ int main(int argc, char *argv[])
       "internally. This corresponds with performance_monitor::printCsvOutput "
       "and provides details about saturation of CPU/memory and port usage.")
     ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
-                    "a visualization from json data output in program " 
-                    "instrumentation")
+                    "a visualization from data output to json during program " 
+                    "instrumentation. Argument should be relative path to "
+                    "aforementioned json.")
     ;
 
   po::variables_map vm;
@@ -281,107 +437,116 @@ int main(int argc, char *argv[])
   {
     performance_monitor::printCsvHeader();
   }
-  else
-  {
-    // This plock is where the benchark is ran
-    if (vm.count("benchmark-all"))
-    {
-      benchmark_all();
-    }
-    else if (vm.count("benchmark-cache-and-memory"))
-    {
-      num_memory_iter = cache_and_memory_args[0];
-      memory_size_kb = cache_and_memory_args[1];
-      benchmark_cache_and_memory(cache_and_memory_args[0],
-                                 cache_and_memory_args[1]);
-    }
-    else if (vm.count("L2"))
-    {
-      num_memory_iter = l2_args[0];
-      memory_size_kb = l2_args[1];
-      setenv("LIKWID_EVENTS",
-             "L2",
-             1);
-  
-      likwid_markerInit();
-  
-    #pragma omp parallel
-      {
-        likwid_markerThreadInit();
-        likwid_markerRegisterRegion("L2");
-        likwid_pinThread(omp_get_thread_num());
-      }
-      benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
-    }
-    else if (vm.count("L3"))
-    {
-      num_memory_iter = l3_args[0];
-      memory_size_kb = l3_args[1];
-      setenv("LIKWID_EVENTS",
-             "L3",
-             1);
-  
-      likwid_markerInit();
-  
-    #pragma omp parallel
-      {
-        likwid_markerThreadInit();
-        likwid_markerRegisterRegion("L3");
-        likwid_pinThread(omp_get_thread_num());
-      }
-      benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
-    }
-    else if (vm.count("mem"))
-    {
-      num_memory_iter = ram_args[0];
-      memory_size_kb = ram_args[1];
-      setenv("LIKWID_EVENTS",
-             "MEM",
-             1);
-  
-      likwid_markerInit();
-  
-    #pragma omp parallel
-      {
-        likwid_markerThreadInit();
-        likwid_markerRegisterRegion("MEM");
-        likwid_pinThread(omp_get_thread_num());
-      }
-      benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
-    }
-    else if (vm.count("flops_sp"))
-    {
-      setenv("LIKWID_EVENTS",
-             "FLOPS_SP",
-             1);
-  
-      likwid_markerInit();
-  
-    #pragma omp parallel
-      {
-        likwid_markerThreadInit();
-        likwid_markerRegisterRegion("flops_sp");
-        likwid_pinThread(omp_get_thread_num());
-      }
-      benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
-    }
-    else if (vm.count("flops_dp"))
-    {
-      setenv("LIKWID_EVENTS",
-             "FLOPS_DP",
-             1);
-  
-      likwid_markerInit();
-  
-    #pragma omp parallel
-      {
-        likwid_markerThreadInit();
-        likwid_markerRegisterRegion("flops_sp");
-        likwid_pinThread(omp_get_thread_num());
-      }
-      benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
-    }
 
+  bool benchmark_done = false;
+
+  // This block is where the benchark is ran
+  if (vm.count("benchmark-all"))
+  {
+    benchmark_all();
+    benchmark_done = true;
+  }
+  else if (vm.count("benchmark-cache-and-memory"))
+  {
+    num_memory_iter = cache_and_memory_args[0];
+    memory_size_kb = cache_and_memory_args[1];
+    benchmark_cache_and_memory(cache_and_memory_args[0],
+                               cache_and_memory_args[1]);
+    benchmark_done = true;
+  }
+  else if (vm.count("L2"))
+  {
+    num_memory_iter = l2_args[0];
+    memory_size_kb = l2_args[1];
+    setenv("LIKWID_EVENTS",
+           "L2",
+           1);
+
+    likwid_markerInit();
+
+  #pragma omp parallel
+    {
+      likwid_markerThreadInit();
+      likwid_markerRegisterRegion("L2");
+      likwid_pinThread(omp_get_thread_num());
+    }
+    benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+    benchmark_done = true;
+  }
+  else if (vm.count("L3"))
+  {
+    num_memory_iter = l3_args[0];
+    memory_size_kb = l3_args[1];
+    setenv("LIKWID_EVENTS",
+           "L3",
+           1);
+
+    likwid_markerInit();
+
+  #pragma omp parallel
+    {
+      likwid_markerThreadInit();
+      likwid_markerRegisterRegion("L3");
+      likwid_pinThread(omp_get_thread_num());
+    }
+    benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+    benchmark_done = true;
+  }
+  else if (vm.count("mem"))
+  {
+    num_memory_iter = ram_args[0];
+    memory_size_kb = ram_args[1];
+    setenv("LIKWID_EVENTS",
+           "MEM",
+           1);
+
+    likwid_markerInit();
+
+  #pragma omp parallel
+    {
+      likwid_markerThreadInit();
+      likwid_markerRegisterRegion("MEM");
+      likwid_pinThread(omp_get_thread_num());
+    }
+    benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+    benchmark_done = true;
+  }
+  else if (vm.count("flops_sp"))
+  {
+    setenv("LIKWID_EVENTS",
+           "FLOPS_SP",
+           1);
+
+    likwid_markerInit();
+
+  #pragma omp parallel
+    {
+      likwid_markerThreadInit();
+      likwid_markerRegisterRegion("flops_sp");
+      likwid_pinThread(omp_get_thread_num());
+    }
+    benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
+    benchmark_done = true;
+  }
+  else if (vm.count("flops_dp"))
+  {
+    setenv("LIKWID_EVENTS",
+           "FLOPS_DP",
+           1);
+
+    likwid_markerInit();
+
+  #pragma omp parallel
+    {
+      likwid_markerThreadInit();
+      likwid_markerRegisterRegion("flops_sp");
+      likwid_pinThread(omp_get_thread_num());
+    }
+    benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+    benchmark_done = true;
+  }
+
+  if(benchmark_done){
     likwid_markerClose();
 
     if(o == pretty){
@@ -435,7 +600,7 @@ int main(int argc, char *argv[])
   // visualization things
   if (vm.count("visualize"))
   {
-    // visualize(perfmon_output_filename, output_filename);
+    visualize(perfmon_output_filename);
   }
 
   return 0;
