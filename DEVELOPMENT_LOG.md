@@ -4,6 +4,7 @@ Hardware Visualization
 
 - [Development Log](#development-log)
 - [2020-04-30 through 2020-05-07](#2020-04-30-through-2020-05-07)
+  - [Thoughts on coloring of diagram:](#thoughts-on-coloring-of-diagram)
 - [2020-04-23 through 2020-04-30](#2020-04-23-through-2020-04-30)
 - [2020-04-16 through 2020-04-23](#2020-04-16-through-2020-04-23)
 - [2020-04-09 through 2020-04-16](#2020-04-09-through-2020-04-16)
@@ -52,13 +53,61 @@ Hardware Visualization
  - for some reason, polynomial_expansion (both basic and block) are using
    double-precision components even though "float" is used, which should (I
    think) use the single-precision data structure.
-   - header did not match order of the data in lines below.
+   - header did not match order of the data in lines below. It was reporting SP
+     as DP, DP as L2, L2 as L3, L3 as MEM, and MEM as DP
+   - fixed header to match and created a plot which showed how computation
+     usage changed
  - created plots to demonstrate how fhv can identify bottlenecks and
    improvements 
+ - spent some time considering color choices to represent saturation of
+   hardware
  - began working on svg diagram of hardware
    - generates a couple rectangles
    - started calculating colors, need to pick a data structure to store those
      in 
+
+## Thoughts on coloring of diagram:
+Notes from meeting with Dr. Saule
+ - anything above 20% is probably pretty well-saturated
+ - color by saturation (more saturation - more intense color)
+
+my thoughts
+ - ideal is to have everything saturated
+ - how should we color this visualization? More saturated things are more
+   green? Do like a red-to-green scale?
+ - but if only one thing is saturated, that's BAD right? because you want to
+   take the load off that part and put it on others.
+ - but you want EVERYTHING to be loaded.... does that mean best way to color
+   is by difference in lowest to highest saturation level?
+ - what if more saturation -> more color intensity, but the choice of color
+   is based on difference between highest and lowest saturation?
+
+Ideal: everything is 1.0
+
+Good:
+ - everything is 0.5
+
+Bad:
+ - something is 1.0 but other things are 0.0
+ - everything is 0.0 
+
+What if red denotes overuse, gray denotes underuse, and green denotes ideal use
+
+This sounds like the last point, where more saturation means more intensity of
+color, but difference in saturation denotes green or red
+
+Given saturation has a small range but grows from low to high:
+ - constant hue of 125
+ - start at 0.5 value, 0 saturation. Grow to 1.0 value, 1.0 saturation 
+
+Given saturation is high but changes from having a large range to having a low
+range:
+ - constant value of 1.0 and saturation of 1.0
+ - start at hue of 0, grow to hue of 125
+
+Green: Hue around 125
+Red: Hue around 0
+Green -> Red would be 125 -> 0
 
 # 2020-04-23 through 2020-04-30
  - added printHighlights function
