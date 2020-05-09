@@ -10,6 +10,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <omp.h>
+#include <tuple>
 
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
@@ -162,42 +163,8 @@ void print_csv_header()
                "Memory load data volume [GBytes]\n";
 }
 
-void cairo_rounded_rectangle(
-  cairo_t * cr,
-  double x, // x pos
-  double y, // y pos
-  double width,
-  double height,
-  double aspect, // corner aspect ratio?
-
-  // corner radius as a fraction of height. E.g. supplying corner radius ratio
-  // of 0.1 will set corner radius to 0.1 * height
-  double corner_radius_ratio 
-  )
-{
-  double corner_radius = height * corner_radius_ratio; 
-
-  double radius = corner_radius / aspect;
-  double degrees = M_PI / 180.0;
-
-  cairo_new_sub_path(cr);
-  cairo_arc(cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
-  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
-  cairo_arc(cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
-  cairo_arc(cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
-  cairo_close_path(cr);
-
-  // fill
-  cairo_set_source_rgb(cr, 0.5, 0.5, 1);
-  cairo_fill_preserve(cr);
-
-  // stroke
-  cairo_set_source_rgba(cr, 0.5, 0, 0, 0.5);
-  cairo_set_line_width(cr, 10.0);
-  cairo_stroke(cr);
-}
-
-void calculate_saturation_colors(
+std::vector<std::tuple<double, double, double>>
+calculate_saturation_colors(
   cairo_t *cr, 
   json region_saturation)
 {
@@ -242,19 +209,19 @@ void visualize(std::string perfmon_output_filename){
   json j;
   i >> j;
 
-  std::cout << j.dump(4) << std::endl;
-  std::cout << j["saturation"]["copy"] << std::endl;
+  // std::cout << j.dump(4) << std::endl;
+  // std::cout << j["saturation"]["copy"] << std::endl;
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(
     image_output_filename.c_str(),
     800,  //width
-    1200  // height
+    1250  // height
   );
   cairo_t *cr =
     cairo_create(surface);
 
-  // auto colors = calculate_saturation_colors(cr, j["saturation"]["copy"]);
+  auto colors = calculate_saturation_colors(cr, j["saturation"]["copy"]);
 
   double line_thickness = 10.0;
   cairo_set_line_width(cr, line_thickness);
@@ -306,6 +273,10 @@ void visualize(std::string perfmon_output_filename){
   cairo_stroke(cr);
 
   // --- connect L3 cache to RAM
+  cairo_move_to(cr, 400, 250);
+  cairo_line_to(cr, 400, 400);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
 
   // --- done drawing things, clean up
 
