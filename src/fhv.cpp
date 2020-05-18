@@ -12,6 +12,7 @@
 #include <omp.h>
 #include <tuple>
 
+#include "../lib/architecture.h"
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
 
@@ -163,8 +164,58 @@ void print_csv_header()
                "Memory load data volume [GBytes]\n";
 }
 
+// ----- LINEAR INTERPOLATION (LERP) ----- //
+
+// taken from
+// https://en.wikipedia.org/wiki/Linear_interpolation#Programming_language_support
+
+// used under Creative Commons Attribution-ShareAlike 3.0 Unported License. See
+// https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License
+// for full text
+
+// Imprecise method, which does not guarantee v = v1 when t = 1, due to
+// floating-point arithmetic error. This form may be used when the hardware has
+// a native fused multiply-add instruction.
+double lerp(double v0, double v1, double t) {
+  return v0 + t * (v1 - v0);
+}
+
+// ----- CLAMP ----- //
+
+// taken from: https://en.cppreference.com/w/cpp/algorithm/clamp
+
+template<class T>
+constexpr const T& clamp( const T& v, const T& lo, const T& hi )
+{
+    assert( !(hi < lo) );
+    return (v < lo) ? lo : (hi < v) ? hi : v;
+}
+
 std::vector<std::tuple<double, double, double>>
 calculate_saturation_colors(
+  json region_saturation)
+{
+  auto saturation_colors = std::vector< std::tuple<double, double, double> >();
+
+  for (auto const& metric: region_saturation.items())
+  {
+    // clamp values to [0.0,1.0]
+    metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
+  }
+
+  // TODO calculate rgb colors instead of returning empty tuples
+  return saturation_colors;
+}
+
+// the idea here was to use hue to represent difference in best and worst
+// saturation, and color saturation to represent average saturation. For more
+// information, see "Thoughts on coloring of diagram" in
+// `./DEVELOPMENT_LOG.md`. We have decided to replace this function with a much
+// simpler strategy of coloring the diagram, implemented in the function
+// `calculate_saturation_colors` above
+[[deprecated("Incomplete: chose a simpler method of color calculation")]]
+std::vector<std::tuple<double, double, double>>
+calculate_saturation_colors_complicated(
   cairo_t *cr, 
   json region_saturation)
 {
@@ -172,21 +223,18 @@ calculate_saturation_colors(
   double max_saturation = 0;
   double saturation_average = 1;
 
-  std::cout << "\n printing metrics from json! \n";
-  for (auto const& metric: region_saturation){
-    // metric.first is metric name, metric.second is metric value
+  auto saturation_colors = std::vector< std::tuple<double, double, double> >();
 
-    std::cout << metric << std::endl;
+  for (auto const& metric: region_saturation.items())
+  {
+    // clamp values to [0.0,1.0]
+    metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
 
-    // min_saturation = min(min_saturation, metric.second);
-    // max_saturation = max(max_saturation, metric.second);
-    // saturation_average *= metric.second;
+    min_saturation = min(min_saturation, static_cast<double>(metric.value()));
+    max_saturation = max(max_saturation, static_cast<double>(metric.value()));
+    saturation_average *= static_cast<double>(metric.value());
   }
 
-  // min_saturation should be no smaller than 0
-  min_saturation = max(min_saturation, 0.0);
-  // max_saturation should be no larger than 1
-  max_saturation = min(max_saturation, 1.0);
   // take root for geometric mean
   saturation_average = pow(saturation_average, 
     1.0/static_cast<double>(region_saturation.size()));
@@ -195,10 +243,14 @@ calculate_saturation_colors(
   double color_value = 1.0 - 0.5 * saturation_average;
   double color_saturation = 1.0 - saturation_average;
   double color_hue = 125 - 125 * saturation_range;
+  saturation_colors.push_back(
+    std::tuple<double, double, double>(color_hue, color_saturation, color_value)
+    );
 
   // TODO convert HSV to rgb
 
-  // TODO return list of rgb colors
+  // TODO return list of rgb colors instead of empty tuples
+  return saturation_colors;
 }
 
 void visualize(std::string perfmon_output_filename){
@@ -221,62 +273,79 @@ void visualize(std::string perfmon_output_filename){
   cairo_t *cr =
     cairo_create(surface);
 
-  auto colors = calculate_saturation_colors(cr, j["saturation"]["copy"]);
+  auto colors = calculate_saturation_colors(j["saturation"]["copy"]);
 
-  double line_thickness = 10.0;
-  cairo_set_line_width(cr, line_thickness);
+  // --- draw RAM --- //
+  cairo_rectangle(cr, 50, 50, 700, 200);
 
+  // --- line from RAM to L3 cache --- //
+  cairo_move_to(cr, 400, 250);
+  cairo_line_to(cr, 400, 400);
+
+  // --- draw L3 cache --- //
+  cairo_rectangle(cr, 200, 400, 400, 100);
+
+  // --- draw socket 0 --- //
+  cairo_rectangle(cr, 50, 500, 700, 700);
+
+  // --- draw cores --- //
+  for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++){
+    // cache numbers
+    unsigned num_attached_caches = 2;
+    unsigned cache_height = 50;
+
+    // core numbers
+    unsigned core_width = 600;
+    unsigned core_height = 175;
+    unsigned between_core_buffer = 50;
+    unsigned core_x = 100;
+    unsigned core_y = 550 + core_num * 
+      (between_core_buffer + core_height + 
+        (num_attached_caches * cache_height)
+      );
+
+    // cache numbers that depend on core numbers
+    unsigned cache_y = core_y + core_height;
+
+    // --- threads within core:
+    for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++){
+      cairo_rectangle(
+        cr, 
+        core_x + thread_num * core_width/THREADS_PER_CORE, 
+        core_y, 
+        core_width/THREADS_PER_CORE,
+        core_height);
+    }
+
+    // --- caches attached to core:
+
+    for (unsigned cache_num = 0; cache_num < num_attached_caches; cache_num++){
+      cairo_rectangle(cr,
+        core_x,
+        cache_y + cache_height * cache_num,
+        core_width,
+        cache_height);
+    }
+  }
+
+  // - fill
   std::vector<double> static_color = {
     102.0 / 255.0, 153.0 / 255.0, 255.0 / 255.0, 0.5
     };
 
-  // --- draw RAM
-  cairo_rectangle(cr, 50, 50, 700, 200);
-
-  // - fill
-
   // TODO: should be colored according to saturation level!
+  // will therefore have to be separate fill calls for each section
   cairo_set_source_rgba(
     cr, static_color[0], static_color[1], static_color[2], static_color[3]);
   cairo_fill_preserve(cr);
 
   // - stroke
+  double line_thickness = 10.0;
+  cairo_set_line_width(cr, line_thickness);
+
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
 
-  // --- draw socket 0
-  cairo_rectangle(cr, 50, 500, 700, 700);
-
-  // - fill
-
-  // TODO: should be colored according to saturation level!
-  cairo_set_source_rgba(
-    cr, static_color[0], static_color[1], static_color[2], static_color[3]);
-  cairo_fill_preserve(cr);
-
-  // - stroke
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-
-  // --- draw L3 cache
-  cairo_rectangle(cr, 200, 400, 400, 100);
-
-  // - fill
-
-  // TODO: should be colored according to saturation level!
-  cairo_set_source_rgba(
-    cr, static_color[0], static_color[1], static_color[2], static_color[3]);
-  cairo_fill_preserve(cr);
-
-  // - stroke
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-
-  // --- connect L3 cache to RAM
-  cairo_move_to(cr, 400, 250);
-  cairo_line_to(cr, 400, 400);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
 
   // --- done drawing things, clean up
 
