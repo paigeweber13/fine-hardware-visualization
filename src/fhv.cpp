@@ -199,6 +199,18 @@ constexpr const T& clamp( const T& v, const T& lo, const T& hi )
     return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
+// ---- custom log scale ---- //
+
+// designed to make most apparent the difference between 0.01 and 0.2, to make
+// somewhat apparent the difference between 0.2 and 0.5, and to minimize
+// difference in values from 0.5 to 1.0
+
+// expects 0.0 <= value <= 1.0
+double scale(double value){
+  #define c 7
+  return (log2(value) + c)/c;
+}
+
 // ---- calculate saturation colors ----- // 
 
 std::map<std::string, std::tuple<double, double, double>>
@@ -213,8 +225,16 @@ calculate_saturation_colors(
 
   for (auto const& metric: region_saturation.items())
   {
+    std::cout << "metric before clamping and scaling: "
+      << metric.key() << ": " << metric.value() << "\n";
     // clamp values to [0.0,1.0]
     metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
+    // scale using custom function
+    metric.value() = scale(metric.value());
+    // clamp again because scale can give negative values for very small input
+    metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
+    std::cout << "metric after clamping and scaling: "
+      << metric.key() << ": " << metric.value() << "\n\n";
 
     saturation_colors[metric.key()] = 
       color_lerp(min_color, max_color, metric.value());
@@ -276,7 +296,7 @@ void test_color_lerp(
   unsigned num_steps,
   unsigned step_size,
   unsigned height)
-  {
+{
   std::string image_output_filename = "test_color_lerp.svg";
 
   // create surface and cairo object
@@ -321,10 +341,10 @@ void test_color_lerp(
 }
 
 void visualize(
-  std::string perfmon_output_filename,
-  std::tuple<double, double, double> min_color, 
-  std::tuple<double, double, double> max_color)
-  {
+    std::string perfmon_output_filename,
+    std::tuple<double, double, double> min_color,
+    std::tuple<double, double, double> max_color)
+{
   std::string image_output_filename = "perfmon_output.svg";
 
   // read a JSON file
@@ -337,27 +357,35 @@ void visualize(
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(
-    image_output_filename.c_str(),
-    800,  //width
-    1250  // height
+      image_output_filename.c_str(),
+      800, //width
+      1250 // height
   );
   cairo_t *cr =
-    cairo_create(surface);
+      cairo_create(surface);
 
   auto colors = calculate_saturation_colors(
-    j["saturation"]["copy"], 
-    min_color, 
-    max_color);
+      j["saturation"]["copy"],
+      min_color,
+      max_color);
+  std::cout << j["saturation"]["copy"];
+
+  double line_thickness = 10.0;
+  cairo_set_line_width(cr, line_thickness);
 
   // --- draw RAM --- //
   cairo_rectangle(cr, 50, 50, 700, 200);
   // - fill
   cairo_set_source_rgb(
-    cr, 
-    get<0>(colors["Memory bandwidth [MBytes/s]"]), 
-    get<1>(colors["Memory bandwidth [MBytes/s]"]), 
-    get<2>(colors["Memory bandwidth [MBytes/s]"]));
+      cr,
+      get<0>(colors["Memory bandwidth [MBytes/s]"]),
+      get<1>(colors["Memory bandwidth [MBytes/s]"]),
+      get<2>(colors["Memory bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
+
+  // - stroke
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
 
   // --- line from RAM to L3 cache --- //
   cairo_move_to(cr, 400, 250);
@@ -367,11 +395,15 @@ void visualize(
   cairo_rectangle(cr, 200, 400, 400, 100);
   // - fill
   cairo_set_source_rgb(
-    cr, 
-    get<0>(colors["L3 bandwidth [MBytes/s]"]), 
-    get<1>(colors["L3 bandwidth [MBytes/s]"]), 
-    get<2>(colors["L3 bandwidth [MBytes/s]"]));
+      cr,
+      get<0>(colors["L3 bandwidth [MBytes/s]"]),
+      get<1>(colors["L3 bandwidth [MBytes/s]"]),
+      get<2>(colors["L3 bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
+
+  // - stroke
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
 
   // --- draw socket 0 --- //
   cairo_rectangle(cr, 50, 500, 700, 700);
@@ -379,13 +411,19 @@ void visualize(
   cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_fill_preserve(cr);
 
-  rgb_color computation_color = 
-    j["saturation"]["copy"]["DP [MFLOP/s]"] >
-    j["saturation"]["copy"]["SP [MFLOP/s]"] ?
-    colors["DP [MFLOP/s]"] : colors["SP [MFLOP/s]"];
+  // - stroke
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+
+  rgb_color computation_color =
+      j["saturation"]["copy"]["DP [MFLOP/s]"] >
+              j["saturation"]["copy"]["SP [MFLOP/s]"]
+          ? colors["DP [MFLOP/s]"]
+          : colors["SP [MFLOP/s]"];
 
   // --- draw cores --- //
-  for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++){
+  for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++)
+  {
     // cache numbers
     unsigned num_attached_caches = 2;
     unsigned cache_height = 50;
@@ -395,56 +433,65 @@ void visualize(
     unsigned core_height = 175;
     unsigned between_core_buffer = 50;
     unsigned core_x = 100;
-    unsigned core_y = 550 + core_num * 
-      (between_core_buffer + core_height + 
-        (num_attached_caches * cache_height)
-      );
+    unsigned core_y = 550 + core_num *
+                                (between_core_buffer + core_height +
+                                 (num_attached_caches * cache_height));
 
     // cache numbers that depend on core numbers
     unsigned cache_y = core_y + core_height;
 
     // --- threads within core:
-    for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++){
+    for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++)
+    {
       cairo_rectangle(
-        cr, 
-        core_x + thread_num * core_width/THREADS_PER_CORE, 
-        core_y, 
-        core_width/THREADS_PER_CORE,
-        core_height);
+          cr,
+          core_x + thread_num * core_width / THREADS_PER_CORE,
+          core_y,
+          core_width / THREADS_PER_CORE,
+          core_height);
       // - fill
       cairo_set_source_rgb(
-        cr, 
-        get<0>(computation_color), 
-        get<1>(computation_color), 
-        get<2>(computation_color));
+          cr,
+          get<0>(computation_color),
+          get<1>(computation_color),
+          get<2>(computation_color));
       cairo_fill_preserve(cr);
+
+      // - stroke
+      cairo_set_source_rgb(cr, 0, 0, 0);
+      cairo_stroke(cr);
     }
 
     // --- caches attached to core:
 
-    for (unsigned cache_num = 0; cache_num < num_attached_caches; cache_num++){
+    for (unsigned cache_num = 0; cache_num < num_attached_caches; cache_num++)
+    {
       cairo_rectangle(cr,
-        core_x,
-        cache_y + cache_height * cache_num,
-        core_width,
-        cache_height);
+                      core_x,
+                      cache_y + cache_height * cache_num,
+                      core_width,
+                      cache_height);
+
       // - fill
-      cairo_set_source_rgb(
-        cr, 
-        get<0>(colors["L" + to_string(cache_num + 1) + " bandwidth [MBytes/s]"]), 
-        get<1>(colors["L" + to_string(cache_num + 1) + " bandwidth [MBytes/s]"]), 
-        get<2>(colors["L" + to_string(cache_num + 1) + " bandwidth [MBytes/s]"]));
+      if (cache_num == 0)
+      {
+        cairo_set_source_rgb(cr, 1, 1, 1);
+      }
+      else
+      {
+        cairo_set_source_rgb(
+            cr,
+            get<0>(colors["L2 bandwidth [MBytes/s]"]),
+            get<1>(colors["L2 bandwidth [MBytes/s]"]),
+            get<2>(colors["L2 bandwidth [MBytes/s]"]));
+      }
       cairo_fill_preserve(cr);
+
+      // - stroke
+      cairo_set_source_rgb(cr, 0, 0, 0);
+      cairo_stroke(cr);
     }
   }
-
-  // - stroke
-  double line_thickness = 10.0;
-  cairo_set_line_width(cr, line_thickness);
-
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-
 
   // --- done drawing things, clean up
 
