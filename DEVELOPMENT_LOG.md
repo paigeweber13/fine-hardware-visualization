@@ -51,12 +51,19 @@ Hardware Visualization
 # 2020-05-17 through 2020-05-23
 ## questions
    - should I visualize saturation on a per-core basis?
-   - should I visualize double precision or single precision?
+   - should I visualize double precision, single precision, or both?
+     - currently picking the larger value (more saturated) and using that one
 
 ## accomplishments
  - worked on visualization
  - created function for interpolating colors
  - created function to test interpolation
+ - added exponential scale as discussed with Dr. Saule
+   - scale(0.01) = 0.0509
+   - scale(0.2)  = 0.6683
+   - scale(0.5)  = 0.8571
+ - visualized saturation on a scale inspired by
+   [colorbrewer](https://colorbrewer2.org/#type=sequential&scheme=PuBu&n=9)
 
 # 2020-04-30 through 2020-05-07
  - created CSV output from fhv to allow for plotting in place of architecture
