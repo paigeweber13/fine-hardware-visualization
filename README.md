@@ -19,7 +19,6 @@ assumed to be stable or correct.
 - [Ownership and licensing](#ownership-and-licensing)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
-    - [What other people do](#what-other-people-do)
     - [Exploration](#exploration)
     - [Likwid stability issues](#likwid-stability-issues)
   - [Long-term:](#long-term)
@@ -84,12 +83,8 @@ So far it seems that nothing is designed to automatically identify and
 visualize the architecture by socket and within the core. Additionally, most of
 these tools are not easy to use.
 
-Dr. Saule mentioned two ways this project will be useful
- - help better understand code and how the author can improve it
- - help better understand the architecture
-
 We want people new to HPC to be able to 
- - understand how their application maps to the architecture
+ - understand how their code maps to their architecture
  - give suggestions on how to improve their application
 
 Additionally, we hope to apply this to graph problems: kernels in graph
@@ -113,18 +108,15 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
- - [ ] color visualization according to saturation
-   - [ ] once we get below 1% I don't think we really care about saturation
-   - [ ] largest visual difference in color from 0.01 to 0.2. Some color
+ - [x] color visualization according to saturation
+   - [x] once we get below 1% I don't think we really care about saturation
+   - [x] largest visual difference in color from 0.01 to 0.2. Some color
          difference between 0.2 and 0.5. Above that is really hard to obtain
-   - [ ] (log_2 (saturation) + 10)/10 then clamp that to (0.0, 1.0)
+   - [x] (log_2 (saturation) + 10)/10 then clamp that to (0.0, 1.0)
  - [ ] eventually talk to a visualization expert
  - [ ] more counters to visualize?
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
-
-### What other people do
- - [ ] read kerncraft paper
 
 ### Exploration
  - [ ] mem instructions retired * 32 bytes instead of 64
