@@ -164,6 +164,9 @@ void print_csv_header()
                "Memory load data volume [GBytes]\n";
 }
 
+// ----- simple color type ----- //
+typedef std::tuple<double, double, double> rgb_color;
+
 // ----- LINEAR INTERPOLATION (LERP) ----- //
 
 // taken from
@@ -176,13 +179,9 @@ void print_csv_header()
 // Imprecise method, which does not guarantee result = max_color when t = 1,
 // due to floating-point arithmetic error. This form may be used when the
 // hardware has a native fused multiply-add instruction.
-std::tuple<double, double, double>
-color_lerp(
-  std::tuple<double, double, double> min_color, 
-  std::tuple<double, double, double> max_color, 
-  double t) 
+rgb_color color_lerp( rgb_color min_color, rgb_color max_color, double t) 
 {
-  return std::tuple<double, double, double>(
+  return rgb_color(
     std::get<0>(min_color) + t * (std::get<0>(max_color) - std::get<0>(min_color)),
     std::get<1>(min_color) + t * (std::get<1>(max_color) - std::get<1>(min_color)),
     std::get<2>(min_color) + t * (std::get<2>(max_color) - std::get<2>(min_color))
@@ -200,16 +199,25 @@ constexpr const T& clamp( const T& v, const T& lo, const T& hi )
     return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
-std::vector<std::tuple<double, double, double>>
+// ---- calculate saturation colors ----- // 
+
+std::map<std::string, std::tuple<double, double, double>>
 calculate_saturation_colors(
-  json region_saturation)
+  json region_saturation,
+  rgb_color min_color,
+  rgb_color max_color
+  )
 {
-  auto saturation_colors = std::vector< std::tuple<double, double, double> >();
+  auto saturation_colors = std::map< std::string, 
+    std::tuple<double, double, double> >();
 
   for (auto const& metric: region_saturation.items())
   {
     // clamp values to [0.0,1.0]
     metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
+
+    saturation_colors[metric.key()] = 
+      color_lerp(min_color, max_color, metric.value());
   }
 
   // TODO calculate rgb colors instead of returning empty tuples
@@ -336,10 +344,20 @@ void visualize(
   cairo_t *cr =
     cairo_create(surface);
 
-  auto colors = calculate_saturation_colors(j["saturation"]["copy"]);
+  auto colors = calculate_saturation_colors(
+    j["saturation"]["copy"], 
+    min_color, 
+    max_color);
 
   // --- draw RAM --- //
   cairo_rectangle(cr, 50, 50, 700, 200);
+  // - fill
+  cairo_set_source_rgb(
+    cr, 
+    get<0>(colors["Memory bandwidth [MBytes/s]"]), 
+    get<1>(colors["Memory bandwidth [MBytes/s]"]), 
+    get<2>(colors["Memory bandwidth [MBytes/s]"]));
+  cairo_fill_preserve(cr);
 
   // --- line from RAM to L3 cache --- //
   cairo_move_to(cr, 400, 250);
@@ -347,9 +365,24 @@ void visualize(
 
   // --- draw L3 cache --- //
   cairo_rectangle(cr, 200, 400, 400, 100);
+  // - fill
+  cairo_set_source_rgb(
+    cr, 
+    get<0>(colors["L3 bandwidth [MBytes/s]"]), 
+    get<1>(colors["L3 bandwidth [MBytes/s]"]), 
+    get<2>(colors["L3 bandwidth [MBytes/s]"]));
+  cairo_fill_preserve(cr);
 
   // --- draw socket 0 --- //
   cairo_rectangle(cr, 50, 500, 700, 700);
+  // - fill
+  cairo_set_source_rgb(cr, 1, 1, 1);
+  cairo_fill_preserve(cr);
+
+  rgb_color computation_color = 
+    j["saturation"]["copy"]["DP [MFLOP/s]"] >
+    j["saturation"]["copy"]["SP [MFLOP/s]"] ?
+    colors["DP [MFLOP/s]"] : colors["SP [MFLOP/s]"];
 
   // --- draw cores --- //
   for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++){
@@ -378,6 +411,13 @@ void visualize(
         core_y, 
         core_width/THREADS_PER_CORE,
         core_height);
+      // - fill
+      cairo_set_source_rgb(
+        cr, 
+        get<0>(computation_color), 
+        get<1>(computation_color), 
+        get<2>(computation_color));
+      cairo_fill_preserve(cr);
     }
 
     // --- caches attached to core:
@@ -388,19 +428,15 @@ void visualize(
         cache_y + cache_height * cache_num,
         core_width,
         cache_height);
+      // - fill
+      cairo_set_source_rgb(
+        cr, 
+        get<0>(colors["L" + to_string(cache_num + 1) + " bandwidth [MBytes/s]"]), 
+        get<1>(colors["L" + to_string(cache_num + 1) + " bandwidth [MBytes/s]"]), 
+        get<2>(colors["L" + to_string(cache_num + 1) + " bandwidth [MBytes/s]"]));
+      cairo_fill_preserve(cr);
     }
   }
-
-  // - fill
-  std::vector<double> static_color = {
-    102.0 / 255.0, 153.0 / 255.0, 255.0 / 255.0, 0.5
-    };
-
-  // TODO: should be colored according to saturation level!
-  // will therefore have to be separate fill calls for each section
-  cairo_set_source_rgba(
-    cr, static_color[0], static_color[1], static_color[2], static_color[3]);
-  cairo_fill_preserve(cr);
 
   // - stroke
   double line_thickness = 10.0;
