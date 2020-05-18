@@ -3,6 +3,9 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
+- [2020-05-17 through 2020-05-23](#2020-05-17-through-2020-05-23)
+  - [questions](#questions)
+  - [accomplishments](#accomplishments)
 - [2020-04-30 through 2020-05-07](#2020-04-30-through-2020-05-07)
   - [Thoughts on coloring of diagram:](#thoughts-on-coloring-of-diagram)
 - [2020-04-23 through 2020-04-30](#2020-04-23-through-2020-04-30)
@@ -45,6 +48,16 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
   
+# 2020-05-17 through 2020-05-23
+## questions
+   - should I visualize saturation on a per-core basis?
+   - should I visualize double precision or single precision?
+
+## accomplishments
+ - worked on visualization
+ - created function for interpolating colors
+ - created function to test interpolation
+
 # 2020-04-30 through 2020-05-07
  - created CSV output from fhv to allow for plotting in place of architecture
    visualization that will come later

@@ -173,11 +173,20 @@ void print_csv_header()
 // https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License
 // for full text
 
-// Imprecise method, which does not guarantee v = v1 when t = 1, due to
-// floating-point arithmetic error. This form may be used when the hardware has
-// a native fused multiply-add instruction.
-double lerp(double v0, double v1, double t) {
-  return v0 + t * (v1 - v0);
+// Imprecise method, which does not guarantee result = max_color when t = 1,
+// due to floating-point arithmetic error. This form may be used when the
+// hardware has a native fused multiply-add instruction.
+std::tuple<double, double, double>
+color_lerp(
+  std::tuple<double, double, double> min_color, 
+  std::tuple<double, double, double> max_color, 
+  double t) 
+{
+  return std::tuple<double, double, double>(
+    std::get<0>(min_color) + t * (std::get<0>(max_color) - std::get<0>(min_color)),
+    std::get<1>(min_color) + t * (std::get<1>(max_color) - std::get<1>(min_color)),
+    std::get<2>(min_color) + t * (std::get<2>(max_color) - std::get<2>(min_color))
+  );
 }
 
 // ----- CLAMP ----- //
@@ -253,7 +262,61 @@ calculate_saturation_colors_complicated(
   return saturation_colors;
 }
 
-void visualize(std::string perfmon_output_filename){
+void test_color_lerp(
+  std::tuple<double, double, double> min_color, 
+  std::tuple<double, double, double> max_color,
+  unsigned num_steps,
+  unsigned step_size,
+  unsigned height)
+  {
+  std::string image_output_filename = "test_color_lerp.svg";
+
+  // create surface and cairo object
+  cairo_surface_t *surface = cairo_svg_surface_create(
+    image_output_filename.c_str(),
+    num_steps * step_size,  // image width
+    height              // image height
+  );
+  cairo_t *cr = cairo_create(surface);
+
+  double line_thickness = 10.0;
+  cairo_set_line_width(cr, line_thickness);
+
+  for (unsigned i = 0; i < num_steps; i++){
+    // shape
+    cairo_rectangle(cr, i * step_size, 0, step_size, height);
+
+    // fill
+    auto color = color_lerp(
+      min_color, 
+      max_color, 
+      static_cast<double>(i + 1)/static_cast<double>(num_steps)
+      );
+
+    cairo_set_source_rgb(cr, 
+      std::get<0>(color), 
+      std::get<1>(color), 
+      std::get<2>(color)
+      );
+    cairo_fill_preserve(cr);
+
+    // stroke
+    // cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_stroke(cr);
+  }
+
+  // --- done drawing things, clean up
+
+  // svg file automatically gets written to disk
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
+
+void visualize(
+  std::string perfmon_output_filename,
+  std::tuple<double, double, double> min_color, 
+  std::tuple<double, double, double> max_color)
+  {
   std::string image_output_filename = "perfmon_output.svg";
 
   // read a JSON file
@@ -429,6 +492,8 @@ int main(int argc, char *argv[])
                     "a visualization from data output to json during program " 
                     "instrumentation. Argument should be relative path to "
                     "aforementioned json.")
+    ("test-color-lerp", "create band of color from least to most to test "
+                        "linear interpolation")
     ;
 
   po::variables_map vm;
@@ -638,9 +703,21 @@ int main(int argc, char *argv[])
   }
 
   // visualization things
+  if (vm.count("test-color-lerp"))
+  {
+    auto min_color = std::tuple<double, double, double>(
+      255.0/255.0, 247/255.0, 251.0/255.0);
+    auto max_color = std::tuple<double, double, double>(
+      2.0/255.0, 56.0/255.0, 88.0/255.0);
+    test_color_lerp(min_color, max_color, 20, 50, 100);
+  }
   if (vm.count("visualize"))
   {
-    visualize(perfmon_output_filename);
+    auto min_color = std::tuple<double, double, double>(
+      255.0/255.0, 247/255.0, 251.0/255.0);
+    auto max_color = std::tuple<double, double, double>(
+      2.0/255.0, 56.0/255.0, 88.0/255.0);
+    visualize(perfmon_output_filename, min_color, max_color);
   }
 
   return 0;
