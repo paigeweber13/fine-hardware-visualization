@@ -368,7 +368,13 @@ void visualize(
   );
   cairo_t *cr =
       cairo_create(surface);
+  cairo_matrix_t default_matrix, rotated_matrix;
+  cairo_matrix_init_identity(&default_matrix);
+  cairo_matrix_init_identity(&rotated_matrix);
   cairo_set_font_size(cr, text_size_large);
+  cairo_get_font_matrix(cr, &default_matrix);
+  cairo_get_font_matrix(cr, &rotated_matrix);
+  cairo_matrix_rotate(&rotated_matrix, -90.0 * M_PI / 180.0);
 
   // --- draw RAM --- //
   double ram_x = 50;
@@ -408,6 +414,7 @@ void visualize(
   cairo_move_to(cr, 400, 250);
   cairo_line_to(cr, 400, 400);
 
+
   // --- draw L3 cache --- //
   double l3_x = 200;
   double l3_y = 400;
@@ -441,8 +448,13 @@ void visualize(
   cairo_fill_preserve(cr);
   cairo_stroke(cr); 
 
+
   // --- draw socket 0 --- //
-  cairo_rectangle(cr, 50, 500, 700, 700);
+  double socket0_x = 50;
+  double socket0_y = 500;
+  double socket0_width = 700;
+  double socket0_height = 700;
+  cairo_rectangle(cr, socket0_x, socket0_y, socket0_width, socket0_height);
   // - fill
   cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_fill_preserve(cr);
@@ -452,13 +464,28 @@ void visualize(
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
 
+  // - text
+  text = "Socket 0";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  cairo_move_to(
+    cr,
+    socket0_x + (socket0_width/2 - text_extents.width/2),
+    socket0_y + socket0_height + text_extents.height + 25);
+  cairo_text_path(cr, text.c_str());
+  // cairo_show_text(cr, text);
+  cairo_set_line_width(cr, text_line_thickness);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
+
+
+  // --- draw cores --- //
   rgb_color computation_color =
       j["saturation"]["copy"]["DP [MFLOP/s]"] >
               j["saturation"]["copy"]["SP [MFLOP/s]"]
           ? colors["DP [MFLOP/s]"]
           : colors["SP [MFLOP/s]"];
 
-  // --- draw cores --- //
   for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++)
   {
     // cache numbers
@@ -466,16 +493,38 @@ void visualize(
     unsigned cache_height = 50;
 
     // core numbers
-    unsigned core_width = 600;
+    unsigned core_width = 550;
     unsigned core_height = 175;
     unsigned between_core_buffer = 50;
-    unsigned core_x = 100;
+    unsigned core_x = 150;
     unsigned core_y = 550 + core_num *
                                 (between_core_buffer + core_height +
                                  (num_attached_caches * cache_height));
 
     // cache numbers that depend on core numbers
     unsigned cache_y = core_y + core_height;
+
+    // - core text
+    text = "Core " + to_string(core_num);
+    cairo_text_extents(cr, text.c_str(), &text_extents);
+    cairo_move_to(
+      cr,
+      core_x - text_extents.height,
+      core_y + (core_height + cache_height * num_attached_caches)/2 
+        + text_extents.width/2
+    );
+    
+	  // cairo_rotate (cr, -90 * M_PI / 180.0);
+    cairo_set_font_matrix(cr, &rotated_matrix);
+    // cairo_set_font_size(cr, text_size_large);
+    cairo_text_path(cr, text.c_str());
+    // cairo_show_text(cr, text);
+    cairo_set_line_width(cr, text_line_thickness);
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_fill_preserve(cr);
+    cairo_stroke(cr); 
+    cairo_set_font_matrix(cr, &default_matrix);
+	  // cairo_rotate (cr, 0 * M_PI / 180.0);
 
     // --- threads within core:
     for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++)
