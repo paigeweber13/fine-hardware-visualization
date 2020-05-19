@@ -225,16 +225,12 @@ calculate_saturation_colors(
 
   for (auto const& metric: region_saturation.items())
   {
-    std::cout << "metric before clamping and scaling: "
-      << metric.key() << ": " << metric.value() << "\n";
     // clamp values to [0.0,1.0]
     metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
     // scale using custom function
     metric.value() = scale(metric.value());
     // clamp again because scale can give negative values for very small input
     metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
-    std::cout << "metric after clamping and scaling: "
-      << metric.key() << ": " << metric.value() << "\n\n";
 
     saturation_colors[metric.key()] = 
       color_lerp(min_color, max_color, metric.value());
@@ -352,58 +348,98 @@ void visualize(
   json j;
   i >> j;
 
-  // std::cout << j.dump(4) << std::endl;
-  // std::cout << j["saturation"]["copy"] << std::endl;
-
-  // create surface and cairo object
-  cairo_surface_t *surface = cairo_svg_surface_create(
-      image_output_filename.c_str(),
-      800, //width
-      1250 // height
-  );
-  cairo_t *cr =
-      cairo_create(surface);
-
   auto colors = calculate_saturation_colors(
       j["saturation"]["copy"],
       min_color,
       max_color);
-  std::cout << j["saturation"]["copy"];
 
+  // variables for cairo
   double line_thickness = 10.0;
-  cairo_set_line_width(cr, line_thickness);
+  double text_line_thickness = 1.0;
+  double text_size_large = 50.0;
+  cairo_text_extents_t text_extents;
+  std::string text;
+
+  // initialization for cairo
+  cairo_surface_t *surface = cairo_svg_surface_create(
+      image_output_filename.c_str(),
+      800, //width
+      1350 // height
+  );
+  cairo_t *cr =
+      cairo_create(surface);
+  cairo_set_font_size(cr, text_size_large);
 
   // --- draw RAM --- //
-  cairo_rectangle(cr, 50, 50, 700, 200);
+  double ram_x = 50;
+  double ram_y = 50;
+  double ram_width = 700;
+  double ram_height = 200;
+  cairo_rectangle(cr, ram_x, ram_y, ram_width, ram_height);
   // - fill
   cairo_set_source_rgb(
-      cr,
-      get<0>(colors["Memory bandwidth [MBytes/s]"]),
-      get<1>(colors["Memory bandwidth [MBytes/s]"]),
-      get<2>(colors["Memory bandwidth [MBytes/s]"]));
+    cr,
+    get<0>(colors["Memory bandwidth [MBytes/s]"]),
+    get<1>(colors["Memory bandwidth [MBytes/s]"]),
+    get<2>(colors["Memory bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
 
   // - stroke
+  cairo_set_line_width(cr, line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
+
+  // - text
+  text = "RAM";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  cairo_move_to(
+    cr,
+    ram_x + (ram_width/2 - text_extents.width/2),
+    ram_y + (ram_height/2 + text_extents.height/2));
+  cairo_text_path(cr, text.c_str());
+  // cairo_show_text(cr, text);
+  cairo_set_line_width(cr, text_line_thickness);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
+
 
   // --- line from RAM to L3 cache --- //
   cairo_move_to(cr, 400, 250);
   cairo_line_to(cr, 400, 400);
 
   // --- draw L3 cache --- //
-  cairo_rectangle(cr, 200, 400, 400, 100);
+  double l3_x = 200;
+  double l3_y = 400;
+  double l3_width = 400;
+  double l3_height = 100;
+  cairo_rectangle(cr, l3_x, l3_y, l3_width, l3_height);
   // - fill
   cairo_set_source_rgb(
-      cr,
-      get<0>(colors["L3 bandwidth [MBytes/s]"]),
-      get<1>(colors["L3 bandwidth [MBytes/s]"]),
-      get<2>(colors["L3 bandwidth [MBytes/s]"]));
+    cr,
+    get<0>(colors["L3 bandwidth [MBytes/s]"]),
+    get<1>(colors["L3 bandwidth [MBytes/s]"]),
+    get<2>(colors["L3 bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
 
   // - stroke
+  cairo_set_line_width(cr, line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
+
+  // - text
+  text = "L3 Cache";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  cairo_move_to(
+    cr,
+    l3_x + (l3_width/2 - text_extents.width/2),
+    l3_y + (l3_height/2 + text_extents.height/2));
+  cairo_text_path(cr, text.c_str());
+  // cairo_show_text(cr, text);
+  cairo_set_line_width(cr, text_line_thickness);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
 
   // --- draw socket 0 --- //
   cairo_rectangle(cr, 50, 500, 700, 700);
@@ -412,6 +448,7 @@ void visualize(
   cairo_fill_preserve(cr);
 
   // - stroke
+  cairo_set_line_width(cr, line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
 
@@ -458,6 +495,7 @@ void visualize(
       cairo_fill_preserve(cr);
 
       // - stroke
+  cairo_set_line_width(cr, line_thickness);
       cairo_set_source_rgb(cr, 0, 0, 0);
       cairo_stroke(cr);
     }
@@ -488,6 +526,7 @@ void visualize(
       cairo_fill_preserve(cr);
 
       // - stroke
+  cairo_set_line_width(cr, line_thickness);
       cairo_set_source_rgb(cr, 0, 0, 0);
       cairo_stroke(cr);
     }
