@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 #include <cairo.h>
 #include <cairo-svg.h>
-#include <chrono>
+#include <ctime>
 #include <immintrin.h>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -721,11 +721,11 @@ void draw_diagram(
 
 void visualize(
   std::string perfmon_output_filename,
-  // std::string image_output_filename,
+  std::string image_output_filename,
   rgb_color min_color,
   rgb_color max_color)
 {
-  std::string image_output_filename = "perfmon_output.svg";
+  // std::string image_output_filename = "perfmon_output.svg";
 
   // read a JSON file
   std::ifstream i(perfmon_output_filename);
@@ -757,6 +757,15 @@ int main(int argc, char *argv[])
   std::uint64_t memory_size_kb = 0;
 
   std::string perfmon_output_filename;
+
+  char time_str[20];
+  std::time_t t;
+  std::strftime(time_str, sizeof(time_str), "%Y-%m-%d_%H%M", 
+    std::localtime(&t));
+  std::string image_output_filename = "perfmon_output_";
+  image_output_filename += time_str;
+  image_output_filename += ".svg";
+
   output_format o = pretty;
 
   // behavior if no arguments are supplied
@@ -818,6 +827,10 @@ int main(int argc, char *argv[])
                     "a visualization from data output to json during program " 
                     "instrumentation. Argument should be relative path to "
                     "aforementioned json.")
+    ("--image-output,o", po::value<std::string>(&image_output_filename), 
+      "Path where visualization should be output to. Region name will "
+      "automatically be appended. If not supplied, a default name with "
+      "dateTime information will be generated.")
     ("test-color-lerp", "create band of color from least to most to test "
                         "linear interpolation")
     ;
@@ -1043,7 +1056,8 @@ int main(int argc, char *argv[])
       255.0/255.0, 247/255.0, 251.0/255.0);
     auto max_color = std::tuple<double, double, double>(
       2.0/255.0, 56.0/255.0, 88.0/255.0);
-    visualize(perfmon_output_filename, min_color, max_color);
+    visualize(perfmon_output_filename, image_output_filename, min_color, 
+      max_color);
   }
 
   return 0;
