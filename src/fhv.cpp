@@ -354,20 +354,53 @@ void visualize(
       min_color,
       max_color);
 
+  rgb_color computation_color;
+  std::string chosen_precision;
+  if(j["saturation"]["copy"]["DP [MFLOP/s]"] >
+    j["saturation"]["copy"]["SP [MFLOP/s]"])
+  {
+    computation_color = colors["DP [MFLOP/s]"];
+    chosen_precision = "double-precision";
+  }
+  else 
+  {
+    computation_color = colors["SP [MFLOP/s]"];
+    chosen_precision = "single-precision";
+  }
+
+  std::vector<std::string> computation_color_note = {
+      "Note: both single- and double-precision floating point operations "
+        "were measured. Here the cores are",
+      "visualized using " + chosen_precision + " saturation, because "
+        "it was higher."
+    };
+  std::vector<std::string> l1_cache_color_note = {
+      "Note: L1 cache is currently not measured and therefore will appear "
+        "white. This is not an indication of",
+      "L1 cache saturation."
+    };
+
   // variables for cairo
   double line_thickness = 10.0;
   double text_line_thickness = 1.0;
+  double text_line_thickness_small = 0.2;
   double text_size_xlarge = 75.0;
   double text_size_large = 50.0;
   double text_size_medium = 30.0;
+  double text_size_small = 15.0;
   cairo_text_extents_t text_extents;
   std::string text;
 
   // initialization for cairo
+  double image_width = 800;
+  double image_height = 1500;
+  double margin_x = 50;
+  double margin_y = 50;
+  double title_text_height = 210;
   cairo_surface_t *surface = cairo_svg_surface_create(
       image_output_filename.c_str(),
-      800, //width
-      1550 // height
+      image_width,
+      image_height
   );
   cairo_t *cr =
       cairo_create(surface);
@@ -379,9 +412,74 @@ void visualize(
   cairo_get_font_matrix(cr, &rotated_matrix);
   cairo_matrix_rotate(&rotated_matrix, -90.0 * M_PI / 180.0);
 
+  // --- title and description text --- //
+  double current_text_y = margin_y + text_extents.height;
+  double line_spacing = 10;
+
+  text = "Saturation diagram for region";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  cairo_move_to(
+    cr,
+    image_width/2 - text_extents.width/2,
+    current_text_y);
+  cairo_text_path(cr, text.c_str());
+  // cairo_show_text(cr, text);
+  cairo_set_line_width(cr, text_line_thickness);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
+
+  text = "\"" + region_name + "\"";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  current_text_y += line_spacing + text_extents.height;
+  cairo_move_to(
+    cr,
+    image_width/2 - text_extents.width/2,
+    current_text_y);
+  cairo_text_path(cr, text.c_str());
+  cairo_fill_preserve(cr);
+  
+  // start small text
+  cairo_set_font_size(cr, text_size_small);
+  cairo_set_line_width(cr, text_line_thickness_small);
+
+  // computation color notes
+  current_text_y += 2 * line_spacing;
+  for(auto &line : computation_color_note){
+    cairo_text_extents(cr, line.c_str(), &text_extents);
+    current_text_y += line_spacing + text_extents.height;
+    cairo_move_to(
+      cr,
+      margin_x,
+      current_text_y);
+    cairo_set_line_width(cr, text_line_thickness);
+    cairo_text_path(cr, line.c_str());
+    cairo_fill_preserve(cr);
+    cairo_stroke(cr); 
+  }
+  
+  // l1 cache note
+  current_text_y += line_spacing;
+  for(auto &line : l1_cache_color_note){
+    cairo_text_extents(cr, line.c_str(), &text_extents);
+    current_text_y += line_spacing + text_extents.height;
+    cairo_move_to(
+      cr,
+      margin_x,
+      current_text_y);
+    cairo_set_line_width(cr, text_line_thickness);
+    cairo_text_path(cr, line.c_str());
+    cairo_fill_preserve(cr);
+    cairo_stroke(cr); 
+  }
+
+  // revert size and width changes
+  cairo_set_font_size(cr, text_size_large);
+  cairo_set_line_width(cr, text_line_thickness);
+
   // --- draw RAM --- //
-  double ram_x = 50;
-  double ram_y = 50;
+  double ram_x = margin_x;
+  double ram_y = margin_y + title_text_height;
   double ram_width = 700;
   double ram_height = 200;
   cairo_rectangle(cr, ram_x, ram_y, ram_width, ram_height);
@@ -416,13 +514,17 @@ void visualize(
 
 
   // --- line from RAM to L3 cache --- //
-  cairo_move_to(cr, 400, 250);
-  cairo_line_to(cr, 400, 400);
+  double line_start_x = ram_x + ram_width/2;
+  double line_start_y = ram_y + ram_height;
+  double line_end_x = line_start_x;
+  double line_end_y = line_start_y + 150;
+  cairo_move_to(cr, line_start_x, line_start_y);
+  cairo_line_to(cr, line_end_x, line_end_y);
 
 
   // --- draw L3 cache --- //
   double l3_x = 200;
-  double l3_y = 400;
+  double l3_y = line_end_y;
   double l3_width = 400;
   double l3_height = 100;
   cairo_rectangle(cr, l3_x, l3_y, l3_width, l3_height);
@@ -456,7 +558,7 @@ void visualize(
 
   // --- draw socket 0 --- //
   double socket0_x = 50;
-  double socket0_y = 500;
+  double socket0_y = l3_y + l3_height;
   double socket0_width = 700;
   double socket0_height = 700;
   cairo_rectangle(cr, socket0_x, socket0_y, socket0_width, socket0_height);
@@ -485,12 +587,6 @@ void visualize(
 
 
   // --- draw cores --- //
-  rgb_color computation_color =
-      j["saturation"]["copy"]["DP [MFLOP/s]"] >
-              j["saturation"]["copy"]["SP [MFLOP/s]"]
-          ? colors["DP [MFLOP/s]"]
-          : colors["SP [MFLOP/s]"];
-
   for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++)
   {
     // cache numbers
@@ -502,9 +598,11 @@ void visualize(
     unsigned core_height = 175;
     unsigned between_core_buffer = 50;
     unsigned core_x = 150;
-    unsigned core_y = 550 + core_num *
-                                (between_core_buffer + core_height +
-                                 (num_attached_caches * cache_height));
+    unsigned core_y = socket0_y + margin_y
+      + core_num * (
+        between_core_buffer + core_height +
+        (num_attached_caches * cache_height)
+      );
 
     // cache numbers that depend on core numbers
     unsigned cache_y = core_y + core_height;
