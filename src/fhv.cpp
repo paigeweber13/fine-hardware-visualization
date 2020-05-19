@@ -348,15 +348,18 @@ void visualize(
   json j;
   i >> j;
 
+  std::string region_name = "copy";
   auto colors = calculate_saturation_colors(
-      j["saturation"]["copy"],
+      j["saturation"][region_name],
       min_color,
       max_color);
 
   // variables for cairo
   double line_thickness = 10.0;
   double text_line_thickness = 1.0;
+  double text_size_xlarge = 75.0;
   double text_size_large = 50.0;
+  double text_size_medium = 30.0;
   cairo_text_extents_t text_extents;
   std::string text;
 
@@ -364,7 +367,7 @@ void visualize(
   cairo_surface_t *surface = cairo_svg_surface_create(
       image_output_filename.c_str(),
       800, //width
-      1350 // height
+      1550 // height
   );
   cairo_t *cr =
       cairo_create(surface);
@@ -397,6 +400,7 @@ void visualize(
 
   // - text
   text = "RAM";
+  cairo_set_font_size(cr, text_size_xlarge);
   cairo_text_extents(cr, text.c_str(), &text_extents);
   cairo_move_to(
     cr,
@@ -408,6 +412,7 @@ void visualize(
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_fill_preserve(cr);
   cairo_stroke(cr); 
+  cairo_set_font_size(cr, text_size_large);
 
 
   // --- line from RAM to L3 cache --- //
@@ -527,13 +532,18 @@ void visualize(
 	  // cairo_rotate (cr, 0 * M_PI / 180.0);
 
     // --- threads within core:
+
+    double thread_x, thread_width;
     for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++)
     {
+      thread_x = core_x + thread_num * core_width / THREADS_PER_CORE;
+      thread_width = core_width / THREADS_PER_CORE;
+
       cairo_rectangle(
           cr,
-          core_x + thread_num * core_width / THREADS_PER_CORE,
+          thread_x,
           core_y,
-          core_width / THREADS_PER_CORE,
+          thread_width,
           core_height);
       // - fill
       cairo_set_source_rgb(
@@ -544,9 +554,23 @@ void visualize(
       cairo_fill_preserve(cr);
 
       // - stroke
-  cairo_set_line_width(cr, line_thickness);
+      cairo_set_line_width(cr, line_thickness);
       cairo_set_source_rgb(cr, 0, 0, 0);
       cairo_stroke(cr);
+
+      // - text
+      text = "Thread " + to_string(core_num * THREADS_PER_CORE + thread_num);
+      cairo_text_extents(cr, text.c_str(), &text_extents);
+      cairo_move_to(
+        cr,
+        thread_x + thread_width/2 - text_extents.width/2,
+        core_y + core_height/2 + text_extents.height/2);
+      cairo_text_path(cr, text.c_str());
+      // cairo_show_text(cr, text);
+      cairo_set_line_width(cr, text_line_thickness);
+      cairo_set_source_rgb(cr, 0, 0, 0);
+      cairo_fill_preserve(cr);
+      cairo_stroke(cr); 
     }
 
     // --- caches attached to core:
@@ -567,17 +591,36 @@ void visualize(
       else
       {
         cairo_set_source_rgb(
-            cr,
-            get<0>(colors["L2 bandwidth [MBytes/s]"]),
-            get<1>(colors["L2 bandwidth [MBytes/s]"]),
-            get<2>(colors["L2 bandwidth [MBytes/s]"]));
+          cr,
+          get<0>(colors["L" + to_string(cache_num + 1) + 
+            " bandwidth [MBytes/s]"]),
+          get<1>(colors["L" + to_string(cache_num + 1) + 
+            " bandwidth [MBytes/s]"]),
+          get<2>(colors["L" + to_string(cache_num + 1) + 
+            " bandwidth [MBytes/s]"]));
       }
       cairo_fill_preserve(cr);
 
       // - stroke
-  cairo_set_line_width(cr, line_thickness);
+      cairo_set_line_width(cr, line_thickness);
       cairo_set_source_rgb(cr, 0, 0, 0);
       cairo_stroke(cr);
+
+      // - text
+      text = "L" + to_string(cache_num + 1) + " Cache";
+      cairo_set_font_size(cr, text_size_medium);
+      cairo_text_extents(cr, text.c_str(), &text_extents);
+      cairo_move_to(
+        cr,
+        core_x + core_width/2 - text_extents.width/2,
+        cache_y + cache_height * cache_num + cache_height/2 + 
+          text_extents.height/2);
+      cairo_text_path(cr, text.c_str());
+      // cairo_show_text(cr, text);
+      cairo_set_line_width(cr, text_line_thickness);
+      cairo_set_source_rgb(cr, 0, 0, 0);
+      cairo_fill_preserve(cr);
+      cairo_stroke(cr); 
     }
   }
 
