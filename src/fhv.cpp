@@ -336,35 +336,25 @@ void test_color_lerp(
   cairo_surface_destroy(surface);
 }
 
-void visualize(
-    std::string perfmon_output_filename,
-    std::tuple<double, double, double> min_color,
-    std::tuple<double, double, double> max_color)
+void draw_diagram(
+  std::map<std::string, rgb_color> region_colors,
+  json region_data,
+  std::string region_name,
+  std::string output_filename
+)
 {
-  std::string image_output_filename = "perfmon_output.svg";
-
-  // read a JSON file
-  std::ifstream i(perfmon_output_filename);
-  json j;
-  i >> j;
-
-  std::string region_name = "copy";
-  auto colors = calculate_saturation_colors(
-      j["saturation"][region_name],
-      min_color,
-      max_color);
-
   rgb_color computation_color;
   std::string chosen_precision;
-  if(j["saturation"]["copy"]["DP [MFLOP/s]"] >
-    j["saturation"]["copy"]["SP [MFLOP/s]"])
+  
+  if(region_data["DP [MFLOP/s]"] >
+    region_data["SP [MFLOP/s]"])
   {
-    computation_color = colors["DP [MFLOP/s]"];
+    computation_color = region_colors["DP [MFLOP/s]"];
     chosen_precision = "double-precision";
   }
   else 
   {
-    computation_color = colors["SP [MFLOP/s]"];
+    computation_color = region_colors["SP [MFLOP/s]"];
     chosen_precision = "single-precision";
   }
 
@@ -383,7 +373,7 @@ void visualize(
   // variables for cairo
   double line_thickness = 10.0;
   double text_line_thickness = 1.0;
-  double text_line_thickness_small = 0.2;
+  double text_line_thickness_small = 0.0;
   double text_size_xlarge = 75.0;
   double text_size_large = 50.0;
   double text_size_medium = 30.0;
@@ -398,7 +388,7 @@ void visualize(
   double margin_y = 50;
   double title_text_height = 210;
   cairo_surface_t *surface = cairo_svg_surface_create(
-      image_output_filename.c_str(),
+      output_filename.c_str(),
       image_width,
       image_height
   );
@@ -486,9 +476,9 @@ void visualize(
   // - fill
   cairo_set_source_rgb(
     cr,
-    get<0>(colors["Memory bandwidth [MBytes/s]"]),
-    get<1>(colors["Memory bandwidth [MBytes/s]"]),
-    get<2>(colors["Memory bandwidth [MBytes/s]"]));
+    get<0>(region_colors["Memory bandwidth [MBytes/s]"]),
+    get<1>(region_colors["Memory bandwidth [MBytes/s]"]),
+    get<2>(region_colors["Memory bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
 
   // - stroke
@@ -531,9 +521,9 @@ void visualize(
   // - fill
   cairo_set_source_rgb(
     cr,
-    get<0>(colors["L3 bandwidth [MBytes/s]"]),
-    get<1>(colors["L3 bandwidth [MBytes/s]"]),
-    get<2>(colors["L3 bandwidth [MBytes/s]"]));
+    get<0>(region_colors["L3 bandwidth [MBytes/s]"]),
+    get<1>(region_colors["L3 bandwidth [MBytes/s]"]),
+    get<2>(region_colors["L3 bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
 
   // - stroke
@@ -690,11 +680,11 @@ void visualize(
       {
         cairo_set_source_rgb(
           cr,
-          get<0>(colors["L" + to_string(cache_num + 1) + 
+          get<0>(region_colors["L" + to_string(cache_num + 1) + 
             " bandwidth [MBytes/s]"]),
-          get<1>(colors["L" + to_string(cache_num + 1) + 
+          get<1>(region_colors["L" + to_string(cache_num + 1) + 
             " bandwidth [MBytes/s]"]),
-          get<2>(colors["L" + to_string(cache_num + 1) + 
+          get<2>(region_colors["L" + to_string(cache_num + 1) + 
             " bandwidth [MBytes/s]"]));
       }
       cairo_fill_preserve(cr);
@@ -727,6 +717,30 @@ void visualize(
   // svg file automatically gets written to disk
   cairo_destroy(cr);
   cairo_surface_destroy(surface);
+}
+
+void visualize(
+  std::string perfmon_output_filename,
+  // std::string image_output_filename,
+  rgb_color min_color,
+  rgb_color max_color)
+{
+  std::string image_output_filename = "perfmon_output.svg";
+
+  // read a JSON file
+  std::ifstream i(perfmon_output_filename);
+  json j;
+  i >> j;
+
+  std::string region_name = "copy";
+  json region_data = j["saturation"][region_name];
+
+  auto colors = calculate_saturation_colors(
+    region_data,
+    min_color,
+    max_color);
+
+  draw_diagram(colors, region_data, region_name, image_output_filename);
 }
 
 int main(int argc, char *argv[])
