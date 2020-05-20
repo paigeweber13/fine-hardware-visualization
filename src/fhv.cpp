@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 #include <cairo.h>
 #include <cairo-svg.h>
+#include <cstdlib>
 #include <ctime>
 #include <immintrin.h>
 #include <iostream>
@@ -293,7 +294,18 @@ void test_color_lerp(
   unsigned step_size,
   unsigned height)
 {
-  std::string image_output_filename = "test_color_lerp.svg";
+  std::string output_dir = "swatches/";
+  std::string image_output_filename = output_dir
+    + to_string(std::get<0>(min_color)) + ","
+    + to_string(std::get<1>(min_color)) + ","
+    + to_string(std::get<2>(min_color))
+    + "_to_"
+    + to_string(std::get<0>(max_color)) + ","
+    + to_string(std::get<1>(max_color)) + ","
+    + to_string(std::get<2>(max_color))
+    + ".svg";
+
+  system(("mkdir -p " + output_dir).c_str());
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(
@@ -765,6 +777,11 @@ int main(int argc, char *argv[])
   std::uint64_t dp_flop_num_iterations;
 
   std::vector<std::uint64_t> cache_and_memory_args;
+  // std::tuple<double, double, double, double, double, double> input_colors = {
+  std::vector<double> input_colors = {
+    255.0, 247, 251.0,
+    2.0, 56.0, 88.0
+  };
 
   // for use with csv output: keeps a consistent name no matter what vector is
   // used for arguments
@@ -831,7 +848,7 @@ int main(int argc, char *argv[])
         multitoken(),
       "benchmark cache and memory. Will run benchmark once for each cache and "
         "once for ram.")
-    ("csv-style-output,c", "output benchmark results in a csv-style format:\n")
+    ("csv-style-output", "output benchmark results in a csv-style format:\n")
     ("print-csv-header", "print header of csv used by fhv (this binary). "
       "The CSV output for which this is the header provides detailed memory "
       "data.")
@@ -848,8 +865,17 @@ int main(int argc, char *argv[])
       "automatically be appended. If not supplied, a default name with "
       "current date and time will be generated. Has no effect if --visualize"
       "is not supplied.")
-    ("test-color-lerp", "create band of color from least to most to test "
-                        "linear interpolation")
+    ("colors,c", 
+      po::value<std::vector<double>>(&input_colors)->multitoken(),
+      "Specify the colors used in the visualization. Six numbers must be "
+      "supplied to indicate RGB values for the min color and max color, in "
+      "that order. Values should be in the range [0:255].")
+    ("test-color-lerp", 
+      po::value<std::vector<double>>(
+        &input_colors)->multitoken()->zero_tokens(),
+      "create band of color from least to most to test linear interpolation. "
+      "May be followed by six doubles to specify rgb of min color and rgb of "
+      "max color. Values should be in the range [0:255].")
     ;
 
   po::variables_map vm;
@@ -1061,18 +1087,26 @@ int main(int argc, char *argv[])
   // visualization things
   if (vm.count("test-color-lerp"))
   {
-    auto min_color = std::tuple<double, double, double>(
-      255.0/255.0, 247/255.0, 251.0/255.0);
-    auto max_color = std::tuple<double, double, double>(
-      2.0/255.0, 56.0/255.0, 88.0/255.0);
+    auto min_color = rgb_color(
+      input_colors[0]/255.0,
+      input_colors[1]/255.0,
+      input_colors[2]/255.0);
+    auto max_color = rgb_color(
+      input_colors[3]/255.0,
+      input_colors[4]/255.0,
+      input_colors[5]/255.0);
     test_color_lerp(min_color, max_color, 20, 50, 100);
   }
   if (vm.count("visualize"))
   {
-    auto min_color = std::tuple<double, double, double>(
-      255.0/255.0, 247/255.0, 251.0/255.0);
-    auto max_color = std::tuple<double, double, double>(
-      2.0/255.0, 56.0/255.0, 88.0/255.0);
+    auto min_color = rgb_color(
+      input_colors[0]/255.0,
+      input_colors[1]/255.0,
+      input_colors[2]/255.0);
+    auto max_color = rgb_color(
+      input_colors[3]/255.0,
+      input_colors[4]/255.0,
+      input_colors[5]/255.0);
     visualize(perfmon_output_filename, image_output_filename, min_color, 
       max_color);
   }
