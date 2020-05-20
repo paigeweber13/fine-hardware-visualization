@@ -740,6 +740,11 @@ void visualize(
     min_color,
     max_color);
 
+  std::size_t pos = image_output_filename.find(".");  
+  std::string ext = image_output_filename.substr(pos);
+  image_output_filename = 
+    image_output_filename.substr(0, pos) + "_" + 
+    region_name + ext;
   draw_diagram(colors, region_data, region_name, image_output_filename);
 }
 
@@ -759,10 +764,10 @@ int main(int argc, char *argv[])
   std::string perfmon_output_filename;
 
   char time_str[20];
-  std::time_t t;
+  std::time_t t = std::time(nullptr);
   std::strftime(time_str, sizeof(time_str), "%Y-%m-%d_%H%M", 
     std::localtime(&t));
-  std::string image_output_filename = "perfmon_output_";
+  std::string image_output_filename = "perfmon_visualization_";
   image_output_filename += time_str;
   image_output_filename += ".svg";
 
