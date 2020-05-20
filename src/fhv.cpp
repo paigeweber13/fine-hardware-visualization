@@ -732,20 +732,30 @@ void visualize(
   json j;
   i >> j;
 
-  std::string region_name = "copy";
-  json region_data = j["saturation"][region_name];
+  std::string region_name;
+  for(auto &saturation_item: j["saturation"].items())
+  {
+    region_name = saturation_item.key();
+    std::cout << "Creating visualization for region " << region_name 
+      << std::endl;
+    json region_data = j["saturation"][region_name];
 
-  auto colors = calculate_saturation_colors(
-    region_data,
-    min_color,
-    max_color);
+    auto region_colors = calculate_saturation_colors(
+      region_data,
+      min_color,
+      max_color);
 
-  std::size_t pos = image_output_filename.find(".");  
-  std::string ext = image_output_filename.substr(pos);
-  image_output_filename = 
-    image_output_filename.substr(0, pos) + "_" + 
-    region_name + ext;
-  draw_diagram(colors, region_data, region_name, image_output_filename);
+    std::size_t pos = image_output_filename.find(".");  
+    std::string ext = image_output_filename.substr(pos);
+    std::string this_image_output_filename = 
+      image_output_filename.substr(0, pos) + "_" + 
+      region_name + ext;
+
+    draw_diagram(region_colors, region_data, region_name,
+      this_image_output_filename);
+    std::cout << "Visualization saved to " << this_image_output_filename 
+      << std::endl;
+  }
 }
 
 int main(int argc, char *argv[])
@@ -832,10 +842,12 @@ int main(int argc, char *argv[])
                     "a visualization from data output to json during program " 
                     "instrumentation. Argument should be relative path to "
                     "aforementioned json.")
-    ("--image-output,o", po::value<std::string>(&image_output_filename), 
+    ("visualization-output,o", 
+      po::value<std::string>(&image_output_filename), 
       "Path where visualization should be output to. Region name will "
       "automatically be appended. If not supplied, a default name with "
-      "dateTime information will be generated.")
+      "current date and time will be generated. Has no effect if --visualize"
+      "is not supplied.")
     ("test-color-lerp", "create band of color from least to most to test "
                         "linear interpolation")
     ;
