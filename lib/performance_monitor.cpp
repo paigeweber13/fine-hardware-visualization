@@ -992,7 +992,8 @@ void performance_monitor::printCsvOutput(){
 }
 
 
-void performance_monitor::resultsToJson(){
+void performance_monitor::resultsToJson()
+{
   if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
               << " before outputting\n"
@@ -1035,7 +1036,11 @@ void performance_monitor::resultsToJson(){
     }
   }
 
-  std::ofstream o(jsonResultOutputFilepath);
+  std::string output_filename = jsonResultOutputFilepath;
+  if(const char* env_p = std::getenv(perfmon_output_envvar))
+    output_filename = env_p;
+
+  std::ofstream o(output_filename);
   o << std::setw(4) << results << std::endl;
 }
 

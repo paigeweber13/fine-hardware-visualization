@@ -25,6 +25,7 @@
 #define OPS_PER_SP_128_VECTOR 4
 
 // keywords
+#define perfmon_output_envvar "FHV_OUTPUT"
 #define total_sp_flops_event_name "total sp flops"
 // #define group_sum_by_region_keyword "group_sum_by_region"
 #define all_groups_keyword "all_groups"
@@ -124,6 +125,9 @@ class performance_monitor {
     static void printCsvOutput();
 
     // output to json
+
+    // gets file name from environment variable FHV_OUTPUT. If unset, will
+    // use a default name
     static void resultsToJson();
 
     // ------ getters ----- //
