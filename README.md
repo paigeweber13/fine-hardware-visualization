@@ -113,8 +113,9 @@ problems tend to change behavior throughout execution
    - [x] largest visual difference in color from 0.01 to 0.2. Some color
          difference between 0.2 and 0.5. Above that is really hard to obtain
    - [x] (log_2 (saturation) + 10)/10 then clamp that to (0.0, 1.0)
- - [ ] add region name as a suffix to image filename
- - [ ] automatically create visualizations for each 
+ - [x] add region name as a suffix to image filename
+ - [x] automatically create visualizations for each region
+ - [ ] play around with colors for visualization
  - [ ] more counters to visualize?
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
