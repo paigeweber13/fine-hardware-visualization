@@ -287,40 +287,22 @@ calculate_saturation_colors_complicated(
   return saturation_colors;
 }
 
-void test_color_lerp(
-  std::tuple<double, double, double> min_color, 
-  std::tuple<double, double, double> max_color,
-  unsigned num_steps,
-  unsigned step_size,
-  unsigned height)
+void cairo_draw_swatch(
+  cairo_t *cr,
+  rgb_color min_color, 
+  rgb_color max_color,
+  unsigned x,
+  unsigned y,
+  unsigned width,
+  unsigned height,
+  unsigned num_steps
+  )
 {
-  std::string output_dir = "swatches/";
-  std::string image_output_filename = output_dir
-    + to_string(std::get<0>(min_color)) + ","
-    + to_string(std::get<1>(min_color)) + ","
-    + to_string(std::get<2>(min_color))
-    + "_to_"
-    + to_string(std::get<0>(max_color)) + ","
-    + to_string(std::get<1>(max_color)) + ","
-    + to_string(std::get<2>(max_color))
-    + ".svg";
-
-  system(("mkdir -p " + output_dir).c_str());
-
-  // create surface and cairo object
-  cairo_surface_t *surface = cairo_svg_surface_create(
-    image_output_filename.c_str(),
-    num_steps * step_size,  // image width
-    height              // image height
-  );
-  cairo_t *cr = cairo_create(surface);
-
-  double line_thickness = 10.0;
-  cairo_set_line_width(cr, line_thickness);
+  unsigned step_size = width/num_steps;
 
   for (unsigned i = 0; i < num_steps; i++){
     // shape
-    cairo_rectangle(cr, i * step_size, 0, step_size, height);
+    cairo_rectangle(cr, x + i * step_size, y, step_size, height);
 
     // fill
     auto color = color_lerp(
@@ -340,6 +322,40 @@ void test_color_lerp(
     // cairo_set_source_rgb(cr, 0, 0, 0);
     cairo_stroke(cr);
   }
+}
+
+void test_color_lerp(
+  rgb_color min_color, 
+  rgb_color max_color,
+  unsigned width,
+  unsigned height,
+  unsigned num_steps)
+{
+  std::string output_dir = "swatches/";
+  std::string image_output_filename = output_dir
+    + to_string(static_cast<unsigned>(round(std::get<0>(min_color) * 255.0))) + ","
+    + to_string(static_cast<unsigned>(round(std::get<1>(min_color) * 255.0))) + ","
+    + to_string(static_cast<unsigned>(round(std::get<2>(min_color) * 255.0)))
+    + "_to_"
+    + to_string(static_cast<unsigned>(round(std::get<0>(max_color) * 255.0))) + ","
+    + to_string(static_cast<unsigned>(round(std::get<1>(max_color) * 255.0))) + ","
+    + to_string(static_cast<unsigned>(round(std::get<2>(max_color) * 255.0)))
+    + ".svg";
+
+  system(("mkdir -p " + output_dir).c_str());
+
+  // create surface and cairo object
+  cairo_surface_t *surface = cairo_svg_surface_create(
+    image_output_filename.c_str(),
+    width,
+    height
+  );
+  cairo_t *cr = cairo_create(surface);
+
+  double line_thickness = 10.0;
+  cairo_set_line_width(cr, line_thickness);
+
+  cairo_draw_swatch(cr, min_color, max_color, 0, 0, width, height, num_steps);
 
   // --- done drawing things, clean up
 
@@ -478,6 +494,9 @@ void draw_diagram(
   // revert size and width changes
   cairo_set_font_size(cr, text_size_large);
   cairo_set_line_width(cr, text_line_thickness);
+
+  // --- draw swatch/legend --- //
+
 
   // --- draw RAM --- //
   double ram_x = margin_x;
@@ -1095,7 +1114,7 @@ int main(int argc, char *argv[])
       input_colors[3]/255.0,
       input_colors[4]/255.0,
       input_colors[5]/255.0);
-    test_color_lerp(min_color, max_color, 20, 50, 100);
+    test_color_lerp(min_color, max_color, 1000, 100, 20);
   }
   if (vm.count("visualize"))
   {
