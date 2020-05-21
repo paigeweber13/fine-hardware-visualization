@@ -342,7 +342,9 @@ void test_color_lerp(
     + to_string(static_cast<unsigned>(round(std::get<2>(max_color) * 255.0)))
     + ".svg";
 
-  system(("mkdir -p " + output_dir).c_str());
+  if(system(("mkdir -p " + output_dir).c_str()) != 0)
+    std::cout << "there was a problem making the directory for swatches..."
+      << " Swatch creation will likely fail.";
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(
@@ -367,6 +369,8 @@ void test_color_lerp(
 void draw_diagram(
   std::map<std::string, rgb_color> region_colors,
   json region_data,
+  rgb_color min_color,
+  rgb_color max_color,
   std::string region_name,
   std::string output_filename
 )
@@ -411,10 +415,10 @@ void draw_diagram(
 
   // initialization for cairo
   double image_width = 800;
-  double image_height = 1500;
+  double image_height = 1600;
   double margin_x = 50;
   double margin_y = 50;
-  double title_text_height = 210;
+  double title_text_height = 310;
   cairo_surface_t *surface = cairo_svg_surface_create(
       output_filename.c_str(),
       image_width,
@@ -470,7 +474,7 @@ void draw_diagram(
       cr,
       margin_x,
       current_text_y);
-    cairo_set_line_width(cr, text_line_thickness);
+    // cairo_set_line_width(cr, text_line_thickness);
     cairo_text_path(cr, line.c_str());
     cairo_fill_preserve(cr);
     cairo_stroke(cr); 
@@ -485,17 +489,51 @@ void draw_diagram(
       cr,
       margin_x,
       current_text_y);
-    cairo_set_line_width(cr, text_line_thickness);
+    // cairo_set_line_width(cr, text_line_thickness);
     cairo_text_path(cr, line.c_str());
     cairo_fill_preserve(cr);
     cairo_stroke(cr); 
   }
+  current_text_y += line_spacing;
+
+  // --- draw swatch/legend --- //
+  cairo_set_line_width(cr, line_thickness);
+  unsigned swatch_height = 50;
+  current_text_y += 2*line_spacing;
+  cairo_draw_swatch(cr, min_color, max_color, margin_x, current_text_y, 
+    image_width - 2 * margin_x, swatch_height, 10);
+
+  // text settings
+  current_text_y += swatch_height;
+  cairo_set_line_width(cr, text_line_thickness_small);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+
+  text = "Low saturation";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  current_text_y += line_spacing + text_extents.height;
+  cairo_move_to(
+    cr,
+    margin_x,
+    current_text_y);
+  cairo_text_path(cr, text.c_str());
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
+
+  text = "High saturation";
+  cairo_text_extents(cr, text.c_str(), &text_extents);
+  cairo_move_to(
+    cr,
+    image_width - margin_x - text_extents.width,
+    current_text_y);
+  cairo_text_path(cr, text.c_str());
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
+
+  current_text_y += line_spacing;
 
   // revert size and width changes
   cairo_set_font_size(cr, text_size_large);
   cairo_set_line_width(cr, text_line_thickness);
-
-  // --- draw swatch/legend --- //
 
 
   // --- draw RAM --- //
@@ -782,7 +820,7 @@ void visualize(
       image_output_filename.substr(0, pos) + "_" + 
       region_name + ext;
 
-    draw_diagram(region_colors, region_data, region_name,
+    draw_diagram(region_colors, region_data, min_color, max_color, region_name,
       this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
@@ -890,11 +928,8 @@ int main(int argc, char *argv[])
       "supplied to indicate RGB values for the min color and max color, in "
       "that order. Values should be in the range [0:255].")
     ("test-color-lerp", 
-      po::value<std::vector<double>>(
-        &input_colors)->multitoken()->zero_tokens(),
       "create band of color from least to most to test linear interpolation. "
-      "May be followed by six doubles to specify rgb of min color and rgb of "
-      "max color. Values should be in the range [0:255].")
+      "respects colors specified in --colors.")
     ;
 
   po::variables_map vm;
