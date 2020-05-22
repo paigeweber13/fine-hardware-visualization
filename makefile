@@ -1,6 +1,7 @@
 CXX=g++
-CXXFLAGS=-g -Wall -std=c++14 $(INC_DIRS) -march=native -mtune=native \
-  -fopenmp -O3 -DLIKWID_PERFMON
+CXXFLAGS_DEBUG=-g -Wall -std=c++14 $(INC_DIRS) -march=native -mtune=native \
+  -fopenmp -DLIKWID_PERFMON
+CXXFLAGS=$(CXXFLAGS_DEBUG) -O3
 LDFLAGS=$(LIB_DIRS) $(LIBS) -march=native -mtune=native -fopenmp
 CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 
