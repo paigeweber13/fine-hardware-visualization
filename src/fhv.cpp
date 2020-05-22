@@ -836,8 +836,8 @@ int main(int argc, char *argv[])
   std::vector<std::uint64_t> cache_and_memory_args;
   // std::tuple<double, double, double, double, double, double> input_colors = {
   std::vector<double> input_colors = {
-    255.0, 247, 251.0,
-    2.0, 56.0, 88.0
+    200, 200, 200,
+    43, 140, 190
   };
 
   // for use with csv output: keeps a consistent name no matter what vector is
