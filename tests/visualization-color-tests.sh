@@ -33,6 +33,11 @@ bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial
 bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem_128_128_128_227_74_51.svg -c 128 128 128 227 74 51
 bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial_block_cpu_128_128_128_227_74_51.svg -c 128 128 128 227 74 51
 
+bin/fhv -v visualizations/polynomial_basic_mem.json -o visualizations/polynomial_basic_mem_200_200_200_43_140_190.svg -c 200 200 200 43 140 190
+bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial_basic_cpu_200_200_200_43_140_190.svg -c 200 200 200 43 140 190
+bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem_200_200_200_43_140_190.svg -c 200 200 200 43 140 190
+bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial_block_cpu_200_200_200_43_140_190.svg -c 200 200 200 43 140 190
+
 bin/fhv -v visualizations/polynomial_basic_mem.json -o visualizations/polynomial_basic_mem_128_128_128_43_140_190.svg -c 128 128 128 43 140 190
 bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial_basic_cpu_128_128_128_43_140_190.svg -c 128 128 128 43 140 190
 bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem_128_128_128_43_140_190.svg -c 128 128 128 43 140 190
