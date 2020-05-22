@@ -1,0 +1,40 @@
+{
+    "port_usage": {
+        "all_regions": {
+            "Port0 usage ratio": 0.07578077684343955,
+            "Port1 usage ratio": 0.0788305425777827,
+            "Port2 usage ratio": 0.08482032021044973,
+            "Port3 usage ratio": 0.0820856088953992,
+            "Port4 usage ratio": 0.04412025669434454,
+            "Port5 usage ratio": 0.09674758671690598,
+            "Port6 usage ratio": 0.13418498601438847,
+            "Port7 usage ratio": 0.008563932697089034
+        },
+        "poly": {
+            "Port0 usage ratio": 0.07578077684343955,
+            "Port1 usage ratio": 0.0788305425777827,
+            "Port2 usage ratio": 0.08482032021044973,
+            "Port3 usage ratio": 0.0820856088953992,
+            "Port4 usage ratio": 0.04412025669434454,
+            "Port5 usage ratio": 0.09674758671690598,
+            "Port6 usage ratio": 0.13418498601438847,
+            "Port7 usage ratio": 0.008563932697089034
+        }
+    },
+    "saturation": {
+        "all_regions": {
+            "DP [MFLOP/s]": 5.150412435178732e-07,
+            "L2 bandwidth [MBytes/s]": 0.04857895192835352,
+            "L3 bandwidth [MBytes/s]": 0.171481141718645,
+            "Memory bandwidth [MBytes/s]": 0.07740779301480558,
+            "SP [MFLOP/s]": 0.006663684369190029
+        },
+        "poly": {
+            "DP [MFLOP/s]": 5.150412435178732e-07,
+            "L2 bandwidth [MBytes/s]": 0.04857895192835352,
+            "L3 bandwidth [MBytes/s]": 0.171481141718645,
+            "Memory bandwidth [MBytes/s]": 0.07740779301480558,
+            "SP [MFLOP/s]": 0.006663684369190029
+        }
+    }
+}
