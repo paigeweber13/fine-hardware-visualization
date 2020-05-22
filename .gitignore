@@ -18,3 +18,7 @@ asm
 
 # editor settings
 .vscode
+.clangd
+*.swp
+Session.vim
+
