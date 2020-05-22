@@ -64,6 +64,39 @@ Hardware Visualization
    - scale(0.5)  = 0.8571
  - visualized saturation on a scale inspired by
    [colorbrewer](https://colorbrewer2.org/#type=sequential&scheme=PuBu&n=9)
+ - found some good colors. 
+   - My favorite was (200, 200, 200) to (43, 140, 190) which is a light gray
+     to a nice pale blue. 
+   - Choosing a darker blue, like (2, 56, 88) might make the differences more
+     clear
+   - an orange-to-blue scale like (227, 74, 51) to (43, 140, 190) was an 
+     interesting idea, but what the diagram was representing was less clear to
+     me. I had to spend more time "learning" the scale.
+ - demonstrated how visualizations highlights a change in load
+   - compare `visualizations/polynomial_basic_cpu_poly.svg` with
+     `visualizations/polynomial_block_cpu_poly_block.svg` to see how CPU is
+     being better utilized with the optimized code
+   - compare `visualizations/polynomial_basic_mem_poly.svg` with
+     `visualizations/polynomial_block_mem_poly_block.svg` to see how in general
+     saturation is better with the block code and RAM is much more saturated.
+ - gave myself a lot of problems by forgetting to replace an optimization flag:
+   - when I ran previous tests, `polynomial_block_likwid 67108864 1 10` gave a
+     saturation of 0.21 for L3 cache and 0.41 for RAM. See line 14 of
+     `examples/polynomial_expansion/data/block_optimized_likwid_2020-05-01_1448.csv`.
+     However, now I can't replicate those results??? I'm getting saturation of
+     about 0.039 for L3 and 0.082 for RAM
+     - trying higher values for parameters (e.g. `polyomial_block_likwid
+       100000000 1 10`) yielded slightly better saturation, but nothing close
+       to the `.4` I got before. Results were an L3 saturation of  0.043 and
+       RAM saturation of 0.130.
+     - tried closing browser, discord, gitkraken, and other resource-heavy
+       applications. Results were similar. 
+       - for n=67108864, deg=1, got L3-sat: 0.0363, RAM-sat: 0.0748
+       - for n=100000000, deg=1, got L3-sat: 0.0363, RAM-sat: 0.0797
+         this is significantly lower?? weird
+     The solution was (as is often the case) laughably obvious. I had removed
+     the -O3 flag because I was debugging and didn't want symbols to be
+     optimized out. I had never replaced it.
 
 # 2020-04-30 through 2020-05-07
  - created CSV output from fhv to allow for plotting in place of architecture
