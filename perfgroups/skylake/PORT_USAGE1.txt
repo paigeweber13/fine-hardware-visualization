@@ -24,6 +24,7 @@ Port0 usage ratio = UOPS_DISPATCHED_PORT_PORT_0/UOPS_EXECUTED_CORE
 Port1 usage ratio = UOPS_DISPATCHED_PORT_PORT_1/UOPS_EXECUTED_CORE
 Port2 usage ratio = UOPS_DISPATCHED_PORT_PORT_2/UOPS_EXECUTED_CORE
 -
-This group measures the execution port utilization in a CPU core. The group can
-only be measured when HyperThreading is disabled because only then each CPU core
-can program eight counters.
+This group measures the execution port utilization in a CPU core. This group is
+designed to be run over the same region with all other PORT_USAGE* groups. By
+splitting the port usage calculations into multiple groups, port usage is able
+to be calculated with hyperthreading enabled.
