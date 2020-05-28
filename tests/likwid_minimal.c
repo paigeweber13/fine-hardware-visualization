@@ -25,28 +25,39 @@ void copy(double * arr, double * copy_arr, size_t n){
 
 int main()
 {
-  printf("\n\nThis is a minimal example of how the likwid marker api works\n");
+  // printf("\n\nThis is a minimal example of how the likwid marker api works\n");
 
-  // int num_threads;
-  // const char *filepath = "/tmp/likwid.out";
+  int num_threads;
+  const char *filepath = "/tmp/likwid.out";
 
-  // setenv("LIKWID_EVENTS",
-  //        "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
-  //        1);
-  // setenv("LIKWID_MODE", "1", 1);
-  // setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
-  // setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
-  // setenv("LIKWID_FORCE", "1", 1);
+  setenv("LIKWID_EVENTS",
+        //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
+        //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP",
+         "L2",
+        //  "L2|L3|FLOPS_SP|FLOPS_DP",
+         1);
+  setenv("LIKWID_MODE", "1", 1);
+  setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
+  // num_threads = 4;
+  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+  setenv("LIKWID_FORCE", "1", 1);
+  remove(filepath);
 
   likwid_markerInit();
 
+  // disable dynamic teams... may help with "stopping non-started region"
+  // errors
+  // omp_set_dynamic(0); 
+  // omp_set_num_threads(num_threads);
+
 #pragma omp parallel
   {
+    // printf("num threads: %d\n", omp_get_num_threads());
+    num_threads = omp_get_num_threads();
     likwid_markerThreadInit();
     likwid_markerRegisterRegion("double_flops");
     likwid_markerRegisterRegion("copy");
     likwid_pinThread(omp_get_thread_num());
-    // num_threads = omp_get_num_threads();
   }
 
   double a, b, c;
@@ -63,7 +74,7 @@ int main()
   {
     for (int j = 0; j < 8; j++)
     {
-      printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
+      // printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
       likwid_markerStartRegion("double_flops");
 #pragma omp barrier
       for (int i = 0; i < 10000000; i++)
@@ -85,9 +96,9 @@ int main()
 
   // these may not be necessary? I'm trying to prevent actual work from being
   // optimized out by the compiler...
-  printf("final c: %f\n", c);
-  printf("final random part of copy_arr: %f\n", 
-         copy_arr[( (size_t) c ) % n]);
+  // printf("final c: %f\n", c);
+  // printf("final random part of copy_arr: %f\n", 
+  //        copy_arr[( (size_t) c ) % n]);
 
   // print results here if you want
 
@@ -105,7 +116,7 @@ int main()
   // perfmon_finalize();
   // perfmon_finalize();
 
-  // perfmon_readMarkerFile(filepath);
+  perfmon_readMarkerFile(filepath);
   // printf("\nMarker API measured %d regions\n", perfmon_getNumberOfRegions());
   // for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
   // {
@@ -134,4 +145,43 @@ int main()
   //   }
   // }
   // remove(filepath);
+
+  const char *regionName, *groupName, *event_name, *metric_name;
+  int gid;
+  double event_value, metric_value;
+  for (int t = 0; t < num_threads; t++)
+  {
+    for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+    {
+      regionName = perfmon_getTagOfRegion(i);
+      gid = perfmon_getGroupOfRegion(i);
+      groupName = perfmon_getGroupName(gid);
+
+      for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
+        // "getCounterName" gives name like "PMC0"
+
+        // event_name = perfmon_getCounterName(gid, k);
+        event_name = perfmon_getEventName(gid, k);
+        event_value = perfmon_getResultOfRegionThread(i, k, t);
+        if (event_value > 1e15)
+        {
+          printf("thread %d : region %s : group %s : event %s : %f\n", 
+            t, regionName, groupName, event_name, event_value);
+        }
+      }
+
+      for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
+        metric_name = perfmon_getMetricName(gid, k);
+        metric_value = perfmon_getMetricOfRegionThread(i, k, t);
+        if (metric_value > 1e6)
+        {
+          printf("thread %d : region %s : group %s : metric %s : %f\n", 
+            t, regionName, groupName, metric_name, metric_value);
+        }
+      }
+    }
+  }
+
+  // remove(filepath);
+
 }
