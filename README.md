@@ -17,6 +17,7 @@ assumed to be stable or correct.
 - [Goals:](#goals)
 - [Architecture of Program](#architecture-of-program)
 - [Ownership and licensing](#ownership-and-licensing)
+- [How to improve likwid stability:](#how-to-improve-likwid-stability)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
     - [Exploration](#exploration)
@@ -98,7 +99,7 @@ problems tend to change behavior throughout execution
  - [ ] Identify peak FLOP/s, memory bandwidth, latency etc.
    - [ ] there are lots of benchmarks that could help us with this. See:
      - [ ] `likwid_bench_auto` script included with kerncraft
-     - [ ] `likwid- [ ]bench` utility included with likwid
+     - [ ] `likwid-bench` utility included with likwid
      - [ ] [NAS parallel benchmarks](https://www.nas.nasa.gov/publications/npb.html)
  - [x] Measure what actual utilization of memory/processor is
  - [x] Compare actual utilization with peak on an piece-by-piece basis
@@ -108,6 +109,12 @@ problems tend to change behavior throughout execution
  - nlohmann/json is included with this repository under the MIT license. See
    `lib/nlohmann/json.hpp` for full license
  - this repository is licensed under GNU GPL v3 (see `LICENSE`)
+
+# How to improve likwid stability:
+ - put barriers (#pragma omp barrier) between regions in parallel code
+ - you MUST pin threads
+ - register parallel regions in parallel blocks
+ - run likwid_markerThreadInit() in a parallel block
 
 # TODO:
 ## Immediate:
@@ -119,6 +126,7 @@ problems tend to change behavior throughout execution
  - [x] add region name as a suffix to image filename
  - [x] automatically create visualizations for each region
  - [x] play around with colors for visualization
+ - [ ] fix descriptions for custom PORT_USAGE perfgroups
  - [ ] more counters to visualize?
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
@@ -131,14 +139,46 @@ problems tend to change behavior throughout execution
      vectors are the biggest they can do)
 
 ### Likwid stability issues
- - [ ] port counters sometimes reporting 1.8e19 for values
+ - [ ] counters sometimes reporting unreasonably high values
+   - [ ] port counters sometimes reporting 1.8e19 for values
+   - [ ] this also happens with many other counters
+   - [ ] reported this on the [likwid mailing
+         list](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ)
+         Currently working on fixing it.
+   - [ ] port_usage sometimes reporting 461375897600.000
    - [ ] also noticed L3 bandwidth was in the order of 1e11 or so for an
          execution of fhv_minimal in the double_flops region. This also doesn't
          make sense
+         - this is the value reported by likwid, not a problem with my
+           post-processing. Ran a test to demonstrate this, where I printed the
+           result of `perfmon_get_MetricOfRegionThread` and then compared with
+           the value I stored in my map:
+         - L2 bandwidth: 8.33646e+16
+           per_thread_results for thread 38.33646e+16
+         - Wrote script to repeatedly run likwid_minimal. (see
+           `tests/likwid_minimal_repeated.sh`). With groups 
+           MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3 all
+           being measured, only 1/100 iterations produced output above 1e6. In
+           this case it was L3 bandwidth and volume
+         - increased number of tests to 200 and ran again. 14/200 failed, some
+           of this was unreasonably high output, and some of it was "skipping
+           region ___ " errors
+         - switched to the groups MEM|L2|L3|FLOPS_SP|FLOPS_DP and ran another
+           100 iterations. 4/100 had some kind of problem
+
  - [ ] convolution sometimes not instrumenting one region?
    - [ ] noticed this also in fhv_minimal. Happens once every 10 executions or
          so 
    - [ ] compiler optimization?
+ - [ ] sometimes get "stopping non-started region _____"
+ - [ ] sometimes get errors like the following:
+       WARN: Skipping region double_flops-0 for evaluation.
+       WARN: Skipping region copy-0 for evaluation.
+       WARN: Regions are skipped because:
+             - The region was only registered
+             - The region was started but never stopped
+             - The region was never started but stopped
+
 
 ## Long-term:
 ### Problems to fix:

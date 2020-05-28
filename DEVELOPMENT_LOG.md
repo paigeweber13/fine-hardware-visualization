@@ -118,6 +118,9 @@ Hardware Visualization
      The solution was (as is often the case) laughably obvious. I had removed
      the -O3 flag because I was debugging and didn't want symbols to be
      optimized out. I had never replaced it.
+ - worked on likwid stability issues
+   - wrote a lot on this in README.md, under the heading "likwid stability
+     issues". if I remove that section, it will be copied to this document.
 
 # 2020-04-30 through 2020-05-07
  - created CSV output from fhv to allow for plotting in place of architecture
