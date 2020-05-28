@@ -3,7 +3,7 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-05-17 through 2020-05-23](#2020-05-17-through-2020-05-23)
+- [2020-05-17 through 2020-](#2020-05-17-through-2020-)
   - [questions](#questions)
   - [accomplishments](#accomplishments)
 - [2020-04-30 through 2020-05-07](#2020-04-30-through-2020-05-07)
@@ -14,8 +14,8 @@ Hardware Visualization
   - [Learning likwid](#learning-likwid)
   - [Exploration](#exploration)
 - [2020-03-24 through 2020-04-09](#2020-03-24-through-2020-04-09)
-  - [Playing with likwid_minimal.c](#playing-with-likwidminimalc)
-  - [Improvements to performance_monitor](#improvements-to-performancemonitor)
+  - [Playing with likwid_minimal.c](#playing-with-likwid_minimalc)
+  - [Improvements to performance_monitor](#improvements-to-performance_monitor)
   - [What other people are doing](#what-other-people-are-doing)
   - [Convolution as a case study](#convolution-as-a-case-study)
   - [Investigating port usage](#investigating-port-usage)
@@ -48,11 +48,15 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
   
-# 2020-05-17 through 2020-05-23
+# 2020-05-17 through 2020-
 ## questions
-   - should I visualize saturation on a per-core basis?
-   - should I visualize double precision, single precision, or both?
-     - currently picking the larger value (more saturated) and using that one
+ - should I visualize saturation on a per-core basis?
+ - should I visualize double precision, single precision, or both?
+   - currently picking the larger value (more saturated) and using that one
+ - is there some way we can include execution parameters in the visualization?
+   It's hard to keep track of how we generated the visualization
+   - perhaps include a line that says "Command used to generate this
+     visualization: <command>"
 
 ## accomplishments
  - worked on visualization
@@ -73,12 +77,29 @@ Hardware Visualization
      interesting idea, but what the diagram was representing was less clear to
      me. I had to spend more time "learning" the scale.
  - demonstrated how visualizations highlights a change in load
+   - to generate memory-stressed versions, used parameters n=67108864 d=1
+     nbiter=800
+   - to generate CPU-stressed versions, used parameters n=67108864 d=1000
+     nbiter=80
+   - in both cases, used OMP_SCHEDULE="dynamic,8"
    - compare `visualizations/polynomial_basic_cpu_poly.svg` with
      `visualizations/polynomial_block_cpu_poly_block.svg` to see how CPU is
      being better utilized with the optimized code
    - compare `visualizations/polynomial_basic_mem_poly.svg` with
      `visualizations/polynomial_block_mem_poly_block.svg` to see how in general
-     saturation is better with the block code and RAM is much more saturated.
+     saturation is better (components are more evenly saturated) with the 
+     block code. Additionally, RAM is much more saturated.
+ - explored some other counters we can use
+   - first identified some of code to use while experimenting with counters:
+     - CONVOLUTION: found some parameters that I initially thought would stress
+       the CPU, but don't indicate a bottleneck when visualized with fhv. These
+       parameters are: n,m = 4000; k = 15
+     - POLYNOMIAL: for the parameters n=67108864 d=1 nbiter=800, seemed like L3
+       was the bottleneck? But it would be good to add some clarity
+   - PORT_USAGE groups might provide some insight: for convolution, Ports 3 and
+     6 reported higher saturation than the others. Port 6 was 0.12, Port 3 was
+     0.10. Port 2 was a close second at 0.09 saturation. The rest were at 0.05
+     or lower
  - gave myself a lot of problems by forgetting to replace an optimization flag:
    - when I ran previous tests, `polynomial_block_likwid 67108864 1 10` gave a
      saturation of 0.21 for L3 cache and 0.41 for RAM. See line 14 of
