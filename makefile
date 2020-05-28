@@ -45,7 +45,7 @@ ASM+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(ASM_DIR)/%.s)
 ASM+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(ASM_DIR)/%.s)
 ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
 
-SYSTEM_PERFGROUPS_DIR=/usr/local/share/likwid/
+SYSTEM_PERFGROUPS_DIR=$(LIKWID_PREFIX)/share/likwid/
 PERFGROUPS_ROOT_DIR_NAME=perfgroups
 PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
 
@@ -184,12 +184,12 @@ run-tests/likwid_minimal: bin/tests/likwid_minimal
 run-tests/likwid_minimal-cli: bin/tests/likwid_minimal
 	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
 	# commented out 
-	likwid-perfctr -C S0:0-3 -g MEM -g L2 -g L3 -g FLOPS_SP -g FLOPS_DP -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -M 1 -m bin/tests/likwid_minimal
+	$(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g MEM -g L2 -g L3 -g FLOPS_SP -g FLOPS_DP -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -M 1 -m bin/tests/likwid_minimal
 
 run-tests/port-counter-cli: bin/tests/likwid_minimal
 	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
 	# commented out 
-	likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
+	$(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
 
 bin/tests/fhv_minimal: $(OBJ_DIR)/fhv_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
 	$(ld-command)
