@@ -1,6 +1,7 @@
 # binaries and intermediate files
 bin
 obj
+examples/**/bin
 
 # torq
 *.e*

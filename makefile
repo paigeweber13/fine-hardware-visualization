@@ -11,14 +11,18 @@ CXXASSEMBLYFLAGS=-S -g -fverbose-asm
 LIKWID_PREFIX=/usr/local/likwid-master
 # LIKWID_PREFIX=/usr/local/likwid-v4.3.4
 # LIKWID_PREFIX=/usr/local
-INC_DIRS=-I$(LIKWID_PREFIX)/include
-INC_DIRS+=-I./lib
-INC_DIRS+=$(shell pkg-config --cflags cairo)
+LIKWID_INC_DIR=-I$(LIKWID_PREFIX)/include
+FHV_INC_DIRS=-I./lib
+CAIRO_INC_DIRS=$(shell pkg-config --cflags cairo)
+INC_DIRS=$(LIKWID_INC_DIR) $(FHV_INC_DIRS) $(CAIRO_INC_DIRS)
 
-LIB_DIRS=-L$(LIKWID_PREFIX)/lib
-LIBS=-llikwid
-LIBS+=-lboost_program_options
-LIBS+=$(shell pkg-config --libs cairo)
+LIKWID_LIB_DIR=-L$(LIKWID_PREFIX)/lib
+LIB_DIRS=$(LIKWID_LIB_DIR)
+
+LIKWID_LIB_FLAG=-llikwid
+BOOST_PO_LIB_FLAG=-lboost_program_options
+CAIRO_LIB_FLAG=$(shell pkg-config --libs cairo)
+LIBS=$(LIKWID_LIB_FLAG) $(BOOST_PO_LIB_FLAG) $(CAIRO_LIB_FLAG)
 
 MAIN_DIR=src
 SRC_DIR=lib
@@ -45,17 +49,32 @@ ASM+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(ASM_DIR)/%.s)
 ASM+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(ASM_DIR)/%.s)
 ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
 
+### examples
+EXAMPLE_DIR=examples
+EXAMPLE_EXECS=$(EXAMPLE_DIR)/convolution/bin/convolution
+EXAMPLE_EXECS+=$(EXAMPLE_DIR)/convolution/bin/convolution-manual
+EXAMPLE_EXECS+=$(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli
+EXAMPLE_EXECS+=$(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon
+
+### perfgroup things
 SYSTEM_PERFGROUPS_DIR=$(LIKWID_PREFIX)/share/likwid/
 PERFGROUPS_ROOT_DIR_NAME=perfgroups
 PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
 
+### exec
 EXEC_NAME=fhv
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
+
+### prefix used to ensure likwid libraries and access daemon are detected and 
+  # used at runtime
+RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib PATH=$(LIKWID_PREFIX)/sbin:$$PATH
 
 ### meta-rules for easier calling
 build: $(EXEC)
 
 tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
+
+build-examples: $(EXAMPLE_EXECS)
 
 assembly: $(ASM) 
 
@@ -84,7 +103,7 @@ debug: LDFLAGS += -Q --help=target
 # debug: clean build
 
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(OBJS) $(EXEC) $(EXAMPLE_EXECS)
 
 ### rules to create directories
 $(EXEC_DIR):
@@ -196,3 +215,60 @@ bin/tests/fhv_minimal: $(OBJ_DIR)/fhv_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
 
 run-tests/fhv_minimal: bin/tests/fhv_minimal
 	bin/tests/fhv_minimal
+
+### variables for Likwid/fhv perfmon examples. These are designed to have fewer
+  # dependencies than those required to compile fhv, to demonstrate what 
+  # dependencies a programmer using this tool would be concerned with
+
+EXAMPLE_CXXFLAGS=-fopenmp -march=native -mtune=native -O3
+
+example-debug:
+	@echo "example execs:"
+	@echo $(EXAMPLE_EXECS)
+
+define compile-command-example
+$(CXX) $(EXAMPLE_CXXFLAGS) $< -o $@
+endef
+
+define compile-command-example-manual
+$(CXX) -DMANUAL_MEASUREMENT $(EXAMPLE_CXXFLAGS) $< -o $@
+endef
+
+define compile-command-example-likwid-cli
+$(CXX) -DLIKWID_CLI $(EXAMPLE_CXXFLAGS) $< $(LIKWID_INC_DIR) $(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -o $@
+endef
+
+define compile-command-example-fhv-perfmon
+$(CXX) -DFHV_PERFMON $(EXAMPLE_CXXFLAGS) $< $(OBJ_DIR)/performance_monitor.o $(FHV_INC_DIRS) $(LIKWID_INC_DIR) $(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -o $@
+endef
+
+# rule to create bin directory:
+$(EXAMPLE_DIR)/convolution/bin:
+	mkdir $(EXAMPLE_DIR)/convolution/bin
+
+$(EXAMPLE_DIR)/convolution/data:
+	mkdir $(EXAMPLE_DIR)/convolution/data
+
+$(EXAMPLE_DIR)/convolution/bin/convolution: $(EXAMPLE_DIR)/convolution/convolution.cpp | $(EXAMPLE_DIR)/convolution/bin
+	$(compile-command-example)
+
+$(EXAMPLE_DIR)/convolution/bin/convolution-manual: $(EXAMPLE_DIR)/convolution/convolution.cpp | $(EXAMPLE_DIR)/convolution/bin
+	$(compile-command-example-manual)
+
+$(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli: $(EXAMPLE_DIR)/convolution/convolution.cpp | $(EXAMPLE_DIR)/convolution/bin
+	$(compile-command-example-likwid-cli)
+
+$(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon: $(EXAMPLE_DIR)/convolution/convolution.cpp $(OBJ_DIR)/performance_monitor.o | $(EXAMPLE_DIR)/convolution/bin
+	$(compile-command-example-fhv-perfmon)
+
+run-example-convolution: $(EXAMPLE_DIR)/convolution/bin/convolution
+	$(EXAMPLE_DIR)/convolution/bin/convolution 4000 4000 15 10
+
+run-example-convolution-manual: $(EXAMPLE_DIR)/convolution/bin/convolution-manual
+	$(EXAMPLE_DIR)/convolution/bin/convolution-manual 4000 4000 15 10
+
+run-example-convolution-likwid-cli: $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli
+	$(RUN_CMD_PREFIX) $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g L3 -g FLOPS_SP -M 1 -m $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli 4000 4000 15 10
+
+run-example-convolution-fhv-perfmon: $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon | $(EXAMPLE_DIR)/convolution/data
+	FHV_OUTPUT=$(EXAMPLE_DIR)/convolution/data/convolution.json $(RUN_CMD_PREFIX) $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon 4000 4000 15 10
