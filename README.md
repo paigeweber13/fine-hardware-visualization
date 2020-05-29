@@ -25,6 +25,7 @@ assumed to be stable or correct.
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
+- [Examples design](#examples-design)
 - [Other similar tools:](#other-similar-tools)
   - [Kerncraft:](#kerncraft)
   - [TAU:](#tau)
@@ -126,7 +127,7 @@ problems tend to change behavior throughout execution
  - [x] add region name as a suffix to image filename
  - [x] automatically create visualizations for each region
  - [x] play around with colors for visualization
- - [ ] fix descriptions for custom PORT_USAGE perfgroups
+ - [x] fix descriptions for custom PORT_USAGE perfgroups
  - [ ] more counters to visualize?
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
@@ -140,44 +141,45 @@ problems tend to change behavior throughout execution
 
 ### Likwid stability issues
  - [ ] counters sometimes reporting unreasonably high values
-   - [ ] port counters sometimes reporting 1.8e19 for values
-   - [ ] this also happens with many other counters
-   - [ ] reported this on the [likwid mailing
-         list](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ)
-         Currently working on fixing it.
-   - [ ] port_usage sometimes reporting 461375897600.000
-   - [ ] also noticed L3 bandwidth was in the order of 1e11 or so for an
-         execution of fhv_minimal in the double_flops region. This also doesn't
-         make sense
-         - this is the value reported by likwid, not a problem with my
-           post-processing. Ran a test to demonstrate this, where I printed the
-           result of `perfmon_get_MetricOfRegionThread` and then compared with
-           the value I stored in my map:
-         - L2 bandwidth: 8.33646e+16
-           per_thread_results for thread 38.33646e+16
-         - Wrote script to repeatedly run likwid_minimal. (see
-           `tests/likwid_minimal_repeated.sh`). With groups 
-           MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3 all
-           being measured, only 1/100 iterations produced output above 1e6. In
-           this case it was L3 bandwidth and volume
-         - increased number of tests to 200 and ran again. 14/200 failed, some
-           of this was unreasonably high output, and some of it was "skipping
-           region ___ " errors
-         - switched to the groups MEM|L2|L3|FLOPS_SP|FLOPS_DP and ran another
-           100 iterations. 4/100 had some kind of problem
-
+   - many examples [availble here](https://pastebin.com/u/rileyw13)
+   - port counters sometimes reporting 1.8e19 for values
+   - this also happens with many other counters
+   - reported this on the [likwid mailing
+     list](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ)
+     Currently working on fixing it.
+   - port_usage sometimes reporting 461375897600.000
+   - also noticed L3 bandwidth was in the order of 1e11 or so for an
+     execution of fhv_minimal in the double_flops region. This also doesn't
+     make sense
+     - this is the value reported by likwid, not a problem with my
+       post-processing. Ran a test to demonstrate this, where I printed the
+       result of `perfmon_get_MetricOfRegionThread` and then compared with
+       the value I stored in my map:
+     - L2 bandwidth: 8.33646e+16
+       per_thread_results for thread 38.33646e+16
+     - Wrote script to repeatedly run likwid_minimal. (see
+       `tests/likwid_minimal_repeated.sh`). With groups 
+       MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3 all
+       being measured, only 1/100 iterations produced output above 1e6. In
+       this case it was L3 bandwidth and volume
+     - increased number of tests to 200 and ran again. 14/200 failed, some
+       of this was unreasonably high output, and some of it was "skipping
+       region ___ " errors
+     - switched to the groups MEM|L2|L3|FLOPS_SP|FLOPS_DP and ran another
+       100 iterations. 4/100 had some kind of problem
+   - seems to be related to error below about "stopping non-started region"
+ - sometimes get "stopping non-started region _____"
+ - sometimes get errors like the following:
+   WARN: Skipping region double_flops-0 for evaluation.
+   WARN: Skipping region copy-0 for evaluation.
+   WARN: Regions are skipped because:
+         - The region was only registered
+         - The region was started but never stopped
+         - The region was never started but stopped
  - [ ] convolution sometimes not instrumenting one region?
-   - [ ] noticed this also in fhv_minimal. Happens once every 10 executions or
-         so 
-   - [ ] compiler optimization?
- - [ ] sometimes get "stopping non-started region _____"
- - [ ] sometimes get errors like the following:
-       WARN: Skipping region double_flops-0 for evaluation.
-       WARN: Skipping region copy-0 for evaluation.
-       WARN: Regions are skipped because:
-             - The region was only registered
-             - The region was started but never stopped
-             - The region was never started but stopped
+   - noticed this also in fhv_minimal. Happens once every 10 executions or
+     so 
+   - compiler optimization?
 
 
 ## Long-term:
@@ -218,6 +220,43 @@ problems tend to change behavior throughout execution
    - have it check architecture to know what size of caches
    - have it populate architecture.h
    - improve software engineering: make it consistent what calls likwid, etc.
+
+# Examples design
+Examples should be designed with simplicity as a priority. There should be no
+fancy cli argument handling and recompilation should be limited.
+
+Three features should be supported in each example:
+ - Manual measurements to demonstrate bottlenecks 
+ - fhv measurements to demonstrate bottlenecks 
+ - Likwid CLI support for testing
+
+./makefile 
+Handles compilation of examples
+
+./examples/test_code/
+Should contain 1 source file. This file should have no dependencies outside of
+the standard library when manual measurements are made. 
+
+A single file should contain manual timing, likwid cli, and FHV metering. You
+pick the one you want with compile time flags. These flags should be:
+ - -DLIKWID_CLI for using the likwid-perfctr cli
+ - -DFHV for using fhv
+
+A single file should contain both basic and optimized code. The code used will
+be chosen by compile-time flags:
+ - -DBASIC_CODE for basic code
+ - -DOPT_CODE for optimized code
+
+Has 3+ scripts for testing 
+ - manual timing that stresses both cpu and mem
+ - likwid cli examples
+ - fhv usage that stresses both cpu and mem
+
+./examples/test_code/data/
+Contains test data output from above scripts 
+
+./examples/test_code/visualizations/
+Contains visualizations of data
 
 # Other similar tools:
 ## Kerncraft:
