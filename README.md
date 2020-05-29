@@ -119,18 +119,14 @@ problems tend to change behavior throughout execution
 
 # TODO:
 ## Immediate:
- - [x] color visualization according to saturation
-   - [x] once we get below 1% I don't think we really care about saturation
-   - [x] largest visual difference in color from 0.01 to 0.2. Some color
-         difference between 0.2 and 0.5. Above that is really hard to obtain
-   - [x] (log_2 (saturation) + 10)/10 then clamp that to (0.0, 1.0)
- - [x] add region name as a suffix to image filename
- - [x] automatically create visualizations for each region
- - [x] play around with colors for visualization
- - [x] fix descriptions for custom PORT_USAGE perfgroups
  - [ ] more counters to visualize?
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
+ - [ ] work on likwid stability issues
+
+Try to split time between likwid stability issues and finding more counters to
+visualize: maybe 2 hours of one before moving to the other, repeat until day is
+over
 
 ### Exploration
  - [ ] mem instructions retired * 32 bytes instead of 64
