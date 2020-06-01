@@ -163,6 +163,44 @@ over
        region ___ " errors
      - switched to the groups MEM|L2|L3|FLOPS_SP|FLOPS_DP and ran another
        100 iterations. 4/100 had some kind of problem
+   - ran some tests with v4.3.4 and v5.0.1, on multiple groups and just one
+     group, and with hyperthreading enabled and disabled
+     - hyperthreading was disabled by selecting cores 0,1 in LIKWID_THREADS and
+       then setting the number of openMP threads to be 2
+     - First, compiling and running with the following commands:
+       g++ likwid_minimal.c -L/usr/local/likwid-v4.3.4/lib -I/usr/local/likwid-v4.3.4/include -llikwid -mtune=native -fopenmp -o likwid_minimal;
+       LD_LIBRARY_PATH=/usr/local/likwid-v4.3.4/lib PATH=/usr/local/likwid-v4.3.4/sbin:$PATH ./likwid_minimal_repeated.sh
+     - Results with likwid v4.3.4: 
+        - No hyperthreading, specifying one group (L2): 0 failures out of 100
+          tests
+        - With hyperthreading, specifying one group (L2): 0 failures out of 200
+          tests
+           - there was one case where I received the error "WARN: Skipping
+             region (null) for evaluation"
+        - No hyperthreading, specifying multiple groups
+          (L2|L3|FLOPS_SP|FLOPS_DP): 3 failures out of 200 tests
+        - With hyperthreading, specifying multiple groups
+          (L2|L3|FLOPS_SP|FLOPS_DP): 12 failures out of 100 tests
+           - full output available here: https://pastebin.com/qcM34Rv6
+     - next, compiled with:
+       g++ likwid_minimal.c -L/usr/local/likwid-master/lib -I/usr/local/likwid-master/include -llikwid -mtune=native -fopenmp -o likwid_minimal
+       LD_LIBRARY_PATH=/usr/local/likwid-master/lib PATH=/usr/local/likwid-master/sbin:$PATH ./likwid_minimal_repeated.sh
+     - Results with likwid compiled from master branch (commit
+       99b0d23927f5e65cfa4eb5aeac1c57504395694b )
+       - No hyperthreading, specifying one group (L2): 0 failures out of 100
+         tests
+       - With hyperthreading, specifying one group (L2): 0 failures out of 100
+         tests
+       - No hyperthreading, specifying multiple groups
+         (L2|L3|FLOPS_SP|FLOPS_DP): 1 failure out of 100 tests
+       - With hyperthreading, specifying multiple groups
+         (L2|L3|FLOPS_SP|FLOPS_DP):5 failures out of 100 tests
+          - full output: https://pastebin.com/X5MwUVUq
+   - It seems to me that the problem is brought out by specifying multiple
+     groups, but that it is exacerbated by hyperthreading. That being said, I
+     do wonder if the hyperthreading problems have to do with intel (and the
+     associated spectre/meltdown problems), I will try to test on my personal
+     machine which uses an AMD processor.
    - seems to be related to error below about "stopping non-started region"
  - sometimes get "stopping non-started region _____"
  - sometimes get errors like the following:
