@@ -33,14 +33,20 @@ int main()
   setenv("LIKWID_EVENTS",
         //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
         //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP",
-         "L2",
-        //  "L2|L3|FLOPS_SP|FLOPS_DP",
+        //  "L2",
+         "L2|L3|FLOPS_SP|FLOPS_DP",
          1);
   setenv("LIKWID_MODE", "1", 1);
   setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
-  // num_threads = 4;
-  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+
+  num_threads = 2;
+  setenv("LIKWID_THREADS", "0,1", 1); // list of threads
   setenv("LIKWID_FORCE", "1", 1);
+
+  // num_threads = 4;
+  // setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+  // setenv("LIKWID_FORCE", "1", 1);
+
   remove(filepath);
 
   likwid_markerInit();
@@ -48,12 +54,12 @@ int main()
   // disable dynamic teams... may help with "stopping non-started region"
   // errors
   // omp_set_dynamic(0); 
-  // omp_set_num_threads(num_threads);
+  omp_set_num_threads(num_threads);
 
 #pragma omp parallel
   {
     // printf("num threads: %d\n", omp_get_num_threads());
-    num_threads = omp_get_num_threads();
+    // num_threads = omp_get_num_threads();
     likwid_markerThreadInit();
     likwid_markerRegisterRegion("double_flops");
     likwid_markerRegisterRegion("copy");
