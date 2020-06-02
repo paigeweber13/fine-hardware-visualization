@@ -3,9 +3,9 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-05-17 through 2020-](#2020-05-17-through-2020-)
-  - [questions](#questions)
-  - [accomplishments](#accomplishments)
+- [Outstanding Questions](#outstanding-questions)
+- [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
+- [2020-05-17 through 2020-06-02](#2020-05-17-through-2020-06-02)
 - [2020-04-30 through 2020-05-07](#2020-04-30-through-2020-05-07)
   - [Thoughts on coloring of diagram:](#thoughts-on-coloring-of-diagram)
 - [2020-04-23 through 2020-04-30](#2020-04-23-through-2020-04-30)
@@ -47,9 +47,8 @@ Hardware Visualization
 - [before 2020-02-11](#before-2020-02-11)
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
-  
-# 2020-05-17 through 2020-
-## questions
+
+# Outstanding Questions
  - should I visualize saturation on a per-core basis?
  - should I visualize double precision, single precision, or both?
    - currently picking the larger value (more saturated) and using that one
@@ -57,8 +56,14 @@ Hardware Visualization
    It's hard to keep track of how we generated the visualization
    - perhaps include a line that says "Command used to generate this
      visualization: <command>"
+ - should we demonstrate change in behavior across many parameters? If so, how?
+   by an animation? Slider?
+   - should we incorporate this work with Yonghong's work in visualization?
+  
+# 2020-06-02 through 2020-06-09
+ - wrote tests to experiment on polynomial_expansion with multiple perfgroups
 
-## accomplishments
+# 2020-05-17 through 2020-06-02
  - worked on visualization
  - created function for interpolating colors
  - created function to test interpolation
@@ -122,6 +127,8 @@ Hardware Visualization
    - wrote on this in README.md, under the heading "likwid stability
      issues". if I remove that section, it will be copied to this document.
  - wrote simpler convolution for testing other counters we can use
+ - made polynomial expansion also have 4 different executable targets based on
+   compile-time environment variables. 
 
 # 2020-04-30 through 2020-05-07
  - created CSV output from fhv to allow for plotting in place of architecture
