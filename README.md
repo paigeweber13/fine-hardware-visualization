@@ -25,6 +25,8 @@ assumed to be stable or correct.
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
+    - [Improve software engineering](#improve-software-engineering)
+- [Parameters used to create visualizations](#parameters-used-to-create-visualizations)
 - [Examples design](#examples-design)
 - [Other similar tools:](#other-similar-tools)
   - [Kerncraft:](#kerncraft)
@@ -123,6 +125,7 @@ problems tend to change behavior throughout execution
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
  - [ ] work on likwid stability issues
+ - [ ] add "command-used-to-generate" to json and svg
 
 Try to split time between likwid stability issues and finding more counters to
 visualize: maybe 2 hours of one before moving to the other, repeat until day is
@@ -253,7 +256,21 @@ over
    - have it check bandwidth for all types of memory/cache
    - have it check architecture to know what size of caches
    - have it populate architecture.h
-   - improve software engineering: make it consistent what calls likwid, etc.
+
+### Improve software engineering
+ - make it consistent what calls likwid
+ - makefile has some unnecessary repetition of variables
+   - compare ./examples/polynomial_expansion/makefile with ./makefile
+
+# Parameters used to create visualizations
+ - memory-stressed versions used parameters n=67108864 d=1 nbiter=800.
+   Examples of memory-stressed versions include:
+   - ./visualizations/polynomial_basic_mem*
+   - ./visualizations/polynomial_block_mem*
+ - CPU-stressed versions used parameters n=67108864 d=1000 nbiter=80. Examples
+   of memory-stressed versions include:
+   - ./visualizations/polynomial_basic_cpu*
+   - ./visualizations/polynomial_block_cpu*
 
 # Examples design
 Examples should be designed with simplicity as a priority. There should be no
