@@ -38,6 +38,7 @@ int main()
          1);
   setenv("LIKWID_MODE", "1", 1);
   setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
+  setenv("LIKWID_DEBUG", "3", 1); // verbosity of debug output
 
   num_threads = 2;
   setenv("LIKWID_THREADS", "0,1", 1); // list of threads
