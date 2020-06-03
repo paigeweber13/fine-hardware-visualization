@@ -4,7 +4,10 @@ Hardware Visualization
 
 - [Development Log](#development-log)
 - [Outstanding Questions](#outstanding-questions)
+  - [What new counters should we use?](#what-new-counters-should-we-use)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
+  - [Experiental results from comparing counters across polynomial and polynomial_block](#experiental-results-from-comparing-counters-across-polynomial-and-polynomial_block)
+    - [Counters we're already using](#counters-were-already-using)
 - [2020-05-17 through 2020-06-02](#2020-05-17-through-2020-06-02)
 - [2020-04-30 through 2020-05-07](#2020-04-30-through-2020-05-07)
   - [Thoughts on coloring of diagram:](#thoughts-on-coloring-of-diagram)
@@ -59,9 +62,127 @@ Hardware Visualization
  - should we demonstrate change in behavior across many parameters? If so, how?
    by an animation? Slider?
    - should we incorporate this work with Yonghong's work in visualization?
+
+## What new counters should we use?
+ - BRANCH: might identify when code is not doing useful computation? Is it 
+   fair to call branching "not useful"?
+ - "Vectorization Ratio": a metric in the FLOPS_SP and FLOPS_DP groups that
+   we are currently not using, but I think is valuable information.
+
   
 # 2020-06-02 through 2020-06-09
  - wrote tests to experiment on polynomial_expansion with multiple perfgroups
+ - inspected results (see next subheading)
+
+## Experiental results from comparing counters across polynomial and polynomial_block
+ - BRANCH perfgroup:
+   - Branch rate: portion of instructions which branch.
+     - this is lower on polynomial_block as compared to polynomial. Is this
+       because of vectorization? 
+   - Branch misprediction rate: portion of instructions which branched to
+     correct misprediction
+   - Branch misprediction ratio: portion of branch instructions which branched
+     to correct misprediction
+   - Instructions per branch: total instructions / branch instructions
+ - BRANCH, cpu-heavy params: 
+   - polynomial_block had about 1/10th the total number of instructions
+   - ratio of branch instructionns to total instructions was also about
+     1/10th that of unoptimized code
+ - BRANCH, mem-heavy params: 
+   - polynomial_block again had about 1/10th the total number of instructions
+   - branch rate of optimized code was 1/3rd that of basic code
+   - both basic and optimized code had VERY low misprediction ratios, but basic
+     code was about 1/3rd that of optimized code
+ - CLOCK wasn't too useful. Mostly power information.
+ - CYCLE_ACTIVITY: CYCLE_ACTIVITY_CYCLES_*_PENDING / CPU_CLK_UNHALTED_CORE
+ - CYCLE_ACTIVITY, cpu-heavy:
+   - cycles without execution was 9.8% for basic code, 6.8% for block-optimized
+     code
+   - Cycles without execution due to L1D was HIGHER for optimized code. Basic
+     code was 1.22%, optimized was 2.71%
+   - Cycles without execution due to L2 was HIGHER for optimized code. Basic
+     code was 1.05%, optimized was 3.41%
+   - Cycles without execution due to memory loads was very high in both cases.
+     Basic code was 94.69%, optimized code was 96.51%
+ - CYCLE_ACTIVITY, mem-heavy:
+   - cycles without execution was 15.5% for basic code, 26.7% for block-optimized
+     code
+   - Cycles without execution due to L1D was HIGHER for optimized code. Basic
+     code was 8.8%, optimized was 20.6%
+   - Cycles without execution due to L2 was HIGHER for optimized code. Basic
+     code was 8.3%, optimized was 30.2%
+   - Cycles without execution due to memory loads was very high in both cases.
+     Basic code was 99.74%, optimized code was 86.52%
+ - CYCLE_ACTIVITY interpretation:
+   - Memory load was obviously shifted to caches in the optimized code... 
+     Also, it's natural that there wasn't nearly as much execution in the
+     memory-heavy case
+ - CYCLE_STALLS seems very similar to CYCLE_ACTIVITY, still trying to figure
+   out the differences...
+   - CYCLE_ACTIVITY_STALLS_*_PENDING / CPU_CLK_UNHALTED_CORE
+   - haven't yet found a part of the intel documentation that makes clear the 
+     differences between CYCLE_ACTIVITY_STALLS_*_PENDING and 
+     CYCLE_ACTIVITY_CYCLES_*_PENDING 
+   - descriptions in perfgroup files basically say the same thing too
+   - "stalls caused by..." are the number of stalls from a given source 
+     divided by the total number of stalls
+   - "rates" in this group are the number of stalls from a given source 
+     divided by the unhalted clock
+ - CYCLE_STALLS, cpu-heavy:
+   - stall rate (total stalls / unhalted clock) is lower for optimized: 
+     basic code had 9.8% and optimized code had 3.5%
+   - portion of stalls caused by L1D and L2 was pretty similar
+   - portion of stalls caused by memory had a big difference. 37.04% for
+     basic, 12.61% for optimized
+ - CYCLE_STALLS, mem-heavy:
+   - stall rate is lower for BASIC (!): 16.42% for  basic, 40.46% for opt
+   - portion of stalls caused by L1D and L2 was pretty similar, though L2 was
+     slightly higher for opt code. Basic was 16.64% and opt was 21.15%
+   - portion of stalls caused by memory had a significant difference. 75.51%
+     for basic, 45.7% for optimized
+ - CYCLE_STALLS interpretation:
+   - clearer difference between basic/opt versions of cpu code
+   - again makes clear the shift from mem to cache with optimized code
+ - DATA:
+   - really only measures load-to-store ratio. 
+ - DATA, cpu-heavy:
+   - MUCH lower on optimized code. Basic code had a ratio of 19.09 and
+     optimized code had a ratio of 1.07. Probably just a manifestation of how
+     there are lower memory operations overall.
+   - inspecting MEM_INST_RETIRED_ALL_* showed that this was not exactly the
+     case... optimized code had about 1/4 the loads and 4x the stores as basic
+     code
+ - DATA, mem-heavy:
+   - basic code had a ratio of 3.14, Optimized code had a ratio of 1.29
+   - basic code had about 1.0e12 loads, 3.3e11 stores
+   - opt code had about 8.3e10 loads, 6.4e10 stores
+ - DIVIDE
+ - ENERGY
+ - FALSE_SHARE
+ - FLOPS_AVX
+   - not super useful. Just gives a subset of information available in 
+     FLOPS_SP and FLOPS_DP
+ - ICACHE
+ - L2CACHE
+ - L3CACHE
+ - RECOVERY
+ - TLB_DATA
+ - TLB_INSTR
+ - TMA
+ - UOPS_EXEC
+ - UOPS_ISSUE
+ - UOPS
+ - UOPS_RETIRE
+
+### Counters we're already using
+ - FLOPS_DP - already used
+ - FLOPS_SP - already used
+ - L2 - already used
+ - L3 - already used
+ - MEM - already used
+ - MEM_DP - just mem + FLOPS_DP combined
+ - MEM_SP - just mem + FLOPS_SP combined
+ - PORT_USAGE* - already used
 
 # 2020-05-17 through 2020-06-02
  - worked on visualization
