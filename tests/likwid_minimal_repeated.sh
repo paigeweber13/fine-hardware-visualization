@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# used to demonstrate non-deterministic behavior in likwid. This is documented
-# here:
+# used to demonstrate unreasonably high values sometimes produced by likwid.
+# This is non-deterministic behavior and is documented at the following
+# locations:
+
 # https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ
+
+# https://github.com/RRZE-HPC/likwid/issues/292 
+
+# Counts the number of failures in num_iter iterations. Expects likwid_minimal
+# to only produce output when unreasonably high values are detected.
 
 num_iter=100
 num_failures=0
