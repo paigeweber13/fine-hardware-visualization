@@ -124,6 +124,7 @@ problems tend to change behavior throughout execution
  - [ ] more counters to visualize?
    - [ ] basic polynomial expansion code has to be saturated somewhere... can
          we find it?
+   - [ ] how can we incorporate vectorization ratio?
  - [ ] work on likwid stability issues
  - [ ] add "command-used-to-generate" to json and svg
 
