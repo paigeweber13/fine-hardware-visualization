@@ -90,6 +90,8 @@ int main()
     }
   }
 
+  likwid_markerClose();
+
   perfmon_readMarkerFile(filepath);
 
   const char *regionName, *groupName, *event_name, *metric_name;
