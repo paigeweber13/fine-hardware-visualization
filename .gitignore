@@ -2,6 +2,10 @@
 bin
 obj
 examples/**/bin
+tests/likwid_minimal
+
+# some test data
+tests/data/unreasonably-high-values
 
 # torq
 *.e*
