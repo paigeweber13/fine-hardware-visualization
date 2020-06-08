@@ -14,14 +14,21 @@
 num_iter=100
 num_failures=0
 
+DATE=$(date +%F_%H%M)
+DIR=data/unreasonably-high-values
+FILENAME_BASE=$DIR/likwid_minimal_repeated
+
+mkdir -p $DIR
+
 for i in $(seq $num_iter); do
   output=$(./likwid_minimal) 
-  if [[ $output ]]; then
-      echo "$i Warning! Something went wrong"
-      echo $output
+  if [[ $output == *"WARNING: unreasonably high"* ]]; then
+      FILENAME=$(echo $FILENAME_BASE)_$(echo $DATE)_iteration_$i.txt
+      echo "$i Warning! Something went wrong. Sending output to $FILENAME"
+      echo $output > $FILENAME
       ((num_failures++))
   else
-      echo "$i No output, things went as usual..."
+      echo "$i No problems detected..."
   fi
 done
 
@@ -29,4 +36,3 @@ echo
 echo
 echo "number of iterations : $num_iter"
 echo "number of failures   : $num_failures"
-
