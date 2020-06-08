@@ -7,8 +7,10 @@
 // https://github.com/RRZE-HPC/likwid/issues/292 
 
 // can be compiled with
-// `g++ likwid_minimal.c -L/usr/local/likwid-master/lib -march=native -mtune=native -fopenmp -llikwid -o likwid_minimal`
-// or the like
+// `g++ likwid_minimal.c -L/path/to/likwid/lib -march=native -mtune=native -fopenmp -llikwid -o likwid_minimal`
+
+// and ran with
+// `LD_LIBRARY_PATH=/path/to/likwid/lib PATH=/path/to/likwid/sbin:$PATH ./likwid_minimal`
 
 #include <omp.h>
 #include <likwid.h>
@@ -35,7 +37,7 @@ int main()
   setenv("LIKWID_MODE", "1", 1);
   setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
   setenv("LIKWID_FORCE", "1", 1);
-  // setenv("LIKWID_DEBUG", "3", 1); // verbosity of debug output
+  setenv("LIKWID_DEBUG", "3", 1); // verbosity of debug output
 
   // optional. Used to disable hyperthreading on my machine
   // num_threads = 2;
@@ -92,6 +94,11 @@ int main()
 
   likwid_markerClose();
 
+  // these values are meaningless; the print is used to computation and copies
+  // aren't optimized away
+  // printf("c = %f, copy_arr[0] = %f\n", 
+  //   c, copy_arr[0]);
+
   perfmon_readMarkerFile(filepath);
 
   const char *regionName, *groupName, *event_name, *metric_name;
@@ -111,9 +118,9 @@ int main()
         if (event_value > 1e15)
         {
           printf("WARNING: unreasonably high event value detected\n");
-          printf("thread %d : region %s : group %s : event %s : %f\n", 
-            t, regionName, groupName, event_name, event_value);
         }
+        printf("thread %d : region %s : group %s : event %s : %f\n", 
+          t, regionName, groupName, event_name, event_value);
       }
 
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
@@ -122,9 +129,9 @@ int main()
         if (metric_value > 1e6)
         {
           printf("WARNING: unreasonably high metric value detected\n");
-          printf("thread %d : region %s : group %s : metric %s : %f\n", 
-            t, regionName, groupName, metric_name, metric_value);
         }
+        printf("thread %d : region %s : group %s : metric %s : %f\n", 
+          t, regionName, groupName, metric_name, metric_value);
       }
     }
   }
