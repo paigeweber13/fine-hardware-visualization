@@ -992,7 +992,7 @@ void performance_monitor::printCsvOutput(){
 }
 
 
-void performance_monitor::resultsToJson()
+void performance_monitor::resultsToJson(std::string param_info_string)
 {
   if(aggregate_results.size() == 0){
     std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
@@ -1009,6 +1009,7 @@ void performance_monitor::resultsToJson()
   }
 
   json results;
+  results["info"]["parameters"] = param_info_string;
   results["saturation"] = saturation;
 
   double metric_value;

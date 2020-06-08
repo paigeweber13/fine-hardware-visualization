@@ -125,10 +125,14 @@ class performance_monitor {
     static void printCsvOutput();
 
     // output to json
-
-    // gets file name from environment variable FHV_OUTPUT. If unset, will
-    // use a default name
-    static void resultsToJson();
+    //  - gets file name from environment variable FHV_OUTPUT. If unset, will
+    //    use a default name
+    //  - param_info_string is entirely arbitrary and left to the user. The
+    //    intention is to use it to track parameters used to generate a
+    //    visualization. For example, when metering convolution, the user may
+    //    set the string to be "n=4000, m=6000, k=7". The visualization will
+    //    preface this with the string "Parameters used to generate:"
+    static void resultsToJson(std::string param_info_string = "");
 
     // ------ getters ----- //
     const static std::map<std::string, double> get_runtimes_by_tag();

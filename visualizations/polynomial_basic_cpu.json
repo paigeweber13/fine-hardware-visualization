@@ -1,40 +1,43 @@
 {
+    "info": {
+        "parameters": "polynomial basic params: n: 67108864, degree: 100, number of iterations: 80"
+    },
     "port_usage": {
         "all_regions": {
-            "Port0 usage ratio": 0.08213283860178991,
-            "Port1 usage ratio": 0.08468255214264238,
-            "Port2 usage ratio": 0.03701844859553031,
-            "Port3 usage ratio": 0.04204463311201518,
-            "Port4 usage ratio": 0.00048428993298277106,
-            "Port5 usage ratio": 0.09389011653269258,
-            "Port6 usage ratio": 0.14091527820846514,
-            "Port7 usage ratio": 0.00014462339563354153
+            "Port0 usage ratio": 0.09700393668371123,
+            "Port1 usage ratio": 0.09918303564179862,
+            "Port2 usage ratio": 0.05198990317283035,
+            "Port3 usage ratio": 0.052574930741723765,
+            "Port4 usage ratio": 0.0030442737860782282,
+            "Port5 usage ratio": 0.07626859711641633,
+            "Port6 usage ratio": 0.12576462321794923,
+            "Port7 usage ratio": 0.00035349281547371076
         },
         "poly": {
-            "Port0 usage ratio": 0.08213283860178991,
-            "Port1 usage ratio": 0.08468255214264238,
-            "Port2 usage ratio": 0.03701844859553031,
-            "Port3 usage ratio": 0.04204463311201518,
-            "Port4 usage ratio": 0.00048428993298277106,
-            "Port5 usage ratio": 0.09389011653269258,
-            "Port6 usage ratio": 0.14091527820846514,
-            "Port7 usage ratio": 0.00014462339563354153
+            "Port0 usage ratio": 0.09700393668371123,
+            "Port1 usage ratio": 0.09918303564179862,
+            "Port2 usage ratio": 0.05198990317283035,
+            "Port3 usage ratio": 0.052574930741723765,
+            "Port4 usage ratio": 0.0030442737860782282,
+            "Port5 usage ratio": 0.07626859711641633,
+            "Port6 usage ratio": 0.12576462321794923,
+            "Port7 usage ratio": 0.00035349281547371076
         }
     },
     "saturation": {
         "all_regions": {
-            "DP [MFLOP/s]": 3.4167778285709144e-07,
-            "L2 bandwidth [MBytes/s]": 0.0027642590585411145,
-            "L3 bandwidth [MBytes/s]": 0.008849346412071774,
-            "Memory bandwidth [MBytes/s]": 203346254.40104783,
-            "SP [MFLOP/s]": 0.04590686034215032
+            "DP [MFLOP/s]": 3.216895657219412e-07,
+            "L2 bandwidth [MBytes/s]": 0.017247997962933585,
+            "L3 bandwidth [MBytes/s]": 0.06838477304383558,
+            "Memory bandwidth [MBytes/s]": 0.030802942445762815,
+            "SP [MFLOP/s]": 0.03985713771972466
         },
         "poly": {
-            "DP [MFLOP/s]": 3.4167778285709144e-07,
-            "L2 bandwidth [MBytes/s]": 0.0027642590585411145,
-            "L3 bandwidth [MBytes/s]": 0.008849346412071774,
-            "Memory bandwidth [MBytes/s]": 203346254.40104783,
-            "SP [MFLOP/s]": 0.04590686034215032
+            "DP [MFLOP/s]": 3.216895657219412e-07,
+            "L2 bandwidth [MBytes/s]": 0.017247997962933585,
+            "L3 bandwidth [MBytes/s]": 0.06838477304383558,
+            "Memory bandwidth [MBytes/s]": 0.030802942445762815,
+            "SP [MFLOP/s]": 0.03985713771972466
         }
     }
 }
