@@ -8,8 +8,9 @@ Hardware Visualization
   - [Secondary](#secondary)
   - [What new counters should we use?](#what-new-counters-should-we-use)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
-  - [Experiental results from comparing counters across polynomial and polynomial_block](#experiental-results-from-comparing-counters-across-polynomial-and-polynomial_block)
+  - [Experiential results from comparing counters across polynomial and polynomial_block](#experiential-results-from-comparing-counters-across-polynomial-and-polynomial_block)
     - [Counters we're already using](#counters-were-already-using)
+  - [Likwid stability issues](#likwid-stability-issues)
 - [2020-05-17 through 2020-06-02](#2020-05-17-through-2020-06-02)
 - [2020-04-30 through 2020-05-07](#2020-04-30-through-2020-05-07)
   - [Thoughts on coloring of diagram:](#thoughts-on-coloring-of-diagram)
@@ -62,11 +63,19 @@ Hardware Visualization
 
 ## Secondary
  - should I visualize saturation on a per-core basis?
-   - I feel like this isn't necessary. Is there a case (besides if you forget
-     to make your code parallel) that some cores would be more utilized than
-     others? 
+   - Dr. Saule: one of the use-cases might be to see load imbalance, so let's
+     visualize per-core
  - should I visualize double precision, single precision, or both?
    - currently picking the larger value (more saturated) and using that one
+   - this visualization will eventually be somewhat hierarchical. You won't see
+     all the detail at the high-level, but you can select different sections to
+     "zoom in" and get a higher level of detail
+   - complex applications may do single-precision for half of the execution and
+     double-precision for the other half. That is full saturation overall.
+   - core may be saturated for many reasons, we want to incorporate all them
+     - what if you can't decode instructions fast enough?
+   - "single precision flops" may be a bad metric. What if you can't support
+     fma? Then you immediately lose a huge portion of performance.
  - is there some way we can include execution parameters in the visualization?
    It's hard to keep track of how we generated the visualization
    - perhaps include a line that says "Command used to generate this
@@ -95,7 +104,7 @@ Hardware Visualization
      alleviate it
  - added optional, customizable parameter string to JSON output
 
-## Experiental results from comparing counters across polynomial and polynomial_block
+## Experiential results from comparing counters across polynomial and polynomial_block
  - BRANCH perfgroup:
    - Branch rate: portion of instructions which branch.
      - this is lower on polynomial_block as compared to polynomial. Is this
@@ -107,8 +116,8 @@ Hardware Visualization
    - Instructions per branch: total instructions / branch instructions
  - BRANCH, cpu-heavy params: 
    - polynomial_block had about 1/10th the total number of instructions
-   - ratio of branch instructionns to total instructions was also about
-     1/10th that of unoptimized code
+   - ratio of branch instructions to total instructions was also about
+     1/10th that of un-optimized code
  - BRANCH, mem-heavy params: 
    - polynomial_block again had about 1/10th the total number of instructions
    - branch rate of optimized code was 1/3rd that of basic code
@@ -192,12 +201,15 @@ Hardware Visualization
      - power somewhat higher in all areas, significantly higher (7x higher) 
        for RAM
  - FALSE_SHARE
+   - uses two counters: MEM_INST_RETIRED_ALL (all memory instructions) and 
+     MEM_LOAD_L3_HIT_RETIRED.XSNP_HITM. Description in intel docs says: 
+     "Retired load instructions which data sources were HitM responses from 
+     shared L3."
  - FLOPS_AVX
    - not super useful. Just gives a subset of information available in 
      FLOPS_SP and FLOPS_DP
  - FLOPS_SP/FLOPS_DP vectorization ratio
-   - in both cpu- and mem-heavy cases, went from numbers in the order of 1e-10
-     (in basic) to 100 (in opt)
+   - went from numbers in the order of 1e-10 (in basic) to 100 (in opt)
  - ICACHE
  - L2CACHE
  - L3CACHE
@@ -220,6 +232,97 @@ Hardware Visualization
  - MEM - already used
  - MEM_DP - just mem + FLOPS_DP combined
  - MEM_SP - just mem + FLOPS_SP combined
+
+## Likwid stability issues
+ - some key places to check:
+   - file "src/perfmon.c": perfmon_startCounters(), perfmon_setupCounters(),
+     perfmon_stopCounters() are all used by likwid_markerNextGroup()
+   - file "src/libperfctr.c": likwid_markerStopRegion() produces the error
+     "WARN: Stopping an unknown/not-started region ..." 
+ - "WARN: Skipping region (null) for evaluation" messages:
+   - Tried printing results of computation, still had this error quite
+     frequently
+   - Figured this would prevent optimizing out computation, maybe it isn't?
+   - other options include: volatile, #pragma GCC optimize("O0")
+   - piping output of likwid_minimal to a file in the same directory
+     consistently produces a LOT of these errors
+   - doesn't happen when I output to /tmp/tmp.txt, which is on the same disk,
+     but a different partition
+ - [ ] counters sometimes reporting unreasonably high values
+   - many examples [available here](https://pastebin.com/u/rileyw13)
+   - port counters sometimes reporting 1.8e19 for values
+   - this also happens with many other counters
+   - port_usage sometimes reporting 461375897600.000
+   - also noticed L3 bandwidth was in the order of 1e11 or so for an
+     execution of fhv_minimal in the double_flops region. This also doesn't
+     make sense
+     - this is the value reported by likwid, not a problem with my
+       post-processing. Ran a test to demonstrate this, where I printed the
+       result of `perfmon_get_MetricOfRegionThread` and then compared with
+       the value I stored in my map:
+     - L2 bandwidth: 8.33646e+16
+       per_thread_results for thread 38.33646e+16
+     - Wrote script to repeatedly run likwid_minimal. (see
+       `tests/likwid_minimal_repeated.sh`). With groups 
+       MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3 all
+       being measured, only 1/100 iterations produced output above 1e6. In
+       this case it was L3 bandwidth and volume
+     - increased number of tests to 200 and ran again. 14/200 failed, some
+       of this was unreasonably high output, and some of it was "skipping
+       region ___ " errors
+     - switched to the groups MEM|L2|L3|FLOPS_SP|FLOPS_DP and ran another
+       100 iterations. 4/100 had some kind of problem
+   - ran some tests with v4.3.4 and v5.0.1, on multiple groups and just one
+     group, and with hyperthreading enabled and disabled
+     - hyperthreading was disabled by selecting cores 0,1 in LIKWID_THREADS and
+       then setting the number of openMP threads to be 2
+     - First, compiling and running with the following commands:
+       g++ likwid_minimal.c -L/usr/local/likwid-v4.3.4/lib -I/usr/local/likwid-v4.3.4/include -llikwid -mtune=native -fopenmp -o likwid_minimal;
+       LD_LIBRARY_PATH=/usr/local/likwid-v4.3.4/lib PATH=/usr/local/likwid-v4.3.4/sbin:$PATH ./likwid_minimal_repeated.sh
+     - Results with likwid v4.3.4: 
+        - No hyperthreading, specifying one group (L2): 0 failures out of 100
+          tests
+        - With hyperthreading, specifying one group (L2): 0 failures out of 200
+          tests
+           - there was one case where I received the error "WARN: Skipping
+             region (null) for evaluation"
+        - No hyperthreading, specifying multiple groups
+          (L2|L3|FLOPS_SP|FLOPS_DP): 3 failures out of 200 tests
+        - With hyperthreading, specifying multiple groups
+          (L2|L3|FLOPS_SP|FLOPS_DP): 12 failures out of 100 tests
+           - full output available here: https://pastebin.com/qcM34Rv6
+     - next, compiled with:
+       g++ likwid_minimal.c -L/usr/local/likwid-master/lib -I/usr/local/likwid-master/include -llikwid -mtune=native -fopenmp -o likwid_minimal
+       LD_LIBRARY_PATH=/usr/local/likwid-master/lib PATH=/usr/local/likwid-master/sbin:$PATH ./likwid_minimal_repeated.sh
+     - Results with likwid compiled from master branch (commit
+       99b0d23927f5e65cfa4eb5aeac1c57504395694b )
+       - No hyperthreading, specifying one group (L2): 0 failures out of 100
+         tests
+       - With hyperthreading, specifying one group (L2): 0 failures out of 100
+         tests
+       - No hyperthreading, specifying multiple groups
+         (L2|L3|FLOPS_SP|FLOPS_DP): 1 failure out of 100 tests
+       - With hyperthreading, specifying multiple groups
+         (L2|L3|FLOPS_SP|FLOPS_DP):5 failures out of 100 tests
+          - full output: https://pastebin.com/X5MwUVUq
+   - It seems to me that the problem is brought out by specifying multiple
+     groups, but that it is exacerbated by hyperthreading. That being said, I
+     do wonder if the hyperthreading problems have to do with intel (and the
+     associated spectre/meltdown problems), I will try to test on my personal
+     machine which uses an AMD processor.
+   - seems to be related to error below about "stopping non-started region"
+ - sometimes get "stopping non-started region _____"
+ - sometimes get errors like the following:
+   WARN: Skipping region double_flops-0 for evaluation.
+   WARN: Skipping region copy-0 for evaluation.
+   WARN: Regions are skipped because:
+         - The region was only registered
+         - The region was started but never stopped
+         - The region was never started but stopped
+ - [ ] convolution sometimes not instrumenting one region?
+   - noticed this also in fhv_minimal. Happens once every 10 executions or
+     so 
+   - compiler optimization?
 
 # 2020-05-17 through 2020-06-02
  - worked on visualization
@@ -284,6 +387,7 @@ Hardware Visualization
  - worked a LOT on likwid stability issues
    - wrote on this in README.md, under the heading "likwid stability
      issues". if I remove that section, it will be copied to this document.
+   - SECTION FROM README HAS BEEN COPIED INTO A HEADING ABOVE
  - wrote simpler convolution for testing other counters we can use
  - made polynomial expansion also have 4 different executable targets based on
    compile-time environment variables. 
