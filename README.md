@@ -22,6 +22,7 @@ assumed to be stable or correct.
   - [Immediate:](#immediate)
     - [Exploration](#exploration)
     - [Likwid stability issues](#likwid-stability-issues)
+      - [Past Notes](#past-notes)
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
@@ -140,6 +141,22 @@ over
      vectors are the biggest they can do)
 
 ### Likwid stability issues
+ - Next steps, things to check:
+   - file "src/perfmon.c": perfmon_startCounters(), perfmon_setupCounters(),
+     perfmon_stopCounters() are all used by likwid_markerNextGroup()
+   - file "src/libperfctr.c": likwid_markerStopRegion() produces the error
+     "WARN: Stopping an unknown/not-started region ..." 
+ - "WARN: Skipping region (null) for evaluation" messages:
+   - Tried printing results of computation, still had this error quite
+     frequently
+   - Figured this would prevent optimizing out computation, maybe it isn't?
+   - other options include: volatile, #pragma GCC optimize("O0")
+   - piping output of likwid_minimal to a file in the same directory
+     consistently produces a LOT of these errors
+   - doesn't happen when I output to /tmp/tmp.txt, which is on the same disk,
+     but a different partition
+
+#### Past Notes
  - [ ] counters sometimes reporting unreasonably high values
    - many examples [availble here](https://pastebin.com/u/rileyw13)
    - port counters sometimes reporting 1.8e19 for values
