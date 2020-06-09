@@ -4,6 +4,8 @@ Hardware Visualization
 
 - [Development Log](#development-log)
 - [Outstanding Questions](#outstanding-questions)
+  - [Top priority](#top-priority)
+  - [Secondary](#secondary)
   - [What new counters should we use?](#what-new-counters-should-we-use)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [Experiental results from comparing counters across polynomial and polynomial_block](#experiental-results-from-comparing-counters-across-polynomial-and-polynomial_block)
@@ -52,20 +54,34 @@ Hardware Visualization
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
 # Outstanding Questions
+## Top priority
+ - should we demonstrate change in behavior across many parameters? If so, how?
+   by an animation? Slider?
+   - should we incorporate this work with Yonghong's work in visualization?
+ - what new counters should we incorporate?
+
+## Secondary
  - should I visualize saturation on a per-core basis?
+   - I feel like this isn't necessary. Is there a case (besides if you forget
+     to make your code parallel) that some cores would be more utilized than
+     others? 
  - should I visualize double precision, single precision, or both?
    - currently picking the larger value (more saturated) and using that one
  - is there some way we can include execution parameters in the visualization?
    It's hard to keep track of how we generated the visualization
    - perhaps include a line that says "Command used to generate this
      visualization: <command>"
- - should we demonstrate change in behavior across many parameters? If so, how?
-   by an animation? Slider?
-   - should we incorporate this work with Yonghong's work in visualization?
 
 ## What new counters should we use?
  - BRANCH: might identify when code is not doing useful computation? Is it 
    fair to call branching "not useful"?
+ - CYCLE_STALLS: memory load reduced on optimized code for CPU-heavy params.
+   Load shifted from memory to cache on mem-heavy params. 
+   - Interpretation of this data kinda needs knowledge of whether you're
+     loading CPU or memory
+   - For instance: 45% memory stalls is pretty good for memory-heavy
+     parameters, but bad if we're expecting CPU to be loaded
+ - FALSE_SHARE: may represent locality of data access?
  - "Vectorization Ratio": a metric in the FLOPS_SP and FLOPS_DP groups that
    we are currently not using, but I think is valuable information.
 
@@ -73,6 +89,11 @@ Hardware Visualization
 # 2020-06-02 through 2020-06-09
  - wrote tests to experiment on polynomial_expansion with multiple perfgroups
  - inspected results (see next subheading)
+ - worked on fixing likwid stability issues
+   - also discovered workaround: don't use hyperthreading. This doesn't
+     completely eliminate non-deterministic behavior but it does greatly
+     alleviate it
+ - added optional, customizable parameter string to JSON output
 
 ## Experiental results from comparing counters across polynomial and polynomial_block
  - BRANCH perfgroup:
@@ -157,14 +178,31 @@ Hardware Visualization
    - basic code had about 1.0e12 loads, 3.3e11 stores
    - opt code had about 8.3e10 loads, 6.4e10 stores
  - DIVIDE
+   - DIVIDE, cpu-heavy:
+     - opt code had about 1/10th the number of divide ops
+     - ratio of ARITH_DIVIDER_ACTIVE to ARITH_DIVIDER_COUNT was about the same
+   - DIVIDE, mem-heavy:
+     - basic code had 2e7 divides, opt had 5e5. That's about 1/40th the number
+       of divides
+     - ratio was again about the same
  - ENERGY
+   - ENERGY, cpu-heavy
+     - power somewhat higher in all areas
+   - ENERGY, mem-heavy
+     - power somewhat higher in all areas, significantly higher (7x higher) 
+       for RAM
  - FALSE_SHARE
  - FLOPS_AVX
    - not super useful. Just gives a subset of information available in 
      FLOPS_SP and FLOPS_DP
+ - FLOPS_SP/FLOPS_DP vectorization ratio
+   - in both cpu- and mem-heavy cases, went from numbers in the order of 1e-10
+     (in basic) to 100 (in opt)
  - ICACHE
  - L2CACHE
  - L3CACHE
+ - PORT_USAGE*
+   - we record these already, but we don't use them in the visualization
  - RECOVERY
  - TLB_DATA
  - TLB_INSTR
@@ -182,7 +220,6 @@ Hardware Visualization
  - MEM - already used
  - MEM_DP - just mem + FLOPS_DP combined
  - MEM_SP - just mem + FLOPS_SP combined
- - PORT_USAGE* - already used
 
 # 2020-05-17 through 2020-06-02
  - worked on visualization
