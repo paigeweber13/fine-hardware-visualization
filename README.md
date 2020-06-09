@@ -22,7 +22,6 @@ assumed to be stable or correct.
   - [Immediate:](#immediate)
     - [Exploration](#exploration)
     - [Likwid stability issues](#likwid-stability-issues)
-      - [Past Notes](#past-notes)
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
@@ -82,21 +81,29 @@ What still works:
 # Usage Notes
  - Region names must not have spaces
  - Chapter 19 of volume 3 of the Intel software developer's manual (page 3605
-   in the combined digital version) has hardware counter names
+   in the combined digital version) has hardware counter names. This is useful
+   if you want to create custom performance groups
 
 # Goals:
 "I think we have a shot at doing something other people don't do" - Dr. Saule.
 
 So far it seems that nothing is designed to automatically identify and
-visualize the architecture by socket and within the core. Additionally, most of
-these tools are not easy to use.
+visualize the architecture by socket and within the core. Additionally, most 
+performance monitoring tools are not easy to use.
 
 We want people new to HPC to be able to 
  - understand how their code maps to their architecture
  - give suggestions on how to improve their application
 
-Additionally, we hope to apply this to graph problems: kernels in graph
-problems tend to change behavior throughout execution
+We want all programmers to
+ - visualize hardware usage automatically, without requiring the software to
+   have prior knowledge of hardware
+ - be able to understand complex, multi-stage applications in relation to
+   hardware. For example:
+   - kernels written for graph problems often change behavior part way through
+     execution. The computational requirements and bottlenecks shift.
+   - in image processing, there is frequently a mix of storage-intensive,
+     memory-intensive, and cpu-intensive computation.
 
 # Architecture of Program
  - [ ] Identify hardware architecture
@@ -108,6 +115,8 @@ problems tend to change behavior throughout execution
  - [x] Measure what actual utilization of memory/processor is
  - [x] Compare actual utilization with peak on an piece-by-piece basis
  - [x] Visualize that
+   - [ ] allow for visualizations with varying levels of detail: overview,
+         detailed core metrics, detailed cache metrics, etc.
 
 # Ownership and licensing
  - nlohmann/json is included with this repository under the MIT license. See
@@ -119,14 +128,65 @@ problems tend to change behavior throughout execution
  - you MUST pin threads
  - register parallel regions in parallel blocks
  - run likwid_markerThreadInit() in a parallel block
+ - run without hyperthreading (this alleviates but does not eliminate some of
+   the unreasonably high values and "stopping non-started region" errors that
+   happen)
 
 # TODO:
+Got a lot of guidance from Dr. Saule today. Will dump it here and sort it into
+immediate/long-term over the rest of today and tomorrow
+
+ - software engineering spaghetti
+   - spending some time refactoring makes sense
+   - refactor with a purpose
+   - typedef long names in performance_monitor
+   - split performance_monitor up by functionality
+   - fhv.cpp: organize hierarchically. Cairo: move code for core to separate
+     function, move code for RAM to separate function, etc.
+     - cairo is basically a stack machine with styles. Before making changes
+       can save current state (push) and then after making changes can revert
+       to previous state (pop)
+       - cairo_save(cr);, cairo_restore(cr); . Basically push/pop. Can inside a
+         block have more calls to these because it's a stack
+ - general time management
+   - don't switch back and forth between likwid and fhv. Pick one. fast context
+     switching is typically bad
+ - likwid stability issues
+   - is this an issue of likwid? or how I use it?
+   - spend a few hours identifying more about it, but don't dig into codebase
+   - likwid can only do some things, we may add other tools to be used
+     alongside. We may also 
+   - google summer of code may accept a project to fix likwid as an option for
+     a summer internship. If I'm interested.
+   - if it's something I could knock out in a couple weeks and then likwid
+     would be exactly what we need, it's perfect. But if this is going to take
+     months of work, maybe not
+
 ## Immediate:
- - [ ] more counters to visualize?
-   - [ ] basic polynomial expansion code has to be saturated somewhere... can
-         we find it?
-   - [ ] how can we incorporate vectorization ratio?
  - [ ] work on likwid stability issues
+   - [ ] how much time do I need to dedicate to fix it?
+ - [ ] improve software engineering
+ - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial block,
+       port4 (store data) is still the most saturated
+   - [ ] what happens if we increase degree past 100?
+ - [ ] more counters to visualize.
+   - [ ] quickly finish looking at all perfgroups
+   - [ ] Dr. Saule identified the following areas as key: 
+     - [ ] port usage
+     - [ ] instruction decoding: can you decode instructions quickly enough?
+     - [ ] micro-instruction retiring: can you fetch instructions quickly
+           enough? 
+ - [ ] explore how well fhv works with other kernels and codebases
+   - [ ] consider standard benchmarks
+   - [ ] Dr. Saule may be able to throw together some software that
+         demonstrates stress on more granular things like TLB or instruction
+         decoder
+ - [ ] start exploring different machines
+   - [ ] another skylake architecture with a different number of cores
+   - [ ] broadwell/haswell
+   - [ ] eventual goal is to have architecture detection totally automatic but
+         for now it's adequate to have a few sets of parameters hardcoded that
+         are selected automatically
  - [ ] add "command-used-to-generate" to json and svg
 
 Try to split time between likwid stability issues and finding more counters to
@@ -141,101 +201,18 @@ over
      vectors are the biggest they can do)
 
 ### Likwid stability issues
- - Next steps, things to check:
-   - file "src/perfmon.c": perfmon_startCounters(), perfmon_setupCounters(),
-     perfmon_stopCounters() are all used by likwid_markerNextGroup()
-   - file "src/libperfctr.c": likwid_markerStopRegion() produces the error
-     "WARN: Stopping an unknown/not-started region ..." 
- - "WARN: Skipping region (null) for evaluation" messages:
-   - Tried printing results of computation, still had this error quite
-     frequently
-   - Figured this would prevent optimizing out computation, maybe it isn't?
-   - other options include: volatile, #pragma GCC optimize("O0")
-   - piping output of likwid_minimal to a file in the same directory
-     consistently produces a LOT of these errors
-   - doesn't happen when I output to /tmp/tmp.txt, which is on the same disk,
-     but a different partition
-
-#### Past Notes
- - [ ] counters sometimes reporting unreasonably high values
-   - many examples [availble here](https://pastebin.com/u/rileyw13)
-   - port counters sometimes reporting 1.8e19 for values
-   - this also happens with many other counters
-   - reported this on the [likwid mailing
-     list](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ)
-     Currently working on fixing it.
-   - port_usage sometimes reporting 461375897600.000
-   - also noticed L3 bandwidth was in the order of 1e11 or so for an
-     execution of fhv_minimal in the double_flops region. This also doesn't
-     make sense
-     - this is the value reported by likwid, not a problem with my
-       post-processing. Ran a test to demonstrate this, where I printed the
-       result of `perfmon_get_MetricOfRegionThread` and then compared with
-       the value I stored in my map:
-     - L2 bandwidth: 8.33646e+16
-       per_thread_results for thread 38.33646e+16
-     - Wrote script to repeatedly run likwid_minimal. (see
-       `tests/likwid_minimal_repeated.sh`). With groups 
-       MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3 all
-       being measured, only 1/100 iterations produced output above 1e6. In
-       this case it was L3 bandwidth and volume
-     - increased number of tests to 200 and ran again. 14/200 failed, some
-       of this was unreasonably high output, and some of it was "skipping
-       region ___ " errors
-     - switched to the groups MEM|L2|L3|FLOPS_SP|FLOPS_DP and ran another
-       100 iterations. 4/100 had some kind of problem
-   - ran some tests with v4.3.4 and v5.0.1, on multiple groups and just one
-     group, and with hyperthreading enabled and disabled
-     - hyperthreading was disabled by selecting cores 0,1 in LIKWID_THREADS and
-       then setting the number of openMP threads to be 2
-     - First, compiling and running with the following commands:
-       g++ likwid_minimal.c -L/usr/local/likwid-v4.3.4/lib -I/usr/local/likwid-v4.3.4/include -llikwid -mtune=native -fopenmp -o likwid_minimal;
-       LD_LIBRARY_PATH=/usr/local/likwid-v4.3.4/lib PATH=/usr/local/likwid-v4.3.4/sbin:$PATH ./likwid_minimal_repeated.sh
-     - Results with likwid v4.3.4: 
-        - No hyperthreading, specifying one group (L2): 0 failures out of 100
-          tests
-        - With hyperthreading, specifying one group (L2): 0 failures out of 200
-          tests
-           - there was one case where I received the error "WARN: Skipping
-             region (null) for evaluation"
-        - No hyperthreading, specifying multiple groups
-          (L2|L3|FLOPS_SP|FLOPS_DP): 3 failures out of 200 tests
-        - With hyperthreading, specifying multiple groups
-          (L2|L3|FLOPS_SP|FLOPS_DP): 12 failures out of 100 tests
-           - full output available here: https://pastebin.com/qcM34Rv6
-     - next, compiled with:
-       g++ likwid_minimal.c -L/usr/local/likwid-master/lib -I/usr/local/likwid-master/include -llikwid -mtune=native -fopenmp -o likwid_minimal
-       LD_LIBRARY_PATH=/usr/local/likwid-master/lib PATH=/usr/local/likwid-master/sbin:$PATH ./likwid_minimal_repeated.sh
-     - Results with likwid compiled from master branch (commit
-       99b0d23927f5e65cfa4eb5aeac1c57504395694b )
-       - No hyperthreading, specifying one group (L2): 0 failures out of 100
-         tests
-       - With hyperthreading, specifying one group (L2): 0 failures out of 100
-         tests
-       - No hyperthreading, specifying multiple groups
-         (L2|L3|FLOPS_SP|FLOPS_DP): 1 failure out of 100 tests
-       - With hyperthreading, specifying multiple groups
-         (L2|L3|FLOPS_SP|FLOPS_DP):5 failures out of 100 tests
-          - full output: https://pastebin.com/X5MwUVUq
-   - It seems to me that the problem is brought out by specifying multiple
-     groups, but that it is exacerbated by hyperthreading. That being said, I
-     do wonder if the hyperthreading problems have to do with intel (and the
-     associated spectre/meltdown problems), I will try to test on my personal
-     machine which uses an AMD processor.
-   - seems to be related to error below about "stopping non-started region"
- - sometimes get "stopping non-started region _____"
- - sometimes get errors like the following:
-   WARN: Skipping region double_flops-0 for evaluation.
-   WARN: Skipping region copy-0 for evaluation.
-   WARN: Regions are skipped because:
-         - The region was only registered
-         - The region was started but never stopped
-         - The region was never started but stopped
- - [ ] convolution sometimes not instrumenting one region?
-   - noticed this also in fhv_minimal. Happens once every 10 executions or
-     so 
-   - compiler optimization?
-
+ - Investigate more what it would take to fix
+ - Is this a likwid issue or a usage issue?
+   - does the issue disappear when compiler optimization is removed?
+   - does the issue manifest in other kernels?
+   - does the issue manifest in the sample code in the likwid repository?
+ - decide how much time to spend on it
+ - some resources:
+   - I reported this on the [likwid mailing
+     list](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ).
+     There is also now a [github
+     issue](https://github.com/RRZE-HPC/likwid/issues/292) in the likwid
+     repository.
 
 ## Long-term:
 ### Problems to fix:
@@ -259,21 +236,22 @@ over
    - parameters which demonstrated higher saturation are: n=67108864 d=1
      nbiter=800
      
-
 ### Features to add:
  - talk to a visualization expert about how we can improve our visualization
- - when nothing is saturated, what do you do? Look in to helping this problem
  - combine benchmark in fhv with benchmark-likwid-vs-manual
    - rewrite computation_measurements to optionally include manual results
    - update CLI to optionally include manual results
- - expand suite of test software that has balanced/imbalanced usage
-   - consider standard benchmarks
  - improve benchmark
    - consider other benchmark tools (see ["architecture of program"
      section](#architecture-of-program))
    - have it check bandwidth for all types of memory/cache
    - have it check architecture to know what size of caches
    - have it populate architecture.h
+ - In some cases, color buses instead of components themselves
+   - RAM: read/write separately are useful. Also, this is easy to incorporate
+   - NUMA: This is the case where it's most important. There's potential for
+     the bus(es) between CPUs to be saturated, when it wouldn't be saturated if
+     it was memory directly to CPU
 
 ### Improve software engineering
  - make it consistent what calls likwid
