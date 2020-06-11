@@ -133,41 +133,16 @@ We want all programmers to
    happen)
 
 # TODO:
-Got a lot of guidance from Dr. Saule today. Will dump it here and sort it into
-immediate/long-term over the rest of today and tomorrow
-
- - software engineering spaghetti
-   - spending some time refactoring makes sense
-   - refactor with a purpose
-   - typedef long names in performance_monitor
-   - split performance_monitor up by functionality
-   - fhv.cpp: organize hierarchically. Cairo: move code for core to separate
-     function, move code for RAM to separate function, etc.
-     - cairo is basically a stack machine with styles. Before making changes
-       can save current state (push) and then after making changes can revert
-       to previous state (pop)
-       - cairo_save(cr);, cairo_restore(cr); . Basically push/pop. Can inside a
-         block have more calls to these because it's a stack
- - general time management
-   - don't switch back and forth between likwid and fhv. Pick one. fast context
-     switching is typically bad
- - likwid stability issues
-   - is this an issue of likwid? or how I use it?
-   - spend a few hours identifying more about it, but don't dig into codebase
-   - likwid can only do some things, we may add other tools to be used
-     alongside. We may also 
-   - google summer of code may accept a project to fix likwid as an option for
-     a summer internship. If I'm interested.
-   - if it's something I could knock out in a couple weeks and then likwid
-     would be exactly what we need, it's perfect. But if this is going to take
-     months of work, maybe not
-
 ## Immediate:
  - [ ] work on likwid stability issues
    - [ ] how much time do I need to dedicate to fix it?
- - [ ] improve software engineering
- - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial block,
-       port4 (store data) is still the most saturated
+   - [ ] is this a likwid issue or a usage issue?
+     - [ ] what if we use this on other code, or a likwid example? Or another
+           machine?
+     - [ ] google summer of code may accept a project to fix likwid as an
+           option for a summer internship. If I'm interested.
+ - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial
+       block, port4 (store data) is still the most saturated
    - [ ] what happens if we increase degree past 100?
  - [ ] more counters to visualize.
    - [ ] quickly finish looking at all perfgroups
@@ -176,6 +151,12 @@ immediate/long-term over the rest of today and tomorrow
      - [ ] instruction decoding: can you decode instructions quickly enough?
      - [ ] micro-instruction retiring: can you fetch instructions quickly
            enough? 
+ - [ ] improve software engineering
+   - [ ] typedef long names in performance_monitor
+   - [ ] fhv.cpp: split up cairo stuff hierarchically
+     - [ ] separate functions for different parts of diagram
+     - [ ] cairo_save/cairo_restore operate as a stack machine: you can
+           save/restore in a nested manner
  - [ ] explore how well fhv works with other kernels and codebases
    - [ ] consider standard benchmarks
    - [ ] Dr. Saule may be able to throw together some software that
