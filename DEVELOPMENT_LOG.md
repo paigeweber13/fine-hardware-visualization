@@ -3,11 +3,12 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [Outstanding Questions](#outstanding-questions)
-  - [Top priority](#top-priority)
-  - [Secondary](#secondary)
-  - [What new counters should we use?](#what-new-counters-should-we-use)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
+  - [This Week's Questions](#this-weeks-questions)
+    - [Top priority](#top-priority)
+    - [Secondary](#secondary)
+    - [What new counters should we use?](#what-new-counters-should-we-use)
   - [Experiential results from comparing counters across polynomial and polynomial_block](#experiential-results-from-comparing-counters-across-polynomial-and-polynomial_block)
     - [Counters we're already using](#counters-were-already-using)
   - [Likwid stability issues](#likwid-stability-issues)
@@ -54,14 +55,52 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# Outstanding Questions
-## Top priority
+# 2020-06-09 through 2020-06-16
+ - worked on fixing likwid; spent some time in the codebase with the goal of 
+   deciding how long it would take to fix everything
+   - Likwid's own examples don't work
+   - documentation is somewhat limited. There is doxygen-generated docs but
+     they aren't always helpful
+   - I don't think likwid has some inherent advantage over other tools like 
+     PAPI or perf_events. I may be able to fix this, but is it a better use of
+     time to just use a different tool?
+   - stepped away from resolving issue, but I will provide Thomas with any
+     information I can.
+   - while looking for alternatives to likwid, discovered a tool called 
+     [extrae](https://tools.bsc.es/extrae), which uses PAPI. I think PAPI
+     requires some serious investigation
+ - explored PAPI
+   - I think this is something we should seriously consider
+   - looked at duplicating existing saturation values and port_usage values
+   - High level API was giving me trouble... Specifying multiple events (even
+     events I was sure my arch supports) did not work at all. It would just do
+     the first event on the list.
+   - Will try low-level API next
+  
+# 2020-06-02 through 2020-06-09
+ - wrote tests to experiment on polynomial_expansion with multiple perfgroups
+ - inspected results (see subheading below)
+ - worked on fixing likwid stability issues
+   - also discovered workaround: don't use hyperthreading. This doesn't
+     completely eliminate non-deterministic behavior but it does greatly
+     alleviate it
+ - added optional, customizable parameter string to JSON output
+
+## This Week's Questions
+### Top priority
  - should we demonstrate change in behavior across many parameters? If so, how?
    by an animation? Slider?
    - should we incorporate this work with Yonghong's work in visualization?
+   -  this can happen later
  - what new counters should we incorporate?
+   - counters that help us determine:
+     - [ ] port usage: are we overloading one port and preventing others from 
+           being used?
+     - [ ] instruction decoding: can you decode instructions quickly enough?
+     - [ ] micro-instruction retiring: can you fetch instructions quickly
+           enough? 
 
-## Secondary
+### Secondary
  - should I visualize saturation on a per-core basis?
    - Dr. Saule: one of the use-cases might be to see load imbalance, so let's
      visualize per-core
@@ -81,7 +120,11 @@ Hardware Visualization
    - perhaps include a line that says "Command used to generate this
      visualization: <command>"
 
-## What new counters should we use?
+### What new counters should we use?
+Look for counters that demonstrate the three main things: port usage, 
+instruction decoding, and micro-instruction retiring. The stuff below was 
+considered and only remains for the purpose of logging past work
+
  - BRANCH: might identify when code is not doing useful computation? Is it 
    fair to call branching "not useful"?
  - CYCLE_STALLS: memory load reduced on optimized code for CPU-heavy params.
@@ -93,16 +136,6 @@ Hardware Visualization
  - FALSE_SHARE: may represent locality of data access?
  - "Vectorization Ratio": a metric in the FLOPS_SP and FLOPS_DP groups that
    we are currently not using, but I think is valuable information.
-
-  
-# 2020-06-02 through 2020-06-09
- - wrote tests to experiment on polynomial_expansion with multiple perfgroups
- - inspected results (see next subheading)
- - worked on fixing likwid stability issues
-   - also discovered workaround: don't use hyperthreading. This doesn't
-     completely eliminate non-deterministic behavior but it does greatly
-     alleviate it
- - added optional, customizable parameter string to JSON output
 
 ## Experiential results from comparing counters across polynomial and polynomial_block
  - BRANCH perfgroup:
