@@ -20,8 +20,6 @@ assumed to be stable or correct.
 - [How to improve likwid stability:](#how-to-improve-likwid-stability)
 - [TODO:](#todo)
   - [Immediate:](#immediate)
-    - [Exploration](#exploration)
-    - [Likwid stability issues](#likwid-stability-issues)
   - [Long-term:](#long-term)
     - [Problems to fix:](#problems-to-fix)
     - [Features to add:](#features-to-add)
@@ -134,19 +132,43 @@ We want all programmers to
 
 # TODO:
 ## Immediate:
- - [ ] work on likwid stability issues
-   - [ ] how much time do I need to dedicate to fix it?
-   - [ ] is this a likwid issue or a usage issue?
-     - [ ] what if we use this on other code, or a likwid example? Or another
-           machine?
+ - [x] work on likwid stability issues
+   - [x] how much time do I need to dedicate to fix it?
+     - Hard to estimate, but I think it's more than is worth our time
+   - [x] is this a likwid issue or a usage issue?
+     - likwid issue
+     - [x] what if we use this on other code?
+       - same issue happens with polynomial_expansion and convolution
+     - [x] without optimization?
+       - There is no optimization currently. setting -O0 to force no
+         optimization doesn't make a difference 
+     - [x] with a likwid example?
+       - can't even get them to work
+     - [ ] on another machine?
      - [ ] google summer of code may accept a project to fix likwid as an
            option for a summer internship. If I'm interested.
+ - [ ] moving forward despite likwid stability issues:
+   - [ ] warning for high values? And then don't count those in calculation?
+         just warn the user and allow them to disable the discounting?
+   - [ ] PAPI may be a better long term solution. Likwid doesn't seem to have a
+         strong API and seems to be a CLI first and foremost. Perhaps PAPI has
+         a better API?
+ - [ ] explore PAPI 
+   - [ ] make sure there are counters available for everything we want to do
+   - [ ] replicate FLOPS/bandwidth measurements
+   - [ ] replicate port usage measurements
+ - [ ] mem instructions retired * 32 bytes instead of 64
+   - this is because there are 2 32-byte busses?
+     [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
+   - this architecture only moves 32-bytes (probably because 32-byte
+     vectors are the biggest they can do)
  - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial
        block, port4 (store data) is still the most saturated
    - [ ] what happens if we increase degree past 100?
  - [ ] more counters to visualize.
    - [ ] quickly finish looking at all perfgroups
-   - [ ] Dr. Saule identified the following areas as key: 
+   - [ ] Dr. Saule identified the following areas as key. What counters and
+         perfgroups can help us identify performance in these areas?
      - [ ] port usage
      - [ ] instruction decoding: can you decode instructions quickly enough?
      - [ ] micro-instruction retiring: can you fetch instructions quickly
@@ -169,31 +191,6 @@ We want all programmers to
          for now it's adequate to have a few sets of parameters hardcoded that
          are selected automatically
  - [ ] add "command-used-to-generate" to json and svg
-
-Try to split time between likwid stability issues and finding more counters to
-visualize: maybe 2 hours of one before moving to the other, repeat until day is
-over
-
-### Exploration
- - [ ] mem instructions retired * 32 bytes instead of 64
-   - this is because there are 2 32-byte busses?
-     [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
-   - this architecture only moves 32-bytes (probably because 32-byte
-     vectors are the biggest they can do)
-
-### Likwid stability issues
- - Investigate more what it would take to fix
- - Is this a likwid issue or a usage issue?
-   - does the issue disappear when compiler optimization is removed?
-   - does the issue manifest in other kernels?
-   - does the issue manifest in the sample code in the likwid repository?
- - decide how much time to spend on it
- - some resources:
-   - I reported this on the [likwid mailing
-     list](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/likwid-users/m1ElsBTerfk/rHczVoFkBQAJ).
-     There is also now a [github
-     issue](https://github.com/RRZE-HPC/likwid/issues/292) in the likwid
-     repository.
 
 ## Long-term:
 ### Problems to fix:
