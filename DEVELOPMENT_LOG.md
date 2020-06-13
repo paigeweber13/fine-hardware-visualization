@@ -59,7 +59,7 @@ Hardware Visualization
  - worked on fixing likwid; spent some time in the codebase with the goal of 
    deciding how long it would take to fix everything
    - Likwid's own examples don't work
-   - documentation is somewhat limited. There is doxygen-generated docs but
+   - documentation is somewhat limited. There are doxygen-generated docs but
      they aren't always helpful
    - I don't think likwid has some inherent advantage over other tools like 
      PAPI or perf_events. I may be able to fix this, but is it a better use of
@@ -75,7 +75,25 @@ Hardware Visualization
    - High level API was giving me trouble... Specifying multiple events (even
      events I was sure my arch supports) did not work at all. It would just do
      the first event on the list.
-   - Will try low-level API next
+     - turns out HL API fails silently if a counter is not available...
+   - Low level api makes errors more clear
+   - still not able to meter both computation and cache/memory things at the
+     same time. Will investigate
+     - seems that PAPI binds to a "component" on PAPI_add_event or
+       PAPI_assign_eventset_component. See
+       https://bitbucket.org/icl/papi/wiki/PAPI-Multiplexing.md 
+     - solution is to just create two event sets. With multiple eventSets, is
+       it even necessary to use multiplexing?
+   - I complained a bit about LIKWID's lack of documentation... honestly PAPI
+     suffers from the same problem. Had to figure out about eventSets being
+     bound to components on my own.
+   - next questions:
+     - how do I use PAPI on multithreaded sections?
+     - how do I use native event sets?
+     - how difficult is it to switch event sets in like a for loop or
+       something?
+       - furthermore, how would this be used if we were to replace likwid
+         in fhv?
   
 # 2020-06-02 through 2020-06-09
  - wrote tests to experiment on polynomial_expansion with multiple perfgroups
