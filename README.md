@@ -147,16 +147,21 @@ We want all programmers to
      - [ ] on another machine?
      - [ ] google summer of code may accept a project to fix likwid as an
            option for a summer internship. If I'm interested.
- - [ ] moving forward despite likwid stability issues:
-   - [ ] warning for high values? And then don't count those in calculation?
-         just warn the user and allow them to disable the discounting?
-   - [ ] PAPI may be a better long term solution. Likwid doesn't seem to have a
-         strong API and seems to be a CLI first and foremost. Perhaps PAPI has
-         a better API?
  - [ ] explore PAPI 
    - [ ] make sure there are counters available for everything we want to do
    - [ ] replicate FLOPS/bandwidth measurements
    - [ ] replicate port usage measurements
+   - [ ] PAPI may be a better long term solution. Likwid doesn't seem to have a
+         strong API and seems to be a CLI first and foremost. Perhaps PAPI has
+         a better API?
+ - [ ] look at likwid-API (so far, I have been using marker API. )
+ - [ ] moving forward despite likwid stability issues:
+   - [ ] keep likwid, keep using markerAPI, and provide a warning for high
+         values? And then don't count those in calculation, but give the user
+         an option to count them despite the warning.
+   - [ ] consider pros and cons of replacing likwid
+     - [ ] assuming PAPI and likwidAPI are viable replacements, consider the
+           pros and cons of each
  - [ ] mem instructions retired * 32 bytes instead of 64
    - this is because there are 2 32-byte busses?
      [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
