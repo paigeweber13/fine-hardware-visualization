@@ -93,7 +93,7 @@ int main() {
   if ((tid = PAPI_thread_id()) == (unsigned long int)-1) 
     handle_error(1, "Got a bad thread id");
 
-  /* Create the Event Set */
+  /* Create the flops event set */
   thread_retval = PAPI_create_eventset(&ComputationEventSet);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While creating event set ComputationEventSet");
 
@@ -104,17 +104,25 @@ int main() {
   thread_retval = PAPI_add_event(ComputationEventSet, PAPI_DP_OPS);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While adding PAPI_DP_OPS");
   
+  /* native event */
+  // documentation: https://bitbucket.org/icl/papi/wiki/PAPI-Events.md#markdown-header-native-events
+
   // FP_ARITH_INST_RETIRED.SCALAR_DOUBLE
-  // event num: C7H
+  // event num: C7H (assuming this is hex, decimal equivalent is 199)
   // umask value: 01H
 
-  // event_code = 0xC7;
-  // thread_retval = PAPI_enum_event(&event_code, 0x01);
-  // if (thread_retval != PAPI_OK) handle_error(thread_retval, "While running PAPI_enum_event for 0xC7 and 0x01");
+  // but, according to `papi_avail -e PAPI_DP_OPS`, this counter has native
+  // code 0x40000021
 
-  // thread_retval = PAPI_add_event(ComputationEventSet, event_code);
-  // if (thread_retval != PAPI_OK) handle_error(thread_retval, "While running PAPI_enum_event for 0xC7 and 0x01");
+  // how do we reconcile this? There must be a way to map values in intel
+  // documentation to the native codes used by PAPI
 
+  event_code = 0x40000021;
+
+  thread_retval = PAPI_add_event(ComputationEventSet, event_code);
+  if (thread_retval != PAPI_OK) handle_error(thread_retval, "While running PAPI_enum_event for 0xC7 and 0x01");
+
+  /* memory event set */
   thread_retval = PAPI_create_eventset(&MemEventSet);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While creating event set MemEventSet");
 
