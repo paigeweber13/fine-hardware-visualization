@@ -4,6 +4,8 @@ Hardware Visualization
 
 - [Development Log](#development-log)
 - [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions)
+  - [Accomplishments](#accomplishments)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -56,6 +58,21 @@ Hardware Visualization
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
 # 2020-06-09 through 2020-06-16
+## Questions
+ - likwid marker API (already using) vs PAPI vs likwid perfmon API
+   (lower-level)
+   - IMO likwid marker API enables us to focus more on this research instead of
+     redoing the works of others, IF we can get the stability issues ironed out
+   - The nice thing about PAPI or the likwid perfmon api is that it gives us
+     more control. If something goes wrong, we are more likely to be able to
+     fix it. This comes at the cost of more work though.
+ - keep test results in github or somewhere else?
+ - planned next steps: 
+   - decide remain with likwid marker API or switch
+   - explore port usage and other counters for polynomial_expansion and
+     convolution 
+
+## Accomplishments
  - worked on fixing likwid; spent some time in the codebase with the goal of 
    deciding how long it would take to fix everything
    - Likwid's own examples don't work
@@ -64,11 +81,17 @@ Hardware Visualization
    - I don't think likwid has some inherent advantage over other tools like 
      PAPI or perf_events. I may be able to fix this, but is it a better use of
      time to just use a different tool?
-   - stepped away from resolving issue, but I will provide Thomas with any
-     information I can.
+     - LIKWID does do a lot of the work that I'd have to do otherwise with
+       PAPI, like timing code and calculating rates like FLOP/s
+   - I'm no longer digging through codebase to resolve this issue, but I will
+     provide Thomas with any information I can.
    - while looking for alternatives to likwid, discovered a tool called 
      [extrae](https://tools.bsc.es/extrae), which uses PAPI. I think PAPI
      requires some serious investigation
+   - tried to run likwid_minimal test on chameleon cloud. The unreasonably high
+     values problem became much, much more common. I believe this is because
+     since there are many threads, it is more likely that any given thread will
+     experience this problem
  - explored PAPI
    - I think this is something we should seriously consider
    - looked at duplicating existing saturation values and port_usage values
@@ -94,6 +117,24 @@ Hardware Visualization
        something?
        - furthermore, how would this be used if we were to replace likwid
          in fhv?
+ - explored Chameleon Cloud
+   - the [resource browser](https://www.chameleoncloud.org/hardware/) allows
+     you to see the information on the hardware you can allocate. 
+   - Skylake nodes:
+     - use Intel(R) Xeon(R) Gold 6126 CPU @ 2.60GHz cpus
+     - almost always have 48 threads. One node in UC only has 24.
+     - lists ram size as 205084688384. Assuming that is bytes, we're looking at
+       205 GB of ram in a node
+   - having trouble with likwid...
+     - when running likwid_minimal, get the following error:
+       `Warning: Counter PMC3 cannot be used if Restricted Transactional Memory feature is enabled and
+         bit 0 of register TSX_FORCE_ABORT is 0. As workaround write 0x1 to TSX_FORCE_ABORT:
+         sudo wrmsr 0x10f 0x1`
+     - running the command given (`sudo wrmsr 0x10f 0x1`) does not help
+     - FIXED! Had to add the `-a` flag to the command. This flag runs the
+       operation on all processors
+     - however, still get the same number of DP scalar ops as on my computer,
+       so results seem to be coming through just fine?
   
 # 2020-06-02 through 2020-06-09
  - wrote tests to experiment on polynomial_expansion with multiple perfgroups
