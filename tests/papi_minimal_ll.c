@@ -103,7 +103,7 @@ int main() {
 
   thread_retval = PAPI_add_event(ComputationEventSet, PAPI_DP_OPS);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While adding PAPI_DP_OPS");
-
+  
   // FP_ARITH_INST_RETIRED.SCALAR_DOUBLE
   // event num: C7H
   // umask value: 01H
@@ -141,7 +141,7 @@ int main() {
   thread_retval = PAPI_read(ComputationEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While reading ComputationEventSet");
 
-  printf("Thread %d, After reading the counters:\n", tid);
+  printf("Thread %lu, After reading the counters:\n", tid);
   print_values(values, num_values);
 
   /* Reset the counting events in the Event Set */
@@ -153,7 +153,7 @@ int main() {
   thread_retval = PAPI_read(ComputationEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While reading ComputationEventSet");
 
-  printf("Thread %d, After reading the counters, a second time:\n", tid);
+  printf("Thread %lu, After reading the counters, a second time:\n", tid);
   print_values(values, num_values);
   printf("Not doing a reset!\n");
 
@@ -164,7 +164,7 @@ int main() {
   thread_retval = PAPI_accum(ComputationEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While running PAPI_accum on ComputationEventSet");
 
-  printf("Thread %d, After adding the counters with PAPI_accum:\n", tid);
+  printf("Thread %lu, After adding the counters with PAPI_accum:\n", tid);
   print_values(values, num_values);
 
   do_flops(a, b, c, NUM_FLOPS);
@@ -173,7 +173,7 @@ int main() {
   thread_retval = PAPI_stop(ComputationEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While stopping ComputationEventSet");
 
-  printf("Thread %d, after stopping the counters:\n", tid);
+  printf("Thread %lu, after stopping the counters:\n", tid);
   print_values(values, num_values);
 
   // ========= MEM ========= //
@@ -189,7 +189,7 @@ int main() {
   thread_retval = PAPI_read(MemEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While reading MemEventSet");
 
-  printf("Thread %d, after reading the counters:\n", tid);
+  printf("Thread %lu, after reading the counters:\n", tid);
   print_values(values, num_values);
 
   /* Reset the counting events in the Event Set */
@@ -202,7 +202,7 @@ int main() {
   thread_retval = PAPI_accum(MemEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While runing PAPI_accum on MemEventSet");
 
-  printf("Thread %d, after adding the counters:\n", tid);
+  printf("Thread %lu, after adding the counters:\n", tid);
   print_values(values, num_values);
 
   do_copy(arr, copy_arr, n, NUM_COPIES);
@@ -211,7 +211,7 @@ int main() {
   thread_retval = PAPI_stop(MemEventSet, values);
   if (thread_retval != PAPI_OK) handle_error(thread_retval, "While stopping MemEventSet");
 
-  printf("Thread %d, after stopping the counters:\n", tid);
+  printf("Thread %lu, after stopping the counters:\n", tid);
   print_values(values, num_values);
 }
 
