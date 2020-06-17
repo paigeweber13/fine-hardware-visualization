@@ -1,6 +1,7 @@
 // based on "C-likwidAPI.c", available at:
 // https://github.com/RRZE-HPC/likwid/blob/v5.0.1/examples/C-likwidAPI.c
 
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -33,11 +34,15 @@ double do_flops(double a, double b, double c, ull num_flops) {
 }
 
 void handle_error(int error_code, char *message) {
-  printf("ERROR: %s\n", message);
-  printf("ERROR: got error code %d\n", error_code);
-  perfmon_finalize();
-  topology_finalize();
-  affinity_finalize();
+  if(omp_get_thread_num() == 0){
+    printf("ERROR: %s\n", message);
+    printf("ERROR: got error code %d\n", error_code);
+    perfmon_finalize();
+    topology_finalize();
+    affinity_finalize();
+  }
+
+#pragma omp barrier
   exit(error_code);
 }
 
@@ -115,7 +120,9 @@ int main(int argc, char *argv[]) {
               estrs[i]);
       handle_error(gids[i], error_string);
     }
+  }
 
+  for (i = 0; i < NUM_GROUPS; i++){
   // Setup the eventset identified by group ID (gid).
     err = perfmon_setupCounters(gids[i]);
     if (err < ERR_OK) {
@@ -130,17 +137,20 @@ int main(int argc, char *argv[]) {
     err = perfmon_startCounters();
     if (err < ERR_OK) {
       sprintf(error_string, 
-        "Failed to start counters for group %d for thread %d\n", gids[i],
-        (-1 * err) - 1);
+        "Failed to start counters for group %d. I am thread %d", gids[i],
+        omp_get_thread_num());
       handle_error(err, error_string);
     }
 
+#pragma omp parallel
+{
     // ---- Perform something ---- //
     printf("measuring group %d, %s\n", gids[i], perfmon_getGroupName(gids[i]));
     c = do_flops(a, b, c, NUM_FLOPS);
     do_copy(arr, copy_arr, n, NUM_COPIES);
     printf("c: %f\n", c);
     printf("copy_arr[c %% n]: %f\n", copy_arr[((size_t)c) % n]);
+}
 
     // Stop all counters in the previously started event set.
     err = perfmon_stopCounters();
@@ -185,16 +195,16 @@ int main(int argc, char *argv[]) {
           t, groupName, event_name, event_value);
       }
 
-      for (k = 0; k < perfmon_getNumberOfMetrics(gids[i]); k++){
-        metric_name = perfmon_getMetricName(gids[i], k);
-        metric_value = perfmon_getResult(gids[i], k, t);
-        if (metric_value > 1e6)
-        {
-          printf("WARNING: unreasonably high metric value detected\n");
-        }
-        printf("thread %d : group %s : metric %s : %f\n", 
-          t, groupName, metric_name, metric_value);
-      }
+      // for (k = 0; k < perfmon_getNumberOfMetrics(gids[i]); k++){
+      //   metric_name = perfmon_getMetricName(gids[i], k);
+      //   metric_value = perfmon_getResult(gids[i], k, t);
+      //   if (metric_value > 1e6)
+      //   {
+      //     printf("WARNING: unreasonably high metric value detected\n");
+      //   }
+      //   printf("thread %d : group %s : metric %s : %f\n", 
+      //     t, groupName, metric_name, metric_value);
+      // }
     }
   }
 
