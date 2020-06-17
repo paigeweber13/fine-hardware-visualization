@@ -132,36 +132,21 @@ We want all programmers to
 
 # TODO:
 ## Immediate:
- - [x] work on likwid stability issues
-   - [x] how much time do I need to dedicate to fix it?
-     - Hard to estimate, but I think it's more than is worth our time
-   - [x] is this a likwid issue or a usage issue?
-     - likwid issue
-     - [x] what if we use this on other code?
-       - same issue happens with polynomial_expansion and convolution
-     - [x] without optimization?
-       - There is no optimization currently. setting -O0 to force no
-         optimization doesn't make a difference 
-     - [x] with a likwid example?
-       - can't even get them to work
-     - [ ] on another machine?
-     - [ ] google summer of code may accept a project to fix likwid as an
-           option for a summer internship. If I'm interested.
- - [ ] explore PAPI 
-   - [ ] make sure there are counters available for everything we want to do
-   - [ ] replicate FLOPS/bandwidth measurements
-   - [ ] replicate port usage measurements
-   - [ ] PAPI may be a better long term solution. Likwid doesn't seem to have a
-         strong API and seems to be a CLI first and foremost. Perhaps PAPI has
-         a better API?
+ - [ ] work on likwid stability issues
+   - [ ] teleconference with Thomas to fix
+ - [ ] improve likwid documentation
+   - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
+     - [ ] update `./examples/C-internalMarkerAPI.c`
+     - [ ] write some wiki pages about general use (e.g. "There are three ways
+           to use likwid...")
+     - [ ] write test cases
+     - [ ] consider improving doxygen comments and writing man pages for usage
  - [ ] look at likwid-API (so far, I have been using marker API. )
+   - [ ] can I replicate likwid_minimal with the likwidAPI?
  - [ ] moving forward despite likwid stability issues:
-   - [ ] keep likwid, keep using markerAPI, and provide a warning for high
-         values? And then don't count those in calculation, but give the user
-         an option to count them despite the warning.
-   - [ ] consider pros and cons of replacing likwid
-     - [ ] assuming PAPI and likwidAPI are viable replacements, consider the
-           pros and cons of each
+   - [ ] If likwid API helps, use that. Otherwise
+   - [ ] Provide a warning for high values and then don't count those in
+         calculation.
  - [ ] mem instructions retired * 32 bytes instead of 64
    - this is because there are 2 32-byte busses?
      [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
@@ -199,6 +184,8 @@ We want all programmers to
 
 ## Long-term:
 ### Problems to fix:
+ - if we are continuing to warn users about unreasonably high values, give them
+   the option to disable the warning and count the values anyways
  - fix benchmark-likwid-vs-manual and thread_migration 
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
@@ -338,7 +325,7 @@ it. The benchmark tool should be evaluated, we can draw from it.
 
 ## TAU:
  - url: https://www.cs.uoregon.edu/research/tau/home.php 
- - [this tutoral](http://tau.uoregon.edu/tau.ppt) was helpful
+ - [this tutorial](http://tau.uoregon.edu/tau.ppt) was helpful
  - mentions a ["topology
    view"](https://www.cs.uoregon.edu/research/tau/docs/newguide/bk01pt02ch10s04.html)
    provided by ParaProf that visualizes how performance maps to architecture.
@@ -385,7 +372,7 @@ it. The benchmark tool should be evaluated, we can draw from it.
 
 ### Works by Martin Schultz:
  - see [their CV](https://www.in.tum.de/caps/mitarbeiter/martin-schulz),
-   specifically the section "journal publications". A few seem pertinient, such
+   specifically the section "journal publications". A few seem pertinent, such
    as:
    - "Visualization and analytics for characterizing complex memory performance
      behaviors"
