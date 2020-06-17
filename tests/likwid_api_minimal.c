@@ -42,16 +42,17 @@ void handle_error(int error_code, char *message) {
 }
 
 int main(int argc, char *argv[]) {
-  int i, j, k;
+  int i, j, k, t;
   int err;
   int *cpus;
   int gids[NUM_GROUPS];
   double result = 0.0;
   char * estrs[NUM_GROUPS];
   char l2_estr[] = "L2_LINES_IN_ALL:PMC0,L2_TRANS_L2_WB:PMC1";
-  char dp_estr[] = "FP_ARITH_INST_RETIRED_SCALAR_DOUBLE:PMC0,"
-    "FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE:PMC1,"
-    "FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE:PMC2";
+  char dp_estr[] = "FLOPS_DP";
+    // "FP_ARITH_INST_RETIRED_SCALAR_DOUBLE:PMC0,"
+    // "FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE:PMC1,"
+    // "FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE:PMC2";
   estrs[0] = l2_estr;
   estrs[1] = dp_estr;
   char error_string[256];
@@ -151,20 +152,52 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  for (k = 0; k < NUM_GROUPS; k++){
+  const char *groupName, *event_name, *metric_name;
+  double event_value, metric_value;
+
+  // for (k = 0; k < NUM_GROUPS; k++){
     // Print the result of every thread/CPU for all events in estr.
-    char *ptr = strtok(estrs[k], ",");
-    j = 0;
-    while (ptr != NULL) {
-      for (i = 0; i < topo->numHWThreads; i++) {
-        result = perfmon_getResult(gids[0], j, i);
-        printf("Measurement result for event set %s at CPU %d: %f\n", ptr,
-               cpus[i], result);
+    // char *ptr = strtok(estrs[k], ",");
+    // j = 0;
+    // while (ptr != NULL) {
+    //   for (i = 0; i < topo->numHWThreads; i++) {
+    //     result = perfmon_getResult(gids[0], j, i);
+    //     printf("Measurement result for event set %s at CPU %d: %f\n", ptr,
+    //            cpus[i], result);
+    //   }
+    //   ptr = strtok(NULL, ",");
+    //   j++;
+    // }
+  // }
+
+  for (i = 0; i < NUM_GROUPS; i++){
+    groupName = perfmon_getGroupName(i);
+    for (t = 0; t < topo->numHWThreads; t++){
+      for (k = 0; k < perfmon_getNumberOfEvents(gids[i]); k++){
+        // k is event id
+        event_name = perfmon_getEventName(gids[i], k);
+        event_value = perfmon_getResult(gids[i], k, t);
+        if (event_value > 1e15)
+        {
+          printf("WARNING: unreasonably high event value detected\n");
+        }
+        printf("thread %d : group %s : event %s : %f\n", 
+          t, groupName, event_name, event_value);
       }
-      ptr = strtok(NULL, ",");
-      j++;
+
+      for (k = 0; k < perfmon_getNumberOfMetrics(gids[i]); k++){
+        metric_name = perfmon_getMetricName(gids[i], k);
+        metric_value = perfmon_getResult(gids[i], k, t);
+        if (metric_value > 1e6)
+        {
+          printf("WARNING: unreasonably high metric value detected\n");
+        }
+        printf("thread %d : group %s : metric %s : %f\n", 
+          t, groupName, metric_name, metric_value);
+      }
     }
   }
+
 
   free(cpus);
   // Uninitialize the perfmon module.
