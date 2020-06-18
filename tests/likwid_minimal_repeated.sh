@@ -11,6 +11,12 @@
 # Counts the number of failures in num_iter iterations. Expects likwid_minimal
 # to only produce output when unreasonably high values are detected.
 
+# For some reason, the output sent to file is all on one line. To fix this,
+# after this command is finished running, I use the following command to add
+# newlines retroactively:
+
+# FILES='./*.txt' bash -c 'sed -i "s/ thread /\nthread /g" $FILES; sed -i "s/ DEBUG -/\nDEBUG -/g" $FILES; sed -i "s/ WARNING:/\nWARNING:/g" $FILES'
+
 num_iter=100
 num_failures=0
 
