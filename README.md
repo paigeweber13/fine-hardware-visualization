@@ -129,6 +129,16 @@ We want all programmers to
  - run without hyperthreading (this alleviates but does not eliminate some of
    the unreasonably high values and "stopping non-started region" errors that
    happen)
+ - run `likwid_markerNextGroup()` at the beginning of the for loop where you
+   do computation, before any calls to `likwid_markerStartRegion()`.
+ - try to avoid redirecting output of a program that uses likwid to a file.
+   This seems to cause many "WARN: Region <region> was already started" and
+   "WARN: Stopping an unknown/not-started region <regon>" errors. Workarounds
+   include: 
+   - instead, pipe output to `less`
+   - in a script, do something like `output = $(./program_that_uses_likwid);
+     output > data/output.txt`
+   - outputting to `/tmp` sometimes avoids this problem
 
 # TODO:
 ## Immediate:
