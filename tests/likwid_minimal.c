@@ -17,24 +17,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void copy(double * arr, double * copy_arr, size_t n){
-  for (size_t i = 0; i < n; i++){
-    copy_arr[i] = arr[i];
+// #define NUM_FLOPS 10000000
+#define NUM_FLOPS 100000000
+// #define NUM_COPIES 1000
+#define NUM_COPIES 100000
+
+typedef unsigned long long ull;
+
+void do_copy(double *arr, double *copy_arr, size_t n, ull num_copies) {
+  for (ull iter = 0; iter < num_copies; iter++) {
+    for (size_t i = 0; i < n; i++) {
+      copy_arr[i] = arr[i];
+    }
   }
 }
+
+double do_flops(double a, double b, double c, ull num_flops) {
+  for (ull i = 0; i < num_flops; i++) {
+    c = a * b + c;
+  }
+  return c;
+}
+
 
 int main()
 {
   int num_threads;
   const char *filepath = "/tmp/likwid.out";
 
+  #define NUM_GROUPS 4
   setenv("LIKWID_EVENTS",
         //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
         //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP",
         //  "L2",
          "L2|L3|FLOPS_SP|FLOPS_DP",
          1);
-  setenv("LIKWID_MODE", "1", 1);
+  setenv("LIKWID_MODE", "1", 1); // 1 is code for accesDaemon
   setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
   setenv("LIKWID_FORCE", "1", 1);
   setenv("LIKWID_DEBUG", "3", 1); // verbosity of debug output
@@ -46,7 +64,7 @@ int main()
   num_threads = 4;
   setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
 
-  remove(filepath);
+  remove(filepath); // just in case file is left over from a previous run 
   omp_set_num_threads(num_threads);
 
   likwid_markerInit();
@@ -64,7 +82,7 @@ int main()
   double a, b, c;
   a = 1.8;
   b = 3.2;
-  c = 0.0;
+  c = 1.0;
 
   size_t n = 256;
   double arr[n];
@@ -74,30 +92,26 @@ int main()
   {
     for (int j = 0; j < 8; j++)
     {
-      likwid_markerStartRegion("double_flops");
 #pragma omp barrier
-      for (int i = 0; i < 10000000; i++)
-      {
-        c = a * b + c;
-      }
+      likwid_markerStartRegion("double_flops");
+      do_flops(a, b, c, NUM_FLOPS);
 #pragma omp barrier
       likwid_markerStopRegion("double_flops");
+// #pragma omp barrier // doesn't seem to help
       likwid_markerStartRegion("copy");
-      for (int i = 0; i < 1000; i++){
-        copy(arr, copy_arr, n);
-      }
+      do_copy(arr, copy_arr, n, NUM_COPIES);
 #pragma omp barrier
       likwid_markerStopRegion("copy");
+#pragma omp barrier
       likwid_markerNextGroup();
     }
   }
 
   likwid_markerClose();
 
-  // these values are meaningless; the print is used to computation and copies
-  // aren't optimized away
-  // printf("c = %f, copy_arr[0] = %f\n", 
-  //   c, copy_arr[0]);
+  // these values are meaningless; the print is used to ensure computation and
+  // copies aren't optimized away 
+  printf("c = %f, copy_arr[c %% n] = %f\n", c, copy_arr[((size_t)c) % n]);
 
   perfmon_readMarkerFile(filepath);
 
@@ -137,6 +151,6 @@ int main()
   }
 
   // not removing filepath afterwards so I can optionally inspect it manually
-  // remove(filepath);
+  remove(filepath);
 
 }
