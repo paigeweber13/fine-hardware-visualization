@@ -3,6 +3,7 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
+- [2020-06-16 through 2020-06-23](#2020-06-16-through-2020-06-23)
 - [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
@@ -57,7 +58,24 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-06-16 through 2020-06-23
+- explored likwid-api. If we do decide to move away from the marker API, I
+  think this is what we should choose. 
+  - see `tests/likwid_api_minimal.c`
+  - single-threaded applications with multiple groups do not have the
+    unreasonably-high values problem
+  - this is not a definitive result: multi-threaded code must still be tested
+  - allows us to take advantage of perfgroups (at least the events, I have not
+    got metrics to work yet. I believe the problem comes from not having a
+    correct runtime)
+- seems that running `likwid_markerNextGroup()` BEFORE starting groups prevents
+  the unreasonably high values we've been seeing. That may be a workaround for
+  now. 
+
 # 2020-06-09 through 2020-06-16
+We've decided to continue using likwid at this point, but PAPI may prove useful
+in the future.
+
 ## Questions
  - likwid marker API (already using) vs PAPI vs likwid perfmon API
    (lower-level)
@@ -117,6 +135,9 @@ Hardware Visualization
        something?
        - furthermore, how would this be used if we were to replace likwid
          in fhv?
+   - majority of events would be native events, which are difficult to find the
+     codes for. There is probably a map function that we can repeatedly use but
+     I haven't figured it out yet
  - explored Chameleon Cloud
    - the [resource browser](https://www.chameleoncloud.org/hardware/) allows
      you to see the information on the hardware you can allocate. 
@@ -292,7 +313,8 @@ considered and only remains for the purpose of logging past work
    - ENERGY, mem-heavy
      - power somewhat higher in all areas, significantly higher (7x higher) 
        for RAM
- - FALSE_SHARE
+ - TODO: expand sections after this one
+ - FALSE_SHARE 
    - uses two counters: MEM_INST_RETIRED_ALL (all memory instructions) and 
      MEM_LOAD_L3_HIT_RETIRED.XSNP_HITM. Description in intel docs says: 
      "Retired load instructions which data sources were HitM responses from 
@@ -464,7 +486,7 @@ considered and only remains for the purpose of logging past work
      `examples/polynomial_expansion/data/block_optimized_likwid_2020-05-01_1448.csv`.
      However, now I can't replicate those results??? I'm getting saturation of
      about 0.039 for L3 and 0.082 for RAM
-     - trying higher values for parameters (e.g. `polyomial_block_likwid
+     - trying higher values for parameters (e.g. `polynomial_block_likwid
        100000000 1 10`) yielded slightly better saturation, but nothing close
        to the `.4` I got before. Results were an L3 saturation of  0.043 and
        RAM saturation of 0.130.
@@ -530,7 +552,8 @@ Bad:
  - something is 1.0 but other things are 0.0
  - everything is 0.0 
 
-What if red denotes overuse, gray denotes underuse, and green denotes ideal use
+What if red denotes overuse, gray denotes under-use, and green denotes ideal
+use
 
 This sounds like the last point, where more saturation means more intensity of
 color, but difference in saturation denotes green or red
@@ -553,7 +576,7 @@ Green -> Red would be 125 -> 0
  - fixed geometric mean on metrics
  - confirmed changes to performance_monitor still seems to match manual
    benchmark and make sense
-   - this was not very rigorous, we still need unittests at some point.
+   - this was not very rigorous, we still need unit tests at some point.
    - checked that benchmark without comparison still saturates, it does
    - manually counted the number of flops in fhv_minimal, performance_monitor
      output matches. 
@@ -641,7 +664,7 @@ Main points:
  - making the number of iterations a multiple of the number of groups
    *sometimes* fixes the preceding problem.
    - this only works sometimes, and seems to work more frequently with lower
-     numbers of groups (the max number of groups I've been able to successfuly
+     numbers of groups (the max number of groups I've been able to successfully
      do is 6). In general, it feels very non-deterministic and it's very
      frustrating. 
    - needs more investigation now that bug has been fixed
@@ -661,7 +684,7 @@ Main points:
  - improved likwid_minimal
    - behavior changes if I compile with gcc or g++: maybe copy is getting
      optimized out?
- - between `benchamrk`, `benchmark-likwid-vs-manual`, `thread_migration`, and
+ - between `benchmark`, `benchmark-likwid-vs-manual`, `thread_migration`, and
    `convolution` there is a LOT to change whenever I make changes to
    performance_monitor. For now I'm going to leave them broken and just update
    fhv_minimal. If we use them in the future I think I'm going to switch to
@@ -682,7 +705,7 @@ Not to mention actually building this library
 
 ## Playing with likwid_minimal.c
 Through the likwid-users group, I discovered that you have to put barriers
-betwen stop/start regions
+between stop/start regions
 
 Noticed some really weird behavior. 
  - reproduced bug in convolution where if I supply too many groups, program
@@ -844,7 +867,7 @@ Inspected assembly. Summary of findings:
  - I realized when using intrinsics, I was trying to use intrinsic for aligned
    values at unaligned addresses. What is the behavior when this happens?
  - when using operator=, volumes reported by likwid are higher and closer to
-   manually calculated vallues
+   manually calculated values
 
 ```
 vmovapd	(%r14,%rax,8), %ymm0	# MEM[base: array_12, index: j_31, step: 8, offset: 0B], _22
@@ -874,7 +897,7 @@ of complicated jump statements and likwid reports the same number of retired
 instructions so it's probably still just two per loop. 
 
 Strangely, memory volume as reported by likwid was higher in L3 and Memory when
-using direct assignment instead of the instrinsic. These higher values were
+using direct assignment instead of the intrinsic. These higher values were
 closer to calculated volumes. Why?
 
 ## For the final 3 iterations:
@@ -909,7 +932,7 @@ Name: Memory data volume [GBytes], dtype: float64
 # 2020-03-17 through 2020-03-24
 ## Memory
  - MEM_INST_RETIRED_ALL_LOAD/STORE count all retired load/store instructions,
-   respecitvely. See Table 19-3 of "Performance monitoring events" in intel
+   respectively. See Table 19-3 of "Performance monitoring events" in intel
    developer's guide
  - using these to get load/store ratios gave us ratios of 4-6x reads to writes
    (see `tests/mem_volume_through_cache_load_to_store.png`)
