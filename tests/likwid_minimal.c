@@ -7,7 +7,7 @@
 // https://github.com/RRZE-HPC/likwid/issues/292 
 
 // can be compiled with
-// `g++ likwid_minimal.c -L/path/to/likwid/lib -march=native -mtune=native -fopenmp -llikwid -o likwid_minimal`
+// `gcc likwid_minimal.c -L/path/to/likwid/lib -march=native -mtune=native -fopenmp -llikwid -o likwid_minimal`
 
 // and ran with
 // `LD_LIBRARY_PATH=/path/to/likwid/lib PATH=/path/to/likwid/sbin:$PATH ./likwid_minimal`
@@ -45,7 +45,6 @@ int main()
   int num_threads;
   const char *filepath = "/tmp/likwid.out";
 
-  #define NUM_GROUPS 4
   setenv("LIKWID_EVENTS",
         //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
         //  "MEM|L2|L3|FLOPS_SP|FLOPS_DP",
@@ -95,12 +94,10 @@ int main()
 #pragma omp barrier
       likwid_markerStartRegion("double_flops");
       do_flops(a, b, c, NUM_FLOPS);
-#pragma omp barrier
       likwid_markerStopRegion("double_flops");
-// #pragma omp barrier // doesn't seem to help
+#pragma omp barrier
       likwid_markerStartRegion("copy");
       do_copy(arr, copy_arr, n, NUM_COPIES);
-#pragma omp barrier
       likwid_markerStopRegion("copy");
 #pragma omp barrier
       likwid_markerNextGroup();
