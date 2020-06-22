@@ -122,15 +122,17 @@ We want all programmers to
  - this repository is licensed under GNU GPL v3 (see `LICENSE`)
 
 # How to improve likwid stability:
- - put barriers (#pragma omp barrier) between regions in parallel code
  - you MUST pin threads
  - register parallel regions in parallel blocks
  - run likwid_markerThreadInit() in a parallel block
- - run without hyperthreading (this alleviates but does not eliminate some of
-   the unreasonably high values and "stopping non-started region" errors that
-   happen)
- - run `likwid_markerNextGroup()` at the beginning of the for loop where you
-   do computation, before any calls to `likwid_markerStartRegion()`.
+ - put `#pragma omp barrier` before calls to `likwid_markerNextGroup`. This
+   seems to dramatically reduce the number of occurrences of the unreasonably
+   high values bug. It may even prevent this bug from occurring, I have yet to
+   see a case where this bug manifests with the barrier in place.
+ - put `#pragma omp barrier` before each `likwid_markerStartRegion` call and
+   after each `likwid_markerStopRegion` call. This helps prevent "WARNING:
+   stopping an unknown/non-started region <region>" and "WARNING: Region
+   <region> was already started"
  - try to avoid redirecting output of a program that uses likwid to a file.
    This seems to cause many "WARN: Region <region> was already started" and
    "WARN: Stopping an unknown/not-started region <regon>" errors. Workarounds
@@ -142,21 +144,6 @@ We want all programmers to
 
 # TODO:
 ## Immediate:
- - [ ] work on likwid stability issues
-   - [ ] teleconference with Thomas to fix
- - [ ] improve likwid documentation
-   - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
-     - [ ] update `./examples/C-internalMarkerAPI.c`
-     - [ ] write some wiki pages about general use (e.g. "There are three ways
-           to use likwid...")
-     - [ ] write test cases
-     - [ ] consider improving doxygen comments and writing man pages for usage
- - [ ] look at likwid-API (so far, I have been using marker API. )
-   - [ ] can I replicate likwid_minimal with the likwidAPI?
- - [ ] moving forward despite likwid stability issues:
-   - [ ] If likwid API helps, use that. Otherwise
-   - [ ] Provide a warning for high values and then don't count those in
-         calculation.
  - [ ] mem instructions retired * 32 bytes instead of 64
    - this is because there are 2 32-byte busses?
      [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
@@ -191,6 +178,17 @@ We want all programmers to
          for now it's adequate to have a few sets of parameters hardcoded that
          are selected automatically
  - [ ] add "command-used-to-generate" to json and svg
+ - [ ] work on likwid stability issues
+   - [ ] BLOCKED: waiting to hear back from Thomas
+   - [ ] teleconference with Thomas to fix
+ - [ ] improve likwid documentation
+   - [ ] BLOCKED: waiting to hear back from Thomas
+   - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
+     - [ ] update `./examples/C-internalMarkerAPI.c`
+     - [ ] write some wiki pages about general use (e.g. "There are three ways
+           to use likwid...")
+     - [ ] write test cases
+     - [ ] consider improving doxygen comments and writing man pages for usage
 
 ## Long-term:
 ### Problems to fix:
