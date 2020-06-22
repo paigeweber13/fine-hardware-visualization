@@ -68,9 +68,16 @@ Hardware Visualization
   - allows us to take advantage of perfgroups (at least the events, I have not
     got metrics to work yet. I believe the problem comes from not having a
     correct runtime)
-- seems that running `likwid_markerNextGroup()` BEFORE starting groups prevents
-  the unreasonably high values we've been seeing. That may be a workaround for
-  now. 
+- workaround discovered for unreasonably large values bug: add `#pragma omp
+  barrier` before call to `likwid_markerNextGroup`
+- fhv performance_monitor now ignores large values and warns the user about
+  them 
+- added barriers to fhv performance_monitor calls (seems to improve stability
+  of using fhv wrapper)
+  - using fhv start/stopRegion and nextGroup: went 410 iterations without
+    having any problems. Final iteration showed unreasonably high values.
+  - also using fhv init: went 400 iterations, then gave up. No problems
+    detected during those iterations
 
 # 2020-06-09 through 2020-06-16
 We've decided to continue using likwid at this point, but PAPI may prove useful
@@ -138,6 +145,9 @@ in the future.
    - majority of events would be native events, which are difficult to find the
      codes for. There is probably a map function that we can repeatedly use but
      I haven't figured it out yet
+   - another benefit of PAPI is that it supports multiplexing, which would
+     allow for multiple performance groups to be measured during one run of the
+     key code
  - explored Chameleon Cloud
    - the [resource browser](https://www.chameleoncloud.org/hardware/) allows
      you to see the information on the hardware you can allocate. 
