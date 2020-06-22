@@ -49,7 +49,7 @@ int main()
   b = 3.2;
   c = 0.0;
 
-  size_t n = 256;
+  size_t n = 2048;
   double arr[n];
   double copy_arr[n];
 
@@ -62,16 +62,18 @@ int main()
 #pragma omp barrier
       for (int i = 0; i < 10000000; i++)
       {
-        // 1e7 scalar double floating point operations per iteration
+        // 2e7 scalar double floating point operations per iteration
         c = a * b + c;
       }
 #pragma omp barrier
       likwid_markerStopRegion("double_flops");
       likwid_markerStartRegion("copy");
-      for (int i = 0; i < 1000; i++){
+      for (int i = 0; i < 10000; i++){
         copy(arr, copy_arr, n);
       }
-#pragma omp barrier
+// if this barrier is left out, some threads are missing and cause problems
+// with the "per thread results" (port usage values) when printing highlights
+#pragma omp barrier 
       likwid_markerStopRegion("copy");
       likwid_markerNextGroup();
     }
@@ -86,7 +88,7 @@ int main()
   // performance_monitor::printRegionGroupEventAndMetricData();
 
   performance_monitor::buildResultsMaps();
-  // performance_monitor::printDetailedResults();
+  performance_monitor::printDetailedResults();
   // performance_monitor::printOnlyAggregate();
 
   performance_monitor::compareActualWithBench();
@@ -97,6 +99,6 @@ int main()
   performance_monitor::resultsToJson();
 
   std::cout << "\n";
-  performance_monitor::printCsvHeader();
-  performance_monitor::printCsvOutput();
+  // performance_monitor::printCsvHeader();
+  // performance_monitor::printCsvOutput();
 }

@@ -11,6 +11,7 @@
 #include <nlohmann/json.hpp>
 #include <omp.h>
 #include <sstream>
+#include <stdexcept>
 #include <stdlib.h>
 #include <string>
 
@@ -18,6 +19,10 @@
 #include "likwid_defines.hpp"
 
 // magic numbers
+// this is the value that seems to always come up in the likwid unreasonably
+// high values bug (see https://github.com/RRZE-HPC/likwid/issues/292 )
+#define EVENT_VALUE_ERROR_THRESHOLD 1.84467e19 
+#define METRIC_VALUE_ERROR_THRESHOLD 1e10 
 #define ACCESSMODE_DAEMON "1"
 #define ACCESSMODE_DIRECT "0"
 #define MFLOPS_TO_TFLOPS 1e-6
@@ -26,6 +31,7 @@
 
 // keywords
 #define perfmon_output_envvar "FHV_OUTPUT"
+#define perfmon_keep_large_values_envvar "FHV_KEEP_LARGE_VALUES"
 #define total_sp_flops_event_name "total sp flops"
 // #define group_sum_by_region_keyword "group_sum_by_region"
 #define all_groups_keyword "all_groups"

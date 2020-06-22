@@ -33,7 +33,7 @@ std::map<std::string, std::map<std::string, double>>
 int performance_monitor::num_threads;
 
 // filenames
-const std::string performance_monitor::likwidOutputFilepath = "/tmp/test_marker.out";
+const std::string performance_monitor::likwidOutputFilepath = "/tmp/likwid_marker.out";
 const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
 
 // saturation metrics
@@ -246,12 +246,14 @@ performance_monitor::init(const char * event_group,
 
 void performance_monitor::startRegion(const char * tag)
 {
+#pragma omp barrier
   likwid_markerStartRegion(tag);
 }
 
 void performance_monitor::stopRegion(const char * tag)
 {
   likwid_markerStopRegion(tag);
+#pragma omp barrier
 
   int nevents = 20;
   double events[nevents];
@@ -271,6 +273,7 @@ void performance_monitor::stopRegion(const char * tag)
 }
 
 void performance_monitor::nextGroup(){
+#pragma omp barrier
   likwid_markerNextGroup();
 }
 
@@ -310,9 +313,9 @@ void performance_monitor::buildResultsMaps()
 {
   // int gid, num_threads;
   int gid;
-  float event_value, metric_value;
+  float event_value = -1, metric_value = -1;
   const char *event_name, *metric_name, * groupName, * regionName;
-
+  bool keep_event, keep_metric;
 
 #pragma omp parallel
   {
@@ -364,7 +367,30 @@ void performance_monitor::buildResultsMaps()
         // event_name = perfmon_getCounterName(gid, k);
         event_name = perfmon_getEventName(gid, k);
         event_value = perfmon_getResultOfRegionThread(i, k, t);
-        if(event_value > 0){
+        keep_event = true;
+
+        if(event_value >= EVENT_VALUE_ERROR_THRESHOLD){
+          if(!std::getenv(perfmon_keep_large_values_envvar)){
+            std::cout << "WARNING: unreasonably high event value detected:"
+              << std::endl
+              << "Thread: '" << t << "'" << std::endl
+              << "Region: '" << regionName << "'" << std::endl
+              << "Group:  '" << groupName << "'" << std::endl
+              << "Event:  '" << event_name << "'" << std::endl
+              << "Value:  '" << event_value << "'" << std::endl
+              << std::endl
+              << "This event will be discarded. We will try to detect all "
+              << "metrics associated with this event, but do not guarantee to "
+              << "catch all of them." << std::endl
+              << std::endl
+              << "To disable detection and removal of 'unreasonably' high "
+              << "values, set the environment variable '" 
+              << perfmon_keep_large_values_envvar << "'." << std::endl
+              << std::endl;
+            keep_event = false;
+          }
+        }
+        if(event_value > 0 && keep_event){
           aggregate_results[sum][event][regionName][groupName][event_name] 
             += event_value;
           aggregate_results[geometric_mean][event][regionName][groupName]
@@ -392,7 +418,26 @@ void performance_monitor::buildResultsMaps()
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
-        if(!isnan(metric_value)){
+        keep_metric = true;
+
+        if(metric_value >= METRIC_VALUE_ERROR_THRESHOLD){
+          if(!std::getenv(perfmon_keep_large_values_envvar)){
+            std::cout << "WARNING: unreasonably high metric value detected:"
+              << std::endl
+              << "Thread: '" << t << "'" << std::endl
+              << "Region: '" << regionName << "'" << std::endl
+              << "Group:  '" << groupName << "'" << std::endl
+              << "Metric: '" << metric_name << "'" << std::endl
+              << "Value:  '" << metric_value << "'" << std::endl
+              << std::endl
+              << "This metric will be discarded. To disable detection and "
+              << "removal of 'unreasonably' high values, set the environment "
+              << "variable '" << perfmon_keep_large_values_envvar << "'." 
+              << std::endl << std::endl;
+            keep_metric = false;
+          }
+        }
+        if(!isnan(metric_value) && keep_metric){
           aggregate_results[sum][metric][regionName][groupName][metric_name]
             += metric_value;
           aggregate_results[geometric_mean][metric][regionName][groupName]
@@ -789,6 +834,8 @@ void performance_monitor::printHighlights(){
   // {
   //   num_threads = omp_get_num_threads();
   // }
+
+  std::stringstream delayed_errors;
   
   // "thread #" is of length 8, so 8 is the smallest width possible while
   // maintaining pretty formatting
@@ -824,11 +871,22 @@ void performance_monitor::printHighlights(){
 
           for (int t = 0; t < num_threads; t++)
           {
-            metric_value = per_thread_results.at(metric)
-              .at(t)
-              .at(region.first)
-              .at(group.first)
-              .at(key_metric);
+            try {
+              metric_value = per_thread_results.at(metric)
+                .at(t)
+                .at(region.first)
+                .at(group.first)
+                .at(key_metric);
+            }
+            catch (std::out_of_range& e){
+              delayed_errors << "WARN: unable to access "
+                << "per_thread_results[metric]" 
+                << "[" << t << "]"
+                << "[" << region.first << "]"
+                << "[" << group.first << "]"
+                << "[" << key_metric << "]" << std::endl;
+              metric_value = NAN;
+            }
 
             std::cout << " "
                       << std::setprecision(3) 
@@ -842,6 +900,7 @@ void performance_monitor::printHighlights(){
       }
     }
   }
+  std::cout << delayed_errors.str();
 
   std::cout << "\n";
 

@@ -1,0 +1,881 @@
+This is a minimal example of how the fhv performance_monitor aggregation prints work thread 1, iteration 0 thread 2, iteration 0 thread 3, iteration 0 thread 0, iteration 0 thread 1, iteration 1 thread 0, iteration 1 thread 2, iteration 1 thread 3, iteration 1 thread 2, iteration 2 thread 0, iteration 2 thread 3, iteration 2 thread 1, iteration 2 thread 2, iteration 3 thread 0, iteration 3 thread 1, iteration 3 thread 3, iteration 3 thread 1, iteration 4 thread 0, iteration 4 thread 2, iteration 4 thread 3, iteration 4 thread 0, iteration 5 thread 2, iteration 5 thread 1, iteration 5 thread 3, iteration 5 thread 0, iteration 6 thread 1, iteration 6 thread 2, iteration 6 thread 3, iteration 6 thread 0, iteration 7 thread 2, iteration 7 thread 1, iteration 7 thread 3, iteration 7 final c: 515611520.063087 final random part of copy_arr: 0.000000
+
+WARNING: unreasonably high event value detected: Thread: '2' Region: 'double_flops' Group: 'L2' Event: 'L1D_M_EVICT' Value: '1.84467e+19' This event will be discarded. We will try to detect all metrics associated with this event, but do not guarantee to catch all of them. To disable detection and removal of 'unreasonably' high values, set the environment variable 'FHV_KEEP_LARGE_VALUES'.
+
+WARNING: unreasonably high metric value detected: Thread: '2' Region: 'double_flops' Group: 'L2' Metric: 'L2D evict bandwidth [MBytes/s]' Value: '1.07532e+16' This metric will be discarded. To disable detection and removal of 'unreasonably' high values, set the environment variable 'FHV_KEEP_LARGE_VALUES'.
+
+WARNING: unreasonably high metric value detected: Thread: '2' Region: 'double_flops' Group: 'L2' Metric: 'L2D evict data volume [GBytes]' Value: '1.18059e+12' This metric will be discarded. To disable detection and removal of 'unreasonably' high values, set the environment variable 'FHV_KEEP_LARGE_VALUES'.
+
+WARNING: unreasonably high metric value detected: Thread: '2' Region: 'double_flops' Group: 'L2' Metric: 'L2 bandwidth [MBytes/s]' Value: '1.07532e+16' This metric will be discarded. To disable detection and removal of 'unreasonably' high values, set the environment variable 'FHV_KEEP_LARGE_VALUES'.
+
+WARNING: unreasonably high metric value detected: Thread: '2' Region: 'double_flops' Group: 'L2' Metric: 'L2 data volume [GBytes]' Value: '1.18059e+12' This metric will be discarded. To disable detection and removal of 'unreasonably' high values, set the environment variable 'FHV_KEEP_LARGE_VALUES'. ----- Detailed performance_monitor report -----
+event : thread 0 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 2.13265e+08
+event : thread 0 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 1.83982e+08
+event : thread 0 : region copy : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 10
+event : thread 0 : region copy : group FLOPS_DP : INSTR_RETIRED_ANY : 3.0765e+08
+event : thread 0 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 2.19906e+08
+event : thread 0 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 1.89712e+08
+event : thread 0 : region copy : group FLOPS_SP : INSTR_RETIRED_ANY : 3.07912e+08
+event : thread 0 : region copy : group L2 : CPU_CLK_UNHALTED_CORE : 2.14812e+08
+event : thread 0 : region copy : group L2 : CPU_CLK_UNHALTED_REF : 1.85317e+08
+event : thread 0 : region copy : group L2 : ICACHE_64B_IFTAG_MISS : 14436
+event : thread 0 : region copy : group L2 : INSTR_RETIRED_ANY : 3.07706e+08
+event : thread 0 : region copy : group L2 : L1D_M_EVICT : 25104
+event : thread 0 : region copy : group L2 : L1D_REPLACEMENT : 2.138e+06
+event : thread 0 : region copy : group L3 : CPU_CLK_UNHALTED_CORE : 2.1462e+08
+event : thread 0 : region copy : group L3 : CPU_CLK_UNHALTED_REF : 1.85151e+08
+event : thread 0 : region copy : group L3 : INSTR_RETIRED_ANY : 3.07982e+08
+event : thread 0 : region copy : group L3 : L2_LINES_IN_ALL : 2.36165e+06
+event : thread 0 : region copy : group L3 : L2_TRANS_L2_WB : 8499
+event : thread 0 : region copy : group MEM : CPU_CLK_UNHALTED_CORE : 2.13578e+08
+event : thread 0 : region copy : group MEM : CPU_CLK_UNHALTED_REF : 1.84252e+08
+event : thread 0 : region copy : group MEM : DRAM_READS : 88793
+event : thread 0 : region copy : group MEM : DRAM_WRITES : 4254
+event : thread 0 : region copy : group MEM : INSTR_RETIRED_ANY : 3.0767e+08
+event : thread 0 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 2.13604e+08
+event : thread 0 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 1.84275e+08
+event : thread 0 : region copy : group PORT_USAGE1 : INSTR_RETIRED_ANY : 3.0767e+08
+event : thread 0 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 3.02422e+07
+event : thread 0 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 3.73573e+07
+event : thread 0 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 8.51768e+07
+event : thread 0 : region copy : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 7.80087e+08
+event : thread 0 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 2.13194e+08
+event : thread 0 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 1.83921e+08
+event : thread 0 : region copy : group PORT_USAGE2 : INSTR_RETIRED_ANY : 3.076e+08
+event : thread 0 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 8.8584e+07
+event : thread 0 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 4.28058e+07
+event : thread 0 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 3.81199e+07
+event : thread 0 : region copy : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 7.80934e+08
+event : thread 0 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 2.13843e+08
+event : thread 0 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 1.84482e+08
+event : thread 0 : region copy : group PORT_USAGE3 : INSTR_RETIRED_ANY : 3.07649e+08
+event : thread 0 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 5.93952e+07
+event : thread 0 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 3.2158e+07
+event : thread 0 : region copy : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 7.79673e+08
+event : thread 0 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 3.17462e+08
+event : thread 0 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 2.73851e+08
+event : thread 0 : region double_flops : group FLOPS_DP : FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE : 6
+event : thread 0 : region double_flops : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 2.00001e+07
+event : thread 0 : region double_flops : group FLOPS_DP : INSTR_RETIRED_ANY : 1.10631e+08
+event : thread 0 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 3.20174e+08
+event : thread 0 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 2.76212e+08
+event : thread 0 : region double_flops : group FLOPS_SP : INSTR_RETIRED_ANY : 1.10593e+08
+event : thread 0 : region double_flops : group L2 : CPU_CLK_UNHALTED_CORE : 3.16589e+08
+event : thread 0 : region double_flops : group L2 : CPU_CLK_UNHALTED_REF : 2.7312e+08
+event : thread 0 : region double_flops : group L2 : ICACHE_64B_IFTAG_MISS : 12114
+event : thread 0 : region double_flops : group L2 : INSTR_RETIRED_ANY : 1.12088e+08
+event : thread 0 : region double_flops : group L2 : L1D_M_EVICT : 1259
+event : thread 0 : region double_flops : group L2 : L1D_REPLACEMENT : 1.67341e+06
+event : thread 0 : region double_flops : group L3 : CPU_CLK_UNHALTED_CORE : 3.15975e+08
+event : thread 0 : region double_flops : group L3 : CPU_CLK_UNHALTED_REF : 2.7259e+08
+event : thread 0 : region double_flops : group L3 : INSTR_RETIRED_ANY : 1.10806e+08
+event : thread 0 : region double_flops : group L3 : L2_LINES_IN_ALL : 2.18434e+06
+event : thread 0 : region double_flops : group L3 : L2_TRANS_L2_WB : 3054
+event : thread 0 : region double_flops : group MEM : CPU_CLK_UNHALTED_CORE : 3.37725e+08
+event : thread 0 : region double_flops : group MEM : CPU_CLK_UNHALTED_REF : 4.43146e+08
+event : thread 0 : region double_flops : group MEM : DRAM_READS : 640232
+event : thread 0 : region double_flops : group MEM : DRAM_WRITES : 113331
+event : thread 0 : region double_flops : group MEM : INSTR_RETIRED_ANY : 1.12702e+08
+event : thread 0 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 3.22436e+08
+event : thread 0 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 2.78164e+08
+event : thread 0 : region double_flops : group PORT_USAGE1 : INSTR_RETIRED_ANY : 1.1185e+08
+event : thread 0 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 2.94724e+07
+event : thread 0 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 2.89446e+07
+event : thread 0 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 4.5177e+07
+event : thread 0 : region double_flops : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 4.02538e+08
+event : thread 0 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 3.23406e+08
+event : thread 0 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 2.79001e+08
+event : thread 0 : region double_flops : group PORT_USAGE2 : INSTR_RETIRED_ANY : 1.12241e+08
+event : thread 0 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 4.54937e+07
+event : thread 0 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 2.46508e+07
+event : thread 0 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 1.85283e+07
+event : thread 0 : region double_flops : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 4.03308e+08
+event : thread 0 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 3.2477e+08
+event : thread 0 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 2.80178e+08
+event : thread 0 : region double_flops : group PORT_USAGE3 : INSTR_RETIRED_ANY : 1.12034e+08
+event : thread 0 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 3.61092e+07
+event : thread 0 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 1.87503e+07
+event : thread 0 : region double_flops : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 4.02592e+08
+event : thread 1 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 2.13584e+08
+event : thread 1 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 1.84258e+08
+event : thread 1 : region copy : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 10
+event : thread 1 : region copy : group FLOPS_DP : INSTR_RETIRED_ANY : 3.07508e+08
+event : thread 1 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 2.17484e+08
+event : thread 1 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 1.8762e+08
+event : thread 1 : region copy : group FLOPS_SP : FP_ARITH_INST_RETIRED_SCALAR_SINGLE : 24
+event : thread 1 : region copy : group FLOPS_SP : INSTR_RETIRED_ANY : 3.08855e+08
+event : thread 1 : region copy : group L2 : CPU_CLK_UNHALTED_CORE : 2.14814e+08
+event : thread 1 : region copy : group L2 : CPU_CLK_UNHALTED_REF : 1.85319e+08
+event : thread 1 : region copy : group L2 : ICACHE_64B_IFTAG_MISS : 15031
+event : thread 1 : region copy : group L2 : INSTR_RETIRED_ANY : 3.07517e+08
+event : thread 1 : region copy : group L2 : L1D_M_EVICT : 33833
+event : thread 1 : region copy : group L2 : L1D_REPLACEMENT : 2.1847e+06
+event : thread 1 : region copy : group L3 : CPU_CLK_UNHALTED_CORE : 2.15182e+08
+event : thread 1 : region copy : group L3 : CPU_CLK_UNHALTED_REF : 1.85637e+08
+event : thread 1 : region copy : group L3 : INSTR_RETIRED_ANY : 3.07656e+08
+event : thread 1 : region copy : group L3 : L2_LINES_IN_ALL : 2.38016e+06
+event : thread 1 : region copy : group L3 : L2_TRANS_L2_WB : 7090
+event : thread 1 : region copy : group MEM : CPU_CLK_UNHALTED_CORE : 2.14145e+08
+event : thread 1 : region copy : group MEM : CPU_CLK_UNHALTED_REF : 1.84741e+08
+event : thread 1 : region copy : group MEM : INSTR_RETIRED_ANY : 3.07572e+08
+event : thread 1 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 2.13432e+08
+event : thread 1 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 1.84126e+08
+event : thread 1 : region copy : group PORT_USAGE1 : INSTR_RETIRED_ANY : 3.07603e+08
+event : thread 1 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 3.73114e+07
+event : thread 1 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 4.22797e+07
+event : thread 1 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 8.48712e+07
+event : thread 1 : region copy : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 7.79824e+08
+event : thread 1 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 2.13084e+08
+event : thread 1 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 1.83827e+08
+event : thread 1 : region copy : group PORT_USAGE2 : INSTR_RETIRED_ANY : 3.07431e+08
+event : thread 1 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 8.86471e+07
+event : thread 1 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 4.8957e+07
+event : thread 1 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 4.31267e+07
+event : thread 1 : region copy : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 7.78366e+08
+event : thread 1 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 2.13794e+08
+event : thread 1 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 1.84439e+08
+event : thread 1 : region copy : group PORT_USAGE3 : INSTR_RETIRED_ANY : 3.07443e+08
+event : thread 1 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 6.07817e+07
+event : thread 1 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 3.22159e+07
+event : thread 1 : region copy : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 7.80439e+08
+event : thread 1 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 3.17469e+08
+event : thread 1 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 2.73845e+08
+event : thread 1 : region double_flops : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 2e+07
+event : thread 1 : region double_flops : group FLOPS_DP : INSTR_RETIRED_ANY : 1.10197e+08
+event : thread 1 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 3.18393e+08
+event : thread 1 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 2.74676e+08
+event : thread 1 : region double_flops : group FLOPS_SP : FP_ARITH_INST_RETIRED_SCALAR_SINGLE : 4
+event : thread 1 : region double_flops : group FLOPS_SP : INSTR_RETIRED_ANY : 1.11239e+08
+event : thread 1 : region double_flops : group L2 : CPU_CLK_UNHALTED_CORE : 3.15588e+08
+event : thread 1 : region double_flops : group L2 : CPU_CLK_UNHALTED_REF : 2.72161e+08
+event : thread 1 : region double_flops : group L2 : ICACHE_64B_IFTAG_MISS : 26452
+event : thread 1 : region double_flops : group L2 : INSTR_RETIRED_ANY : 1.11709e+08
+event : thread 1 : region double_flops : group L2 : L1D_M_EVICT : 4587
+event : thread 1 : region double_flops : group L2 : L1D_REPLACEMENT : 1.71791e+06
+event : thread 1 : region double_flops : group L3 : CPU_CLK_UNHALTED_CORE : 3.141e+08
+event : thread 1 : region double_flops : group L3 : CPU_CLK_UNHALTED_REF : 2.70973e+08
+event : thread 1 : region double_flops : group L3 : INSTR_RETIRED_ANY : 1.10144e+08
+event : thread 1 : region double_flops : group L3 : L2_LINES_IN_ALL : 2.19673e+06
+event : thread 1 : region double_flops : group L3 : L2_TRANS_L2_WB : 6611
+event : thread 1 : region double_flops : group MEM : CPU_CLK_UNHALTED_CORE : 3.37399e+08
+event : thread 1 : region double_flops : group MEM : CPU_CLK_UNHALTED_REF : 4.43874e+08
+event : thread 1 : region double_flops : group MEM : INSTR_RETIRED_ANY : 1.13626e+08
+event : thread 1 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 3.21692e+08
+event : thread 1 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 2.77522e+08
+event : thread 1 : region double_flops : group PORT_USAGE1 : INSTR_RETIRED_ANY : 1.10189e+08
+event : thread 1 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 3.07149e+07
+event : thread 1 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 3.01298e+07
+event : thread 1 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 4.70319e+07
+event : thread 1 : region double_flops : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 4.07866e+08
+event : thread 1 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 3.2033e+08
+event : thread 1 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 2.76347e+08
+event : thread 1 : region double_flops : group PORT_USAGE2 : INSTR_RETIRED_ANY : 1.11408e+08
+event : thread 1 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 4.74879e+07
+event : thread 1 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 2.73042e+07
+event : thread 1 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 2.14079e+07
+event : thread 1 : region double_flops : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 4.1459e+08
+event : thread 1 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 3.23311e+08
+event : thread 1 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 2.78919e+08
+event : thread 1 : region double_flops : group PORT_USAGE3 : INSTR_RETIRED_ANY : 1.17574e+08
+event : thread 1 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 3.95178e+07
+event : thread 1 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 2.06615e+07
+event : thread 1 : region double_flops : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 4.14553e+08
+event : thread 2 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 2.1434e+08
+event : thread 2 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 1.8491e+08
+event : thread 2 : region copy : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 10
+event : thread 2 : region copy : group FLOPS_DP : INSTR_RETIRED_ANY : 3.07651e+08
+event : thread 2 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 2.20613e+08
+event : thread 2 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 1.90322e+08
+event : thread 2 : region copy : group FLOPS_SP : FP_ARITH_INST_RETIRED_SCALAR_SINGLE : 5
+event : thread 2 : region copy : group FLOPS_SP : INSTR_RETIRED_ANY : 3.08078e+08
+event : thread 2 : region copy : group L2 : CPU_CLK_UNHALTED_CORE : 2.14708e+08
+event : thread 2 : region copy : group L2 : CPU_CLK_UNHALTED_REF : 1.85228e+08
+event : thread 2 : region copy : group L2 : ICACHE_64B_IFTAG_MISS : 43014
+event : thread 2 : region copy : group L2 : INSTR_RETIRED_ANY : 3.07849e+08
+event : thread 2 : region copy : group L2 : L1D_M_EVICT : 24326
+event : thread 2 : region copy : group L2 : L1D_REPLACEMENT : 1.69876e+06
+event : thread 2 : region copy : group L3 : CPU_CLK_UNHALTED_CORE : 2.15218e+08
+event : thread 2 : region copy : group L3 : CPU_CLK_UNHALTED_REF : 1.85668e+08
+event : thread 2 : region copy : group L3 : INSTR_RETIRED_ANY : 3.08174e+08
+event : thread 2 : region copy : group L3 : L2_LINES_IN_ALL : 2.47648e+06
+event : thread 2 : region copy : group L3 : L2_TRANS_L2_WB : 7081
+event : thread 2 : region copy : group MEM : CPU_CLK_UNHALTED_CORE : 2.14427e+08
+event : thread 2 : region copy : group MEM : CPU_CLK_UNHALTED_REF : 1.84985e+08
+event : thread 2 : region copy : group MEM : INSTR_RETIRED_ANY : 3.07655e+08
+event : thread 2 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 2.1385e+08
+event : thread 2 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 1.84486e+08
+event : thread 2 : region copy : group PORT_USAGE1 : INSTR_RETIRED_ANY : 3.07637e+08
+event : thread 2 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 3.02627e+07
+event : thread 2 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 3.73552e+07
+event : thread 2 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 8.51701e+07
+event : thread 2 : region copy : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 7.80723e+08
+event : thread 2 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 2.12512e+08
+event : thread 2 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 1.83333e+08
+event : thread 2 : region copy : group PORT_USAGE2 : INSTR_RETIRED_ANY : 3.07638e+08
+event : thread 2 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 8.86115e+07
+event : thread 2 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 4.28106e+07
+event : thread 2 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 3.81095e+07
+event : thread 2 : region copy : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 7.79494e+08
+event : thread 2 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 2.1417e+08
+event : thread 2 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 1.84762e+08
+event : thread 2 : region copy : group PORT_USAGE3 : INSTR_RETIRED_ANY : 3.07726e+08
+event : thread 2 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 5.94332e+07
+event : thread 2 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 3.21243e+07
+event : thread 2 : region copy : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 7.80739e+08
+event : thread 2 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 3.17227e+08
+event : thread 2 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 2.7367e+08
+event : thread 2 : region double_flops : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 2e+07
+event : thread 2 : region double_flops : group FLOPS_DP : INSTR_RETIRED_ANY : 1.10437e+08
+event : thread 2 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 3.1941e+08
+event : thread 2 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 2.75517e+08
+event : thread 2 : region double_flops : group FLOPS_SP : INSTR_RETIRED_ANY : 1.10526e+08
+event : thread 2 : region double_flops : group L2 : CPU_CLK_UNHALTED_CORE : 3.17094e+08
+event : thread 2 : region double_flops : group L2 : CPU_CLK_UNHALTED_REF : 2.73524e+08
+event : thread 2 : region double_flops : group L2 : ICACHE_64B_IFTAG_MISS : 78
+event : thread 2 : region double_flops : group L2 : INSTR_RETIRED_ANY : 1.12008e+08
+event : thread 2 : region double_flops : group L2 : L1D_REPLACEMENT : 237664
+event : thread 2 : region double_flops : group L3 : CPU_CLK_UNHALTED_CORE : 3.15725e+08
+event : thread 2 : region double_flops : group L3 : CPU_CLK_UNHALTED_REF : 2.72334e+08
+event : thread 2 : region double_flops : group L3 : INSTR_RETIRED_ANY : 1.107e+08
+event : thread 2 : region double_flops : group L3 : L2_LINES_IN_ALL : 2.1767e+06
+event : thread 2 : region double_flops : group L3 : L2_TRANS_L2_WB : 656
+event : thread 2 : region double_flops : group MEM : CPU_CLK_UNHALTED_CORE : 3.36331e+08
+event : thread 2 : region double_flops : group MEM : CPU_CLK_UNHALTED_REF : 4.42569e+08
+event : thread 2 : region double_flops : group MEM : INSTR_RETIRED_ANY : 1.18436e+08
+event : thread 2 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 3.2253e+08
+event : thread 2 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 2.78246e+08
+event : thread 2 : region double_flops : group PORT_USAGE1 : INSTR_RETIRED_ANY : 1.11675e+08
+event : thread 2 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 2.95711e+07
+event : thread 2 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 2.89842e+07
+event : thread 2 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 4.51717e+07
+event : thread 2 : region double_flops : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 4.03221e+08
+event : thread 2 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 3.21677e+08
+event : thread 2 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 2.77479e+08
+event : thread 2 : region double_flops : group PORT_USAGE2 : INSTR_RETIRED_ANY : 1.12014e+08
+event : thread 2 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 4.54894e+07
+event : thread 2 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 2.45973e+07
+event : thread 2 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 1.84154e+07
+event : thread 2 : region double_flops : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 4.02658e+08
+event : thread 2 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 3.23509e+08
+event : thread 2 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 2.78984e+08
+event : thread 2 : region double_flops : group PORT_USAGE3 : INSTR_RETIRED_ANY : 1.11999e+08
+event : thread 2 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 3.61403e+07
+event : thread 2 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 1.8686e+07
+event : thread 2 : region double_flops : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 4.01967e+08
+event : thread 3 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 2.136e+08
+event : thread 3 : region copy : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 1.84271e+08
+event : thread 3 : region copy : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 10
+event : thread 3 : region copy : group FLOPS_DP : INSTR_RETIRED_ANY : 3.07446e+08
+event : thread 3 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 2.19258e+08
+event : thread 3 : region copy : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 1.89152e+08
+event : thread 3 : region copy : group FLOPS_SP : INSTR_RETIRED_ANY : 3.12091e+08
+event : thread 3 : region copy : group L2 : CPU_CLK_UNHALTED_CORE : 2.14414e+08
+event : thread 3 : region copy : group L2 : CPU_CLK_UNHALTED_REF : 1.84974e+08
+event : thread 3 : region copy : group L2 : ICACHE_64B_IFTAG_MISS : 10961
+event : thread 3 : region copy : group L2 : INSTR_RETIRED_ANY : 3.07468e+08
+event : thread 3 : region copy : group L2 : L1D_M_EVICT : 32651
+event : thread 3 : region copy : group L2 : L1D_REPLACEMENT : 1.77708e+06
+event : thread 3 : region copy : group L3 : CPU_CLK_UNHALTED_CORE : 2.15311e+08
+event : thread 3 : region copy : group L3 : CPU_CLK_UNHALTED_REF : 1.85748e+08
+event : thread 3 : region copy : group L3 : INSTR_RETIRED_ANY : 3.08389e+08
+event : thread 3 : region copy : group L3 : L2_LINES_IN_ALL : 2.45016e+06
+event : thread 3 : region copy : group L3 : L2_TRANS_L2_WB : 5787
+event : thread 3 : region copy : group MEM : CPU_CLK_UNHALTED_CORE : 2.13868e+08
+event : thread 3 : region copy : group MEM : CPU_CLK_UNHALTED_REF : 1.84502e+08
+event : thread 3 : region copy : group MEM : INSTR_RETIRED_ANY : 3.07455e+08
+event : thread 3 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 2.13808e+08
+event : thread 3 : region copy : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 1.84451e+08
+event : thread 3 : region copy : group PORT_USAGE1 : INSTR_RETIRED_ANY : 3.07484e+08
+event : thread 3 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 3.73599e+07
+event : thread 3 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 4.2335e+07
+event : thread 3 : region copy : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 8.48375e+07
+event : thread 3 : region copy : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 7.80872e+08
+event : thread 3 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 2.13929e+08
+event : thread 3 : region copy : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 1.84556e+08
+event : thread 3 : region copy : group PORT_USAGE2 : INSTR_RETIRED_ANY : 3.07462e+08
+event : thread 3 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 8.86485e+07
+event : thread 3 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 4.90271e+07
+event : thread 3 : region copy : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 4.32186e+07
+event : thread 3 : region copy : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 7.80954e+08
+event : thread 3 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 2.13766e+08
+event : thread 3 : region copy : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 1.84415e+08
+event : thread 3 : region copy : group PORT_USAGE3 : INSTR_RETIRED_ANY : 3.07426e+08
+event : thread 3 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 6.08466e+07
+event : thread 3 : region copy : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 3.22365e+07
+event : thread 3 : region copy : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 7.80314e+08
+event : thread 3 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_CORE : 3.15943e+08
+event : thread 3 : region double_flops : group FLOPS_DP : CPU_CLK_UNHALTED_REF : 2.72563e+08
+event : thread 3 : region double_flops : group FLOPS_DP : FP_ARITH_INST_RETIRED_SCALAR_DOUBLE : 2e+07
+event : thread 3 : region double_flops : group FLOPS_DP : INSTR_RETIRED_ANY : 1.10038e+08
+event : thread 3 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_CORE : 3.18261e+08
+event : thread 3 : region double_flops : group FLOPS_SP : CPU_CLK_UNHALTED_REF : 2.74562e+08
+event : thread 3 : region double_flops : group FLOPS_SP : INSTR_RETIRED_ANY : 1.10214e+08
+event : thread 3 : region double_flops : group L2 : CPU_CLK_UNHALTED_CORE : 3.15388e+08
+event : thread 3 : region double_flops : group L2 : CPU_CLK_UNHALTED_REF : 2.72084e+08
+event : thread 3 : region double_flops : group L2 : ICACHE_64B_IFTAG_MISS : 258064
+event : thread 3 : region double_flops : group L2 : INSTR_RETIRED_ANY : 1.16369e+08
+event : thread 3 : region double_flops : group L2 : L1D_M_EVICT : 15019
+event : thread 3 : region double_flops : group L2 : L1D_REPLACEMENT : 298873
+event : thread 3 : region double_flops : group L3 : CPU_CLK_UNHALTED_CORE : 3.14452e+08
+event : thread 3 : region double_flops : group L3 : CPU_CLK_UNHALTED_REF : 2.71275e+08
+event : thread 3 : region double_flops : group L3 : INSTR_RETIRED_ANY : 1.10045e+08
+event : thread 3 : region double_flops : group L3 : L2_LINES_IN_ALL : 2.18413e+06
+event : thread 3 : region double_flops : group L3 : L2_TRANS_L2_WB : 2432
+event : thread 3 : region double_flops : group MEM : CPU_CLK_UNHALTED_CORE : 3.18068e+08
+event : thread 3 : region double_flops : group MEM : CPU_CLK_UNHALTED_REF : 3.80449e+08
+event : thread 3 : region double_flops : group MEM : INSTR_RETIRED_ANY : 1.10194e+08
+event : thread 3 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_CORE : 3.21074e+08
+event : thread 3 : region double_flops : group PORT_USAGE1 : CPU_CLK_UNHALTED_REF : 2.76989e+08
+event : thread 3 : region double_flops : group PORT_USAGE1 : INSTR_RETIRED_ANY : 1.10043e+08
+event : thread 3 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_0 : 3.07652e+07
+event : thread 3 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_1 : 3.0145e+07
+event : thread 3 : region double_flops : group PORT_USAGE1 : UOPS_DISPATCHED_PORT_PORT_2 : 4.70716e+07
+event : thread 3 : region double_flops : group PORT_USAGE1 : UOPS_EXECUTED_CORE : 4.07307e+08
+event : thread 3 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_CORE : 3.19874e+08
+event : thread 3 : region double_flops : group PORT_USAGE2 : CPU_CLK_UNHALTED_REF : 2.75954e+08
+event : thread 3 : region double_flops : group PORT_USAGE2 : INSTR_RETIRED_ANY : 1.151e+08
+event : thread 3 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_3 : 4.83797e+07
+event : thread 3 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_4 : 2.78811e+07
+event : thread 3 : region double_flops : group PORT_USAGE2 : UOPS_DISPATCHED_PORT_PORT_5 : 2.19592e+07
+event : thread 3 : region double_flops : group PORT_USAGE2 : UOPS_EXECUTED_CORE : 4.1493e+08
+event : thread 3 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_CORE : 3.2257e+08
+event : thread 3 : region double_flops : group PORT_USAGE3 : CPU_CLK_UNHALTED_REF : 2.7828e+08
+event : thread 3 : region double_flops : group PORT_USAGE3 : INSTR_RETIRED_ANY : 1.10215e+08
+event : thread 3 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_6 : 3.758e+07
+event : thread 3 : region double_flops : group PORT_USAGE3 : UOPS_DISPATCHED_PORT_PORT_7 : 1.99662e+07
+event : thread 3 : region double_flops : group PORT_USAGE3 : UOPS_EXECUTED_CORE : 4.13847e+08
+metric : thread 0 : region copy : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 0 : region copy : group FLOPS_DP : CPI : 0.693206
+metric : thread 0 : region copy : group FLOPS_DP : Clock [MHz] : 2893.16
+metric : thread 0 : region copy : group FLOPS_DP : DP [MFLOP/s] : 0.000135372
+metric : thread 0 : region copy : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 0 : region copy : group FLOPS_DP : Runtime (RDTSC) [s] : 0.0738707
+metric : thread 0 : region copy : group FLOPS_DP : Runtime unhalted [s] : 0.0854461
+metric : thread 0 : region copy : group FLOPS_DP : Scalar [MUOPS/s] : 0.000135372
+metric : thread 0 : region copy : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 0 : region copy : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 0 : region copy : group FLOPS_SP : CPI : 0.714184
+metric : thread 0 : region copy : group FLOPS_SP : Clock [MHz] : 2893.15
+metric : thread 0 : region copy : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 0 : region copy : group FLOPS_SP : Runtime (RDTSC) [s] : 0.0762712
+metric : thread 0 : region copy : group FLOPS_SP : Runtime unhalted [s] : 0.0881067
+metric : thread 0 : region copy : group FLOPS_SP : SP [MFLOP/s] : 0
+metric : thread 0 : region copy : group FLOPS_SP : Scalar [MUOPS/s] : 0
+metric : thread 0 : region copy : group L2 : CPI : 0.698109
+metric : thread 0 : region copy : group L2 : Clock [MHz] : 2893.16
+metric : thread 0 : region copy : group L2 : L2 bandwidth [MBytes/s] : 1869.7
+metric : thread 0 : region copy : group L2 : L2 data volume [GBytes] : 0.139362
+metric : thread 0 : region copy : group L2 : L2D evict bandwidth [MBytes/s] : 21.555
+metric : thread 0 : region copy : group L2 : L2D evict data volume [GBytes] : 0.00160666
+metric : thread 0 : region copy : group L2 : L2D load bandwidth [MBytes/s] : 1835.75
+metric : thread 0 : region copy : group L2 : L2D load data volume [GBytes] : 0.136832
+metric : thread 0 : region copy : group L2 : Runtime (RDTSC) [s] : 0.0745374
+metric : thread 0 : region copy : group L2 : Runtime unhalted [s] : 0.0860659
+metric : thread 0 : region copy : group L3 : CPI : 0.696859
+metric : thread 0 : region copy : group L3 : Clock [MHz] : 2893.15
+metric : thread 0 : region copy : group L3 : L3 bandwidth [MBytes/s] : 2022.21
+metric : thread 0 : region copy : group L3 : L3 data volume [GBytes] : 0.151689
+metric : thread 0 : region copy : group L3 : L3 evict bandwidth [MBytes/s] : 7.25134
+metric : thread 0 : region copy : group L3 : L3 evict data volume [GBytes] : 0.000543936
+metric : thread 0 : region copy : group L3 : L3 load bandwidth [MBytes/s] : 2014.96
+metric : thread 0 : region copy : group L3 : L3 load data volume [GBytes] : 0.151146
+metric : thread 0 : region copy : group L3 : Runtime (RDTSC) [s] : 0.0750118
+metric : thread 0 : region copy : group L3 : Runtime unhalted [s] : 0.0859889
+metric : thread 0 : region copy : group MEM : CPI : 0.694178
+metric : thread 0 : region copy : group MEM : Clock [MHz] : 2893.15
+metric : thread 0 : region copy : group MEM : Memory bandwidth [MBytes/s] : 80.4208
+metric : thread 0 : region copy : group MEM : Memory data volume [GBytes] : 0.00595501
+metric : thread 0 : region copy : group MEM : Memory evict bandwidth [MBytes/s] : 3.67675
+metric : thread 0 : region copy : group MEM : Memory evict data volume [GBytes] : 0.000272256
+metric : thread 0 : region copy : group MEM : Memory load bandwidth [MBytes/s] : 76.7441
+metric : thread 0 : region copy : group MEM : Memory load data volume [GBytes] : 0.00568275
+metric : thread 0 : region copy : group MEM : Runtime (RDTSC) [s] : 0.0740481
+metric : thread 0 : region copy : group MEM : Runtime unhalted [s] : 0.0855714
+metric : thread 0 : region copy : group PORT_USAGE1 : CPI : 0.694261
+metric : thread 0 : region copy : group PORT_USAGE1 : Clock [MHz] : 2893.15
+metric : thread 0 : region copy : group PORT_USAGE1 : Port0 usage ratio : 0.0387678
+metric : thread 0 : region copy : group PORT_USAGE1 : Port1 usage ratio : 0.0478886
+metric : thread 0 : region copy : group PORT_USAGE1 : Port2 usage ratio : 0.109189
+metric : thread 0 : region copy : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.0740719
+metric : thread 0 : region copy : group PORT_USAGE1 : Runtime unhalted [s] : 0.0855817
+metric : thread 0 : region copy : group PORT_USAGE2 : CPI : 0.693088
+metric : thread 0 : region copy : group PORT_USAGE2 : Clock [MHz] : 2893.14
+metric : thread 0 : region copy : group PORT_USAGE2 : Port3 usage ratio : 0.113433
+metric : thread 0 : region copy : group PORT_USAGE2 : Port4 usage ratio : 0.0548136
+metric : thread 0 : region copy : group PORT_USAGE2 : Port5 usage ratio : 0.0488132
+metric : thread 0 : region copy : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.0739367
+metric : thread 0 : region copy : group PORT_USAGE2 : Runtime unhalted [s] : 0.0854174
+metric : thread 0 : region copy : group PORT_USAGE3 : CPI : 0.695089
+metric : thread 0 : region copy : group PORT_USAGE3 : Clock [MHz] : 2893.15
+metric : thread 0 : region copy : group PORT_USAGE3 : Port6 usage ratio : 0.0761796
+metric : thread 0 : region copy : group PORT_USAGE3 : Port7 usage ratio : 0.0412456
+metric : thread 0 : region copy : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.0740463
+metric : thread 0 : region copy : group PORT_USAGE3 : Runtime unhalted [s] : 0.0856778
+metric : thread 0 : region double_flops : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 0 : region double_flops : group FLOPS_DP : CPI : 2.86957
+metric : thread 0 : region double_flops : group FLOPS_DP : Clock [MHz] : 2893.38
+metric : thread 0 : region double_flops : group FLOPS_DP : DP [MFLOP/s] : 181.338
+metric : thread 0 : region double_flops : group FLOPS_DP : Packed [MUOPS/s] : 5.44011e-05
+metric : thread 0 : region double_flops : group FLOPS_DP : Runtime (RDTSC) [s] : 0.110292
+metric : thread 0 : region double_flops : group FLOPS_DP : Runtime unhalted [s] : 0.127193
+metric : thread 0 : region double_flops : group FLOPS_DP : Scalar [MUOPS/s] : 181.338
+metric : thread 0 : region double_flops : group FLOPS_DP : Vectorization ratio : 2.99999e-05
+metric : thread 0 : region double_flops : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 0 : region double_flops : group FLOPS_SP : CPI : 2.89507
+metric : thread 0 : region double_flops : group FLOPS_SP : Clock [MHz] : 2893.14
+metric : thread 0 : region double_flops : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 0 : region double_flops : group FLOPS_SP : Runtime (RDTSC) [s] : 0.110888
+metric : thread 0 : region double_flops : group FLOPS_SP : Runtime unhalted [s] : 0.12828
+metric : thread 0 : region double_flops : group FLOPS_SP : SP [MFLOP/s] : 0
+metric : thread 0 : region double_flops : group FLOPS_SP : Scalar [MUOPS/s] : 0
+metric : thread 0 : region double_flops : group L2 : CPI : 2.82447
+metric : thread 0 : region double_flops : group L2 : Clock [MHz] : 2893.15
+metric : thread 0 : region double_flops : group L2 : L2 bandwidth [MBytes/s] : 982.109
+metric : thread 0 : region double_flops : group L2 : L2 data volume [GBytes] : 0.107954
+metric : thread 0 : region double_flops : group L2 : L2D evict bandwidth [MBytes/s] : 0.733036
+metric : thread 0 : region double_flops : group L2 : L2D evict data volume [GBytes] : 8.0576e-05
+metric : thread 0 : region double_flops : group L2 : L2D load bandwidth [MBytes/s] : 974.323
+metric : thread 0 : region double_flops : group L2 : L2D load data volume [GBytes] : 0.107098
+metric : thread 0 : region double_flops : group L2 : Runtime (RDTSC) [s] : 0.109921
+metric : thread 0 : region double_flops : group L2 : Runtime unhalted [s] : 0.126844
+metric : thread 0 : region double_flops : group L3 : CPI : 2.8516
+metric : thread 0 : region double_flops : group L3 : Clock [MHz] : 2893.14
+metric : thread 0 : region double_flops : group L3 : L3 bandwidth [MBytes/s] : 1279.23
+metric : thread 0 : region double_flops : group L3 : L3 data volume [GBytes] : 0.139993
+metric : thread 0 : region double_flops : group L3 : L3 evict bandwidth [MBytes/s] : 1.78605
+metric : thread 0 : region double_flops : group L3 : L3 evict data volume [GBytes] : 0.000195456
+metric : thread 0 : region double_flops : group L3 : L3 load bandwidth [MBytes/s] : 1277.45
+metric : thread 0 : region double_flops : group L3 : L3 load data volume [GBytes] : 0.139797
+metric : thread 0 : region double_flops : group L3 : Runtime (RDTSC) [s] : 0.109435
+metric : thread 0 : region double_flops : group L3 : Runtime unhalted [s] : 0.126597
+metric : thread 0 : region double_flops : group MEM : CPI : 2.99661
+metric : thread 0 : region double_flops : group MEM : Clock [MHz] : 1902.15
+metric : thread 0 : region double_flops : group MEM : Memory bandwidth [MBytes/s] : 268.484
+metric : thread 0 : region double_flops : group MEM : Memory data volume [GBytes] : 0.048228
+metric : thread 0 : region double_flops : group MEM : Memory evict bandwidth [MBytes/s] : 40.3783
+metric : thread 0 : region double_flops : group MEM : Memory evict data volume [GBytes] : 0.00725318
+metric : thread 0 : region double_flops : group MEM : Memory load bandwidth [MBytes/s] : 228.106
+metric : thread 0 : region double_flops : group MEM : Memory load data volume [GBytes] : 0.0409748
+metric : thread 0 : region double_flops : group MEM : Runtime (RDTSC) [s] : 0.179631
+metric : thread 0 : region double_flops : group MEM : Runtime unhalted [s] : 0.135312
+metric : thread 0 : region double_flops : group PORT_USAGE1 : CPI : 2.88276
+metric : thread 0 : region double_flops : group PORT_USAGE1 : Clock [MHz] : 2893.14
+metric : thread 0 : region double_flops : group PORT_USAGE1 : Port0 usage ratio : 0.0732163
+metric : thread 0 : region double_flops : group PORT_USAGE1 : Port1 usage ratio : 0.0719052
+metric : thread 0 : region double_flops : group PORT_USAGE1 : Port2 usage ratio : 0.11223
+metric : thread 0 : region double_flops : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.111938
+metric : thread 0 : region double_flops : group PORT_USAGE1 : Runtime unhalted [s] : 0.129186
+metric : thread 0 : region double_flops : group PORT_USAGE2 : CPI : 2.88136
+metric : thread 0 : region double_flops : group PORT_USAGE2 : Clock [MHz] : 2893.14
+metric : thread 0 : region double_flops : group PORT_USAGE2 : Port3 usage ratio : 0.112801
+metric : thread 0 : region double_flops : group PORT_USAGE2 : Port4 usage ratio : 0.0611216
+metric : thread 0 : region double_flops : group PORT_USAGE2 : Port5 usage ratio : 0.0459408
+metric : thread 0 : region double_flops : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.1121
+metric : thread 0 : region double_flops : group PORT_USAGE2 : Runtime unhalted [s] : 0.129575
+metric : thread 0 : region double_flops : group PORT_USAGE3 : CPI : 2.89886
+metric : thread 0 : region double_flops : group PORT_USAGE3 : Clock [MHz] : 2893.14
+metric : thread 0 : region double_flops : group PORT_USAGE3 : Port6 usage ratio : 0.0896918
+metric : thread 0 : region double_flops : group PORT_USAGE3 : Port7 usage ratio : 0.0465739
+metric : thread 0 : region double_flops : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.112675
+metric : thread 0 : region double_flops : group PORT_USAGE3 : Runtime unhalted [s] : 0.130121
+metric : thread 1 : region copy : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 1 : region copy : group FLOPS_DP : CPI : 0.694564
+metric : thread 1 : region copy : group FLOPS_DP : Clock [MHz] : 2893.15
+metric : thread 1 : region copy : group FLOPS_DP : DP [MFLOP/s] : 0.000135054
+metric : thread 1 : region copy : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 1 : region copy : group FLOPS_DP : Runtime (RDTSC) [s] : 0.0740444
+metric : thread 1 : region copy : group FLOPS_DP : Runtime unhalted [s] : 0.0855738
+metric : thread 1 : region copy : group FLOPS_DP : Scalar [MUOPS/s] : 0.000135054
+metric : thread 1 : region copy : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 1 : region copy : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 1 : region copy : group FLOPS_SP : CPI : 0.704161
+metric : thread 1 : region copy : group FLOPS_SP : Clock [MHz] : 2893.19
+metric : thread 1 : region copy : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 1 : region copy : group FLOPS_SP : Runtime (RDTSC) [s] : 0.0762504
+metric : thread 1 : region copy : group FLOPS_SP : Runtime unhalted [s] : 0.0871364
+metric : thread 1 : region copy : group FLOPS_SP : SP [MFLOP/s] : 0.000314753
+metric : thread 1 : region copy : group FLOPS_SP : Scalar [MUOPS/s] : 0.000314753
+metric : thread 1 : region copy : group FLOPS_SP : Vectorization ratio : 0
+metric : thread 1 : region copy : group L2 : CPI : 0.698545
+metric : thread 1 : region copy : group L2 : Clock [MHz] : 2893.15
+metric : thread 1 : region copy : group L2 : L2 bandwidth [MBytes/s] : 1919.11
+metric : thread 1 : region copy : group L2 : L2 data volume [GBytes] : 0.142948
+metric : thread 1 : region copy : group L2 : L2D evict bandwidth [MBytes/s] : 29.0698
+metric : thread 1 : region copy : group L2 : L2D evict data volume [GBytes] : 0.00216531
+metric : thread 1 : region copy : group L2 : L2D load bandwidth [MBytes/s] : 1877.13
+metric : thread 1 : region copy : group L2 : L2D load data volume [GBytes] : 0.139821
+metric : thread 1 : region copy : group L2 : Runtime (RDTSC) [s] : 0.0744867
+metric : thread 1 : region copy : group L2 : Runtime unhalted [s] : 0.0860668
+metric : thread 1 : region copy : group L3 : CPI : 0.699423
+metric : thread 1 : region copy : group L3 : Clock [MHz] : 2893.14
+metric : thread 1 : region copy : group L3 : L3 bandwidth [MBytes/s] : 2043.62
+metric : thread 1 : region copy : group L3 : L3 data volume [GBytes] : 0.152784
+metric : thread 1 : region copy : group L3 : L3 evict bandwidth [MBytes/s] : 6.06944
+metric : thread 1 : region copy : group L3 : L3 evict data volume [GBytes] : 0.00045376
+metric : thread 1 : region copy : group L3 : L3 load bandwidth [MBytes/s] : 2037.55
+metric : thread 1 : region copy : group L3 : L3 load data volume [GBytes] : 0.15233
+metric : thread 1 : region copy : group L3 : Runtime (RDTSC) [s] : 0.0747614
+metric : thread 1 : region copy : group L3 : Runtime unhalted [s] : 0.0862141
+metric : thread 1 : region copy : group MEM : CPI : 0.696243
+metric : thread 1 : region copy : group MEM : Clock [MHz] : 2893.15
+metric : thread 1 : region copy : group MEM : Memory bandwidth [MBytes/s] : 0
+metric : thread 1 : region copy : group MEM : Memory data volume [GBytes] : 0
+metric : thread 1 : region copy : group MEM : Memory evict bandwidth [MBytes/s] : 0
+metric : thread 1 : region copy : group MEM : Memory evict data volume [GBytes] : 0
+metric : thread 1 : region copy : group MEM : Memory load bandwidth [MBytes/s] : 0
+metric : thread 1 : region copy : group MEM : Memory load data volume [GBytes] : 0
+metric : thread 1 : region copy : group MEM : Runtime (RDTSC) [s] : 0.0742084
+metric : thread 1 : region copy : group MEM : Runtime unhalted [s] : 0.0857987
+metric : thread 1 : region copy : group PORT_USAGE1 : CPI : 0.693856
+metric : thread 1 : region copy : group PORT_USAGE1 : Clock [MHz] : 2893.16
+metric : thread 1 : region copy : group PORT_USAGE1 : Port0 usage ratio : 0.047846
+metric : thread 1 : region copy : group PORT_USAGE1 : Port1 usage ratio : 0.054217
+metric : thread 1 : region copy : group PORT_USAGE1 : Port2 usage ratio : 0.108834
+metric : thread 1 : region copy : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.0739824
+metric : thread 1 : region copy : group PORT_USAGE1 : Runtime unhalted [s] : 0.0855132
+metric : thread 1 : region copy : group PORT_USAGE2 : CPI : 0.693112
+metric : thread 1 : region copy : group PORT_USAGE2 : Clock [MHz] : 2893.14
+metric : thread 1 : region copy : group PORT_USAGE2 : Port3 usage ratio : 0.113889
+metric : thread 1 : region copy : group PORT_USAGE2 : Port4 usage ratio : 0.0628972
+metric : thread 1 : region copy : group PORT_USAGE2 : Port5 usage ratio : 0.0554066
+metric : thread 1 : region copy : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.073811
+metric : thread 1 : region copy : group PORT_USAGE2 : Runtime unhalted [s] : 0.0853735
+metric : thread 1 : region copy : group PORT_USAGE3 : CPI : 0.695393
+metric : thread 1 : region copy : group PORT_USAGE3 : Clock [MHz] : 2893.15
+metric : thread 1 : region copy : group PORT_USAGE3 : Port6 usage ratio : 0.0778814
+metric : thread 1 : region copy : group PORT_USAGE3 : Port7 usage ratio : 0.0412792
+metric : thread 1 : region copy : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.074049
+metric : thread 1 : region copy : group PORT_USAGE3 : Runtime unhalted [s] : 0.0856579
+metric : thread 1 : region double_flops : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 1 : region double_flops : group FLOPS_DP : CPI : 2.88091
+metric : thread 1 : region double_flops : group FLOPS_DP : Clock [MHz] : 2893.5
+metric : thread 1 : region double_flops : group FLOPS_DP : DP [MFLOP/s] : 181.257
+metric : thread 1 : region double_flops : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 1 : region double_flops : group FLOPS_DP : Runtime (RDTSC) [s] : 0.11034
+metric : thread 1 : region double_flops : group FLOPS_DP : Runtime unhalted [s] : 0.127196
+metric : thread 1 : region double_flops : group FLOPS_DP : Scalar [MUOPS/s] : 181.257
+metric : thread 1 : region double_flops : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 1 : region double_flops : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 1 : region double_flops : group FLOPS_SP : CPI : 2.86224
+metric : thread 1 : region double_flops : group FLOPS_SP : Clock [MHz] : 2893.14
+metric : thread 1 : region double_flops : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 1 : region double_flops : group FLOPS_SP : Runtime (RDTSC) [s] : 0.110477
+metric : thread 1 : region double_flops : group FLOPS_SP : Runtime unhalted [s] : 0.127566
+metric : thread 1 : region double_flops : group FLOPS_SP : SP [MFLOP/s] : 3.62066e-05
+metric : thread 1 : region double_flops : group FLOPS_SP : Scalar [MUOPS/s] : 3.62066e-05
+metric : thread 1 : region double_flops : group FLOPS_SP : Vectorization ratio : 0
+metric : thread 1 : region double_flops : group L2 : CPI : 2.82509
+metric : thread 1 : region double_flops : group L2 : Clock [MHz] : 2894.16
+metric : thread 1 : region double_flops : group L2 : L2 bandwidth [MBytes/s] : 1016.19
+metric : thread 1 : region double_flops : group L2 : L2 data volume [GBytes] : 0.111933
+metric : thread 1 : region double_flops : group L2 : L2D evict bandwidth [MBytes/s] : 2.66518
+metric : thread 1 : region double_flops : group L2 : L2D evict data volume [GBytes] : 0.000293568
+metric : thread 1 : region double_flops : group L2 : L2D load bandwidth [MBytes/s] : 998.157
+metric : thread 1 : region double_flops : group L2 : L2D load data volume [GBytes] : 0.109946
+metric : thread 1 : region double_flops : group L2 : Runtime (RDTSC) [s] : 0.110149
+metric : thread 1 : region double_flops : group L2 : Runtime unhalted [s] : 0.126443
+metric : thread 1 : region double_flops : group L3 : CPI : 2.85171
+metric : thread 1 : region double_flops : group L3 : Clock [MHz] : 2893.14
+metric : thread 1 : region double_flops : group L3 : L3 bandwidth [MBytes/s] : 1294.8
+metric : thread 1 : region double_flops : group L3 : L3 data volume [GBytes] : 0.141014
+metric : thread 1 : region double_flops : group L3 : L3 evict bandwidth [MBytes/s] : 3.88496
+metric : thread 1 : region double_flops : group L3 : L3 evict data volume [GBytes] : 0.000423104
+metric : thread 1 : region double_flops : group L3 : L3 load bandwidth [MBytes/s] : 1290.91
+metric : thread 1 : region double_flops : group L3 : L3 load data volume [GBytes] : 0.140591
+metric : thread 1 : region double_flops : group L3 : Runtime (RDTSC) [s] : 0.108908
+metric : thread 1 : region double_flops : group L3 : Runtime unhalted [s] : 0.125846
+metric : thread 1 : region double_flops : group MEM : CPI : 2.96938
+metric : thread 1 : region double_flops : group MEM : Clock [MHz] : 1897.19
+metric : thread 1 : region double_flops : group MEM : Memory bandwidth [MBytes/s] : 0
+metric : thread 1 : region double_flops : group MEM : Memory data volume [GBytes] : 0
+metric : thread 1 : region double_flops : group MEM : Memory evict bandwidth [MBytes/s] : 0
+metric : thread 1 : region double_flops : group MEM : Memory evict data volume [GBytes] : 0
+metric : thread 1 : region double_flops : group MEM : Memory load bandwidth [MBytes/s] : 0
+metric : thread 1 : region double_flops : group MEM : Memory load data volume [GBytes] : 0
+metric : thread 1 : region double_flops : group MEM : Runtime (RDTSC) [s] : 0.180029
+metric : thread 1 : region double_flops : group MEM : Runtime unhalted [s] : 0.135181
+metric : thread 1 : region double_flops : group PORT_USAGE1 : CPI : 2.91946
+metric : thread 1 : region double_flops : group PORT_USAGE1 : Clock [MHz] : 2893.15
+metric : thread 1 : region double_flops : group PORT_USAGE1 : Port0 usage ratio : 0.0753064
+metric : thread 1 : region double_flops : group PORT_USAGE1 : Port1 usage ratio : 0.0738719
+metric : thread 1 : region double_flops : group PORT_USAGE1 : Port2 usage ratio : 0.115312
+metric : thread 1 : region double_flops : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.111493
+metric : thread 1 : region double_flops : group PORT_USAGE1 : Runtime unhalted [s] : 0.128888
+metric : thread 1 : region double_flops : group PORT_USAGE2 : CPI : 2.87528
+metric : thread 1 : region double_flops : group PORT_USAGE2 : Clock [MHz] : 2893.15
+metric : thread 1 : region double_flops : group PORT_USAGE2 : Port3 usage ratio : 0.114542
+metric : thread 1 : region double_flops : group PORT_USAGE2 : Port4 usage ratio : 0.0658585
+metric : thread 1 : region double_flops : group PORT_USAGE2 : Port5 usage ratio : 0.0516364
+metric : thread 1 : region double_flops : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.111652
+metric : thread 1 : region double_flops : group PORT_USAGE2 : Runtime unhalted [s] : 0.128342
+metric : thread 1 : region double_flops : group PORT_USAGE3 : CPI : 2.74985
+metric : thread 1 : region double_flops : group PORT_USAGE3 : Clock [MHz] : 2893.15
+metric : thread 1 : region double_flops : group PORT_USAGE3 : Port6 usage ratio : 0.0953261
+metric : thread 1 : region double_flops : group PORT_USAGE3 : Port7 usage ratio : 0.0498405
+metric : thread 1 : region double_flops : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.11216
+metric : thread 1 : region double_flops : group PORT_USAGE3 : Runtime unhalted [s] : 0.129537
+metric : thread 2 : region copy : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 2 : region copy : group FLOPS_DP : CPI : 0.696699
+metric : thread 2 : region copy : group FLOPS_DP : Clock [MHz] : 2893.15
+metric : thread 2 : region copy : group FLOPS_DP : DP [MFLOP/s] : 0.00013481
+metric : thread 2 : region copy : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 2 : region copy : group FLOPS_DP : Runtime (RDTSC) [s] : 0.0741783
+metric : thread 2 : region copy : group FLOPS_DP : Runtime unhalted [s] : 0.0858768
+metric : thread 2 : region copy : group FLOPS_DP : Scalar [MUOPS/s] : 0.00013481
+metric : thread 2 : region copy : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 2 : region copy : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 2 : region copy : group FLOPS_SP : CPI : 0.716096
+metric : thread 2 : region copy : group FLOPS_SP : Clock [MHz] : 2893.14
+metric : thread 2 : region copy : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 2 : region copy : group FLOPS_SP : Runtime (RDTSC) [s] : 0.0764427
+metric : thread 2 : region copy : group FLOPS_SP : Runtime unhalted [s] : 0.0883901
+metric : thread 2 : region copy : group FLOPS_SP : SP [MFLOP/s] : 6.54085e-05
+metric : thread 2 : region copy : group FLOPS_SP : Scalar [MUOPS/s] : 6.54085e-05
+metric : thread 2 : region copy : group FLOPS_SP : Vectorization ratio : 0
+metric : thread 2 : region copy : group L2 : CPI : 0.697445
+metric : thread 2 : region copy : group L2 : Clock [MHz] : 2893.14
+metric : thread 2 : region copy : group L2 : L2 bandwidth [MBytes/s] : 1516.96
+metric : thread 2 : region copy : group L2 : L2 data volume [GBytes] : 0.11303
+metric : thread 2 : region copy : group L2 : L2D evict bandwidth [MBytes/s] : 20.8944
+metric : thread 2 : region copy : group L2 : L2D evict data volume [GBytes] : 0.00155686
+metric : thread 2 : region copy : group L2 : L2D load bandwidth [MBytes/s] : 1459.12
+metric : thread 2 : region copy : group L2 : L2D load data volume [GBytes] : 0.10872
+metric : thread 2 : region copy : group L2 : Runtime (RDTSC) [s] : 0.074511
+metric : thread 2 : region copy : group L2 : Runtime unhalted [s] : 0.0860242
+metric : thread 2 : region copy : group L3 : CPI : 0.698365
+metric : thread 2 : region copy : group L3 : Clock [MHz] : 2893.15
+metric : thread 2 : region copy : group L3 : L3 bandwidth [MBytes/s] : 2124.23
+metric : thread 2 : region copy : group L3 : L3 data volume [GBytes] : 0.158948
+metric : thread 2 : region copy : group L3 : L3 evict bandwidth [MBytes/s] : 6.0565
+metric : thread 2 : region copy : group L3 : L3 evict data volume [GBytes] : 0.000453184
+metric : thread 2 : region copy : group L3 : L3 load bandwidth [MBytes/s] : 2118.18
+metric : thread 2 : region copy : group L3 : L3 load data volume [GBytes] : 0.158495
+metric : thread 2 : region copy : group L3 : Runtime (RDTSC) [s] : 0.074826
+metric : thread 2 : region copy : group L3 : Runtime unhalted [s] : 0.0862286
+metric : thread 2 : region copy : group MEM : CPI : 0.696971
+metric : thread 2 : region copy : group MEM : Clock [MHz] : 2893.14
+metric : thread 2 : region copy : group MEM : Memory bandwidth [MBytes/s] : 0
+metric : thread 2 : region copy : group MEM : Memory data volume [GBytes] : 0
+metric : thread 2 : region copy : group MEM : Memory evict bandwidth [MBytes/s] : 0
+metric : thread 2 : region copy : group MEM : Memory evict data volume [GBytes] : 0
+metric : thread 2 : region copy : group MEM : Memory load bandwidth [MBytes/s] : 0
+metric : thread 2 : region copy : group MEM : Memory load data volume [GBytes] : 0
+metric : thread 2 : region copy : group MEM : Runtime (RDTSC) [s] : 0.0742037
+metric : thread 2 : region copy : group MEM : Runtime unhalted [s] : 0.0859115
+metric : thread 2 : region copy : group PORT_USAGE1 : CPI : 0.695135
+metric : thread 2 : region copy : group PORT_USAGE1 : Clock [MHz] : 2893.15
+metric : thread 2 : region copy : group PORT_USAGE1 : Port0 usage ratio : 0.0387624
+metric : thread 2 : region copy : group PORT_USAGE1 : Port1 usage ratio : 0.047847
+metric : thread 2 : region copy : group PORT_USAGE1 : Port2 usage ratio : 0.109091
+metric : thread 2 : region copy : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.074104
+metric : thread 2 : region copy : group PORT_USAGE1 : Runtime unhalted [s] : 0.0856802
+metric : thread 2 : region copy : group PORT_USAGE2 : CPI : 0.690785
+metric : thread 2 : region copy : group PORT_USAGE2 : Clock [MHz] : 2893.14
+metric : thread 2 : region copy : group PORT_USAGE2 : Port3 usage ratio : 0.113678
+metric : thread 2 : region copy : group PORT_USAGE2 : Port4 usage ratio : 0.054921
+metric : thread 2 : region copy : group PORT_USAGE2 : Port5 usage ratio : 0.04889
+metric : thread 2 : region copy : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.0736943
+metric : thread 2 : region copy : group PORT_USAGE2 : Runtime unhalted [s] : 0.0851444
+metric : thread 2 : region copy : group PORT_USAGE3 : CPI : 0.695974
+metric : thread 2 : region copy : group PORT_USAGE3 : Clock [MHz] : 2893.15
+metric : thread 2 : region copy : group PORT_USAGE3 : Port6 usage ratio : 0.0761243
+metric : thread 2 : region copy : group PORT_USAGE3 : Port7 usage ratio : 0.0411461
+metric : thread 2 : region copy : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.0742415
+metric : thread 2 : region copy : group PORT_USAGE3 : Runtime unhalted [s] : 0.0858084
+metric : thread 2 : region double_flops : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 2 : region double_flops : group FLOPS_DP : CPI : 2.87248
+metric : thread 2 : region double_flops : group FLOPS_DP : Clock [MHz] : 2893.15
+metric : thread 2 : region double_flops : group FLOPS_DP : DP [MFLOP/s] : 182.134
+metric : thread 2 : region double_flops : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 2 : region double_flops : group FLOPS_DP : Runtime (RDTSC) [s] : 0.109809
+metric : thread 2 : region double_flops : group FLOPS_DP : Runtime unhalted [s] : 0.127099
+metric : thread 2 : region double_flops : group FLOPS_DP : Scalar [MUOPS/s] : 182.134
+metric : thread 2 : region double_flops : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 2 : region double_flops : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 2 : region double_flops : group FLOPS_SP : CPI : 2.88989
+metric : thread 2 : region double_flops : group FLOPS_SP : Clock [MHz] : 2893.53
+metric : thread 2 : region double_flops : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 2 : region double_flops : group FLOPS_SP : Runtime (RDTSC) [s] : 0.110886
+metric : thread 2 : region double_flops : group FLOPS_SP : Runtime unhalted [s] : 0.127974
+metric : thread 2 : region double_flops : group FLOPS_SP : SP [MFLOP/s] : 0
+metric : thread 2 : region double_flops : group FLOPS_SP : Scalar [MUOPS/s] : 0
+metric : thread 2 : region double_flops : group L2 : CPI : 2.83099
+metric : thread 2 : region double_flops : group L2 : Clock [MHz] : 2893.48
+metric : thread 2 : region double_flops : group L2 : L2D load bandwidth [MBytes/s] : 138.542
+metric : thread 2 : region double_flops : group L2 : L2D load data volume [GBytes] : 0.0152105
+metric : thread 2 : region double_flops : group L2 : Runtime (RDTSC) [s] : 0.10979
+metric : thread 2 : region double_flops : group L2 : Runtime unhalted [s] : 0.127046
+metric : thread 2 : region double_flops : group L3 : CPI : 2.85208
+metric : thread 2 : region double_flops : group L3 : Clock [MHz] : 2893.58
+metric : thread 2 : region double_flops : group L3 : L3 bandwidth [MBytes/s] : 1271.68
+metric : thread 2 : region double_flops : group L3 : L3 data volume [GBytes] : 0.139351
+metric : thread 2 : region double_flops : group L3 : L3 evict bandwidth [MBytes/s] : 0.383135
+metric : thread 2 : region double_flops : group L3 : L3 evict data volume [GBytes] : 4.1984e-05
+metric : thread 2 : region double_flops : group L3 : L3 load bandwidth [MBytes/s] : 1271.3
+metric : thread 2 : region double_flops : group L3 : L3 load data volume [GBytes] : 0.139309
+metric : thread 2 : region double_flops : group L3 : Runtime (RDTSC) [s] : 0.10958
+metric : thread 2 : region double_flops : group L3 : Runtime unhalted [s] : 0.126497
+metric : thread 2 : region double_flops : group MEM : CPI : 2.83976
+metric : thread 2 : region double_flops : group MEM : Clock [MHz] : 1896.76
+metric : thread 2 : region double_flops : group MEM : Memory bandwidth [MBytes/s] : 0
+metric : thread 2 : region double_flops : group MEM : Memory data volume [GBytes] : 0
+metric : thread 2 : region double_flops : group MEM : Memory evict bandwidth [MBytes/s] : 0
+metric : thread 2 : region double_flops : group MEM : Memory evict data volume [GBytes] : 0
+metric : thread 2 : region double_flops : group MEM : Memory load bandwidth [MBytes/s] : 0
+metric : thread 2 : region double_flops : group MEM : Memory load data volume [GBytes] : 0
+metric : thread 2 : region double_flops : group MEM : Runtime (RDTSC) [s] : 0.180011
+metric : thread 2 : region double_flops : group MEM : Runtime unhalted [s] : 0.134753
+metric : thread 2 : region double_flops : group PORT_USAGE1 : CPI : 2.88811
+metric : thread 2 : region double_flops : group PORT_USAGE1 : Clock [MHz] : 2893.14
+metric : thread 2 : region double_flops : group PORT_USAGE1 : Port0 usage ratio : 0.0733372
+metric : thread 2 : region double_flops : group PORT_USAGE1 : Port1 usage ratio : 0.0718816
+metric : thread 2 : region double_flops : group PORT_USAGE1 : Port2 usage ratio : 0.112027
+metric : thread 2 : region double_flops : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.111654
+metric : thread 2 : region double_flops : group PORT_USAGE1 : Runtime unhalted [s] : 0.129224
+metric : thread 2 : region double_flops : group PORT_USAGE2 : CPI : 2.87176
+metric : thread 2 : region double_flops : group PORT_USAGE2 : Clock [MHz] : 2893.45
+metric : thread 2 : region double_flops : group PORT_USAGE2 : Port3 usage ratio : 0.112973
+metric : thread 2 : region double_flops : group PORT_USAGE2 : Port4 usage ratio : 0.0610874
+metric : thread 2 : region double_flops : group PORT_USAGE2 : Port5 usage ratio : 0.0457347
+metric : thread 2 : region double_flops : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.111433
+metric : thread 2 : region double_flops : group PORT_USAGE2 : Runtime unhalted [s] : 0.128882
+metric : thread 2 : region double_flops : group PORT_USAGE3 : CPI : 2.88851
+metric : thread 2 : region double_flops : group PORT_USAGE3 : Clock [MHz] : 2894.24
+metric : thread 2 : region double_flops : group PORT_USAGE3 : Port6 usage ratio : 0.0899088
+metric : thread 2 : region double_flops : group PORT_USAGE3 : Port7 usage ratio : 0.0464865
+metric : thread 2 : region double_flops : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.112676
+metric : thread 2 : region double_flops : group PORT_USAGE3 : Runtime unhalted [s] : 0.129616
+metric : thread 3 : region copy : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 3 : region copy : group FLOPS_DP : CPI : 0.694758
+metric : thread 3 : region copy : group FLOPS_DP : Clock [MHz] : 2893.16
+metric : thread 3 : region copy : group FLOPS_DP : DP [MFLOP/s] : 0.000134847
+metric : thread 3 : region copy : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 3 : region copy : group FLOPS_DP : Runtime (RDTSC) [s] : 0.0741578
+metric : thread 3 : region copy : group FLOPS_DP : Runtime unhalted [s] : 0.0855805
+metric : thread 3 : region copy : group FLOPS_DP : Scalar [MUOPS/s] : 0.000134847
+metric : thread 3 : region copy : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 3 : region copy : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 3 : region copy : group FLOPS_SP : CPI : 0.702545
+metric : thread 3 : region copy : group FLOPS_SP : Clock [MHz] : 2893.15
+metric : thread 3 : region copy : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 3 : region copy : group FLOPS_SP : Runtime (RDTSC) [s] : 0.0761938
+metric : thread 3 : region copy : group FLOPS_SP : Runtime unhalted [s] : 0.0878471
+metric : thread 3 : region copy : group FLOPS_SP : SP [MFLOP/s] : 0
+metric : thread 3 : region copy : group FLOPS_SP : Scalar [MUOPS/s] : 0
+metric : thread 3 : region copy : group L2 : CPI : 0.697354
+metric : thread 3 : region copy : group L2 : Clock [MHz] : 2893.15
+metric : thread 3 : region copy : group L2 : L2 bandwidth [MBytes/s] : 1565.44
+metric : thread 3 : region copy : group L2 : L2 data volume [GBytes] : 0.116524
+metric : thread 3 : region copy : group L2 : L2D evict bandwidth [MBytes/s] : 28.0735
+metric : thread 3 : region copy : group L2 : L2D evict data volume [GBytes] : 0.00208966
+metric : thread 3 : region copy : group L2 : L2D load bandwidth [MBytes/s] : 1527.94
+metric : thread 3 : region copy : group L2 : L2D load data volume [GBytes] : 0.113733
+metric : thread 3 : region copy : group L2 : Runtime (RDTSC) [s] : 0.0744354
+metric : thread 3 : region copy : group L2 : Runtime unhalted [s] : 0.0859064
+metric : thread 3 : region copy : group L3 : CPI : 0.698179
+metric : thread 3 : region copy : group L3 : Clock [MHz] : 2893.14
+metric : thread 3 : region copy : group L3 : L3 bandwidth [MBytes/s] : 2095.22
+metric : thread 3 : region copy : group L3 : L3 data volume [GBytes] : 0.157181
+metric : thread 3 : region copy : group L3 : L3 evict bandwidth [MBytes/s] : 4.937
+metric : thread 3 : region copy : group L3 : L3 evict data volume [GBytes] : 0.000370368
+metric : thread 3 : region copy : group L3 : L3 load bandwidth [MBytes/s] : 2090.28
+metric : thread 3 : region copy : group L3 : L3 load data volume [GBytes] : 0.15681
+metric : thread 3 : region copy : group L3 : Runtime (RDTSC) [s] : 0.0750188
+metric : thread 3 : region copy : group L3 : Runtime unhalted [s] : 0.0862658
+metric : thread 3 : region copy : group MEM : CPI : 0.695606
+metric : thread 3 : region copy : group MEM : Clock [MHz] : 2893.15
+metric : thread 3 : region copy : group MEM : Memory bandwidth [MBytes/s] : 0
+metric : thread 3 : region copy : group MEM : Memory data volume [GBytes] : 0
+metric : thread 3 : region copy : group MEM : Memory evict bandwidth [MBytes/s] : 0
+metric : thread 3 : region copy : group MEM : Memory evict data volume [GBytes] : 0
+metric : thread 3 : region copy : group MEM : Memory load bandwidth [MBytes/s] : 0
+metric : thread 3 : region copy : group MEM : Memory load data volume [GBytes] : 0
+metric : thread 3 : region copy : group MEM : Runtime (RDTSC) [s] : 0.0742056
+metric : thread 3 : region copy : group MEM : Runtime unhalted [s] : 0.0856874
+metric : thread 3 : region copy : group PORT_USAGE1 : CPI : 0.695345
+metric : thread 3 : region copy : group PORT_USAGE1 : Clock [MHz] : 2893.15
+metric : thread 3 : region copy : group PORT_USAGE1 : Port0 usage ratio : 0.0478438
+metric : thread 3 : region copy : group PORT_USAGE1 : Port1 usage ratio : 0.054215
+metric : thread 3 : region copy : group PORT_USAGE1 : Port2 usage ratio : 0.108645
+metric : thread 3 : region copy : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.0740691
+metric : thread 3 : region copy : group PORT_USAGE1 : Runtime unhalted [s] : 0.0856634
+metric : thread 3 : region copy : group PORT_USAGE2 : CPI : 0.69579
+metric : thread 3 : region copy : group PORT_USAGE2 : Clock [MHz] : 2893.15
+metric : thread 3 : region copy : group PORT_USAGE2 : Port3 usage ratio : 0.113513
+metric : thread 3 : region copy : group PORT_USAGE2 : Port4 usage ratio : 0.0627785
+metric : thread 3 : region copy : group PORT_USAGE2 : Port5 usage ratio : 0.0553407
+metric : thread 3 : region copy : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.0741113
+metric : thread 3 : region copy : group PORT_USAGE2 : Runtime unhalted [s] : 0.0857122
+metric : thread 3 : region copy : group PORT_USAGE3 : CPI : 0.695343
+metric : thread 3 : region copy : group PORT_USAGE3 : Clock [MHz] : 2893.15
+metric : thread 3 : region copy : group PORT_USAGE3 : Port6 usage ratio : 0.0779771
+metric : thread 3 : region copy : group PORT_USAGE3 : Port7 usage ratio : 0.0413122
+metric : thread 3 : region copy : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.0739771
+metric : thread 3 : region copy : group PORT_USAGE3 : Runtime unhalted [s] : 0.0856468
+metric : thread 3 : region double_flops : group FLOPS_DP : AVX DP [MFLOP/s] : 0
+metric : thread 3 : region double_flops : group FLOPS_DP : CPI : 2.87123
+metric : thread 3 : region double_flops : group FLOPS_DP : Clock [MHz] : 2893.14
+metric : thread 3 : region double_flops : group FLOPS_DP : DP [MFLOP/s] : 182.517
+metric : thread 3 : region double_flops : group FLOPS_DP : Packed [MUOPS/s] : 0
+metric : thread 3 : region double_flops : group FLOPS_DP : Runtime (RDTSC) [s] : 0.109579
+metric : thread 3 : region double_flops : group FLOPS_DP : Runtime unhalted [s] : 0.126585
+metric : thread 3 : region double_flops : group FLOPS_DP : Scalar [MUOPS/s] : 182.517
+metric : thread 3 : region double_flops : group FLOPS_DP : Vectorization ratio : 0
+metric : thread 3 : region double_flops : group FLOPS_SP : AVX SP [MFLOP/s] : 0
+metric : thread 3 : region double_flops : group FLOPS_SP : CPI : 2.88767
+metric : thread 3 : region double_flops : group FLOPS_SP : Clock [MHz] : 2893.15
+metric : thread 3 : region double_flops : group FLOPS_SP : Packed [MUOPS/s] : 0
+metric : thread 3 : region double_flops : group FLOPS_SP : Runtime (RDTSC) [s] : 0.110414
+metric : thread 3 : region double_flops : group FLOPS_SP : Runtime unhalted [s] : 0.127514
+metric : thread 3 : region double_flops : group FLOPS_SP : SP [MFLOP/s] : 0
+metric : thread 3 : region double_flops : group FLOPS_SP : Scalar [MUOPS/s] : 0
+metric : thread 3 : region double_flops : group L2 : CPI : 2.71024
+metric : thread 3 : region double_flops : group L2 : Clock [MHz] : 2893.14
+metric : thread 3 : region double_flops : group L2 : L2 bandwidth [MBytes/s] : 334.49
+metric : thread 3 : region double_flops : group L2 : L2 data volume [GBytes] : 0.0366052
+metric : thread 3 : region double_flops : group L2 : L2D evict bandwidth [MBytes/s] : 8.78337
+metric : thread 3 : region double_flops : group L2 : L2D evict data volume [GBytes] : 0.000961216
+metric : thread 3 : region double_flops : group L2 : L2D load bandwidth [MBytes/s] : 174.786
+metric : thread 3 : region double_flops : group L2 : L2D load data volume [GBytes] : 0.0191279
+metric : thread 3 : region double_flops : group L2 : Runtime (RDTSC) [s] : 0.109436
+metric : thread 3 : region double_flops : group L2 : Runtime unhalted [s] : 0.126362
+metric : thread 3 : region double_flops : group L3 : CPI : 2.85748
+metric : thread 3 : region double_flops : group L3 : Clock [MHz] : 2893.16
+metric : thread 3 : region double_flops : group L3 : L3 bandwidth [MBytes/s] : 1282.28
+metric : thread 3 : region double_flops : group L3 : L3 data volume [GBytes] : 0.13994
+metric : thread 3 : region double_flops : group L3 : L3 evict bandwidth [MBytes/s] : 1.42621
+metric : thread 3 : region double_flops : group L3 : L3 evict data volume [GBytes] : 0.000155648
+metric : thread 3 : region double_flops : group L3 : L3 load bandwidth [MBytes/s] : 1280.85
+metric : thread 3 : region double_flops : group L3 : L3 load data volume [GBytes] : 0.139785
+metric : thread 3 : region double_flops : group L3 : Runtime (RDTSC) [s] : 0.109134
+metric : thread 3 : region double_flops : group L3 : Runtime unhalted [s] : 0.125987
+metric : thread 3 : region double_flops : group MEM : CPI : 2.88644
+metric : thread 3 : region double_flops : group MEM : Clock [MHz] : 2086.66
+metric : thread 3 : region double_flops : group MEM : Memory bandwidth [MBytes/s] : 0
+metric : thread 3 : region double_flops : group MEM : Memory data volume [GBytes] : 0
+metric : thread 3 : region double_flops : group MEM : Memory evict bandwidth [MBytes/s] : 0
+metric : thread 3 : region double_flops : group MEM : Memory evict data volume [GBytes] : 0
+metric : thread 3 : region double_flops : group MEM : Memory load bandwidth [MBytes/s] : 0
+metric : thread 3 : region double_flops : group MEM : Memory load data volume [GBytes] : 0
+metric : thread 3 : region double_flops : group MEM : Runtime (RDTSC) [s] : 0.153663
+metric : thread 3 : region double_flops : group MEM : Runtime unhalted [s] : 0.127436
+metric : thread 3 : region double_flops : group PORT_USAGE1 : CPI : 2.91773
+metric : thread 3 : region double_flops : group PORT_USAGE1 : Clock [MHz] : 2893.15
+metric : thread 3 : region double_flops : group PORT_USAGE1 : Port0 usage ratio : 0.0755333
+metric : thread 3 : region double_flops : group PORT_USAGE1 : Port1 usage ratio : 0.0740106
+metric : thread 3 : region double_flops : group PORT_USAGE1 : Port2 usage ratio : 0.115568
+metric : thread 3 : region double_flops : group PORT_USAGE1 : Runtime (RDTSC) [s] : 0.111242
+metric : thread 3 : region double_flops : group PORT_USAGE1 : Runtime unhalted [s] : 0.128641
+metric : thread 3 : region double_flops : group PORT_USAGE2 : CPI : 2.77911
+metric : thread 3 : region double_flops : group PORT_USAGE2 : Clock [MHz] : 2893.15
+metric : thread 3 : region double_flops : group PORT_USAGE2 : Port3 usage ratio : 0.116597
+metric : thread 3 : region double_flops : group PORT_USAGE2 : Port4 usage ratio : 0.0671946
+metric : thread 3 : region double_flops : group PORT_USAGE2 : Port5 usage ratio : 0.0529227
+metric : thread 3 : region double_flops : group PORT_USAGE2 : Runtime (RDTSC) [s] : 0.111056
+metric : thread 3 : region double_flops : group PORT_USAGE2 : Runtime unhalted [s] : 0.12816
+metric : thread 3 : region double_flops : group PORT_USAGE3 : CPI : 2.92673
+metric : thread 3 : region double_flops : group PORT_USAGE3 : Clock [MHz] : 2893.14
+metric : thread 3 : region double_flops : group PORT_USAGE3 : Port6 usage ratio : 0.0908065
+metric : thread 3 : region double_flops : group PORT_USAGE3 : Port7 usage ratio : 0.0482454
+metric : thread 3 : region double_flops : group PORT_USAGE3 : Runtime (RDTSC) [s] : 0.112031
+metric : thread 3 : region double_flops : group PORT_USAGE3 : Runtime unhalted [s] : 0.12924 ----- end detailed performance_monitor report ----- ----- performance_monitor highlights report ----- ---- key metrics, summed across threads ---- REGION copy SP [MFLOP/s] 3.802e-04 DP [MFLOP/s] 5.401e-04 L2 bandwidth [MBytes/s] 6.871e+03 L2 data volume [GBytes] 5.119e-01 L2D evict bandwidth [MBytes/s] 9.959e+01 L2D evict data volume [GBytes] 7.418e-03 L2D load bandwidth [MBytes/s] 6.700e+03 L2D load data volume [GBytes] 4.991e-01 L3 bandwidth [MBytes/s] 8.285e+03 L3 data volume [GBytes] 6.206e-01 L3 evict bandwidth [MBytes/s] 2.431e+01 L3 evict data volume [GBytes] 1.821e-03 L3 load bandwidth [MBytes/s] 8.261e+03 L3 load data volume [GBytes] 6.188e-01 Memory bandwidth [MBytes/s] 8.042e+01 Memory data volume [GBytes] 5.955e-03 Memory evict bandwidth [MBytes/s] 3.677e+00 Memory evict data volume [GBytes] 2.723e-04 Memory load bandwidth [MBytes/s] 7.674e+01 Memory load data volume [GBytes] 5.683e-03 REGION double_flops SP [MFLOP/s] 3.621e-05 DP [MFLOP/s] 7.272e+02 L2 bandwidth [MBytes/s] 2.333e+03 L2 data volume [GBytes] 2.565e-01 L2D evict bandwidth [MBytes/s] 1.218e+01 L2D evict data volume [GBytes] 1.335e-03 L2D load bandwidth [MBytes/s] 2.286e+03 L2D load data volume [GBytes] 2.514e-01 L3 bandwidth [MBytes/s] 5.128e+03 L3 data volume [GBytes] 5.603e-01 L3 evict bandwidth [MBytes/s] 7.480e+00 L3 evict data volume [GBytes] 8.162e-04 L3 load bandwidth [MBytes/s] 5.121e+03 L3 load data volume [GBytes] 5.595e-01 Memory bandwidth [MBytes/s] 2.685e+02 Memory data volume [GBytes] 4.823e-02 Memory evict bandwidth [MBytes/s] 4.038e+01 Memory evict data volume [GBytes] 7.253e-03 Memory load bandwidth [MBytes/s] 2.281e+02 Memory load data volume [GBytes] 4.097e-02 ---- key metrics, per-thread ---- REGION copy Metric Thread 0 Thread 1 Thread 2 Thread 3 Port0 usage ratio 0.039 0.048 0.039 0.048 Port1 usage ratio 0.048 0.054 0.048 0.054 Port2 usage ratio 0.109 0.109 0.109 0.109 Port3 usage ratio 0.113 0.114 0.114 0.114 Port4 usage ratio 0.055 0.063 0.055 0.063 Port5 usage ratio 0.049 0.055 0.049 0.055 Port6 usage ratio 0.076 0.078 0.076 0.078 Port7 usage ratio 0.041 0.041 0.041 0.041 REGION double_flops Metric Thread 0 Thread 1 Thread 2 Thread 3 Port0 usage ratio 0.073 0.075 0.073 0.076 Port1 usage ratio 0.072 0.074 0.072 0.074 Port2 usage ratio 0.112 0.115 0.112 0.116 Port3 usage ratio 0.113 0.115 0.113 0.117 Port4 usage ratio 0.061 0.066 0.061 0.067 Port5 usage ratio 0.046 0.052 0.046 0.053 Port6 usage ratio 0.090 0.095 0.090 0.091 Port7 usage ratio 0.047 0.050 0.046 0.048 ---- key metrics, averaged across threads ---- ---- using a geometric mean ---- REGION all_regions Port0 usage ratio 0.057 Port1 usage ratio 0.061 Port2 usage ratio 0.111 Port3 usage ratio 0.114 Port4 usage ratio 0.061 Port5 usage ratio 0.050 Port6 usage ratio 0.084 Port7 usage ratio 0.044 REGION copy Port0 usage ratio 0.043 Port1 usage ratio 0.051 Port2 usage ratio 0.109 Port3 usage ratio 0.114 Port4 usage ratio 0.059 Port5 usage ratio 0.052 Port6 usage ratio 0.077 Port7 usage ratio 0.041 REGION double_flops Port0 usage ratio 0.074 Port1 usage ratio 0.073 Port2 usage ratio 0.114 Port3 usage ratio 0.114 Port4 usage ratio 0.064 Port5 usage ratio 0.049 Port6 usage ratio 0.091 Port7 usage ratio 0.048 ----- saturation level performance_monitor report ----- Region all_regions: Percentage of available DP [MFLOP/s] used: 0.000 Percentage of available L2 bandwidth [MBytes/s] used: 0.027 Percentage of available L3 bandwidth [MBytes/s] used: 0.063 Percentage of available Memory bandwidth [MBytes/s] used: 0.006 Percentage of available SP [MFLOP/s] used: 0.000 Region copy: Percentage of available DP [MFLOP/s] used: 0.000 Percentage of available L2 bandwidth [MBytes/s] used: 0.046 Percentage of available L3 bandwidth [MBytes/s] used: 0.080 Percentage of available Memory bandwidth [MBytes/s] used: 0.003 Percentage of available SP [MFLOP/s] used: 0.000 Region double_flops: Percentage of available DP [MFLOP/s] used: 0.008 Percentage of available L2 bandwidth [MBytes/s] used: 0.016 Percentage of available L3 bandwidth [MBytes/s] used: 0.050 Percentage of available Memory bandwidth [MBytes/s] used: 0.011 Percentage of available SP [MFLOP/s] used: 0.000 ----- end saturation level performance_monitor report ----- ----- end performance_monitor highlights report -----
