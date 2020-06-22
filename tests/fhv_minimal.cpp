@@ -58,23 +58,21 @@ int main()
     for (int j = 0; j < 8; j++)
     {
       printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
-      likwid_markerStartRegion("double_flops");
 #pragma omp barrier
+      likwid_markerStartRegion("double_flops");
       for (int i = 0; i < 10000000; i++)
       {
         // 2e7 scalar double floating point operations per iteration
         c = a * b + c;
       }
-#pragma omp barrier
       likwid_markerStopRegion("double_flops");
+#pragma omp barrier
       likwid_markerStartRegion("copy");
       for (int i = 0; i < 10000; i++){
         copy(arr, copy_arr, n);
       }
-// if this barrier is left out, some threads are missing and cause problems
-// with the "per thread results" (port usage values) when printing highlights
-#pragma omp barrier 
       likwid_markerStopRegion("copy");
+#pragma omp barrier 
       likwid_markerNextGroup();
     }
   }
