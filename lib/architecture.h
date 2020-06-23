@@ -16,7 +16,10 @@ const unsigned L1_CACHE_GROUPS [2][2] = {{0,2}, {1, 3}};
 const unsigned L2_CACHE_GROUPS [2][2] = {{0,2}, {1, 3}};
 const unsigned L3_CACHE_GROUPS [1][4] = {{0, 2, 1, 3}};
 
-const unsigned CACHE_LINE_SIZE_BYTES = 64;
+// https://en.wikichip.org/wiki/intel/microarchitectures/skylake_(client)#Memory_Hierarchy
+// this site shows how the line size and load/cycle bandwidth is 64 bytes.
+// However, this is shared between the two threads on one core
+const unsigned CACHE_LINE_SIZE_BYTES = 32;
 
 const unsigned NUM_NUMA_DOMAINS = 1;
 

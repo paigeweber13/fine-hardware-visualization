@@ -33,7 +33,7 @@ def run_tests():
         command = [
             fhv_bin_location, '--benchmark-cache-and-memory', 
             str(num_iter), str(data_size_kb),
-            '-c']
+            '--csv-style-output']
         # print('running command:', ' '.join(command))
         print('running memory with data size ' + str(data_size_kb) + ' and '
               'number of iterations ' + str(num_iter),

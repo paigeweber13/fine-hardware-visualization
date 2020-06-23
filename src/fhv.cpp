@@ -90,11 +90,23 @@ void benchmark_cache_and_memory(std::uint64_t num_iterations,
   }
   
   benchmark_memory_bw("L2", num_iterations, data_size_kb);
+
+  #pragma omp parallel
+  {
   likwid_markerNextGroup();
+  }
   benchmark_memory_bw("L3", num_iterations, data_size_kb);
+
+  #pragma omp parallel
+  {
   likwid_markerNextGroup();
+  }
   benchmark_memory_bw("MEM", num_iterations, data_size_kb);
+
+  #pragma omp parallel
+  {
   likwid_markerNextGroup();
+  }
   benchmark_memory_bw("DATA", num_iterations, data_size_kb);
 }
 
