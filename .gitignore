@@ -26,4 +26,5 @@ asm
 .clangd
 *.swp
 Session.vim
+.python-version
 
