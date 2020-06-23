@@ -1,4 +1,5 @@
 #include "computation_measurements.h"
+#include "likwid.h"
 
 __m256 flops_sp(std::uint64_t num_iterations)
 {
@@ -72,15 +73,14 @@ __m256d flops_dp(std::uint64_t num_iterations)
   return a;
 }
 
-void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
-                  std::uint64_t size_kib)
-{
+double bandwidth_rw(const char *tag, std::uint64_t num_groups,
+                    std::uint64_t num_iterations_per_group,
+                    std::uint64_t num_iterations_to_measure,
+                    std::uint64_t size_kib) {
   // reduction(max:ticks) previously at the end of this pragma
 
   // unsigned thr_num;
-  std::uint64_t i, j, k;
   // __m256d buffer;
-  std::uint64_t inner_iterations = 1;
 
   // align to cache line, which is 512 bits or 64 bytes
   double * array = static_cast<double *>(
@@ -90,25 +90,33 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
 
   std::uint64_t num_doubles = size_kib * KILO_BYTE_SIZE/BYTES_PER_DOUBLE;
 
-#pragma omp parallel default(shared) private(i, j)
-  {
+  if (num_iterations_to_measure == 0) num_iterations_to_measure = 1;
+  std::uint64_t outer_iter = std::max(
+    num_iterations_per_group/num_iterations_to_measure, 
+    static_cast<std::uint64_t>(3));
 
-    // thr_num = omp_get_thread_num();
-    for (i = 0; i < num_iterations; i++)
+#pragma omp parallel
+  {
+    std::uint64_t i, j, k, group;
+
+    for (group = 0; group < num_groups; group++)
     {
+    // thr_num = omp_get_thread_num();
+    for (i = 0; i < outer_iter; i++) {
       //Get time snapshot just for one iteration
-      if (i == num_iterations / 2)
-      {
+      if (i == outer_iter/ 2) {
         //	start = system_clock::now();
         //	Maybe start likwid region here
         //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
         
+        #pragma omp barrier
         likwid_markerStartRegion(tag);
       }
-      for (k = 0; k < inner_iterations; k++)
+      for (k = 0; k < num_iterations_to_measure; k++){
         for (j = 0; j < num_doubles; j += 1){
           copy_array[j] = array[j];
         }
+      }
         // for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
         // {
         //   // Loading 256-bits into memory address of array
@@ -117,18 +125,25 @@ void bandwidth_rw(const char *tag, std::uint64_t num_iterations,
         //   _mm256_store_pd(copy_array + j, buffer);
         // }
       //Get time snapshot just for one iteration
-      if (i == num_iterations / 2)
-      {
+      if (i == outer_iter/ 2) {
         //	end = system_clock::now();
         //	Maybe stop likwid regin here
         //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
         
         likwid_markerStopRegion(tag);
+        #pragma omp barrier
       }
       asm(""); //Say no to loop optimization
     }
+#pragma omp barrier
+    likwid_markerNextGroup();
+    }
   }
+
+  double result = copy_array[static_cast<std::uint64_t>(rand()) % num_doubles];
 
   free(array);
   free(copy_array);
+
+  return result;
 }

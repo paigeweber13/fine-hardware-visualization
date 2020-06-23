@@ -16,6 +16,7 @@
 #include "../lib/architecture.h"
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
+#include "likwid.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -52,14 +53,20 @@ void benchmark_flops(precision p, uint64_t num_iter)
 #pragma omp parallel
   {
     if(p == precision::SINGLE_P){
+      #pragma omp barrier
       likwid_markerStartRegion("flops_sp");
       flops_sp(num_iter);
       likwid_markerStopRegion("flops_sp");
+      #pragma omp barrier
     } else if (p == precision::DOUBLE_P){
+      #pragma omp barrier
       likwid_markerStartRegion("flops_dp");
       flops_dp(num_iter);
       likwid_markerStopRegion("flops_dp");
+      #pragma omp barrier
     }
+    #pragma omp barrier
+    likwid_markerNextGroup();
   }
 }
 
@@ -67,7 +74,7 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
                          uint64_t mem_size_kb){
   // memory type becomes the performance group. Typically this is "L2", "L3",
   // or "RAM"
-  bandwidth_rw(memory_type.c_str(), num_iterations, mem_size_kb);
+  bandwidth_rw(memory_type.c_str(), 1, num_iterations, 1, mem_size_kb);
 }
 
 void benchmark_cache_and_memory(std::uint64_t num_iterations,
@@ -82,32 +89,11 @@ void benchmark_cache_and_memory(std::uint64_t num_iterations,
 #pragma omp parallel
   {
     likwid_markerThreadInit();
-    likwid_markerRegisterRegion("L2");
-    likwid_markerRegisterRegion("L3");
-    likwid_markerRegisterRegion("MEM");
-    likwid_markerRegisterRegion("DATA");
+    likwid_markerRegisterRegion("copy_bw");
     likwid_pinThread(omp_get_thread_num());
   }
   
-  benchmark_memory_bw("L2", num_iterations, data_size_kb);
-
-  #pragma omp parallel
-  {
-  likwid_markerNextGroup();
-  }
-  benchmark_memory_bw("L3", num_iterations, data_size_kb);
-
-  #pragma omp parallel
-  {
-  likwid_markerNextGroup();
-  }
-  benchmark_memory_bw("MEM", num_iterations, data_size_kb);
-
-  #pragma omp parallel
-  {
-  likwid_markerNextGroup();
-  }
-  benchmark_memory_bw("DATA", num_iterations, data_size_kb);
+  bandwidth_rw("copy_bw", 4, num_iterations, 1, data_size_kb);
 }
 
 void benchmark_all()
@@ -131,19 +117,15 @@ void benchmark_all()
 
   std::cout << "starting single precision flop benchmark" << std::endl;
   benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
-  likwid_markerNextGroup();
 
   std::cout << "starting double precision flop benchmark" << std::endl;
   benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
-  likwid_markerNextGroup();
 
   std::cout << "starting L2 cache rw bandwidth benchmark" << std::endl;
   benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
-  likwid_markerNextGroup();
 
   std::cout << "starting L3 cache rw bandwidth benchmark" << std::endl;
   benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
-  likwid_markerNextGroup();
 
   std::cout << "starting RAM rw bandwidth benchmark" << std::endl;
   benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
@@ -355,8 +337,9 @@ void test_color_lerp(
     + ".svg";
 
   if(system(("mkdir -p " + output_dir).c_str()) != 0)
-    std::cout << "there was a problem making the directory for swatches..."
-      << " Swatch creation will likely fail.";
+    std::cout << "WARN: there was a problem making the directory for "
+      << "color swatches (" << output_dir << ")." << std::endl
+      << "Swatch creation will likely fail.";
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(
@@ -1120,32 +1103,32 @@ int main(int argc, char *argv[])
 
       std::cout << memory_size_kb << ","
                 << num_memory_iter << ","
-                << m["DATA"]["DATA"][load_to_store_ratio_metric_name] << ","
-                << e["DATA"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
+                << m["copy_bw"]["DATA"][load_to_store_ratio_metric_name] << ","
+                << e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
                    * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
-                << e["DATA"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"] 
+                << e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"] 
                    * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
-                << (e["DATA"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
-                   + e["DATA"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"])
+                << (e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
+                   + e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"])
                    * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
-                << m["L2"]["L2"][l2_bandwidth_metric_name] << ","
-                << m["L2"]["L2"][l2_data_volume_name] << ","
-                << m["L2"]["L2"][l2_evict_bandwidth_name] << ","
-                << m["L2"]["L2"][l2_evict_data_volume_name] << ","
-                << m["L2"]["L2"][l2_load_bandwidth_name] << ","
-                << m["L2"]["L2"][l2_load_data_volume_name] << ","
-                << m["L3"]["L3"][l3_bandwidth_metric_name] << ","
-                << m["L3"]["L3"][l3_data_volume_name] << ","
-                << m["L3"]["L3"][l3_evict_bandwidth_name] << ","
-                << m["L3"]["L3"][l3_evict_data_volume_name] << ","
-                << m["L3"]["L3"][l3_load_bandwidth_name] << ","
-                << m["L3"]["L3"][l3_load_data_volume_name] << ","
-                << m["MEM"]["MEM"][ram_bandwidth_metric_name] << ","
-                << m["MEM"]["MEM"][ram_data_volume_metric_name] << ","
-                << m["MEM"]["MEM"][ram_evict_bandwidth_name] << ","
-                << m["MEM"]["MEM"][ram_evict_data_volume_name] << ","
-                << m["MEM"]["MEM"][ram_load_bandwidth_name] << ","
-                << m["MEM"]["MEM"][ram_load_data_volume_name] << "\n"
+                << m["copy_bw"]["L2"][l2_bandwidth_metric_name] << ","
+                << m["copy_bw"]["L2"][l2_data_volume_name] << ","
+                << m["copy_bw"]["L2"][l2_evict_bandwidth_name] << ","
+                << m["copy_bw"]["L2"][l2_evict_data_volume_name] << ","
+                << m["copy_bw"]["L2"][l2_load_bandwidth_name] << ","
+                << m["copy_bw"]["L2"][l2_load_data_volume_name] << ","
+                << m["copy_bw"]["L3"][l3_bandwidth_metric_name] << ","
+                << m["copy_bw"]["L3"][l3_data_volume_name] << ","
+                << m["copy_bw"]["L3"][l3_evict_bandwidth_name] << ","
+                << m["copy_bw"]["L3"][l3_evict_data_volume_name] << ","
+                << m["copy_bw"]["L3"][l3_load_bandwidth_name] << ","
+                << m["copy_bw"]["L3"][l3_load_data_volume_name] << ","
+                << m["copy_bw"]["MEM"][ram_bandwidth_metric_name] << ","
+                << m["copy_bw"]["MEM"][ram_data_volume_metric_name] << ","
+                << m["copy_bw"]["MEM"][ram_evict_bandwidth_name] << ","
+                << m["copy_bw"]["MEM"][ram_evict_data_volume_name] << ","
+                << m["copy_bw"]["MEM"][ram_load_bandwidth_name] << ","
+                << m["copy_bw"]["MEM"][ram_load_data_volume_name] << "\n"
                 ;
     }
   }
