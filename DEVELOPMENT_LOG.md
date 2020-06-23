@@ -4,9 +4,11 @@ Hardware Visualization
 
 - [Development Log](#development-log)
 - [2020-06-16 through 2020-06-23](#2020-06-16-through-2020-06-23)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-1)
+  - [Accomplishments](#accomplishments-1)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -59,6 +61,15 @@ Hardware Visualization
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
 # 2020-06-16 through 2020-06-23
+## Questions
+- cache line size is 32 bytes. We use vectors of size 32 bytes. What if we used
+  the smaller vectors, the 16 byte vectors? The core would still load 32 bytes
+  because it can't load part of a cache line, so it would just discard the
+  other 16 bytes?
+  - could you make it so that each thread gets 16 bytes so that you use
+    everything loaded?
+
+## Accomplishments
 - explored likwid-api. If we do decide to move away from the marker API, I
   think this is what we should choose. 
   - see `tests/likwid_api_minimal.c`
@@ -76,8 +87,10 @@ Hardware Visualization
   of using fhv wrapper)
   - using fhv start/stopRegion and nextGroup: went 410 iterations without
     having any problems. Final iteration showed unreasonably high values.
-  - also using fhv init: went 400 iterations, then gave up. No problems
-    detected during those iterations
+  - also using fhv init: went 798 iterations before having a problem.
+- "stopping non-started region" seems to happen when one thread stops before
+  another has started. I suppose regions are not completely thread-independent,
+  but the likwid documentation doesn't mention anything about this...
 
 # 2020-06-09 through 2020-06-16
 We've decided to continue using likwid at this point, but PAPI may prove useful
