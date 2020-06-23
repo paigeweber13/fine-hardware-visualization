@@ -17,30 +17,31 @@ int main()
   printf("\n\nThis is a minimal example of how the fhv performance_monitor \n"
          "aggregation prints work\n");
 
+  performance_monitor::init("double_flops,copy", "");
   // ---- begin likwid initialization
 
-  const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
+  // const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
 
-  // so 14 group/region combos
-  setenv("LIKWID_EVENTS",
-         "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
-         1);
-  // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
-  setenv("LIKWID_MODE", "1", 1);
-  // output filepath
-  setenv("LIKWID_FILEPATH", filepath, 1); 
-  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
-  setenv("LIKWID_FORCE", "1", 1);
+  // // so 14 group/region combos
+  // setenv("LIKWID_EVENTS",
+  //        "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
+  //        1);
+  // // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
+  // setenv("LIKWID_MODE", "1", 1);
+  // // output filepath
+  // setenv("LIKWID_FILEPATH", filepath, 1); 
+  // setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
+  // setenv("LIKWID_FORCE", "1", 1);
 
-  likwid_markerInit();
+  // likwid_markerInit();
 
-#pragma omp parallel
-  {
-    likwid_markerThreadInit();
-    likwid_markerRegisterRegion("double_flops");
-    likwid_markerRegisterRegion("copy");
-    likwid_pinThread(omp_get_thread_num());
-  }
+  // #pragma omp parallel
+  // {
+  //   likwid_markerThreadInit();
+  //   likwid_markerRegisterRegion("double_flops");
+  //   likwid_markerRegisterRegion("copy");
+  //   likwid_pinThread(omp_get_thread_num());
+  // }
 
   // ---- end likwid initialization
 
@@ -58,22 +59,19 @@ int main()
     for (int j = 0; j < 8; j++)
     {
       printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
-#pragma omp barrier
-      likwid_markerStartRegion("double_flops");
+      performance_monitor::startRegion("double_flops");
       for (int i = 0; i < 10000000; i++)
       {
         // 2e7 scalar double floating point operations per iteration
         c = a * b + c;
       }
-      likwid_markerStopRegion("double_flops");
-#pragma omp barrier
-      likwid_markerStartRegion("copy");
+      performance_monitor::stopRegion("double_flops");
+      performance_monitor::startRegion("copy");
       for (int i = 0; i < 10000; i++){
         copy(arr, copy_arr, n);
       }
-      likwid_markerStopRegion("copy");
-#pragma omp barrier 
-      likwid_markerNextGroup();
+      performance_monitor::stopRegion("copy");
+      performance_monitor::nextGroup();
     }
   }
 
