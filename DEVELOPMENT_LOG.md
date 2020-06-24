@@ -91,6 +91,11 @@ Hardware Visualization
 - "stopping non-started region" seems to happen when one thread stops before
   another has started. I suppose regions are not completely thread-independent,
   but the likwid documentation doesn't mention anything about this...
+- explored high saturation on port 4 even for CPU-heavy parameters of
+  polynomial_block:
+  - kept n at 1024 and increased degree from 1e3 to 1e8. In all cases, port4
+    was the most saturated. That seems odd; now I wonder if I'm measureing port
+    usage correctly...
 
 # 2020-06-09 through 2020-06-16
 We've decided to continue using likwid at this point, but PAPI may prove useful

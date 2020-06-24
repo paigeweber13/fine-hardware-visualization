@@ -144,14 +144,16 @@ We want all programmers to
 
 # TODO:
 ## Immediate:
- - [ ] mem instructions retired * 32 bytes instead of 64
+ - [x] mem instructions retired * 32 bytes instead of 64
    - this is because there are 2 32-byte busses?
      [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
    - this architecture only moves 32-bytes (probably because 32-byte
      vectors are the biggest they can do)
  - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial
        block, port4 (store data) is still the most saturated
-   - [ ] what happens if we increase degree past 100?
+   - [x] what happens if we increase degree past 100? Same behavior...
+   - [ ] inspect assembly to find stores
+   - [ ] look at how we measure port usage
  - [ ] more counters to visualize.
    - [ ] quickly finish looking at all perfgroups
    - [ ] Dr. Saule identified the following areas as key. What counters and
