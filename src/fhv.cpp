@@ -367,6 +367,7 @@ void draw_diagram(
   rgb_color min_color,
   rgb_color max_color,
   std::string region_name,
+  std::string parameters,
   std::string output_filename
 )
 {
@@ -410,10 +411,11 @@ void draw_diagram(
 
   // initialization for cairo
   double image_width = 800;
-  double image_height = 1600;
+  double image_height = 1650;
   double margin_x = 50;
   double margin_y = 50;
-  double title_text_height = 310;
+  double internal_margin = 25;
+  // double title_text_height = 310;
   cairo_surface_t *surface = cairo_svg_surface_create(
       output_filename.c_str(),
       image_width,
@@ -460,8 +462,25 @@ void draw_diagram(
   cairo_set_font_size(cr, text_size_small);
   cairo_set_line_width(cr, text_line_thickness_small);
 
-  // computation color notes
+  // spacing between title and small text
   current_text_y += 2 * line_spacing;
+
+  if(parameters.compare("") != 0)
+  {
+    cairo_text_extents(cr, parameters.c_str(), &text_extents);
+    current_text_y += line_spacing + text_extents.height;
+    cairo_move_to(
+      cr,
+      margin_x,
+      current_text_y);
+    // cairo_set_text_width(cr, text_line_thickness);
+    cairo_text_path(cr, parameters.c_str());
+    cairo_fill_preserve(cr);
+    cairo_stroke(cr); 
+    current_text_y += line_spacing;
+  }
+
+  // computation color notes
   for(auto &line : computation_color_note){
     cairo_text_extents(cr, line.c_str(), &text_extents);
     current_text_y += line_spacing + text_extents.height;
@@ -533,7 +552,7 @@ void draw_diagram(
 
   // --- draw RAM --- //
   double ram_x = margin_x;
-  double ram_y = margin_y + title_text_height;
+  double ram_y = internal_margin + current_text_y; 
   double ram_width = 700;
   double ram_height = 200;
   cairo_rectangle(cr, ram_x, ram_y, ram_width, ram_height);
@@ -796,6 +815,8 @@ void visualize(
   json j;
   i >> j;
 
+  std::string params = j["info"]["parameters"];
+
   std::string region_name;
   for(auto &saturation_item: j["saturation"].items())
   {
@@ -816,7 +837,7 @@ void visualize(
       region_name + ext;
 
     draw_diagram(region_colors, region_data, min_color, max_color, region_name,
-      this_image_output_filename);
+      params, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
   }
