@@ -1,3 +1,4 @@
+#pragma once
 // JUSTIFICATION: using defines for these things turns incorrect spellings into
 // compile-time errors instead of runtime errors. This is good!
 
@@ -20,15 +21,8 @@
 #define mflops_metric_name "SP [MFLOP/s]"
 #define mflops_dp_metric_name "DP [MFLOP/s]"
 
-// port usage ratios
-#define port0_usage_ratio "Port0 usage ratio"
-#define port1_usage_ratio "Port1 usage ratio"
-#define port2_usage_ratio "Port2 usage ratio"
-#define port3_usage_ratio "Port3 usage ratio"
-#define port4_usage_ratio "Port4 usage ratio"
-#define port5_usage_ratio "Port5 usage ratio"
-#define port6_usage_ratio "Port6 usage ratio"
-#define port7_usage_ratio "Port7 usage ratio"
+// port usage
+#define uops_port_base_name "UOPS_DISPATCHED_PORT_PORT_"
 
 // cache volume and bandwidth
 #define l2_bandwidth_metric_name "L2 bandwidth [MBytes/s]"
@@ -53,5 +47,5 @@
 #define ram_load_bandwidth_name "Memory load bandwidth [MBytes/s]"
 #define ram_load_data_volume_name "Memory load data volume [GBytes]"
 
-// other memroy/cache stuff
+// other memory/cache stuff
 #define load_to_store_ratio_metric_name "Load to store ratio"

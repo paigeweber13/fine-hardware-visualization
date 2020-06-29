@@ -1,31 +1,13 @@
 #include "performance_monitor.h"
+#include "architecture.h"
+#include "likwid_defines.hpp"
 
 // declarations
 std::map<std::string, double> performance_monitor::runtimes_by_tag;
 
-std::map<
-  aggregation_type, std::map<
-    result_type, std::map<
-      std::string, std::map<
-        std::string, std::map<
-          std::string, double
-        >
-      >
-    >
-  >
-> performance_monitor::aggregate_results;
+aggregate_results_map_t performance_monitor::aggregate_results;
 
-std::map<
-  result_type, std::map<
-    int, std::map<
-      std::string, std::map<
-        std::string, std::map<
-          std::string, double
-        >
-      >
-    >
-  >
-> performance_monitor::per_thread_results;
+per_thread_results_map_t performance_monitor::per_thread_results;
 
 std::map<std::string, std::map<std::string, double>>
   performance_monitor::saturation;
@@ -63,14 +45,14 @@ const std::vector<float> performance_monitor::saturationBenchmarkReferences = {
 
 // port usage metrics
 const std::vector<std::string> performance_monitor::port_usage_metrics = {
-  port0_usage_ratio,
-  port1_usage_ratio,
-  port2_usage_ratio,
-  port3_usage_ratio,
-  port4_usage_ratio,
-  port5_usage_ratio,
-  port6_usage_ratio,
-  port7_usage_ratio,
+  fhv_port0_usage_ratio,
+  fhv_port1_usage_ratio,
+  fhv_port2_usage_ratio,
+  fhv_port3_usage_ratio,
+  fhv_port4_usage_ratio,
+  fhv_port5_usage_ratio,
+  fhv_port6_usage_ratio,
+  fhv_port7_usage_ratio,
 };
 
 
@@ -317,6 +299,9 @@ void performance_monitor::buildResultsMaps()
   const char *event_name, *metric_name, * groupName, * regionName;
   bool keep_event, keep_metric;
 
+  std::string this_port_event_name;
+  std::string this_port_usage_metric_name;
+
 #pragma omp parallel
   {
     // needed because we use it to print results later
@@ -350,11 +335,22 @@ void performance_monitor::buildResultsMaps()
       aggregate_results[geometric_mean][metric][regionName][groupName][metric_name] = 1.;
       aggregate_results[geometric_mean][metric][all_regions_keyword][groupName][metric_name] = 1.;
     }
+    for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++){
+      groupName = fhv_port_usage_group;
+      this_port_usage_metric_name = fhv_port_usage_ratio_start 
+        + std::to_string(port_num) + fhv_port_usage_ratio_end;
+      aggregate_results[sum][metric][regionName][groupName][this_port_usage_metric_name] = 0.;
+      aggregate_results[arithmetic_mean][metric][regionName][groupName][this_port_usage_metric_name] = 0.;
+      aggregate_results[geometric_mean][metric][regionName][groupName][this_port_usage_metric_name] = 1.;
+    }
   }
 
   // populate maps
   for (int t = 0; t < num_threads; t++)
   {
+    // this loop is not actually regions, it's regions * groups. This is
+    // because perfmon_getNumberOfRegions considers each region + group
+    // combination as a "region"
     for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
     {
       regionName = perfmon_getTagOfRegion(i);
@@ -453,42 +449,117 @@ void performance_monitor::buildResultsMaps()
     }
   }
 
+  // sum port usage on a per-thread basis and find port usage ratios
+
+  double total_port_usage, port_usage_value;
+
+  std::vector<double> port_usages(NUM_PORTS_IN_CORE);
+
+  for (int t = 0; t < num_threads; t++){
+    printf("Thread %d\n", t);
+
+    for (auto region = per_thread_results[event][t].begin();
+    region != per_thread_results[event][t].end();
+    ++region)
+    {
+      printf("region %s\n", region->first.c_str());
+      total_port_usage = 0;
+      port_usages.clear();
+
+      for (auto group = region->second.begin(); 
+        group != region->second.end(); 
+        ++group)
+      {
+        for (auto event = group->second.begin();
+          event != group->second.end();
+          ++event)
+        {
+          for(unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++){
+            this_port_event_name = 
+              uops_port_base_name + std::to_string(port_num);
+              printf("event name: %s\n", event->first.c_str());
+            if (event->first.compare(this_port_event_name) == 0){
+              total_port_usage += event->second;
+              port_usages[port_num] = event->second;
+
+              printf("found port event! %s\n", this_port_event_name.c_str());
+              printf("event value: %f\n", event->second);
+              printf("port_usages[%d]: %f\n", port_num, port_usages[port_num]);
+            }
+          }
+        }
+      }
+
+      for(unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++){
+        groupName = fhv_port_usage_group;
+        this_port_usage_metric_name = fhv_port_usage_ratio_start 
+          + std::to_string(port_num) + fhv_port_usage_ratio_end;
+        port_usage_value = port_usages[port_num]/total_port_usage;
+
+        per_thread_results[metric][t][region->first][groupName][this_port_usage_metric_name] = port_usage_value;
+        aggregate_results[sum][metric][region->first][groupName][this_port_usage_metric_name] += port_usage_value;
+        if(port_usage_value != 0.0){
+          aggregate_results[geometric_mean][metric][region->first][groupName][this_port_usage_metric_name] *= port_usage_value;
+        }
+
+        std::cout << "METRIC NAME:  " << this_port_usage_metric_name << std::endl;
+        std::cout << "METRIC VALUE: " << port_usage_value << std::endl;
+      }
+      printf("thread %d         aggregate_results[sum][metric][region->first][groupName][%s]: %f\n",
+        t, this_port_usage_metric_name.c_str(), aggregate_results[sum][metric][region->first][groupName][this_port_usage_metric_name]);
+    }
+  }
+
   // convert sums/products to averages where appropriate
 
-  for (int i = 0; i < perfmon_getNumberOfRegions(); i++)
+  for (auto region = aggregate_results[geometric_mean][result_type::event].begin();
+    region != aggregate_results[geometric_mean][result_type::event].end();
+    ++region)
   {
-    regionName = perfmon_getTagOfRegion(i);
-    gid = perfmon_getGroupOfRegion(i);
-    groupName = perfmon_getGroupName(gid);
-
-    for (int k = 0; k < perfmon_getEventsOfRegion(i); k++)
+    for (auto group = region->second.begin(); 
+      group != region->second.end(); 
+      ++group)
     {
-      event_name = perfmon_getEventName(gid, k);
-      aggregate_results[arithmetic_mean][event][regionName][groupName][event_name] =
-          aggregate_results[sum][event][regionName][groupName][event_name] / num_threads;
+      for (auto event = group->second.begin();
+        event != group->second.end();
+        ++event)
+      {
+        aggregate_results[arithmetic_mean][result_type::event][region->first][group->first][event->first] =
+            aggregate_results[sum][result_type::event][region->first][group->first][event->first] / num_threads;
 
-      aggregate_results[geometric_mean][event][regionName][groupName]
-        [event_name] = 
-        pow(
-          aggregate_results[geometric_mean][event][regionName][groupName]
-            [event_name],
-          1.0/static_cast<double>(num_threads));
+        aggregate_results[geometric_mean][result_type::event][region->first][group->first]
+          [event->first] = 
+          pow(
+            aggregate_results[geometric_mean][result_type::event][region->first][group->first]
+              [event->first],
+            1.0/static_cast<double>(num_threads));
+      }
     }
+  }
 
-    for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++)
+  for (auto region = aggregate_results[geometric_mean][result_type::metric].begin();
+    region != aggregate_results[geometric_mean][result_type::metric].end();
+    ++region)
+  {
+    for (auto group = region->second.begin(); 
+      group != region->second.end(); 
+      ++group)
     {
-      metric_name = perfmon_getMetricName(gid, k);
+      for (auto metric = group->second.begin();
+        metric != group->second.end();
+        ++metric)
+      {
+        aggregate_results[arithmetic_mean][result_type::metric][region->first][group->first][metric->first] =
+            aggregate_results[sum][result_type::metric][region->first][group->first][metric->first] / num_threads;
 
-      aggregate_results[geometric_mean][metric][regionName][groupName]
-        [metric_name] = 
-        pow(
-          aggregate_results[geometric_mean][metric][regionName][groupName]
-            [metric_name],
-          1.0/static_cast<double>(num_threads));
-      aggregate_results[arithmetic_mean][metric][regionName][groupName][metric_name] =
-          aggregate_results[sum][metric][regionName][groupName][metric_name] / num_threads;
+        aggregate_results[geometric_mean][result_type::metric][region->first][group->first]
+          [metric->first] = 
+          pow(
+            aggregate_results[geometric_mean][result_type::metric][region->first][group->first]
+              [metric->first],
+            1.0/static_cast<double>(num_threads));
+      }
     }
-
   }
 
   int num_regions = perfmon_getNumberOfRegions()/perfmon_getNumberOfGroups();

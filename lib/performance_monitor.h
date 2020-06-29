@@ -37,12 +37,65 @@
 #define all_groups_keyword "all_groups"
 #define all_regions_keyword "all_regions"
 
+// port usage ratio names
+#define fhv_port_usage_group "FHV Port usage ratios"
+#define fhv_port_usage_ratio_start "Port"
+#define fhv_port_usage_ratio_end " usage ratio"
+#define fhv_port0_usage_ratio "Port0 usage ratio"
+#define fhv_port1_usage_ratio "Port1 usage ratio"
+#define fhv_port2_usage_ratio "Port2 usage ratio"
+#define fhv_port3_usage_ratio "Port3 usage ratio"
+#define fhv_port4_usage_ratio "Port4 usage ratio"
+#define fhv_port5_usage_ratio "Port5 usage ratio"
+#define fhv_port6_usage_ratio "Port6 usage ratio"
+#define fhv_port7_usage_ratio "Port7 usage ratio"
 
 // enums for aggregation type and result type
 enum aggregation_type { sum, arithmetic_mean, geometric_mean };
 enum result_type { event, metric };
 
 using json = nlohmann::json;
+
+// ---- TYPES
+// aggregate results
+
+// each includes group for "all groups" and region for "all regions"
+
+// aggregation type -> result type (event or metric) -> region name ->
+// group name -> thing name -> thing value
+
+typedef 
+std::map<
+  aggregation_type, std::map<
+    result_type, std::map<
+      std::string, std::map<
+        std::string, std::map<
+          std::string, double
+        >
+      >
+    >
+  >
+>
+aggregate_results_map_t;
+
+// in the case of "per_thread_results", "thread" refers to the hardware
+// thread 
+
+// result type (event or metric) -> thread number -> region name -> group
+// name -> thing name -> thing value
+typedef
+std::map<
+  result_type, std::map<
+    int, std::map<
+      std::string, std::map<
+        std::string, std::map<
+          std::string, double
+        >
+      >
+    >
+  >
+>
+per_thread_results_map_t;
 
 class performance_monitor {
   public:
@@ -142,31 +195,8 @@ class performance_monitor {
 
     // ------ getters ----- //
     const static std::map<std::string, double> get_runtimes_by_tag();
-    const static std::map<
-      aggregation_type, std::map<
-        result_type, std::map<
-          std::string, std::map<
-            std::string, std::map<
-              std::string, double
-            >
-          >
-        >
-      >
-    >
-      get_aggregate_results();
-
-    const static std::map<
-      result_type, std::map<
-        int, std::map<
-          std::string, std::map<
-            std::string, std::map<
-              std::string, double
-            >
-          >
-        >
-      >
-    >
-      get_per_thread_results();
+    const static aggregate_results_map_t get_aggregate_results();
+    const static per_thread_results_map_t get_per_thread_results();
     const static std::map<std::string, std::map<std::string, double>>
       get_saturation();
     const static std::map<std::string, std::map<std::string, double>>
@@ -198,42 +228,9 @@ class performance_monitor {
 
     static std::map<std::string, double> runtimes_by_tag;
 
-    // aggregate results
+    static aggregate_results_map_t  aggregate_results;
 
-    // each includes group for "all groups" and region for "all regions"
-
-    // aggregation type -> result type (event or metric) -> region name ->
-    // group name -> thing name -> thing value
-    static std::map<
-      aggregation_type, std::map<
-        result_type, std::map<
-          std::string, std::map<
-            std::string, std::map<
-              std::string, double
-            >
-          >
-        >
-      >
-    >
-      aggregate_results;
-
-    // in the case of "per_thread_results", "thread" refers to the hardware
-    // thread 
-
-    // result type (event or metric) -> thread number -> region name -> group
-    // name -> thing name -> thing value
-    static std::map<
-      result_type, std::map<
-        int, std::map<
-          std::string, std::map<
-            std::string, std::map<
-              std::string, double
-            >
-          >
-        >
-      >
-    >
-      per_thread_results;
+    static per_thread_results_map_t per_thread_results;
 
     // map region to saturation name to saturation value
 

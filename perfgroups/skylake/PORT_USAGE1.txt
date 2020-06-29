@@ -4,7 +4,7 @@ EVENTSET
 FIXC0 INSTR_RETIRED_ANY
 FIXC1 CPU_CLK_UNHALTED_CORE
 FIXC2 CPU_CLK_UNHALTED_REF
-PMC0  UOPS_EXECUTED_CORE
+PMC0  UOPS_EXECUTED_THREAD
 PMC1  UOPS_DISPATCHED_PORT_PORT_0
 PMC2  UOPS_DISPATCHED_PORT_PORT_1
 PMC3  UOPS_DISPATCHED_PORT_PORT_2
@@ -14,17 +14,14 @@ Runtime (RDTSC) [s] time
 Runtime unhalted [s] FIXC1*inverseClock
 Clock [MHz]  1.E-06*(FIXC1/FIXC2)/inverseClock
 CPI  FIXC1/FIXC0
-Port0 usage ratio PMC1/PMC0
-Port1 usage ratio PMC2/PMC0
-Port2 usage ratio PMC3/PMC0
 
-LONG
-Formulas:
-Port0 usage ratio = UOPS_DISPATCHED_PORT_PORT_0/UOPS_EXECUTED_CORE
-Port1 usage ratio = UOPS_DISPATCHED_PORT_PORT_1/UOPS_EXECUTED_CORE
-Port2 usage ratio = UOPS_DISPATCHED_PORT_PORT_2/UOPS_EXECUTED_CORE
 -
 This group measures the execution port utilization in a CPU core. This group is
 designed to be run over the same region with all other PORT_USAGE* groups. By
 splitting the port usage calculations into multiple groups, port usage is able
-to be calculated with hyperthreading enabled.
+to be calculated with hyperthreading enabled. 
+
+Ratios of a given port's usage to the total usage of all ports must be
+calculated by software that processes results, for instance by summing the uops
+dispatched across all ports and then dividing each UOPS_DISPATCHED_PORT_PORT_*
+by that sum.

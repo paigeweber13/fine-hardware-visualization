@@ -8,6 +8,8 @@ const double CLOCK_RATE_GHZ = 2.9;
 
 const unsigned SOCKET_THREADS [1][4] = {{0, 2, 1, 3}};
 
+const unsigned NUM_PORTS_IN_CORE = 8;
+
 const unsigned L1_CACHE_SIZE_KB = 32;
 const unsigned L2_CACHE_SIZE_KB = 256;
 const unsigned L3_CACHE_SIZE_MB = 3;
