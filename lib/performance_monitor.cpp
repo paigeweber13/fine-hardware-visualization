@@ -256,7 +256,10 @@ void performance_monitor::stopRegion(const char * tag)
 
 void performance_monitor::nextGroup(){
 #pragma omp barrier
-  likwid_markerNextGroup();
+#pragma omp single
+  {
+    likwid_markerNextGroup();
+  }
 }
 
 void performance_monitor::close(){

@@ -100,7 +100,10 @@ int main()
       do_copy(arr, copy_arr, n, NUM_COPIES);
       likwid_markerStopRegion("copy");
 #pragma omp barrier
-      likwid_markerNextGroup();
+#pragma omp single
+      {
+        likwid_markerNextGroup();
+      }
     }
   }
 
