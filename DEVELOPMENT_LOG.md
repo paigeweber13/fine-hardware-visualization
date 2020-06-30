@@ -66,8 +66,23 @@ Hardware Visualization
   the smaller vectors, the 16 byte vectors? The core would still load 32 bytes
   because it can't load part of a cache line, so it would just discard the
   other 16 bytes?
+  - wikichip says the bandwidth (for L1/L2 loads) is 64B/cycle. Wikichip
+    also says L1 and L2 caches are shared between threads on a single core. I
+    assume this implies that the 64B/cycle bandwidth is also shared and that
+    this accounts for the 32B cache line we really get per thread in L1. Is
+    that right?
   - could you make it so that each thread gets 16 bytes so that you use
     everything loaded?
+- for UOPS, what's the difference between "executed", "issued", and
+  "dispatched"? The intel documentation uses all 3 and they seem to have
+  nuances that separate them, but they are not clearly defined. Intel uses the
+  word in its own definition. 
+  - for instance, the description of "UOPS_EXECUTED_PORT.PORT_0" reads "Counts
+    the number of cycles in which a uop is dispatched to port 0."
+- why is it so hard to get a consistent number of 
+- why do I get such different saturations/port usages between compilers with
+  the same flags?
+- at what point should I make a test suite?
 
 ## Accomplishments
 - explored likwid-api. If we do decide to move away from the marker API, I
@@ -94,8 +109,55 @@ Hardware Visualization
 - explored high saturation on port 4 even for CPU-heavy parameters of
   polynomial_block:
   - kept n at 1024 and increased degree from 1e3 to 1e8. In all cases, port4
-    was the most saturated. That seems odd; now I wonder if I'm measureing port
+    was the most saturated. That seems odd; now I wonder if I'm measuring port
     usage correctly...
+  - started inspecting assembly. Also used llvm-mca to get some insights.
+    Noticed that I was getting different results from llvm-mca if I used clang,
+    so I tried to compile polynomial-block with clang. Results follow
+    - command used (in both cases, $(CXX) is replaced with g++ or clang++):
+      `$(CXX) polynomial_block.cpp -std=c++14 -O3 -fopenmp -march=native
+      -mtune=native -I /usr/local/likwid-master/include -I
+      /home/riley/code/fine-hardware-visualization/lib -fopenmp
+      /home/riley/code/fine-hardware-visualization/obj/performance_monitor.o -L
+      /usr/local/likwid-master/lib -llikwid -DFHV_PERFMON -o
+      polynomial_block_fhv_perfmon`
+    - key parts are the flags `-std=c++14 -O3 -fopenmp -march=native
+      -mtune=native -llikwid -DFHV_PERFMON`
+    - g++ version: g++ (Ubuntu 7.4.0-1ubuntu1~18.04.1) 7.4.0
+    - clang++ version: clang version
+      10.0.1-++20200519095410+f79cd71e145-1~exp1~20200519200813.165 Target:
+      x86_64-pc-linux-gnu Thread model: posix InstalledDir: /usr/bin
+    - Results:
+      | Compiler | SP Flops | Top Port Saturation | Second Port Saturation |
+      | -------- | -------- | ------------------- | ---------------------- |
+      | g++      | 5.654e+04| Port 4 @ 0.114      | Port 3 @ 0.090         |
+      | clang++  | 7.642e+04| Port 0 @ 0.091      | Port 1 @ 0.091         |
+    - in the case of clang++, port 3 was also fairly saturated at 0.084
+    - this is much more what we expect in the cpu-heavy case. Interesting how
+      much the compiler makes a difference even with the same flags
+- looked at how we calculate port usage. Summing all port usages should be 1,
+  because it's supposed to be usage of 1/total usage. But that isn't the case.
+  The sum of them all was around 0.43 or so for both the g++ and clang++
+  versions. Why is that?
+  - I think it's because I was using UOPS_EXECUTED_CORE, which counts from both
+    threads. Evaluating replacements, but UOPS_EXECUTED_THREAD looks promising
+  - counts were pretty consistent across runs, here is one example:
+  - Thread 2
+    sum of UOPS_DISPATCHED_PORT_PORT_*:     2.70143e+08
+    UOPS_EXECUTED_CORE:                     3.99846e+08
+    UOPS_EXECUTED_THREAD:                   2.01832e+08
+    UOPS_ISSUED_ANY:                        1.53631e+08
+  - none are spot on, UOPS_EXECUTED_THREAD is certainly better
+- discovered that in many places the documentation is simply wrong. [The
+  documentation for the marker
+  API](https://rrze-hpc.github.io/likwid/Doxygen/group__MarkerAPI.html#gaeaba86bf606c2f0044ece3600c5657a9)
+  says that `likwid_markerNextGroup` should be called in a parallel region.
+  Thomas, the lead dev [mentioned in an
+  issue](https://github.com/RRZE-HPC/likwid/issues/292#issuecomment-646493838)
+  that `likwid_markerGroup` should be called in a sequential region.
+- fixed how we measure port usage: made fhv sum all the uops executed by port
+  and then divide each by that sum
+
 
 # 2020-06-09 through 2020-06-16
 We've decided to continue using likwid at this point, but PAPI may prove useful
