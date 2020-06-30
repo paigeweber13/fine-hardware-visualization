@@ -3,12 +3,15 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-06-16 through 2020-06-23](#2020-06-16-through-2020-06-23)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-1)
   - [Accomplishments](#accomplishments-1)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-2)
+  - [Accomplishments](#accomplishments-2)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -60,7 +63,17 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# 2020-06-16 through 2020-06-23
+# 2020-06-30 through 2020-07-07
+## Questions
+- at what point should I make a test suite?
+- how should I organize the file tree for this repo?
+  - I had main files in a separate src directory so that more than one main
+    file won't get grabbed by a wildcard in the makefile
+- questions on cache from last week
+
+## Accomplishments
+
+# 2020-06-16 through 2020-06-30
 ## Questions
 - cache line size is 32 bytes. We use vectors of size 32 bytes. What if we used
   the smaller vectors, the 16 byte vectors? The core would still load 32 bytes
@@ -79,7 +92,6 @@ Hardware Visualization
   word in its own definition. 
   - for instance, the description of "UOPS_EXECUTED_PORT.PORT_0" reads "Counts
     the number of cycles in which a uop is dispatched to port 0."
-- why is it so hard to get a consistent number of 
 - why do I get such different saturations/port usages between compilers with
   the same flags?
 - at what point should I make a test suite?
@@ -127,12 +139,15 @@ Hardware Visualization
     - clang++ version: clang version
       10.0.1-++20200519095410+f79cd71e145-1~exp1~20200519200813.165 Target:
       x86_64-pc-linux-gnu Thread model: posix InstalledDir: /usr/bin
-    - Results:
+    - Results: (updated with correct port saturation)
       | Compiler | SP Flops | Top Port Saturation | Second Port Saturation |
       | -------- | -------- | ------------------- | ---------------------- |
-      | g++      | 5.654e+04| Port 4 @ 0.114      | Port 3 @ 0.090         |
-      | clang++  | 7.642e+04| Port 0 @ 0.091      | Port 1 @ 0.091         |
-    - in the case of clang++, port 3 was also fairly saturated at 0.084
+      | g++      | 5.654e+04| Port 4 @ 0.236      | Port 3 @ 0.180         |
+      | clang++  | 7.642e+04| Port 0 @ 0.182      | Port 1 @ 0.180         |
+    - in the case of clang++, ports 2/3 were also fairly saturated at 0.169
+    - on skylake, we have to read for writeback, so it makes sense that port 2
+      and 3 (the ports for loads) are also fairly saturated. In the case of the
+      g++ code, both port 2 and 3 were about 0.180
     - this is much more what we expect in the cpu-heavy case. Interesting how
       much the compiler makes a difference even with the same flags
 - looked at how we calculate port usage. Summing all port usages should be 1,
@@ -157,7 +172,16 @@ Hardware Visualization
   that `likwid_markerGroup` should be called in a sequential region.
 - fixed how we measure port usage: made fhv sum all the uops executed by port
   and then divide each by that sum
-
+- looked at polynomial_block with Dr. Saule and discovered a few things.
+  - even with clang, code is producing a lot of move instructions in assembly
+  - unroll 64 was too high; need 8 YMM registers for out, 8 YMM registers for
+    xtothepowerof, 8 YMM registers for x. In theory x could spill over to stack
+    since we're just reading from it after the beginning, but this may not be
+    ideal.
+    - in any case, since there weren't enough registers it was spilling to the
+      stack. Since the stack is on L1 it was still quite fast
+  - changing to unroll 32 still had lots of moves. Changing to unroll 16 had
+    fewer moves but no longer used fma. This is odd. 
 
 # 2020-06-09 through 2020-06-16
 We've decided to continue using likwid at this point, but PAPI may prove useful
