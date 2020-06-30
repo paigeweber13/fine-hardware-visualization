@@ -144,17 +144,28 @@ We want all programmers to
 
 # TODO:
 ## Immediate:
- - [x] mem instructions retired * 32 bytes instead of 64
-   - this is because there are 2 32-byte busses?
-     [Yes!](https://en.wikichip.org/w/images/thumb/7/7e/skylake_block_diagram.svg/1350px-skylake_block_diagram.svg.png)
-   - this architecture only moves 32-bytes (probably because 32-byte
-     vectors are the biggest they can do)
- - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial
+ - [x] port usage isn't what we expected it... why on CPU-heavy polynomial
        block, port4 (store data) is still the most saturated
    - [x] what happens if we increase degree past 100? Same behavior...
    - [x] inspect assembly to find stores
    - [x] look at how we measure port usage
      - corrected how we measure port usage. Values are still odd, though
+   - Dr. Saule will look at this
+ - [x] work on likwid stability issues
+   - [x] BLOCKED: waiting to hear back from Thomas
+     - thomas said likwid_markerNextGroup should be called in a sequential
+       region. Seems to be solved?
+   - [x] teleconference with Thomas to fix
+ - [ ] improve likwid documentation
+   - [x] BLOCKED: waiting to hear back from Thomas
+   - [ ] update doxygen for likwid
+   - [ ] update likwid examples
+   - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
+     - [ ] update `./examples/C-internalMarkerAPI.c`
+     - [ ] write some wiki pages about general use (e.g. "There are three ways
+           to use likwid...")
+     - [ ] write test cases
+     - [ ] consider improving doxygen comments and writing man pages for usage
  - [ ] more counters to visualize.
    - [ ] quickly finish looking at all perfgroups
    - [ ] Dr. Saule identified the following areas as key. What counters and
@@ -181,17 +192,6 @@ We want all programmers to
          for now it's adequate to have a few sets of parameters hardcoded that
          are selected automatically
  - [ ] add "command-used-to-generate" to json and svg
- - [ ] work on likwid stability issues
-   - [ ] BLOCKED: waiting to hear back from Thomas
-   - [ ] teleconference with Thomas to fix
- - [ ] improve likwid documentation
-   - [ ] BLOCKED: waiting to hear back from Thomas
-   - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
-     - [ ] update `./examples/C-internalMarkerAPI.c`
-     - [ ] write some wiki pages about general use (e.g. "There are three ways
-           to use likwid...")
-     - [ ] write test cases
-     - [ ] consider improving doxygen comments and writing man pages for usage
 
 ## Long-term:
 ### Problems to fix:
