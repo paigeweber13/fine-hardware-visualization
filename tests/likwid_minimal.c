@@ -87,9 +87,9 @@ int main()
   double arr[n];
   double copy_arr[n];
 
-#pragma omp parallel
+  for (int j = 0; j < 8; j++) 
   {
-    for (int j = 0; j < 8; j++)
+#pragma omp parallel
     {
 #pragma omp barrier
       likwid_markerStartRegion("double_flops");
@@ -99,12 +99,17 @@ int main()
       likwid_markerStartRegion("copy");
       do_copy(arr, copy_arr, n, NUM_COPIES);
       likwid_markerStopRegion("copy");
-#pragma omp barrier
-#pragma omp single
-      {
-        likwid_markerNextGroup();
-      }
+      // likwid_markerNextGroup may also be called inside a parallel region.
+      // However, if this is done, it should be preceeded by a barrier and only
+      // one thread should run likwid_markerNextGroup:
+
+      // #pragma omp barrier
+      // #pragma omp single
+      // {
+      //   likwid_markerNextGroup();
+      // }
     }
+    likwid_markerNextGroup();
   }
 
   likwid_markerClose();
