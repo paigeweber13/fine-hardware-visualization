@@ -152,8 +152,9 @@ We want all programmers to
  - [ ] port usage isn't what we expected it... why on CPU-heavy polynomial
        block, port4 (store data) is still the most saturated
    - [x] what happens if we increase degree past 100? Same behavior...
-   - [ ] inspect assembly to find stores
-   - [ ] look at how we measure port usage
+   - [x] inspect assembly to find stores
+   - [x] look at how we measure port usage
+     - corrected how we measure port usage. Values are still odd, though
  - [ ] more counters to visualize.
    - [ ] quickly finish looking at all perfgroups
    - [ ] Dr. Saule identified the following areas as key. What counters and
@@ -163,7 +164,7 @@ We want all programmers to
      - [ ] micro-instruction retiring: can you fetch instructions quickly
            enough? 
  - [ ] improve software engineering
-   - [ ] typedef long names in performance_monitor
+   - [x] typedef long names in performance_monitor
    - [ ] fhv.cpp: split up cairo stuff hierarchically
      - [ ] separate functions for different parts of diagram
      - [ ] cairo_save/cairo_restore operate as a stack machine: you can
