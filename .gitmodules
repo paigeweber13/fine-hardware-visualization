@@ -1,9 +1,3 @@
-[submodule "brandon_senior_project"]
-	path = brandon_senior_project
-	url = https://github.com/rileyweber13/Capstone2017.git
-	update = merge
-	branch = master
-
 [submodule "examples/polynomial_expansion"]
 	path = examples/polynomial_expansion
 	url = https://github.com/esaule/polynomial_expansion.git
