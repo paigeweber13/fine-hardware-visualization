@@ -54,7 +54,7 @@ int main()
   setenv("LIKWID_MODE", "1", 1); // 1 is code for accesDaemon
   setenv("LIKWID_FILEPATH", filepath, 1); // output filepath
   setenv("LIKWID_FORCE", "1", 1);
-  setenv("LIKWID_DEBUG", "3", 1); // verbosity of debug output
+  // setenv("LIKWID_DEBUG", "3", 1); // verbosity of debug output
 
   // optional. Used to disable hyperthreading on my machine
   // num_threads = 2;
@@ -72,7 +72,9 @@ int main()
   {
     // printf("num threads: %d\n", omp_get_num_threads());
     // num_threads = omp_get_num_threads();
-    likwid_markerThreadInit();
+
+    // apparently ThreadInit is no longer necessary
+    // likwid_markerThreadInit();
     likwid_markerRegisterRegion("double_flops");
     likwid_markerRegisterRegion("copy");
     likwid_pinThread(omp_get_thread_num());
@@ -91,7 +93,6 @@ int main()
   {
 #pragma omp parallel
     {
-#pragma omp barrier
       likwid_markerStartRegion("double_flops");
       do_flops(a, b, c, NUM_FLOPS);
       likwid_markerStopRegion("double_flops");
@@ -99,6 +100,7 @@ int main()
       likwid_markerStartRegion("copy");
       do_copy(arr, copy_arr, n, NUM_COPIES);
       likwid_markerStopRegion("copy");
+
       // likwid_markerNextGroup may also be called inside a parallel region.
       // However, if this is done, it should be preceeded by a barrier and only
       // one thread should run likwid_markerNextGroup:
