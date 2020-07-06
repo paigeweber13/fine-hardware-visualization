@@ -158,10 +158,10 @@ We want all programmers to
    - [x] teleconference with Thomas to fix
  - [ ] improve likwid documentation
    - [x] BLOCKED: waiting to hear back from Thomas
-   - [ ] update doxygen for likwid
-   - [ ] update likwid examples
+   - [x] update doxygen for likwid
+   - [x] update likwid examples
    - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
-     - [ ] update `./examples/C-internalMarkerAPI.c`
+     - [x] update `./examples/C-internalMarkerAPI.c`
      - [ ] write some wiki pages about general use (e.g. "There are three ways
            to use likwid...")
      - [ ] write test cases
@@ -174,12 +174,22 @@ We want all programmers to
      - [ ] instruction decoding: can you decode instructions quickly enough?
      - [ ] micro-instruction retiring: can you fetch instructions quickly
            enough? 
+   - [ ] change computation saturation to be per-core
  - [ ] improve software engineering
    - [x] typedef long names in performance_monitor
+   - [x] remove old, unused things
+   - [ ] improve makefile 
+     - [ ] simplify: there's some redundant stuff in there
+     - [ ] can I make it so there's a general rule for all examples?
+     - [ ] tests don't work any more
    - [ ] fhv.cpp: split up cairo stuff hierarchically
+     - [ ] move cairo stuff to library in lib
      - [ ] separate functions for different parts of diagram
      - [ ] cairo_save/cairo_restore operate as a stack machine: you can
            save/restore in a nested manner
+   - [ ] give convolution its own makefile
+   - [ ] there are a lot of text files floating around (like in `tests/`). Can
+         those be removed?
  - [ ] explore how well fhv works with other kernels and codebases
    - [ ] consider standard benchmarks
    - [ ] Dr. Saule may be able to throw together some software that
@@ -218,6 +228,18 @@ We want all programmers to
      nbiter=800
      
 ### Features to add:
+ - make core saturation (and therefore, color of the core) an average of many
+   key metrics.
+   - For example, might average flop saturation, instruction decoding, port
+     usage, and instruction retiring.
+   - This visualization will be general at the initial zoom but when you zoom
+     in will separate into the different factors we consider
+   - this should include single and double precision flops, because complex
+     calculations may use both. However, only consider the highest for the
+     average?
+   - for more info, see notes taken on what Dr. Saule had to say about the
+     subject in DEVELOPMENT_LOG.md -> 2020-06-02 through 2020-06-09 ->
+     secondary
  - talk to a visualization expert about how we can improve our visualization
  - combine benchmark in fhv with benchmark-likwid-vs-manual
    - rewrite computation_measurements to optionally include manual results
