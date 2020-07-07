@@ -187,6 +187,10 @@ We want all programmers to
      - [ ] separate functions for different parts of diagram
      - [ ] cairo_save/cairo_restore operate as a stack machine: you can
            save/restore in a nested manner
+     - [ ] there's fhv's csv and performance_monitor's fhv. Should I continue
+           to support these moving forward? Are these important tests?
+           - if yes, somehow combine them and make the code cleaner
+           - if no, remove
    - [ ] give convolution its own makefile
    - [ ] there are a lot of text files floating around (like in `tests/`). Can
          those be removed?

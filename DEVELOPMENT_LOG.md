@@ -72,17 +72,21 @@ Hardware Visualization
 - lower priority: questions on cache from last week
 
 ## Accomplishments
-- corrected likwid documentation on marker api
-- began adding to documentation
-- updated likwid-markerAPI example. Mainly just fixed position of
-  LIKWID_MARKER_SWITCH and improved comments
-- rewrote likwid-internalMarkerAPI from scratch
-  - more descriptive comments
-  - advanced usage 
-  - nested groups
-  - GET, RESET
-  - completely independent of likwid-perfctr (sets environment variables and
+- double checked new method for calculating port saturation
+- put in two PRs for likwid repo!
+  - corrected likwid documentation on marker api
+  - updated likwid-markerAPI example. Mainly just fixed position of
+    LIKWID_MARKER_SWITCH and improved comments
+  - rewrote likwid-internalMarkerAPI from scratch
+    - more descriptive comments
+    - advanced usage 
+    - nested groups
+    - GET, RESET
+    - completely independent of likwid-perfctr (sets environment variables and
     analyzes results)
+- began adding to likwid doxygen documentation
+- improve software engineering in fhv.cpp
+  - moved cairo stuff to own file
 
 # 2020-06-16 through 2020-06-30
 ## Questions
