@@ -1,21 +1,10 @@
 #include "saturation_diagram.h"
 
-// ----- simple color type ----- //
-typedef std::tuple<double, double, double> rgb_color;
-
-// ----- LINEAR INTERPOLATION (LERP) ----- //
-
-// taken from
-// https://en.wikipedia.org/wiki/Linear_interpolation#Programming_language_support
-
-// used under Creative Commons Attribution-ShareAlike 3.0 Unported License. See
-// https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License
-// for full text
-
-// Imprecise method, which does not guarantee result = max_color when t = 1,
-// due to floating-point arithmetic error. This form may be used when the
-// hardware has a native fused multiply-add instruction.
-rgb_color color_lerp( rgb_color min_color, rgb_color max_color, double t) 
+rgb_color 
+saturation_diagram::color_lerp( 
+  rgb_color min_color, 
+  rgb_color max_color, 
+  double t) 
 {
   return rgb_color(
     std::get<0>(min_color) + t * (std::get<0>(max_color) - std::get<0>(min_color)),
@@ -24,25 +13,15 @@ rgb_color color_lerp( rgb_color min_color, rgb_color max_color, double t)
   );
 }
 
-// ----- CLAMP ----- //
-
-// taken from: https://en.cppreference.com/w/cpp/algorithm/clamp
-
 template<class T>
-constexpr const T& clamp( const T& v, const T& lo, const T& hi )
+constexpr const T& 
+saturation_diagram::clamp( const T& v, const T& lo, const T& hi )
 {
     assert( !(hi < lo) );
     return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
-// ---- custom log scale ---- //
-
-// designed to make most apparent the difference between 0.01 and 0.2, to make
-// somewhat apparent the difference between 0.2 and 0.5, and to minimize
-// difference in values from 0.5 to 1.0
-
-// expects 0.0 <= value <= 1.0
-double scale(double value){
+double saturation_diagram::scale(double value){
   #define c 7
   return (log2(value) + c)/c;
 }
@@ -50,7 +29,7 @@ double scale(double value){
 // ---- calculate saturation colors ----- // 
 
 std::map<std::string, rgb_color>
-calculate_saturation_colors(
+saturation_diagram::calculate_saturation_colors(
   json region_saturation,
   rgb_color min_color,
   rgb_color max_color
@@ -76,7 +55,7 @@ calculate_saturation_colors(
   return saturation_colors;
 }
 
-void cairo_draw_swatch(
+void saturation_diagram::cairo_draw_swatch(
   cairo_t *cr,
   rgb_color min_color, 
   rgb_color max_color,
@@ -113,7 +92,7 @@ void cairo_draw_swatch(
   }
 }
 
-void test_color_lerp(
+void saturation_diagram::test_color_lerp(
   rgb_color min_color, 
   rgb_color max_color,
   unsigned width,
