@@ -9,11 +9,11 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <omp.h>
-#include <tuple>
 
 #include "../lib/architecture.h"
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
+#include "../lib/saturation_diagram.h"
 #include "likwid.h"
 
 using namespace std;
