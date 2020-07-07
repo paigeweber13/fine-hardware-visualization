@@ -10,13 +10,14 @@
 #include <nlohmann/json.hpp>
 #include <omp.h>
 
-#include "../lib/architecture.h"
+// #include "../lib/architecture.h"
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
 #include "../lib/saturation_diagram.h"
 #include "likwid.h"
 
 using namespace std;
+using json = nlohmann::json;
 namespace po = boost::program_options;
 
 #define BYTES_TO_GBYTES 1e-9
@@ -155,6 +156,48 @@ void print_csv_header()
                "Memory evict data volume [GBytes],"
                "Memory load bandwidth [MBytes/s],"
                "Memory load data volume [GBytes]\n";
+}
+
+/* ---- visualize ----
+ * high level function that loads data and creates diagrams for each region
+ */
+void visualize(
+  std::string perfmon_output_filename,
+  std::string image_output_filename,
+  rgb_color min_color,
+  rgb_color max_color)
+{
+  // std::string image_output_filename = "perfmon_output.svg";
+
+  // read a JSON file
+  std::ifstream i(perfmon_output_filename);
+  json j;
+  i >> j;
+
+  std::string params = j["info"]["parameters"];
+
+  std::string region_name;
+  for(auto &saturation_item: j["saturation"].items())
+  {
+    region_name = saturation_item.key();
+    std::cout << "Creating visualization for region " << region_name 
+      << std::endl;
+    json region_data = j["saturation"][region_name];
+
+    auto region_colors = saturation_diagram::calculate_saturation_colors(
+      region_data, min_color, max_color);
+
+    std::size_t pos = image_output_filename.find(".");  
+    std::string ext = image_output_filename.substr(pos);
+    std::string this_image_output_filename = 
+      image_output_filename.substr(0, pos) + "_" + 
+      region_name + ext;
+
+    saturation_diagram::draw_diagram(region_colors, region_data, min_color, 
+      max_color, region_name, params, this_image_output_filename);
+    std::cout << "Visualization saved to " << this_image_output_filename 
+      << std::endl;
+  }
 }
 
 int main(int argc, char *argv[])
@@ -479,7 +522,7 @@ int main(int argc, char *argv[])
       input_colors[3]/255.0,
       input_colors[4]/255.0,
       input_colors[5]/255.0);
-    test_color_lerp(min_color, max_color, 1000, 100, 20);
+    saturation_diagram::test_color_lerp(min_color, max_color, 1000, 100, 20);
   }
   if (vm.count("visualize"))
   {
@@ -491,7 +534,9 @@ int main(int argc, char *argv[])
       input_colors[3]/255.0,
       input_colors[4]/255.0,
       input_colors[5]/255.0);
-    visualize(perfmon_output_filename, image_output_filename, min_color, 
+    visualize(perfmon_output_filename, 
+      image_output_filename, 
+      min_color, 
       max_color);
   }
 

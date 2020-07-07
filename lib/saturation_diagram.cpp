@@ -101,13 +101,13 @@ void saturation_diagram::test_color_lerp(
 {
   std::string output_dir = "visualizations/swatches/";
   std::string image_output_filename = output_dir
-    + to_string(static_cast<unsigned>(round(std::get<0>(min_color) * 255.0))) + ","
-    + to_string(static_cast<unsigned>(round(std::get<1>(min_color) * 255.0))) + ","
-    + to_string(static_cast<unsigned>(round(std::get<2>(min_color) * 255.0)))
+    + std::to_string(static_cast<unsigned>(round(std::get<0>(min_color) * 255.0))) + ","
+    + std::to_string(static_cast<unsigned>(round(std::get<1>(min_color) * 255.0))) + ","
+    + std::to_string(static_cast<unsigned>(round(std::get<2>(min_color) * 255.0)))
     + "_to_"
-    + to_string(static_cast<unsigned>(round(std::get<0>(max_color) * 255.0))) + ","
-    + to_string(static_cast<unsigned>(round(std::get<1>(max_color) * 255.0))) + ","
-    + to_string(static_cast<unsigned>(round(std::get<2>(max_color) * 255.0)))
+    + std::to_string(static_cast<unsigned>(round(std::get<0>(max_color) * 255.0))) + ","
+    + std::to_string(static_cast<unsigned>(round(std::get<1>(max_color) * 255.0))) + ","
+    + std::to_string(static_cast<unsigned>(round(std::get<2>(max_color) * 255.0)))
     + ".svg";
 
   if(system(("mkdir -p " + output_dir).c_str()) != 0)
@@ -135,7 +135,7 @@ void saturation_diagram::test_color_lerp(
   cairo_surface_destroy(surface);
 }
 
-void draw_diagram(
+void saturation_diagram::draw_diagram(
   std::map<std::string, rgb_color> region_colors,
   json region_data,
   rgb_color min_color,
@@ -333,9 +333,9 @@ void draw_diagram(
   // - fill
   cairo_set_source_rgb(
     cr,
-    get<0>(region_colors["Memory bandwidth [MBytes/s]"]),
-    get<1>(region_colors["Memory bandwidth [MBytes/s]"]),
-    get<2>(region_colors["Memory bandwidth [MBytes/s]"]));
+    std::get<0>(region_colors["Memory bandwidth [MBytes/s]"]),
+    std::get<1>(region_colors["Memory bandwidth [MBytes/s]"]),
+    std::get<2>(region_colors["Memory bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
 
   // - stroke
@@ -378,9 +378,9 @@ void draw_diagram(
   // - fill
   cairo_set_source_rgb(
     cr,
-    get<0>(region_colors["L3 bandwidth [MBytes/s]"]),
-    get<1>(region_colors["L3 bandwidth [MBytes/s]"]),
-    get<2>(region_colors["L3 bandwidth [MBytes/s]"]));
+    std::get<0>(region_colors["L3 bandwidth [MBytes/s]"]),
+    std::get<1>(region_colors["L3 bandwidth [MBytes/s]"]),
+    std::get<2>(region_colors["L3 bandwidth [MBytes/s]"]));
   cairo_fill_preserve(cr);
 
   // - stroke
@@ -455,7 +455,7 @@ void draw_diagram(
     unsigned cache_y = core_y + core_height;
 
     // - core text
-    text = "Core " + to_string(core_num);
+    text = "Core " + std::to_string(core_num);
     cairo_text_extents(cr, text.c_str(), &text_extents);
     cairo_move_to(
       cr,
@@ -493,9 +493,9 @@ void draw_diagram(
       // - fill
       cairo_set_source_rgb(
           cr,
-          get<0>(computation_color),
-          get<1>(computation_color),
-          get<2>(computation_color));
+          std::get<0>(computation_color),
+          std::get<1>(computation_color),
+          std::get<2>(computation_color));
       cairo_fill_preserve(cr);
 
       // - stroke
@@ -504,7 +504,7 @@ void draw_diagram(
       cairo_stroke(cr);
 
       // - text
-      text = "Thread " + to_string(core_num * THREADS_PER_CORE + thread_num);
+      text = "Thread " + std::to_string(core_num * THREADS_PER_CORE + thread_num);
       cairo_text_extents(cr, text.c_str(), &text_extents);
       cairo_move_to(
         cr,
@@ -537,11 +537,11 @@ void draw_diagram(
       {
         cairo_set_source_rgb(
           cr,
-          get<0>(region_colors["L" + to_string(cache_num + 1) + 
+          std::get<0>(region_colors["L" + std::to_string(cache_num + 1) + 
             " bandwidth [MBytes/s]"]),
-          get<1>(region_colors["L" + to_string(cache_num + 1) + 
+          std::get<1>(region_colors["L" + std::to_string(cache_num + 1) + 
             " bandwidth [MBytes/s]"]),
-          get<2>(region_colors["L" + to_string(cache_num + 1) + 
+          std::get<2>(region_colors["L" + std::to_string(cache_num + 1) + 
             " bandwidth [MBytes/s]"]));
       }
       cairo_fill_preserve(cr);
@@ -552,7 +552,7 @@ void draw_diagram(
       cairo_stroke(cr);
 
       // - text
-      text = "L" + to_string(cache_num + 1) + " Cache";
+      text = "L" + std::to_string(cache_num + 1) + " Cache";
       cairo_set_font_size(cr, text_size_medium);
       cairo_text_extents(cr, text.c_str(), &text_extents);
       cairo_move_to(
@@ -574,45 +574,4 @@ void draw_diagram(
   // svg file automatically gets written to disk
   cairo_destroy(cr);
   cairo_surface_destroy(surface);
-}
-
-void visualize(
-  std::string perfmon_output_filename,
-  std::string image_output_filename,
-  rgb_color min_color,
-  rgb_color max_color)
-{
-  // std::string image_output_filename = "perfmon_output.svg";
-
-  // read a JSON file
-  std::ifstream i(perfmon_output_filename);
-  json j;
-  i >> j;
-
-  std::string params = j["info"]["parameters"];
-
-  std::string region_name;
-  for(auto &saturation_item: j["saturation"].items())
-  {
-    region_name = saturation_item.key();
-    std::cout << "Creating visualization for region " << region_name 
-      << std::endl;
-    json region_data = j["saturation"][region_name];
-
-    auto region_colors = calculate_saturation_colors(
-      region_data,
-      min_color,
-      max_color);
-
-    std::size_t pos = image_output_filename.find(".");  
-    std::string ext = image_output_filename.substr(pos);
-    std::string this_image_output_filename = 
-      image_output_filename.substr(0, pos) + "_" + 
-      region_name + ext;
-
-    draw_diagram(region_colors, region_data, min_color, max_color, region_name,
-      params, this_image_output_filename);
-    std::cout << "Visualization saved to " << this_image_output_filename 
-      << std::endl;
-  }
 }

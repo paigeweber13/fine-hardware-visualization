@@ -2,8 +2,15 @@
 
 #include <cairo.h>
 #include <cairo-svg.h>
+#include <iostream>
+#include <nlohmann/json.hpp>
 #include <map>
 #include <tuple>
+#include <string>
+
+#include "architecture.h"
+
+using json = nlohmann::json;
 
 // ----- simple color type ----- //
 typedef std::tuple<double, double, double> rgb_color;
@@ -26,7 +33,10 @@ class saturation_diagram {
      * due to floating-point arithmetic error. This form may be used when the
      * hardware has a native fused multiply-add instruction.
      */
-    rgb_color color_lerp( rgb_color min_color, rgb_color max_color, double t);
+    static rgb_color color_lerp( 
+      rgb_color min_color, 
+      rgb_color max_color, 
+      double t);
 
     /* ----- CLAMP ----- 
      * taken from: https://en.cppreference.com/w/cpp/algorithm/clamp
@@ -69,8 +79,7 @@ class saturation_diagram {
       rgb_color max_color,
       unsigned width,
       unsigned height,
-      unsigned num_steps)
-    {
+      unsigned num_steps);
 
     /* ---- calculate saturation colors ----- */ 
     static std::map<std::string, rgb_color>
@@ -79,5 +88,17 @@ class saturation_diagram {
       rgb_color min_color,
       rgb_color max_color);
 
+    /* ---- draw diagram ----
+     * the function that actually makes the diagram 
+     */
+    static void draw_diagram(
+      std::map<std::string, rgb_color> region_colors,
+      json region_data,
+      rgb_color min_color,
+      rgb_color max_color,
+      std::string region_name,
+      std::string parameters,
+      std::string output_filename);
+
   private:
-}
+};
