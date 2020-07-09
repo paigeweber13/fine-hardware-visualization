@@ -107,6 +107,15 @@ class saturation_diagram {
      * each function begins with a call to cairo_save and ends with a call to
      * cairo_restore so that settings are preserved across calls
      */
+    
+    static void cairo_draw_text(
+      cairo_t * cr,
+      double x, 
+      double y,
+      std::string text,
+      double text_size,
+      double text_line_thickness);
+
     static void cairo_draw_sideways_text(
       cairo_t * cr, 
       double x,

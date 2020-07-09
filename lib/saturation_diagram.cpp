@@ -66,6 +66,8 @@ void saturation_diagram::cairo_draw_swatch(
   unsigned num_steps
   )
 {
+  cairo_save(cr);
+
   unsigned step_size = width/num_steps;
 
   for (unsigned i = 0; i < num_steps; i++){
@@ -90,6 +92,8 @@ void saturation_diagram::cairo_draw_swatch(
     // cairo_set_source_rgb(cr, 0, 0, 0);
     cairo_stroke(cr);
   }
+
+  cairo_restore(cr);
 }
 
 void saturation_diagram::test_color_lerp(
@@ -141,7 +145,7 @@ void saturation_diagram::cairo_draw_sideways_text(
   double y,
   std::string text, 
   double text_size,
-  double text_thickness)
+  double text_line_thickness)
 {
   cairo_save(cr);
 
@@ -155,10 +159,33 @@ void saturation_diagram::cairo_draw_sideways_text(
 
   cairo_set_font_matrix(cr, &rotated_matrix);
   cairo_text_path(cr, text.c_str());
-  cairo_set_line_width(cr, text_thickness);
+  cairo_set_line_width(cr, text_line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_fill_preserve(cr);
   cairo_stroke(cr);
+
+  cairo_restore(cr);
+}
+
+void saturation_diagram::cairo_draw_text(
+  cairo_t * cr,
+  double x, 
+  double y,
+  std::string text,
+  double text_size,
+  double text_line_thickness
+)
+{
+  cairo_save(cr);
+
+  cairo_move_to(cr, x, y);
+
+  cairo_text_path(cr, text.c_str());
+  // cairo_show_text(cr, text);
+  cairo_set_line_width(cr, text_line_thickness);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_fill_preserve(cr);
+  cairo_stroke(cr); 
 
   cairo_restore(cr);
 }
@@ -200,56 +227,46 @@ void saturation_diagram::draw_diagram(
       "L1 cache saturation."
     };
 
+  // valuse we'll pass to helper functions
   double x, y;
+  double current_text_y;
 
   // variables for cairo
-  double line_thickness = 10.0;
-  double text_line_thickness_large = 1.0;
-  double text_line_thickness_small = 0.0;
-  double text_size_xlarge = 75.0;
-  double text_size_large = 50.0;
-  double text_size_medium = 30.0;
-  double text_size_small = 15.0;
+  const double line_thickness = 10.0;
+  const double text_line_thickness_large = 1.0;
+  const double text_line_thickness_small = 0.0;
+  const double text_size_xlarge = 75.0;
+  const double text_size_large = 50.0;
+  const double text_size_medium = 30.0;
+  const double text_size_small = 15.0;
   cairo_text_extents_t text_extents;
   std::string text;
 
   // initialization for cairo
-  double image_width = 800;
-  double image_height = 1650;
-  double margin_x = 50;
-  double margin_y = 50;
-  double internal_margin = 25;
+  const double image_width = 800;
+  const double image_height = 1730;
+  const double margin_x = 50;
+  const double margin_y = 50;
+  const double internal_margin = 25;
+  const double line_spacing = 10;
   // double title_text_height = 310;
-  cairo_surface_t *surface = cairo_svg_surface_create(
-      output_filename.c_str(),
-      image_width,
-      image_height
-  );
-  cairo_t *cr =
-      cairo_create(surface);
 
-  // text rotation stuff
-  // cairo_matrix_t default_matrix;
-  // cairo_matrix_init_identity(&default_matrix);
+  cairo_surface_t *surface = cairo_svg_surface_create(
+    output_filename.c_str(),
+    image_width,
+    image_height
+  );
+  cairo_t *cr = cairo_create(surface);
+
   cairo_set_font_size(cr, text_size_large);
-  // cairo_get_font_matrix(cr, &default_matrix);
   
   // --- title and description text --- //
-  double current_text_y = margin_y + text_extents.height;
-  double line_spacing = 10;
-
   text = "Saturation diagram for region";
   cairo_text_extents(cr, text.c_str(), &text_extents);
-  cairo_move_to(
-    cr,
-    image_width/2 - text_extents.width/2,
-    current_text_y);
-  cairo_text_path(cr, text.c_str());
-  // cairo_show_text(cr, text);
-  cairo_set_line_width(cr, text_line_thickness_large);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
+  current_text_y = margin_y + text_extents.height;
+  x = image_width/2 - text_extents.width/2;
+  cairo_draw_text(cr, x, current_text_y, text, text_size_large, 
+    text_line_thickness_large);
 
   text = "\"" + region_name + "\"";
   cairo_text_extents(cr, text.c_str(), &text_extents);
