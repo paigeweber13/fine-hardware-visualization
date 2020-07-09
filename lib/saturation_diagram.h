@@ -17,7 +17,49 @@ typedef std::tuple<double, double, double> rgb_color;
 
 class saturation_diagram {
   public:
+    /* ======== Primary functions ======== 
+     * These are the high-level functions intended primarily for use outside 
+     * this class. Intended usage is demonstrated in fhv.cpp::visualize.
+     */
+    /* ---- test color lerp ----
+     * Draws a swatch of a gradient calculated using color_lerp to test before
+     * using in a saturation diagram
+     */
+    static void test_color_lerp(
+      rgb_color min_color, 
+      rgb_color max_color,
+      unsigned width,
+      unsigned height,
+      unsigned num_steps);
 
+    /* ---- calculate saturation colors ----- 
+     * The return value of this function is intended to be passed to
+     * draw_diagram. 
+     */ 
+    static std::map<std::string, rgb_color>
+    calculate_saturation_colors(
+      json region_saturation,
+      rgb_color min_color,
+      rgb_color max_color);
+
+    /* ---- draw diagram ----
+     * the function that actually makes the diagram 
+     */
+    static void draw_diagram(
+      std::map<std::string, rgb_color> region_colors,
+      json region_data,
+      rgb_color min_color,
+      rgb_color max_color,
+      std::string region_name,
+      std::string parameters,
+      std::string output_filename);
+
+
+    /* ======== Helper functions: general ======== 
+     * These may be used elsewhere but are intended for internal use. They
+     * include things like clamping and scaling values that are applied before
+     * calculating colors.
+     */
     /* ----- LINEAR INTERPOLATION (LERP) ----- 
      * Used to create a gradient from min_color to max_color. This will be used
      * to indicate saturation.
@@ -55,7 +97,24 @@ class saturation_diagram {
      * expects 0.0 <= value <= 1.0
      */
     static double scale(double value);
-    
+
+
+    /* ======== Helper functions: cairo ======== 
+     * These are helper functions used by draw_diagram. They can be used
+     * elsewhere but are not intended for use elsewhere, and thus their scopes
+     * are fairly limited.
+     *
+     * each function begins with a call to cairo_save and ends with a call to
+     * cairo_restore so that settings are preserved across calls
+     */
+    static void cairo_draw_sideways_text(
+      cairo_t * cr, 
+      double x,
+      double y,
+      std::string text,
+      double text_size,
+      double text_thickness);
+
     /* ---- draw swatch ----
      * Used to create legend on saturation diagram. Also used to test gradients
      * that may be used to indicate saturation in diagrams 
@@ -68,37 +127,7 @@ class saturation_diagram {
       unsigned y,
       unsigned width,
       unsigned height,
-      unsigned num_steps);
-
-    /* ---- test color lerp ----
-     * Draws a swatch of a gradient calculated using color_lerp to test before
-     * using in a saturation diagram
-     */
-    static void test_color_lerp(
-      rgb_color min_color, 
-      rgb_color max_color,
-      unsigned width,
-      unsigned height,
-      unsigned num_steps);
-
-    /* ---- calculate saturation colors ----- */ 
-    static std::map<std::string, rgb_color>
-    calculate_saturation_colors(
-      json region_saturation,
-      rgb_color min_color,
-      rgb_color max_color);
-
-    /* ---- draw diagram ----
-     * the function that actually makes the diagram 
-     */
-    static void draw_diagram(
-      std::map<std::string, rgb_color> region_colors,
-      json region_data,
-      rgb_color min_color,
-      rgb_color max_color,
-      std::string region_name,
-      std::string parameters,
-      std::string output_filename);
+      unsigned num_steps); 
 
   private:
 };
