@@ -13,16 +13,16 @@ LIKWID_PREFIX=/usr/local/likwid-master
 # LIKWID_PREFIX=/usr/local
 LIKWID_INC_DIR=-I$(LIKWID_PREFIX)/include
 FHV_INC_DIRS=-I./lib
-CAIRO_INC_DIRS=$(shell pkg-config --cflags cairo)
-INC_DIRS=$(LIKWID_INC_DIR) $(FHV_INC_DIRS) $(CAIRO_INC_DIRS)
+PANGOCAIRO_INC_DIRS=$(shell pkg-config --cflags pangocairo)
+INC_DIRS=$(LIKWID_INC_DIR) $(FHV_INC_DIRS) $(PANGOCAIRO_INC_DIRS)
 
 LIKWID_LIB_DIR=-L$(LIKWID_PREFIX)/lib
 LIB_DIRS=$(LIKWID_LIB_DIR)
 
 LIKWID_LIB_FLAG=-llikwid
 BOOST_PO_LIB_FLAG=-lboost_program_options
-CAIRO_LIB_FLAG=$(shell pkg-config --libs cairo)
-LIBS=$(LIKWID_LIB_FLAG) $(BOOST_PO_LIB_FLAG) $(CAIRO_LIB_FLAG)
+PANGOCAIRO_LIB_FLAG=$(shell pkg-config --libs pangocairo)
+LIBS=$(LIKWID_LIB_FLAG) $(BOOST_PO_LIB_FLAG) $(PANGOCAIRO_LIB_FLAG)
 
 MAIN_DIR=src
 SRC_DIR=lib

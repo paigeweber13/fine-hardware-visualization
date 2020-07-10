@@ -5,6 +5,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <map>
+#include <pango/pangocairo.h>
 #include <tuple>
 #include <string>
 
@@ -116,13 +117,20 @@ class saturation_diagram {
       double text_size,
       double text_line_thickness);
 
+    /* ---- draw sideways text ----
+     * x, y coordinates should indicate bottom left corner of textbox that will
+     * contain the text. Text will be vertically aligned to the center and the
+     * width of the box will be determined by the size of the text. This
+     * function moves the cursor to the bottom-right corner of the text box
+     * before returning.
+     */
     static void cairo_draw_sideways_text(
       cairo_t * cr, 
       double x,
       double y,
+      double text_box_height,
       std::string text,
-      double text_size,
-      double text_thickness);
+      PangoFontDescription * font_desc);
 
     /* ---- draw swatch ----
      * Used to create legend on saturation diagram. Also used to test gradients

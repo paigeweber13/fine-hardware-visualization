@@ -143,28 +143,34 @@ void saturation_diagram::cairo_draw_sideways_text(
   cairo_t * cr, 
   double x,
   double y,
+  double text_box_height,
   std::string text, 
-  double text_size,
-  double text_line_thickness)
+  PangoFontDescription * font_desc)
 {
   cairo_save(cr);
 
-  cairo_move_to(cr, x, y);
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+  pango_layout_set_text(layout, text.c_str(), -1);
+  pango_layout_set_font_description(layout, font_desc);
+  
+  int width, height;
+  double cairo_width, cairo_height;
+  pango_cairo_update_layout(cr, layout);
+  pango_layout_get_size(layout, &width, &height);
+  cairo_width = ((double)width / PANGO_SCALE);
+  cairo_height = ((double)height / PANGO_SCALE);
 
-  cairo_matrix_t rotated_matrix;
-  cairo_matrix_init_identity(&rotated_matrix);
-  cairo_set_font_size(cr, text_size);
-  cairo_get_font_matrix(cr, &rotated_matrix);
-  cairo_matrix_rotate(&rotated_matrix, -90.0 * M_PI / 180.0);
-
-  cairo_set_font_matrix(cr, &rotated_matrix);
-  cairo_text_path(cr, text.c_str());
-  cairo_set_line_width(cr, text_line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr);
+  cairo_move_to(cr, x, y - text_box_height/2 + cairo_width/2);
+  cairo_rotate(cr, -90.0 * G_PI / 180.0);
+
+  pango_cairo_update_layout(cr, layout);
+  pango_cairo_show_layout(cr, layout);
 
   cairo_restore(cr);
+  g_object_unref(layout);
+
+  cairo_move_to(cr, x + cairo_height, y);
 }
 
 void saturation_diagram::cairo_draw_text(
@@ -489,6 +495,7 @@ void saturation_diagram::draw_diagram(
     // core numbers
     unsigned core_width = 550;
     unsigned core_height = 175;
+    unsigned core_and_cache_height = core_height + (cache_height * num_attached_caches);
     unsigned between_core_buffer = 50;
     unsigned core_x = 150;
     unsigned core_y = socket0_y + margin_y
@@ -506,11 +513,18 @@ void saturation_diagram::draw_diagram(
 
     text = "Core " + std::to_string(core_num);
     cairo_text_extents(cr, text.c_str(), &text_extents);
-    x = core_x - text_extents.height;
-    y = core_y + (core_height + cache_height * num_attached_caches)/2 
-        + text_extents.width/2;
+    x = socket0_x + internal_margin;
+    y = core_y + core_and_cache_height;
 
-    cairo_draw_sideways_text(cr, x, y, text, text_size_large, text_line_thickness_large);
+    PangoFontDescription *desc = pango_font_description_from_string ("Sans Bold 40");
+    
+    cairo_draw_sideways_text(cr, x, y, core_and_cache_height, 
+      text, desc);
+    
+    pango_font_description_free(desc);
+    // TODO: use the current cursor location here instead of manually
+    // calculating where I should draw next. This way if the size changes, the
+    // x postion where the core/caches are drawn will automatically adjust
 
     // --- threads within core:
 
