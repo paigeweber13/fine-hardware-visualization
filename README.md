@@ -182,16 +182,21 @@ We want all programmers to
      - [ ] simplify: there's some redundant stuff in there
      - [ ] can I make it so there's a general rule for all examples?
      - [ ] tests don't work any more
-   - [ ] fhv.cpp: split up cairo stuff hierarchically
-     - [ ] move cairo stuff to library in lib
+   - [ ] fhv.cpp
+     - [x] move cairo stuff to library in lib
      - [ ] separate functions for different parts of diagram
      - [ ] cairo_save/cairo_restore operate as a stack machine: you can
            save/restore in a nested manner
+     - [ ] make saturation diagram use a real text api and not the cairo "toy"
+           api
      - [ ] there's fhv's csv and performance_monitor's fhv. Should I continue
            to support these moving forward? Are these important tests?
            - if yes, somehow combine them and make the code cleaner
            - if no, remove
-   - [ ] give convolution its own makefile
+   - [ ] there are a lot of things in tests that simply don't work anymore
+     - [ ] verify tests
+     - [ ] verify examples
+   - [ ] give convolution its own makefile???
    - [ ] there are a lot of text files floating around (like in `tests/`). Can
          those be removed?
  - [ ] explore how well fhv works with other kernels and codebases

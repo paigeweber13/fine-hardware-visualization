@@ -3,15 +3,18 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
+- [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
-- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-1)
   - [Accomplishments](#accomplishments-1)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-2)
   - [Accomplishments](#accomplishments-2)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-3)
+  - [Accomplishments](#accomplishments-3)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -63,12 +66,40 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# 2020-06-30 through 2020-07-07
+# 2020-07-07 through 2020-07-14
 ## Questions
 - at what point should I make a test suite?
 - how should I organize the file tree for this repo?
   - I had main files in a separate src directory so that more than one main
     file won't get grabbed by a wildcard in the makefile
+- do wildcards in the makefile even make sense? Each file has such different
+  dependencies. Does compilation go faster if I only add the -I, -L, and -l
+  flags for the files that need those headers and libraries?
+- for example code, I thought it'd be good to use the existing makefile in the
+  root directory, since the compile commands for each example are the same
+  - does this make sense?
+  - how do I keep the makefile DRY and not rewrite the command for each
+    example? 
+
+## Accomplishments
+A big part of this week was doing work to refactor fhv to make it more readable
+and maintainable. This work is found in the branch "make-diagram-own-file"
+- switched from cairo's "Toy" text api to pango
+- moved all drawing functions to a different file and class,
+  "saturation_diagram". 
+- started moving things to their own functions
+
+I also spent some time working on my pull request to improve likwid's examples.
+This was in response to some changes Thomas wanted me to make.
+- removed one region registration to demonstrate that it's optional
+- removed some unnecessary barriers and improved comments
+- made a separate parallel block to demonstrate GET/RESET, which further
+  cleaned up the code
+- in the example designed to be independent of the likwid-perfctr CLI tool, the
+  program now errors and exits if used with CLI tool.
+
+# 2020-06-30 through 2020-07-07
+## Questions
 - lower priority: questions on cache from last week
 
 ## Accomplishments
@@ -90,10 +121,10 @@ Hardware Visualization
 
 # 2020-06-16 through 2020-06-30
 ## Questions
-- cache line size is 32 bytes. We use vectors of size 32 bytes. What if we used
-  the smaller vectors, the 16 byte vectors? The core would still load 32 bytes
-  because it can't load part of a cache line, so it would just discard the
-  other 16 bytes?
+- cache line size is 64 bytes. But on a skylake system we can only use 32
+  bytes. Also, vectors are 32 bytes. What if we used the smaller vectors, the
+  16 byte vectors? The core would still load 32 bytes because it can't load
+  part of a cache line, so it would just discard the other 16 bytes?
   - wikichip says the bandwidth (for L1/L2 loads) is 64B/cycle. Wikichip
     also says L1 and L2 caches are shared between threads on a single core. I
     assume this implies that the 64B/cycle bandwidth is also shared and that
