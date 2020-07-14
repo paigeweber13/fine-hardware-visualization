@@ -68,18 +68,47 @@ Hardware Visualization
 
 # 2020-07-07 through 2020-07-14
 ## Questions
-- at what point should I make a test suite?
-- how should I organize the file tree for this repo?
-  - I had main files in a separate src directory so that more than one main
-    file won't get grabbed by a wildcard in the makefile
-- do wildcards in the makefile even make sense? Each file has such different
-  dependencies. Does compilation go faster if I only add the -I, -L, and -l
-  flags for the files that need those headers and libraries?
-- for example code, I thought it'd be good to use the existing makefile in the
-  root directory, since the compile commands for each example are the same
-  - does this make sense?
-  - how do I keep the makefile DRY and not rewrite the command for each
-    example? 
+Q: at what point should I make a test suite?
+
+A: There are two purposes:
+   - bug track
+   - demonstrate how software is intended to be used
+
+   There's a tradeoff. you can find bugs faster with a test suite, but then when
+   code isn't stable you end up breaking your tests all the time
+
+   Now is probably not a good time
+
+Q: how should I organize the file tree for this repo? I had main files in a
+   separate src directory so that more than one main file won't get grabbed by
+   a wildcard in the makefile
+
+A: separating library and driver file directories as mentioned above makes
+   sense 
+
+Q: do wildcards in the makefile even make sense? Each file has such different
+   dependencies. Does compilation go faster if I only add the -I, -L, and -l
+   flags for the files that need those headers and libraries?
+   
+A: you can optimize a little bit... but it's not a big amount, and the
+   carefully-crafted makefile will require a lot of time to maintain
+
+Q: for example code, I thought it'd be good to use the existing makefile in the
+   root directory, since the compile commands for each example are the same.
+   does this make sense?
+
+A: yes, but it can get messy if each example doesn't have the same dependencies
+   (which is nearly always). Instead, consider including the install prefix and
+   other common choices from another makefile but having separate makefiles for
+   each example.
+  
+Q: how do I keep the makefile DRY and not rewrite the command for each case 
+   in a single example? 
+
+A: one option is to test the name of the target, e.g. pick a different command
+    based on the suffix of the target 
+    
+    ifeq, ifneq, subst are useful makefile commands to look into
 
 ## Accomplishments
 A big part of this week was doing work to refactor fhv to make it more readable
