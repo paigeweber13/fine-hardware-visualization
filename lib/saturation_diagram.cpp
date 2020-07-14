@@ -182,6 +182,7 @@ void saturation_diagram::cairo_draw_text(
   PangoFontDescription * font_desc,
   text_alignment alignment)
 {
+  // TODO: make it work with multiline text
   cairo_save(cr);
 
   PangoLayout *layout = pango_cairo_create_layout(cr);
@@ -197,8 +198,12 @@ void saturation_diagram::cairo_draw_text(
 
   cairo_set_source_rgb(cr, 0, 0, 0);
 
-  // if alignment is center
-  cairo_move_to(cr, x, y - text_box_height/2 + cairo_width/2);
+  if (alignment == text_alignment::left)
+    cairo_move_to(cr, x, y);
+  if (alignment == text_alignment::center)
+    cairo_move_to(cr, x + text_box_width/2 - cairo_width/2, y);
+  if (alignment == text_alignment::right)
+    cairo_move_to(cr, x + text_box_width - cairo_width, y);
 
   pango_cairo_update_layout(cr, layout);
   pango_cairo_show_layout(cr, layout);
@@ -246,12 +251,12 @@ void saturation_diagram::draw_diagram(
       "L1 cache saturation."
     };
 
-  // valuse we'll pass to helper functions
+  // values we'll pass to helper functions
   double x, y;
   double current_text_y;
 
   // variables for cairo
-  PangoFontDescription *title_font = pango_font_description_from_string ("Sans Bold 40");
+  PangoFontDescription *title_font = pango_font_description_from_string ("Sans 40");
   PangoFontDescription *description_font = pango_font_description_from_string ("Sans 15");
   PangoFontDescription *big_label_font = pango_font_description_from_string ("Sans 40");
   PangoFontDescription *small_label_font = pango_font_description_from_string ("Sans 25");
@@ -275,6 +280,9 @@ void saturation_diagram::draw_diagram(
   const double line_spacing = 10;
   // double title_text_height = 310;
 
+  // TODO: use translate instead of move_to so that we don't have to manually
+  // keep track of where we are
+
   cairo_surface_t *surface = cairo_svg_surface_create(
     output_filename.c_str(),
     image_width,
@@ -286,21 +294,17 @@ void saturation_diagram::draw_diagram(
   
   // --- title and description text --- //
   text = "Saturation diagram for region";
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  current_text_y = margin_y + text_extents.height;
-  x = image_width/2 - text_extents.width/2;
-  cairo_draw_text(cr, x, current_text_y, text, text_size_large, 
-    text_line_thickness_large);
+  current_text_y = margin_y;
+  x = margin_x;
+  cairo_draw_text(cr, x, current_text_y, image_width - 2*margin_x,
+    text, title_font, text_alignment::center);
+  current_text_y += 60 + line_spacing;
 
   text = "\"" + region_name + "\"";
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  current_text_y += line_spacing + text_extents.height;
-  cairo_move_to(
-    cr,
-    image_width/2 - text_extents.width/2,
-    current_text_y);
-  cairo_text_path(cr, text.c_str());
-  cairo_fill_preserve(cr);
+  x = margin_x;
+  cairo_draw_text(cr, x, current_text_y, image_width - 2*margin_x,
+    text, title_font, text_alignment::center);
+  current_text_y += 60 + line_spacing;
   
   // start small text
   cairo_set_font_size(cr, text_size_small);
