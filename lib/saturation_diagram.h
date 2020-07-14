@@ -16,6 +16,8 @@ using json = nlohmann::json;
 // ----- simple color type ----- //
 typedef std::tuple<double, double, double> rgb_color;
 
+enum text_alignment { left, center, right };
+
 class saturation_diagram {
   public:
     /* ======== Primary functions ======== 
@@ -109,13 +111,19 @@ class saturation_diagram {
      * cairo_restore so that settings are preserved across calls
      */
     
+    /* ---- draw text ----
+     * x, y coordinates should be to top-left corner of text box. 
+     * 
+     * TODO: rename this and sideways to pango_cairo...
+     */
     static void cairo_draw_text(
       cairo_t * cr,
       double x, 
       double y,
+      double text_box_width,
       std::string text,
-      double text_size,
-      double text_line_thickness);
+      PangoFontDescription * font_desc,
+      text_alignment alignment);
 
     /* ---- draw sideways text ----
      * x, y coordinates should indicate bottom left corner of textbox that will
@@ -123,6 +131,8 @@ class saturation_diagram {
      * width of the box will be determined by the size of the text. This
      * function moves the cursor to the bottom-right corner of the text box
      * before returning.
+     *
+     * TODO: handle wrapping text, support more than one alignment
      */
     static void cairo_draw_sideways_text(
       cairo_t * cr, 

@@ -177,23 +177,36 @@ void saturation_diagram::cairo_draw_text(
   cairo_t * cr,
   double x, 
   double y,
+  double text_box_width,
   std::string text,
-  double text_size,
-  double text_line_thickness
-)
+  PangoFontDescription * font_desc,
+  text_alignment alignment)
 {
   cairo_save(cr);
 
-  cairo_move_to(cr, x, y);
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+  pango_layout_set_text(layout, text.c_str(), -1);
+  pango_layout_set_font_description(layout, font_desc);
+  
+  int width, height;
+  double cairo_width, cairo_height;
+  pango_cairo_update_layout(cr, layout);
+  pango_layout_get_size(layout, &width, &height);
+  cairo_width = ((double)width / PANGO_SCALE);
+  cairo_height = ((double)height / PANGO_SCALE);
 
-  cairo_text_path(cr, text.c_str());
-  // cairo_show_text(cr, text);
-  cairo_set_line_width(cr, text_line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
+
+  // if alignment is center
+  cairo_move_to(cr, x, y - text_box_height/2 + cairo_width/2);
+
+  pango_cairo_update_layout(cr, layout);
+  pango_cairo_show_layout(cr, layout);
 
   cairo_restore(cr);
+  g_object_unref(layout);
+
+  cairo_move_to(cr, x + cairo_height, y);
 }
 
 void saturation_diagram::draw_diagram(
@@ -238,6 +251,11 @@ void saturation_diagram::draw_diagram(
   double current_text_y;
 
   // variables for cairo
+  PangoFontDescription *title_font = pango_font_description_from_string ("Sans Bold 40");
+  PangoFontDescription *description_font = pango_font_description_from_string ("Sans 15");
+  PangoFontDescription *big_label_font = pango_font_description_from_string ("Sans 40");
+  PangoFontDescription *small_label_font = pango_font_description_from_string ("Sans 25");
+
   const double line_thickness = 10.0;
   const double text_line_thickness_large = 1.0;
   const double text_line_thickness_small = 0.0;
@@ -516,12 +534,12 @@ void saturation_diagram::draw_diagram(
     x = socket0_x + internal_margin;
     y = core_y + core_and_cache_height;
 
-    PangoFontDescription *desc = pango_font_description_from_string ("Sans Bold 40");
+    
     
     cairo_draw_sideways_text(cr, x, y, core_and_cache_height, 
-      text, desc);
+      text, big_label_font);
     
-    pango_font_description_free(desc);
+
     // TODO: use the current cursor location here instead of manually
     // calculating where I should draw next. This way if the size changes, the
     // x postion where the core/caches are drawn will automatically adjust
@@ -620,6 +638,10 @@ void saturation_diagram::draw_diagram(
   }
 
   // --- done drawing things, clean up
+  pango_font_description_free(title_font);
+  pango_font_description_free(description_font);
+  pango_font_description_free(big_label_font);
+  pango_font_description_free(small_label_font);
 
   // svg file automatically gets written to disk
   cairo_destroy(cr);
