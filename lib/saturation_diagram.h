@@ -103,6 +103,7 @@ class saturation_diagram {
 
 
     /* ======== Helper functions: cairo ======== 
+     *
      * These are helper functions used by draw_diagram. They can be used
      * elsewhere but are not intended for use elsewhere, and thus their scopes
      * are fairly limited.
@@ -112,29 +113,36 @@ class saturation_diagram {
      */
     
     /* ---- draw text ----
-     * x, y coordinates should be to top-left corner of text box. 
+     *
+     * x, y coordinates should be to top-left corner of text box. Will
+     * automatically take as much vertical space as needed, but will limit to
+     * the horizonatal space specified, adding new lines as needed to maintain
+     * the specified text box width
+     *
+     * this function moves the text to the bottom-left corner of the text box
+     * before returning
      * 
-     * TODO: rename this and sideways to pango_cairo...
+     * TODO: handle multiline text
      */
-    static void cairo_draw_text(
+    static void pango_cairo_draw_text(
       cairo_t * cr,
       double x, 
       double y,
       double text_box_width,
       std::string text,
       PangoFontDescription * font_desc,
-      text_alignment alignment);
+      text_alignment alignment = text_alignment::left);
 
-    /* ---- draw sideways text ----
+    /* ---- draw sideways text ---- 
+     *
      * x, y coordinates should indicate bottom left corner of textbox that will
      * contain the text. Text will be vertically aligned to the center and the
-     * width of the box will be determined by the size of the text. This
-     * function moves the cursor to the bottom-right corner of the text box
-     * before returning.
+     * width of the box will be determined by the size of the text. 
      *
-     * TODO: handle wrapping text, support more than one alignment
+     * This function moves the cursor to the bottom-right corner of the text
+     * box before returning.
      */
-    static void cairo_draw_sideways_text(
+    static void pango_cairo_draw_sideways_text(
       cairo_t * cr, 
       double x,
       double y,

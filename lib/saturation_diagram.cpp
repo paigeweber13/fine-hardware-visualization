@@ -139,7 +139,7 @@ void saturation_diagram::test_color_lerp(
   cairo_surface_destroy(surface);
 }
 
-void saturation_diagram::cairo_draw_sideways_text(
+void saturation_diagram::pango_cairo_draw_sideways_text(
   cairo_t * cr, 
   double x,
   double y,
@@ -170,10 +170,10 @@ void saturation_diagram::cairo_draw_sideways_text(
   cairo_restore(cr);
   g_object_unref(layout);
 
-  cairo_move_to(cr, x + cairo_height, y);
+  cairo_rel_move_to(cr, cairo_height, 0);
 }
 
-void saturation_diagram::cairo_draw_text(
+void saturation_diagram::pango_cairo_draw_text(
   cairo_t * cr,
   double x, 
   double y,
@@ -186,9 +186,9 @@ void saturation_diagram::cairo_draw_text(
   cairo_save(cr);
 
   PangoLayout *layout = pango_cairo_create_layout(cr);
-  pango_layout_set_text(layout, text.c_str(), -1);
   pango_layout_set_font_description(layout, font_desc);
-  
+  pango_layout_set_text(layout, text.c_str(), -1);
+
   int width, height;
   double cairo_width, cairo_height;
   pango_cairo_update_layout(cr, layout);
@@ -196,8 +196,111 @@ void saturation_diagram::cairo_draw_text(
   cairo_width = ((double)width / PANGO_SCALE);
   cairo_height = ((double)height / PANGO_SCALE);
 
-  cairo_set_source_rgb(cr, 0, 0, 0);
+  // TODO: make this block it's own function
 
+  // TODO: remove check and just wrap text. This way we can avoid calling
+  // pango_cairo separately for single line and multiline text
+  if (cairo_width > text_box_width) {
+    // if text is too wide, adjust so that it takes up multiple lines
+
+    std::vector<std::string> lines;
+    std::string final_text = "";
+
+    size_t old_pos = 0;
+    size_t pos = 0;
+    while((pos = text.find('\n', old_pos)) < text.size()){
+      lines.push_back(text.substr(old_pos, pos - old_pos));
+      old_pos = pos + 1;
+    }
+
+    // also add last thing after last found '\n' symbol. If none were found,
+    // this will add the entire string to "lines"
+    lines.push_back(text.substr(old_pos, std::string::npos));
+
+    std::cout << "size of lines: " << lines.size() << std::endl;
+    for(auto &line : lines) 
+      std::cout << "current line: " << line << std::endl;
+
+    for(auto &line : lines) {
+      std::cout << "current line: " << line << std::endl;
+      size_t old_pos = 0;
+      size_t pos = 0;
+      std::vector<std::string> words;
+      while((pos = line.find(' ', old_pos)) < line.size()){
+        words.push_back(line.substr(old_pos, pos - old_pos));
+        old_pos = pos + 1;
+      }
+      words.push_back(line.substr(old_pos, std::string::npos));
+
+      for (auto it = words.begin(); it != words.end(); ++it)
+        std::cout << "word: " << *it << std::endl;
+
+
+      // now you have all the words in the current line. Edit the pango layout
+      // and check how much you can fit in a line. Then wrap at that point.
+      std::string new_line = "";
+      bool added_new_line = false;
+      auto word_it = words.begin(); 
+      while(word_it != words.end())
+      {
+        added_new_line = false;
+        std::cout << "current word: " << *word_it << std::endl;
+        if(new_line.compare("") == 0)
+          pango_layout_set_text(layout, (*word_it).c_str(), -1);
+        else
+          pango_layout_set_text(layout, (new_line + ' ' + *word_it).c_str(), -1);
+        std::cout << "new_line + word: \"" << new_line + ' ' + *word_it
+          << "\"" << std::endl;
+        pango_layout_get_size(layout, &width, &height);
+        cairo_width = ((double)width / PANGO_SCALE);
+        cairo_height = ((double)height / PANGO_SCALE);
+        std::cout << "size of new_line + word: " << cairo_width << std::endl;
+        std::cout << "textbox width: " << text_box_width << std::endl;
+
+        if(cairo_width < text_box_width)
+        {
+          if(new_line.compare("") != 0)
+            new_line += ' ';
+          
+          new_line += *word_it;
+          ++word_it;
+        }
+        else
+        {
+          if (new_line.compare("") == 0) 
+          {
+            // then nothing was able to be fit... this is a problem!
+            std::cerr << "ERROR: A word is too long to fit in the specified "
+              << "textbox size. Resize your textbox." 
+              << std::endl
+              << "       Words are deliniated by spaces."
+              << std::endl;
+
+            return;
+          }
+
+          final_text += new_line + '\n';
+          std::cout << "just added to final_text! final_text is now: " 
+            << final_text << std::endl;
+          new_line = "";
+          added_new_line = true;
+        }
+      }
+      if(!added_new_line)
+        final_text += new_line + '\n';
+    }
+
+    // TODO: This should really be moved to after this loop, but since we've
+    // done it for the normal text it's here for now
+    pango_layout_set_text(layout, final_text.c_str(), -1);
+    pango_layout_get_size(layout, &width, &height);
+    cairo_width = ((double)width / PANGO_SCALE);
+    cairo_height = ((double)height / PANGO_SCALE);
+  }
+
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  // TODO: handle each line manually for proper alignment. So here you'll have
+  // split the new, processed, final text at the '\n' character
   if (alignment == text_alignment::left)
     cairo_move_to(cr, x, y);
   if (alignment == text_alignment::center)
@@ -211,7 +314,7 @@ void saturation_diagram::cairo_draw_text(
   cairo_restore(cr);
   g_object_unref(layout);
 
-  cairo_move_to(cr, x + cairo_height, y);
+  cairo_rel_move_to(cr, 0, cairo_height);
 }
 
 void saturation_diagram::draw_diagram(
@@ -293,19 +396,21 @@ void saturation_diagram::draw_diagram(
   cairo_set_font_size(cr, text_size_large);
   
   // --- title and description text --- //
-  text = "Saturation diagram for region";
-  current_text_y = margin_y;
+  y = margin_y;
   x = margin_x;
-  cairo_draw_text(cr, x, current_text_y, image_width - 2*margin_x,
-    text, title_font, text_alignment::center);
-  current_text_y += 60 + line_spacing;
 
-  text = "\"" + region_name + "\"";
-  x = margin_x;
-  cairo_draw_text(cr, x, current_text_y, image_width - 2*margin_x,
-    text, title_font, text_alignment::center);
-  current_text_y += 60 + line_spacing;
+  // TODO: these two calls to "pango_cairo_draw_text" can be combined
+  pango_cairo_draw_text(cr, x, y, image_width - 2*margin_x,
+    "Saturation diagram for region\nlorem ipsum dolum si amet this is really long text that should go past the limits of this line", title_font, text_alignment::center);
+  cairo_get_current_point(cr, NULL, &y);
+  y += line_spacing;
+
+  pango_cairo_draw_text(cr, x, y, image_width - 2*margin_x,
+    "\"" + region_name + "\"", title_font, text_alignment::center);
+  cairo_get_current_point(cr, NULL, &y);
+  y += line_spacing;
   
+  // TODO: this should all be fixed to be relative to new y
   // start small text
   cairo_set_font_size(cr, text_size_small);
   cairo_set_line_width(cr, text_line_thickness_small);
@@ -540,7 +645,7 @@ void saturation_diagram::draw_diagram(
 
     
     
-    cairo_draw_sideways_text(cr, x, y, core_and_cache_height, 
+    pango_cairo_draw_sideways_text(cr, x, y, core_and_cache_height, 
       text, big_label_font);
     
 
