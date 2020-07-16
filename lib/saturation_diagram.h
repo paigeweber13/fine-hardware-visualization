@@ -112,22 +112,22 @@ class saturation_diagram {
     
     /* ---- draw text ----
      *
-     * Draws text at current cairo position. Current position should indicate
-     * the top-left corner of the text box. Will automatically take as much
-     * vertical space as needed, but will limit to the horizonatal space
-     * specified, adding new lines as needed to maintain the specified text box
-     * width.
+     * Draws text at x, y. x and y should indicate the top-left corner of the
+     * text box. Will automatically take as much vertical space as needed, but
+     * will limit to the horizonatal space specified, adding new lines as
+     * needed to maintain the specified text box width.
      *
-     * this function moves the text to the bottom-left corner of the text box
-     * before returning
+     * this function returns the vertical distance taken by the text.
      *
      * if "vertical" is true, "text_box_width" will be applied in the vertical
      * cairo dimension. Therefore, vertical distance is fixed and horizontal
-     * distance is not. As a result, this function will instead move to the
-     * top-right corner of the text box before returning.
+     * distance is not. As a result, this function will instead return the
+     * horizontal distance taken by the text
      */
-    static void pango_cairo_draw_text(
+    static double pango_cairo_draw_text(
       cairo_t * cr,
+      double x,
+      double y,
       double text_box_width,
       std::string text,
       PangoFontDescription * font_desc,

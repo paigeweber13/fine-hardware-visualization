@@ -51,7 +51,6 @@ saturation_diagram::calculate_saturation_colors(
       color_lerp(min_color, max_color, metric.value());
   }
 
-  // TODO calculate rgb colors instead of returning empty tuples
   return saturation_colors;
 }
 
@@ -139,8 +138,10 @@ void saturation_diagram::test_color_lerp(
   cairo_surface_destroy(surface);
 }
 
-void saturation_diagram::pango_cairo_draw_text(
+double saturation_diagram::pango_cairo_draw_text(
   cairo_t * cr,
+  double x,
+  double y,
   double text_box_width,
   std::string text,
   PangoFontDescription * font_desc,
@@ -148,6 +149,7 @@ void saturation_diagram::pango_cairo_draw_text(
   bool vertical)
 {
   cairo_save(cr);
+  // TODO: increase spacing
 
   int height;
   double cairo_height;
@@ -157,6 +159,7 @@ void saturation_diagram::pango_cairo_draw_text(
   pango_layout_set_text(layout, text.c_str(), -1);
   pango_layout_set_width(layout, text_box_width * PANGO_SCALE);
   pango_layout_set_alignment(layout, alignment);
+  cairo_move_to(cr, x, y);
   cairo_set_source_rgb(cr, 0, 0, 0);
 
   if (vertical) {
@@ -173,10 +176,7 @@ void saturation_diagram::pango_cairo_draw_text(
   cairo_restore(cr);
   g_object_unref(layout);
 
-  if (vertical)
-    cairo_rel_move_to(cr, cairo_height, -text_box_width);
-  else
-    cairo_rel_move_to(cr, 0, cairo_height);
+  return cairo_height;
 }
 
 void saturation_diagram::draw_diagram(
@@ -204,49 +204,39 @@ void saturation_diagram::draw_diagram(
     chosen_precision = "single-precision";
   }
 
-  std::vector<std::string> computation_color_note = {
-      "Note: both single- and double-precision floating point operations "
-        "were measured. Here the cores are",
-      "visualized using " + chosen_precision + " saturation, because "
-        "it was higher."
-    };
-  std::vector<std::string> l1_cache_color_note = {
-      "Note: L1 cache is currently not measured and therefore will appear "
-        "white. This is not an indication of",
-      "L1 cache saturation."
-    };
-
-  // values we'll pass to helper functions
-  double x, y;
-  double current_text_y;
-
   // variables for cairo
   PangoFontDescription *title_font = pango_font_description_from_string ("Sans 40");
-  PangoFontDescription *description_font = pango_font_description_from_string ("Sans 15");
+  PangoFontDescription *description_font = pango_font_description_from_string ("Sans 12");
   PangoFontDescription *big_label_font = pango_font_description_from_string ("Sans 40");
   PangoFontDescription *small_label_font = pango_font_description_from_string ("Sans 25");
 
-  const double line_thickness = 10.0;
-  const double text_line_thickness_large = 1.0;
-  const double text_line_thickness_small = 0.0;
-  const double text_size_xlarge = 75.0;
-  const double text_size_large = 50.0;
-  const double text_size_medium = 30.0;
-  const double text_size_small = 15.0;
-  cairo_text_extents_t text_extents;
-  std::string text;
-
-  // initialization for cairo
+  // general cairo constants
   const double image_width = 800;
   const double image_height = 1730;
   const double margin_x = 50;
   const double margin_y = 50;
+  const double content_width = image_width - 2*margin_x;
   const double internal_margin = 25;
-  const double line_spacing = 10;
-  // double title_text_height = 310;
+  const double line_thickness = 10.0;
 
-  // TODO: use translate instead of move_to so that we don't have to manually
-  // keep track of where we are
+  // should probably be in architecture, perhaps derived from likwid's
+  // L*_CACHE_GROUPS 
+  const unsigned num_attached_caches = 2;
+
+  // size of different diagram components
+  const double swatch_height = 50;
+  const double ram_width = 700;
+  const double ram_height = 200;
+  const double l3_width = 400;
+  const double l3_height = 100;
+  const double socket0_width = 700;
+  const double socket0_height = 700;
+  const double core_width = 550;
+  const double core_height = 175;
+  const double core_cache_height = 50;
+  const double core_and_cache_height = core_height + (core_cache_height * num_attached_caches);
+  
+  double text_height;
 
   cairo_surface_t *surface = cairo_svg_surface_create(
     output_filename.c_str(),
@@ -254,107 +244,59 @@ void saturation_diagram::draw_diagram(
     image_height
   );
   cairo_t *cr = cairo_create(surface);
+  cairo_set_line_width(cr, line_thickness);
 
-  cairo_set_font_size(cr, text_size_large);
-  
   // --- title and description text --- //
-  y = margin_y;
-  x = margin_x;
-  cairo_move_to(cr, x, y);
+  double title_x = margin_x;
+  double title_y = margin_y;
 
-  pango_cairo_draw_text(cr, image_width - 2*margin_x,
+  text_height = pango_cairo_draw_text(cr, title_x, title_y, content_width,
     "Saturation diagram for region\n\"" + region_name + "\"", 
     title_font, PANGO_ALIGN_CENTER);
   // add some spacing after big text
-  cairo_rel_move_to(cr, 0, internal_margin);
   
-  cairo_set_font_size(cr, text_size_small);
-  cairo_set_line_width(cr, text_line_thickness_small);
+  double description_x = title_x;
+  double description_y = title_y + text_height + internal_margin;
 
-
+  std::string description;
   if(parameters.compare("") != 0)
-  {
-    pango_cairo_draw_text(cr, image_width - 2*margin_x, 
-      parameters.c_str(), description_font);
-    cairo_get_current_point(cr, NULL, &y);
-    current_text_y = y + internal_margin;
-  }
+    description += parameters + "\n\n";
 
   // computation color notes
-  for(auto &line : computation_color_note){
-    cairo_text_extents(cr, line.c_str(), &text_extents);
-    current_text_y += line_spacing + text_extents.height;
-    cairo_move_to(
-      cr,
-      margin_x,
-      current_text_y);
-    // cairo_set_line_width(cr, text_line_thickness_large);
-    cairo_text_path(cr, line.c_str());
-    cairo_fill_preserve(cr);
-    cairo_stroke(cr); 
-  }
-  
+  description += 
+    "Note: both single- and double-precision floating point operations were "
+    "measured. Here the cores are visualized using " + chosen_precision + " "
+    "saturation, because it was higher.\n\n";
+
   // l1 cache note
-  current_text_y += line_spacing;
-  for(auto &line : l1_cache_color_note){
-    cairo_text_extents(cr, line.c_str(), &text_extents);
-    current_text_y += line_spacing + text_extents.height;
-    cairo_move_to(
-      cr,
-      margin_x,
-      current_text_y);
-    // cairo_set_line_width(cr, text_line_thickness_large);
-    cairo_text_path(cr, line.c_str());
-    cairo_fill_preserve(cr);
-    cairo_stroke(cr); 
-  }
-  current_text_y += line_spacing;
+  description += 
+    "Note: L1 cache is currently not measured and therefore will appear "
+    "white. This is not an indication of L1 cache saturation.";
+
+  text_height = pango_cairo_draw_text(cr, description_x, description_y, 
+    content_width, description, description_font);
 
   // --- draw swatch/legend --- //
-  cairo_set_line_width(cr, line_thickness);
-  unsigned swatch_height = 50;
-  current_text_y += 2*line_spacing;
-  cairo_draw_swatch(cr, min_color, max_color, margin_x, current_text_y, 
-    image_width - 2 * margin_x, swatch_height, 10);
+  double swatch_x = description_x;
+  double swatch_y = description_y + text_height + internal_margin;
+  cairo_draw_swatch(cr, min_color, max_color, swatch_x, swatch_y, 
+    content_width, swatch_height, 10);
 
-  // text settings
-  current_text_y += swatch_height;
-  cairo_set_line_width(cr, text_line_thickness_small);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-
-  text = "Low saturation";
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  current_text_y += line_spacing + text_extents.height;
-  cairo_move_to(
-    cr,
-    margin_x,
-    current_text_y);
-  cairo_text_path(cr, text.c_str());
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
-
-  text = "High saturation";
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  cairo_move_to(
-    cr,
-    image_width - margin_x - text_extents.width,
-    current_text_y);
-  cairo_text_path(cr, text.c_str());
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
-
-  current_text_y += line_spacing;
-
-  // revert size and width changes
-  cairo_set_font_size(cr, text_size_large);
-  cairo_set_line_width(cr, text_line_thickness_large);
-
+  double swatch_label_x = swatch_x;
+  double swatch_label_y = swatch_y + swatch_height + internal_margin/2;
+  text_height = pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, content_width, 
+    "Low saturation", description_font, PANGO_ALIGN_LEFT);
+  pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, content_width, 
+    "High saturation", description_font, PANGO_ALIGN_RIGHT);
 
   // --- draw RAM --- //
+  // TODO: replace this and other components with a custom "draw rectangle"
+  // command 
+  cairo_save(cr);
+
   double ram_x = margin_x;
-  double ram_y = internal_margin + current_text_y; 
-  double ram_width = 700;
-  double ram_height = 200;
+  double ram_y = swatch_label_y + text_height + internal_margin;
+
   cairo_rectangle(cr, ram_x, ram_y, ram_width, ram_height);
   // - fill
   cairo_set_source_rgb(
@@ -365,26 +307,14 @@ void saturation_diagram::draw_diagram(
   cairo_fill_preserve(cr);
 
   // - stroke
-  cairo_set_line_width(cr, line_thickness);
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
 
-  // - text
-  text = "RAM";
-  cairo_set_font_size(cr, text_size_xlarge);
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  cairo_move_to(
-    cr,
-    ram_x + (ram_width/2 - text_extents.width/2),
-    ram_y + (ram_height/2 + text_extents.height/2));
-  cairo_text_path(cr, text.c_str());
-  // cairo_show_text(cr, text);
-  cairo_set_line_width(cr, text_line_thickness_large);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
-  cairo_set_font_size(cr, text_size_large);
+  cairo_restore(cr);
 
+  // - RAM text
+  pango_cairo_draw_text(cr, ram_x, ram_y + ram_height/3, content_width, "RAM",
+    big_label_font, PANGO_ALIGN_CENTER);
 
   // --- line from RAM to L3 cache --- //
   double line_start_x = ram_x + ram_width/2;
@@ -396,10 +326,10 @@ void saturation_diagram::draw_diagram(
 
 
   // --- draw L3 cache --- //
+  cairo_save(cr);
+
   double l3_x = 200;
   double l3_y = line_end_y;
-  double l3_width = 400;
-  double l3_height = 100;
   cairo_rectangle(cr, l3_x, l3_y, l3_width, l3_height);
   // - fill
   cairo_set_source_rgb(
@@ -414,26 +344,15 @@ void saturation_diagram::draw_diagram(
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_stroke(cr);
 
-  // - text
-  text = "L3 Cache";
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  cairo_move_to(
-    cr,
-    l3_x + (l3_width/2 - text_extents.width/2),
-    l3_y + (l3_height/2 + text_extents.height/2));
-  cairo_text_path(cr, text.c_str());
-  // cairo_show_text(cr, text);
-  cairo_set_line_width(cr, text_line_thickness_large);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
+  cairo_restore(cr);
 
+  // - L3 cache text
+  pango_cairo_draw_text(cr, l3_x, l3_y + l3_height/4, l3_width, 
+    "L3 Cache", big_label_font, PANGO_ALIGN_CENTER);
 
   // --- draw socket 0 --- //
-  double socket0_x = 50;
+  double socket0_x = margin_x;
   double socket0_y = l3_y + l3_height;
-  double socket0_width = 700;
-  double socket0_height = 700;
   cairo_rectangle(cr, socket0_x, socket0_y, socket0_width, socket0_height);
   // - fill
   cairo_set_source_rgb(cr, 1, 1, 1);
@@ -445,59 +364,32 @@ void saturation_diagram::draw_diagram(
   cairo_stroke(cr);
 
   // - text
-  text = "Socket 0";
-  cairo_text_extents(cr, text.c_str(), &text_extents);
-  cairo_move_to(
-    cr,
-    socket0_x + (socket0_width/2 - text_extents.width/2),
-    socket0_y + socket0_height + text_extents.height + 25);
-  cairo_text_path(cr, text.c_str());
-  // cairo_show_text(cr, text);
-  cairo_set_line_width(cr, text_line_thickness_large);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_fill_preserve(cr);
-  cairo_stroke(cr); 
-
+  pango_cairo_draw_text(cr, socket0_x, 
+    socket0_y + socket0_height + internal_margin, content_width, 
+    "Socket 0", big_label_font, PANGO_ALIGN_CENTER);
 
   // --- draw cores --- //
   for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++)
   {
     // cache numbers
-    unsigned num_attached_caches = 2;
-    unsigned cache_height = 50;
-
-    // core numbers
-    unsigned core_width = 550;
-    unsigned core_height = 175;
-    unsigned core_and_cache_height = core_height + (cache_height * num_attached_caches);
-    unsigned between_core_buffer = 50;
+    // unsigned between_core_buffer = 50;
     unsigned core_x = 150;
     unsigned core_y = socket0_y + margin_y
       + core_num * (
-        between_core_buffer + core_height +
-        (num_attached_caches * cache_height)
+        internal_margin + core_height +
+        (num_attached_caches * core_cache_height)
       );
 
     // cache numbers that depend on core numbers
     unsigned cache_y = core_y + core_height;
 
     // - core text
-    cairo_set_font_size(cr, text_size_large);
-    cairo_set_line_width(cr, text_line_thickness_large);
-
-    text = "Core " + std::to_string(core_num);
-    cairo_text_extents(cr, text.c_str(), &text_extents);
-    x = socket0_x + internal_margin;
-    y = core_y;
+    double x = socket0_x + internal_margin;
+    double y = core_y;
     
-    cairo_move_to(cr, x, y);
-    pango_cairo_draw_text(cr, core_and_cache_height, text, big_label_font,
-      PANGO_ALIGN_CENTER, true);
-    
-
-    // TODO: use the current cursor location here instead of manually
-    // calculating where I should draw next. This way if the size changes, the
-    // x postion where the core/caches are drawn will automatically adjust
+    pango_cairo_draw_text(cr, x, y, core_and_cache_height, 
+      "Core " + std::to_string(core_num), 
+      big_label_font, PANGO_ALIGN_CENTER, true);    
 
     // --- threads within core:
 
@@ -527,29 +419,17 @@ void saturation_diagram::draw_diagram(
       cairo_stroke(cr);
 
       // - text
-      text = "Thread " + std::to_string(core_num * THREADS_PER_CORE + thread_num);
-      cairo_text_extents(cr, text.c_str(), &text_extents);
-      cairo_move_to(
-        cr,
-        thread_x + thread_width/2 - text_extents.width/2,
-        core_y + core_height/2 + text_extents.height/2);
-      cairo_text_path(cr, text.c_str());
-      // cairo_show_text(cr, text);
-      cairo_set_line_width(cr, text_line_thickness_large);
-      cairo_set_source_rgb(cr, 0, 0, 0);
-      cairo_fill_preserve(cr);
-      cairo_stroke(cr); 
+      pango_cairo_draw_text(cr, thread_x, core_y + core_height/3, thread_width, 
+        "Thread " + std::to_string(core_num * THREADS_PER_CORE + thread_num),
+        big_label_font, PANGO_ALIGN_CENTER);
     }
 
     // --- caches attached to core:
 
     for (unsigned cache_num = 0; cache_num < num_attached_caches; cache_num++)
     {
-      cairo_rectangle(cr,
-                      core_x,
-                      cache_y + cache_height * cache_num,
-                      core_width,
-                      cache_height);
+      cairo_rectangle(cr, core_x, cache_y + core_cache_height * cache_num,
+        core_width, core_cache_height);
 
       // - fill
       if (cache_num == 0)
@@ -575,20 +455,11 @@ void saturation_diagram::draw_diagram(
       cairo_stroke(cr);
 
       // - text
-      text = "L" + std::to_string(cache_num + 1) + " Cache";
-      cairo_set_font_size(cr, text_size_medium);
-      cairo_text_extents(cr, text.c_str(), &text_extents);
-      cairo_move_to(
-        cr,
-        core_x + core_width/2 - text_extents.width/2,
-        cache_y + cache_height * cache_num + cache_height/2 + 
-          text_extents.height/2);
-      cairo_text_path(cr, text.c_str());
-      // cairo_show_text(cr, text);
-      cairo_set_line_width(cr, text_line_thickness_large);
-      cairo_set_source_rgb(cr, 0, 0, 0);
-      cairo_fill_preserve(cr);
-      cairo_stroke(cr); 
+      pango_cairo_draw_text(cr, core_x, 
+        cache_y + core_cache_height * cache_num + core_cache_height/8,
+        core_width, 
+        "L" + std::to_string(cache_num + 1) + " Cache",
+        small_label_font, PANGO_ALIGN_CENTER);
     }
   }
 
