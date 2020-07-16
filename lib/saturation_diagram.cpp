@@ -149,7 +149,9 @@ double saturation_diagram::pango_cairo_draw_text(
   bool vertical)
 {
   cairo_save(cr);
-  // TODO: increase spacing
+
+  const double spacing_factor = 0.3;
+  const int text_size = pango_font_description_get_size(font_desc);
 
   int height;
   double cairo_height;
@@ -159,6 +161,9 @@ double saturation_diagram::pango_cairo_draw_text(
   pango_layout_set_text(layout, text.c_str(), -1);
   pango_layout_set_width(layout, text_box_width * PANGO_SCALE);
   pango_layout_set_alignment(layout, alignment);
+  pango_layout_set_spacing(layout, 
+    static_cast<int>(static_cast<double>(text_size) * spacing_factor)
+  );
   cairo_move_to(cr, x, y);
   cairo_set_source_rgb(cr, 0, 0, 0);
 
@@ -376,7 +381,7 @@ void saturation_diagram::draw_diagram(
     unsigned core_x = 150;
     unsigned core_y = socket0_y + margin_y
       + core_num * (
-        internal_margin + core_height +
+        internal_margin*2 + core_height +
         (num_attached_caches * core_cache_height)
       );
 
