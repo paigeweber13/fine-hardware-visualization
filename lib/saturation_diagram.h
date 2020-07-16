@@ -112,37 +112,27 @@ class saturation_diagram {
     
     /* ---- draw text ----
      *
-     * x, y coordinates should be to top-left corner of text box. Will
-     * automatically take as much vertical space as needed, but will limit to
-     * the horizonatal space specified, adding new lines as needed to maintain
-     * the specified text box width
+     * Draws text at current cairo position. Current position should indicate
+     * the top-left corner of the text box. Will automatically take as much
+     * vertical space as needed, but will limit to the horizonatal space
+     * specified, adding new lines as needed to maintain the specified text box
+     * width.
      *
      * this function moves the text to the bottom-left corner of the text box
      * before returning
+     *
+     * if "vertical" is true, "text_box_width" will be applied in the vertical
+     * cairo dimension. Therefore, vertical distance is fixed and horizontal
+     * distance is not. As a result, this function will instead move to the
+     * top-right corner of the text box before returning.
      */
     static void pango_cairo_draw_text(
       cairo_t * cr,
       double text_box_width,
       std::string text,
       PangoFontDescription * font_desc,
-      PangoAlignment alignment = PangoAlignment::PANGO_ALIGN_LEFT);
-
-    /* ---- draw sideways text ---- 
-     *
-     * x, y coordinates should indicate bottom left corner of textbox that will
-     * contain the text. Text will be vertically aligned to the center and the
-     * width of the box will be determined by the size of the text. 
-     *
-     * This function moves the cursor to the bottom-right corner of the text
-     * box before returning.
-     */
-    static void pango_cairo_draw_sideways_text(
-      cairo_t * cr, 
-      double x,
-      double y,
-      double text_box_height,
-      std::string text,
-      PangoFontDescription * font_desc);
+      PangoAlignment alignment = PangoAlignment::PANGO_ALIGN_LEFT,
+      bool vertical = false);
 
     /* ---- draw swatch ----
      * Used to create legend on saturation diagram. Also used to test gradients

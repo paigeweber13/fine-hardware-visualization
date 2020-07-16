@@ -139,46 +139,13 @@ void saturation_diagram::test_color_lerp(
   cairo_surface_destroy(surface);
 }
 
-void saturation_diagram::pango_cairo_draw_sideways_text(
-  cairo_t * cr, 
-  double x,
-  double y,
-  double text_box_height,
-  std::string text, 
-  PangoFontDescription * font_desc)
-{
-  cairo_save(cr);
-
-  PangoLayout *layout = pango_cairo_create_layout(cr);
-  pango_layout_set_text(layout, text.c_str(), -1);
-  pango_layout_set_font_description(layout, font_desc);
-  
-  int width, height;
-  double cairo_width, cairo_height;
-  pango_cairo_update_layout(cr, layout);
-  pango_layout_get_size(layout, &width, &height);
-  cairo_width = ((double)width / PANGO_SCALE);
-  cairo_height = ((double)height / PANGO_SCALE);
-
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_move_to(cr, x, y - text_box_height/2 + cairo_width/2);
-  cairo_rotate(cr, -90.0 * G_PI / 180.0);
-
-  pango_cairo_update_layout(cr, layout);
-  pango_cairo_show_layout(cr, layout);
-
-  cairo_restore(cr);
-  g_object_unref(layout);
-
-  cairo_rel_move_to(cr, cairo_height, 0);
-}
-
 void saturation_diagram::pango_cairo_draw_text(
   cairo_t * cr,
   double text_box_width,
   std::string text,
   PangoFontDescription * font_desc,
-  PangoAlignment alignment)
+  PangoAlignment alignment,
+  bool vertical)
 {
   cairo_save(cr);
 
@@ -192,6 +159,11 @@ void saturation_diagram::pango_cairo_draw_text(
   pango_layout_set_alignment(layout, alignment);
   cairo_set_source_rgb(cr, 0, 0, 0);
 
+  if (vertical) {
+    cairo_rel_move_to(cr, 0, text_box_width);
+    cairo_rotate(cr, -90 * G_PI / 180.0);
+  }
+
   pango_cairo_update_layout(cr, layout);
   pango_cairo_show_layout(cr, layout);
 
@@ -201,7 +173,10 @@ void saturation_diagram::pango_cairo_draw_text(
   cairo_restore(cr);
   g_object_unref(layout);
 
-  cairo_rel_move_to(cr, 0, cairo_height);
+  if (vertical)
+    cairo_rel_move_to(cr, cairo_height, -text_box_width);
+  else
+    cairo_rel_move_to(cr, 0, cairo_height);
 }
 
 void saturation_diagram::draw_diagram(
@@ -288,7 +263,7 @@ void saturation_diagram::draw_diagram(
   cairo_move_to(cr, x, y);
 
   pango_cairo_draw_text(cr, image_width - 2*margin_x,
-    "Saturation diagram for region\nlorem ipsum dolum si amet this is really long text that should go past the limits of this line\n\"" + region_name + "\"", 
+    "Saturation diagram for region\n\"" + region_name + "\"", 
     title_font, PANGO_ALIGN_CENTER);
   // add some spacing after big text
   cairo_rel_move_to(cr, 0, internal_margin);
@@ -513,12 +488,11 @@ void saturation_diagram::draw_diagram(
     text = "Core " + std::to_string(core_num);
     cairo_text_extents(cr, text.c_str(), &text_extents);
     x = socket0_x + internal_margin;
-    y = core_y + core_and_cache_height;
-
+    y = core_y;
     
-    
-    pango_cairo_draw_sideways_text(cr, x, y, core_and_cache_height, 
-      text, big_label_font);
+    cairo_move_to(cr, x, y);
+    pango_cairo_draw_text(cr, core_and_cache_height, text, big_label_font,
+      PANGO_ALIGN_CENTER, true);
     
 
     // TODO: use the current cursor location here instead of manually
