@@ -138,34 +138,44 @@ void saturation_diagram::test_color_lerp(
   cairo_surface_destroy(surface);
 }
 
-double saturation_diagram::pango_cairo_draw_text(
-  cairo_t * cr,
-  double x,
-  double y,
-  double text_box_width,
-  std::string text,
-  PangoFontDescription * font_desc,
+void saturation_diagram::pango_cairo_make_text_layout(
+  PangoLayout *layout,
+  PangoFontDescription *font_desc,
   PangoAlignment alignment,
-  bool vertical)
+  std::string text,
+  int cairo_width,
+  int cairo_height)
 {
-  cairo_save(cr);
-
   const double spacing_factor = 0.3;
   const int text_size = pango_font_description_get_size(font_desc);
-
-  int height;
-  double cairo_height;
-
-  PangoLayout *layout = pango_cairo_create_layout(cr);
   pango_layout_set_font_description(layout, font_desc);
   pango_layout_set_text(layout, text.c_str(), -1);
-  pango_layout_set_width(layout, text_box_width * PANGO_SCALE);
+  pango_layout_set_width(layout, cairo_width * PANGO_SCALE);
+
+  if (cairo_height < -1)
+    pango_layout_set_height(layout, cairo_height);
+  else if (cairo_height > -1)
+    pango_layout_set_height(layout, cairo_height * PANGO_SCALE);
+  // if cairo_height is equal to -1, we do nothing because that is the default
+  // value of cairo_height.
+
   pango_layout_set_alignment(layout, alignment);
   pango_layout_set_spacing(layout, 
     static_cast<int>(static_cast<double>(text_size) * spacing_factor)
   );
+}
+
+void saturation_diagram::pango_cairo_draw_layout(
+  cairo_t * cr,
+  double x,
+  double y,
+  PangoLayout *layout,
+  bool vertical)
+{
   cairo_move_to(cr, x, y);
   cairo_set_source_rgb(cr, 0, 0, 0);
+
+  int text_box_width = pango_layout_get_width(layout) / PANGO_SCALE;
 
   if (vertical) {
     cairo_rel_move_to(cr, 0, text_box_width);
@@ -174,6 +184,30 @@ double saturation_diagram::pango_cairo_draw_text(
 
   pango_cairo_update_layout(cr, layout);
   pango_cairo_show_layout(cr, layout);
+}
+
+double saturation_diagram::pango_cairo_draw_text(
+  cairo_t * cr,
+  double x,
+  double y,
+  int text_box_width,
+  std::string text,
+  PangoFontDescription * font_desc,
+  PangoAlignment alignment,
+  bool vertical)
+{
+  cairo_save(cr);
+
+  int height;
+  double cairo_height;
+
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+
+  // create layout
+  pango_cairo_make_text_layout(layout, font_desc, alignment, text, 
+    text_box_width);
+
+  pango_cairo_draw_layout(cr, x, y, layout, vertical);
 
   pango_layout_get_size(layout, NULL, &height);
   cairo_height = ((double)height / PANGO_SCALE);
@@ -369,7 +403,7 @@ void saturation_diagram::draw_diagram(
   double ram_y = swatch_label_y + text_height + internal_margin;
   cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
     region_colors[ram_bandwidth_metric_name], "RAM", big_label_font,
-    label_position::INSIDE);
+    label_position::LEFT);
 
   // --- line from RAM to L3 cache --- //
   double line_start_x = ram_x + ram_width/2;

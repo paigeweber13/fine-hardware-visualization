@@ -8,6 +8,7 @@
 #include <pango/pangocairo.h>
 #include <tuple>
 #include <string>
+#include <type_traits>
 
 #include "architecture.h"
 #include "likwid_defines.hpp"
@@ -114,6 +115,23 @@ class saturation_diagram {
      * each function begins with a call to cairo_save and ends with a call to
      * cairo_restore so that settings are preserved across calls
      */
+
+    /* used by pango_cairo_draw_text */
+    static void pango_cairo_make_text_layout(
+      PangoLayout *layout,
+      PangoFontDescription *font_desc,
+      PangoAlignment alignment,
+      std::string text,
+      int width,
+      int height = -1);
+
+    /* used by pango_cairo_draw_text */
+    static void pango_cairo_draw_layout(
+      cairo_t * cr,
+      double x,
+      double y,
+      PangoLayout *layout,
+      bool vertical);
     
     /* ---- draw text ----
      *
@@ -133,7 +151,7 @@ class saturation_diagram {
       cairo_t * cr,
       double x,
       double y,
-      double text_box_width,
+      int text_box_width,
       std::string text,
       PangoFontDescription * font_desc,
       PangoAlignment alignment = PangoAlignment::PANGO_ALIGN_LEFT,
