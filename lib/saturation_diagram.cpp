@@ -184,6 +184,74 @@ double saturation_diagram::pango_cairo_draw_text(
   return cairo_height;
 }
 
+double saturation_diagram::cairo_draw_component(
+  cairo_t *cr,
+  double x,
+  double y,
+  double width,
+  double height,
+  rgb_color fill_color,
+  std::string label,
+  PangoFontDescription * font_desc,
+  label_position position)
+{
+  cairo_save(cr);
+
+  double text_height = 0; // height in vertical dimension relative to text
+
+  int old_font_size = pango_font_description_get_size(font_desc);
+  std::cout << "old font size: " << old_font_size << std::endl;
+  std::cout << "new font size: " <<  (height/4) * PANGO_SCALE << std::endl;
+  pango_font_description_set_size(font_desc, (height/4) * PANGO_SCALE);
+
+  if(position == label_position::INSIDE)
+  {
+    cairo_rectangle(cr, x, y, width, height);
+    text_height = 0;
+  }
+  else if(position == label_position::LEFT)
+  {
+    text_height = pango_cairo_draw_text(cr, x, y, height, label,
+      font_desc, PANGO_ALIGN_CENTER, true);
+    cairo_rectangle(cr, x + text_height, y,
+      width - text_height, height);
+  }
+  else if(position == label_position::BOTTOM)
+  {
+    // really need to know height before drawing, because y position should be
+    // y + height - text_height. For now, not resizing rectangle
+    text_height = pango_cairo_draw_text(cr, x,
+      y + height, width, label, font_desc, 
+      PANGO_ALIGN_CENTER);
+    // cairo_rectangle(cr, x, y, width, height - text_height);
+    cairo_rectangle(cr, x, y, width, height);
+  }
+
+  cairo_set_source_rgb(
+    cr,
+    std::get<0>(fill_color),
+    std::get<1>(fill_color),
+    std::get<2>(fill_color));
+  cairo_fill_preserve(cr);
+
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+
+  if(position == label_position::INSIDE)
+  {
+    // because text is on top of rectangle, have to draw it AFTER fill and
+    // stroke happen
+    pango_cairo_draw_text(cr, x, y + height/4, width, label,
+      font_desc, PANGO_ALIGN_CENTER);
+    text_height = 0;
+  }
+
+  cairo_restore(cr);
+  pango_font_description_set_size(font_desc, old_font_size);
+
+  return text_height;
+}
+
 void saturation_diagram::draw_diagram(
   std::map<std::string, rgb_color> region_colors,
   json region_data,
@@ -297,29 +365,11 @@ void saturation_diagram::draw_diagram(
   // --- draw RAM --- //
   // TODO: replace this and other components with a custom "draw rectangle"
   // command 
-  cairo_save(cr);
-
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
-
-  cairo_rectangle(cr, ram_x, ram_y, ram_width, ram_height);
-  // - fill
-  cairo_set_source_rgb(
-    cr,
-    std::get<0>(region_colors["Memory bandwidth [MBytes/s]"]),
-    std::get<1>(region_colors["Memory bandwidth [MBytes/s]"]),
-    std::get<2>(region_colors["Memory bandwidth [MBytes/s]"]));
-  cairo_fill_preserve(cr);
-
-  // - stroke
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-
-  cairo_restore(cr);
-
-  // - RAM text
-  pango_cairo_draw_text(cr, ram_x, ram_y + ram_height/3, content_width, "RAM",
-    big_label_font, PANGO_ALIGN_CENTER);
+  cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
+    region_colors[ram_bandwidth_metric_name], "RAM", big_label_font,
+    label_position::INSIDE);
 
   // --- line from RAM to L3 cache --- //
   double line_start_x = ram_x + ram_width/2;
@@ -328,7 +378,6 @@ void saturation_diagram::draw_diagram(
   double line_end_y = line_start_y + 150;
   cairo_move_to(cr, line_start_x, line_start_y);
   cairo_line_to(cr, line_end_x, line_end_y);
-
 
   // --- draw L3 cache --- //
   cairo_save(cr);

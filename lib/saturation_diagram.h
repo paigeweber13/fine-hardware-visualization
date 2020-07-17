@@ -10,11 +10,16 @@
 #include <string>
 
 #include "architecture.h"
+#include "likwid_defines.hpp"
 
 using json = nlohmann::json;
 
 // ----- simple color type ----- //
 typedef std::tuple<double, double, double> rgb_color;
+
+enum label_position {
+  INSIDE, BOTTOM, LEFT
+};
 
 class saturation_diagram {
   public:
@@ -147,6 +152,28 @@ class saturation_diagram {
       unsigned width,
       unsigned height,
       unsigned num_steps); 
+
+    /* ---- draw component ----
+     *
+     * Font size will be adjusted to be approximately 1/3 the height of the
+     * box. Text will be centered horizontally (and vertically in all positions
+     * except BOTTOM)
+     *
+     * Returns the distance needed for the text. This distance is in the
+     * vertical dimension for position BOTTOM and horizontal for LEFT. The
+     * rectangle will take the rest of <width>
+     *
+     */
+    static double cairo_draw_component(
+      cairo_t *cr,
+      double x,
+      double y,
+      double width,
+      double height,
+      rgb_color fill_color,
+      std::string label,
+      PangoFontDescription * font_desc,
+      label_position position = label_position::INSIDE);
 
   private:
 };
