@@ -120,9 +120,9 @@ class saturation_diagram {
     static void pango_cairo_make_text_layout(
       PangoLayout *layout,
       PangoFontDescription *font_desc,
-      PangoAlignment alignment,
       std::string text,
       int width,
+      PangoAlignment alignment = PangoAlignment::PANGO_ALIGN_LEFT,
       int height = -1);
 
     /* used by pango_cairo_draw_text */
@@ -131,7 +131,7 @@ class saturation_diagram {
       double x,
       double y,
       PangoLayout *layout,
-      bool vertical);
+      bool vertical = false);
     
     /* ---- draw text ----
      *
@@ -140,7 +140,9 @@ class saturation_diagram {
      * will limit to the horizonatal space specified, adding new lines as
      * needed to maintain the specified text box width.
      *
-     * this function returns the vertical distance taken by the text.
+     * this function returns the vertical distance needed to reach the
+     * rectangle. For alignments LEFT and BOTTOM, this is the distance taken by
+     * the text. For INSIDE, it is 0.
      *
      * if "vertical" is true, "text_box_width" will be applied in the vertical
      * cairo dimension. Therefore, vertical distance is fixed and horizontal
