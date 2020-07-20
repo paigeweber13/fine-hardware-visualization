@@ -8,9 +8,12 @@ cd ../..
 
 OLD_FHV_OUTPUT=$FHV_OUTPUT
 OLD_OMP_SCHEDULE=$OMP_SCHEDULE
+OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
 MEM_HEAVY_PARAMS="67108864 1 800"
 CPU_HEAVY_PARAMS="67108864 1000 80"
+
+export LD_LIBRARY_PATH="/usr/local/likwid-master/lib"
 
 echo "running basic polynomial to saturate memory"
 export FHV_OUTPUT="visualizations/polynomial_basic_mem.json"
@@ -40,3 +43,5 @@ bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial
 # cleanup
 export FHV_OUTPUT=$OLD_FHV_OUTPUT
 export OMP_SCHEDULE=$OLD_FHV_OUTPUT
+export LD_LIBRARY_PATH=$OLD_LD_LIBRARY_PATH
+
