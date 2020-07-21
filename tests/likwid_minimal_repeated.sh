@@ -21,13 +21,14 @@ num_iter=100
 num_failures=0
 
 DATE=$(date +%F_%H%M)
-DIR=data/unreasonably-high-values
-FILENAME_BASE=$DIR/likwid_minimal_repeated
+OUTPUT_DIR=data/unreasonably-high-values
+FILENAME_BASE=$OUTPUT_DIR/likwid_minimal_repeated
+PATH_TO_THIS_SCRIPT=`dirname \$(readlink -f "\$0")`
 
-mkdir -p $DIR
+mkdir -p $OUTPUT_DIR
 
 for i in $(seq $num_iter); do
-  output=$(./likwid_minimal) 
+  output=$($PATH_TO_THIS_SCRIPT/../bin/tests/likwid_minimal) 
   if [[ $output == *"WARNING: unreasonably high"* ]]; then
       FILENAME=$(echo $FILENAME_BASE)_$(echo $DATE)_iteration_$i.txt
       echo "$i Warning! Something went wrong. Sending output to $FILENAME"
