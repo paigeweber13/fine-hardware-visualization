@@ -195,7 +195,7 @@ run-tests/thread_migration: bin/tests/thread_migration
 	bin/tests/thread_migration 2;
 
 bin/tests/likwid_minimal: $(TEST_DIR)/likwid_minimal.c | $(TEST_EXEC_DIR)
-	gcc likwid_minimal.c -L$(LIKWID_PREFIX)/lib -march=native -mtune=native -fopenmp -llikwid -o likwid_minimal
+	gcc tests/likwid_minimal.c -I$(LIKWID_PREFIX)/include -L$(LIKWID_PREFIX)/lib -march=native -mtune=native -fopenmp -llikwid -o $@
 
 bin/tests/likwid_minimal-run: bin/tests/likwid_minimal
 	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/likwid_minimal
