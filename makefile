@@ -194,16 +194,16 @@ run-tests/thread_migration: bin/tests/thread_migration
 	# bin/tests/thread_migration 1; \
 	bin/tests/thread_migration 2;
 
-bin/tests/likwid_minimal: $(OBJ_DIR)/likwid_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
-	$(ld-command)
+bin/tests/likwid_minimal: $(TEST_DIR)/likwid_minimal.c | $(TEST_EXEC_DIR)
+	gcc likwid_minimal.c -L$(LIKWID_PREFIX)/lib -march=native -mtune=native -fopenmp -llikwid -o likwid_minimal
 
-run-tests/likwid_minimal: bin/tests/likwid_minimal
-	bin/tests/likwid_minimal
+bin/tests/likwid_minimal-run: bin/tests/likwid_minimal
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/likwid_minimal
 
-run-tests/likwid_minimal-cli: bin/tests/likwid_minimal
+bin/tests/likwid_minimal-run-with-cli: bin/tests/likwid_minimal
 	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
 	# commented out 
-	$(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g MEM -g L2 -g L3 -g FLOPS_SP -g FLOPS_DP -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -M 1 -m bin/tests/likwid_minimal
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g MEM -g L2 -g L3 -g FLOPS_SP -g FLOPS_DP -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -M 1 -m bin/tests/likwid_minimal
 
 run-tests/port-counter-cli: bin/tests/likwid_minimal
 	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
