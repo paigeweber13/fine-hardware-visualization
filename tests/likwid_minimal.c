@@ -17,10 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #define NUM_FLOPS 10000000
-#define NUM_FLOPS 100000000
-// #define NUM_COPIES 1000
-#define NUM_COPIES 100000
+#define NUM_FLOPS 10000000
+#define NUM_COPIES 10000
 
 typedef unsigned long long ull;
 
@@ -146,7 +144,7 @@ int main()
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
         metric_name = perfmon_getMetricName(gid, k);
         metric_value = perfmon_getMetricOfRegionThread(i, k, t);
-        if (metric_value > 1e6)
+        if (metric_value > 1e10)
         {
           printf("WARNING: unreasonably high metric value detected\n");
         }
