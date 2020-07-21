@@ -96,7 +96,6 @@ int main()
       likwid_markerStartRegion("double_flops");
       do_flops(a, b, c, NUM_FLOPS);
       likwid_markerStopRegion("double_flops");
-#pragma omp barrier
       likwid_markerStartRegion("copy");
       do_copy(arr, copy_arr, n, NUM_COPIES);
       likwid_markerStopRegion("copy");
