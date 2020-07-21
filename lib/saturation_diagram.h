@@ -50,9 +50,18 @@ class saturation_diagram {
       rgb_color max_color);
 
     /* ---- draw diagram ----
-     * the function that actually makes the diagram 
+     * Draws an overview of the architecture that displays RAM, cores, and
+     * caches 
      */
-    static void draw_diagram(
+    // TODO: evaluate if this should really be provided region_colors. 
+    //   - it depends on region_data to decide to use DP or SP flops. But in
+    //     the future we want to change this to be an average of things like
+    //     port usage, instruction decoding, and instruction retiring
+    //   - it depends on min_color and max_color to draw swatch
+    //   - even if we remove region_data dependency, does it make more sense to
+    //     just calculate the region colors here? Is there a benefit to
+    //     calculating region_colors elsewhere?
+    static void draw_diagram_overview(
       std::map<std::string, rgb_color> region_colors,
       json region_data,
       rgb_color min_color,
@@ -61,6 +70,14 @@ class saturation_diagram {
       std::string parameters,
       std::string output_filename);
 
+    
+    static void draw_diagram_core_detail(
+      std::map<std::string, rgb_color> region_colors,
+      rgb_color min_color,
+      rgb_color max_color,
+      std::string region_name,
+      std::string parameters,
+      std::string output_filename);
 
     /* ======== Helper functions: general ======== 
      * These may be used elsewhere but are intended for internal use. They

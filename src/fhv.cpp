@@ -193,8 +193,8 @@ void visualize(
       image_output_filename.substr(0, pos) + "_" + 
       region_name + ext;
 
-    saturation_diagram::draw_diagram(region_colors, region_data, min_color, 
-      max_color, region_name, params, this_image_output_filename);
+    saturation_diagram::draw_diagram_overview(region_colors, region_data, 
+      min_color, max_color, region_name, params, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
   }

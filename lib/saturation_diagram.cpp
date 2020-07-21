@@ -309,7 +309,7 @@ double saturation_diagram::cairo_draw_component(
   return cairo_text_height;
 }
 
-void saturation_diagram::draw_diagram(
+void saturation_diagram::draw_diagram_overview(
   std::map<std::string, rgb_color> region_colors,
   json region_data,
   rgb_color min_color,
@@ -544,4 +544,16 @@ void saturation_diagram::draw_diagram(
   // svg file automatically gets written to disk
   cairo_destroy(cr);
   cairo_surface_destroy(surface);
+}
+
+void saturation_diagram::draw_diagram_core_detail(
+  std::map<std::string, rgb_color> region_colors,
+  rgb_color min_color,
+  rgb_color max_color,
+  std::string region_name,
+  std::string parameters,
+  std::string output_filename
+)
+{
+  ;
 }
