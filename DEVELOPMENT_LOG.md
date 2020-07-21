@@ -3,18 +3,23 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
-- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
+  - [Next steps](#next-steps)
+  - [Backlog](#backlog)
+- [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
   - [Questions](#questions-1)
   - [Accomplishments](#accomplishments-1)
-- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-2)
   - [Accomplishments](#accomplishments-2)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-3)
   - [Accomplishments](#accomplishments-3)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-4)
+  - [Accomplishments](#accomplishments-4)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -65,6 +70,53 @@ Hardware Visualization
 - [before 2020-02-11](#before-2020-02-11)
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
+
+# 2020-07-14 through 2020-07-21
+## Questions
+- is creating separate svgs for overview/detailed view a good course of action
+  for now? 
+  - from what I understand, the final goal/vision is to have an interactive
+    diagram the user can pan and zoom, right?
+  - alternative is to create very small drawings and expect people to zoom into
+    the svgs....
+- for likwid documentation: does it make sense for me to write documentation
+  even though I'm frequently wrong about expected usage? (Thomas and I talked
+  for months before I finally learned that likwid_markerNextGroup() must be
+  called in a serial region)
+
+## Accomplishments
+- [pull request](https://github.com/RRZE-HPC/likwid/pull/303) for likwid is
+  merged!
+- dramatically improved draw_diagram function
+  - moved to own file so it's not bloating the driver file
+  - created reusable functions to keep code DRY
+  - switched to pango, a much more powerful text engine that has first-class
+    support in cairo
+  - made it easy to configure diagram (and easy to move configuration to a
+    separate .ini file or similar)
+  - began work on a "detail view" that will show us in-core performance with
+    finer granularity: things like port saturation
+
+## Next steps
+In general, I want to pivot away from maintenance and start adding features. We
+can return to code maintenance later.
+
+- implement port usage in "detail view"
+- look at counters that will help us identify instruction decoding and
+  micro-instruction retiring (key areas identified in the past)
+- have the program automatically adapt to new configurations (for now, this
+  means different numbers of cores, but same architecture)
+
+## Backlog
+- clean up and simplify makefile (goal is to make it easy to maintain,
+  uncomplicated)
+- make program adapt to other architectures
+- improve likwid documentation
+  - tom hasn't made it clear how I can help or if my help is even wanted
+  - he may create a "todo" list for documentation that I can use
+- give examples their own makefiles
+- verify tests/examples. Many of them don't work anymore. Decide what should be
+  updated and what should be removed
 
 # 2020-07-07 through 2020-07-14
 ## Questions
