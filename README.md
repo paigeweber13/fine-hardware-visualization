@@ -5,7 +5,9 @@ architecture are most loaded to identify bottlenecks in high-performance
 applications.
 
 This software is in the early stages of development and should not yet be
-assumed to be stable or correct.
+assumed to be stable or correct. However, we encourage you to try to build it
+and run some of the examples! Feedback is welcome via email. My email address
+may be found [in my github profile](https://github.com/rileyweber13).
 
 - [Fine Hardware Visualization](#fine-hardware-visualization)
 - [Prerequisites](#prerequisites)
