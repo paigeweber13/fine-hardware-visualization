@@ -18,13 +18,7 @@ assumed to be stable or correct.
 - [Architecture of Program](#architecture-of-program)
 - [Ownership and licensing](#ownership-and-licensing)
 - [How to improve likwid stability:](#how-to-improve-likwid-stability)
-- [TODO:](#todo)
-  - [Immediate:](#immediate)
-  - [Long-term:](#long-term)
-    - [Problems to fix:](#problems-to-fix)
-    - [Features to add:](#features-to-add)
-    - [Improve software engineering](#improve-software-engineering)
-- [Parameters used to create visualizations](#parameters-used-to-create-visualizations)
+- [How example visualizations are created](#how-example-visualizations-are-created)
 - [Examples design](#examples-design)
 - [Other similar tools:](#other-similar-tools)
   - [Kerncraft:](#kerncraft)
@@ -45,7 +39,6 @@ assumed to be stable or correct.
    running `make perfgroups` in the root directory.
 
 ## Installed via package manager
-
  - **boost/program_options:** available on [the boost
    website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
    install libboost-program-options-dev` on debian-based distributions. The
@@ -143,130 +136,18 @@ We want all programmers to
      output > data/output.txt`
    - outputting to `/tmp` sometimes avoids this problem
 
-# TODO:
-## Immediate:
- - [ ] improve likwid documentation
-   - [ ] Tom has not made it clear how to contribute, but here are some ideas
-         for PRs:
-     - [ ] write some wiki pages about general use (e.g. "There are three ways
-           to use likwid...")
-     - [ ] write test cases
-     - [ ] consider improving doxygen comments and writing man pages for usage
- - [ ] more counters to visualize.
-   - [ ] quickly finish looking at all perfgroups
-   - [ ] Dr. Saule identified the following areas as key. What counters and
-         perfgroups can help us identify performance in these areas?
-     - [ ] port usage
-     - [ ] instruction decoding: can you decode instructions quickly enough?
-     - [ ] micro-instruction retiring: can you fetch instructions quickly
-           enough? 
-   - [ ] change computation saturation to be per-core
- - [ ] improve software engineering
-   - [ ] improve makefile 
-     - [ ] simplify: there's some redundant stuff in there
-     - [ ] can I make it so there's a general rule for all examples?
-     - [ ] tests don't work any more
-     - [ ] give convolution its own makefile???
-   - [ ] performance_monitor.cpp (see "improve-result-processing" branch)
-     - [ ] some things are aggregated across threads, some things are not
-     - [ ] we're still using groups even though there's really no need. It just
-           makes it so we have to iterate through all groups in a region to
-           find the right event/metric
-     - [ ] getting raw data from likwid and aggregating data are tightly
-           coupled and difficult to maintain. These should be separated.
-   - [ ] fhv.cpp
-     - [ ] there's fhv's csv and performance_monitor's fhv. Should I continue
-           to support these moving forward? Are these important tests?
-           - if yes, somehow combine them and make the code cleaner
-           - if no, remove
-   - [ ] there are a lot of things in tests that simply don't work anymore
-     - [ ] verify tests
-     - [ ] verify examples
-   - [ ] there are a lot of text files floating around (like in `tests/`). Can
-         those be removed?
- - [ ] explore how well fhv works with other kernels and codebases
-   - [ ] consider standard benchmarks
-   - [ ] Dr. Saule may be able to throw together some software that
-         demonstrates stress on more granular things like TLB or instruction
-         decoder
- - [ ] start exploring different machines
-   - [ ] another skylake architecture with a different number of cores
-   - [ ] broadwell/haswell
-   - [ ] eventual goal is to have architecture detection totally automatic but
-         for now it's adequate to have a few sets of parameters hardcoded that
-         are selected automatically
+# How example visualizations are created
+The `visualizations/polynomial*.svg` visualizations are created using
+`tests/visualizations-poly.sh`, which should be run from the root of this
+project.
 
-## Long-term:
-### Problems to fix:
- - fix benchmark-likwid-vs-manual and thread_migration 
- - manual benchmark only prints runtime for flops region
-   - in other words, runtime_by_tag doesn't seem to work for more than one 
-     region
- - sometimes make rule for `run-tests/fhv_minimal` fails with a segmentation
-   fault, seems to be right after compilation but before running. Immediately
-   running the rule again succeeds.
- - sometimes get "stopping non-started region" error in fhv. I think it only
-   happens when you run "benchmark-all" (the `-b` flag)
- - performance_monitor assumes maximum number of threads are used every time it
-   sets performance_monitor::num_threads. Perhaps replace by initializing once
-   in init once init routines are working?
-   - data generated by `examples/polynomial_expansion/script2*.sh` are not
-   completely accurate. My own tests have show that saturation as high as 0.7
-   for memory is possible, but these scripts only demonstrate a maximum 
-   saturation of 0.4. See the .csv files in 
-   `examples/polynomial_expansion/data` for examples.
-   - parameters which demonstrated higher saturation are: n=67108864 d=1
-     nbiter=800
-     
-### Features to add:
- - make core saturation (and therefore, color of the core) an average of many
-   key metrics.
-   - For example, might average flop saturation, instruction decoding, port
-     usage, and instruction retiring.
-   - This visualization will be general at the initial zoom but when you zoom
-     in will separate into the different factors we consider
-   - this should include single and double precision flops, because complex
-     calculations may use both. However, only consider the highest for the
-     average?
-   - for more info, see notes taken on what Dr. Saule had to say about the
-     subject in DEVELOPMENT_LOG.md -> 2020-06-02 through 2020-06-09 ->
-     secondary
- - talk to a visualization expert about how we can improve our visualization
- - combine benchmark in fhv with benchmark-likwid-vs-manual
-   - rewrite computation_measurements to optionally include manual results
-   - update CLI to optionally include manual results
- - improve benchmark: either decide to use another benchmark or improve the one
-   we have
-   - consider other benchmark tools (see ["architecture of program"
-     section](#architecture-of-program))
-   - have it check bandwidth for all types of memory/cache
-   - have it check architecture to know what size of caches
-   - have it populate architecture.h
- - In some cases, color buses instead of components themselves
-   - RAM: read/write separately are useful. Also, this is easy to incorporate
-   - NUMA: This is the case where it's most important. There's potential for
-     the bus(es) between CPUs to be saturated, when it wouldn't be saturated if
-     it was memory directly to CPU
+The visualizations/data in `tests/data/mem_size*.png`,
+`tests/data/mem_iter_comparison.csv`, and `tests/data/flops_comparison.png` are
+all created using `tests/benchmark_comparison_test.py`, which should be run
+from the `tests` directory. 
 
-### Improve software engineering
- - make it consistent what calls likwid
- - makefile has some unnecessary repetition of variables
-   - compare ./examples/polynomial_expansion/makefile with ./makefile
- - make consistent if examples are made in root or example version
-   - probably better to put makefiles in the directory of each example. Then,
-     if an example has different dependencies they don't affect other examples
-   - perhaps compile performance_monitor into a shared library that is then
-     grabbed by examples?
-
-# Parameters used to create visualizations
- - memory-stressed versions used parameters n=67108864 d=1 nbiter=800.
-   Examples of memory-stressed versions include:
-   - ./visualizations/polynomial_basic_mem*
-   - ./visualizations/polynomial_block_mem*
- - CPU-stressed versions used parameters n=67108864 d=1000 nbiter=80. Examples
-   of memory-stressed versions include:
-   - ./visualizations/polynomial_basic_cpu*
-   - ./visualizations/polynomial_block_cpu*
+The `tests/data/mem_volume_through_cache*` visualizations and data are created
+with `tests/mem_volume_through_cache.py`, which should be run from the `tests` directory.
 
 # Examples design
 Examples should be designed with simplicity as a priority. There should be no
