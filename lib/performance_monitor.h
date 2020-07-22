@@ -107,6 +107,9 @@ class performance_monitor {
     // ------ functions ------ //
     // actual functionality
 
+    // TODO: merge init functions and use optional parameters instead of
+    // overloading.  
+
     // does a default set of groups that allows fhv to work normally. Also
     // automatically uses the default number of threads created by openMP as
     // below 
@@ -155,6 +158,10 @@ class performance_monitor {
 
     // sum events and metrics across threads. Organize by region and group
 
+    // TODO: evaluate these functions. buildingResultsMaps may need to be
+    // rewritten from the ground up... in general this file has a lot of
+    // hard-to-read (and, therefore, hard to maintain) code and I feel like
+    // this falls prey to that. Can these functions be simplified?
     static void buildResultsMaps();
     static void compareActualWithBench();
 
