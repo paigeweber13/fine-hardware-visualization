@@ -129,10 +129,11 @@ We want all programmers to
    seems to dramatically reduce the number of occurrences of the unreasonably
    high values bug. It may even prevent this bug from occurring, I have yet to
    see a case where this bug manifests with the barrier in place.
- - put `#pragma omp barrier` before each `likwid_markerStartRegion` call and
-   after each `likwid_markerStopRegion` call. This helps prevent "WARNING:
-   stopping an unknown/non-started region <region>" and "WARNING: Region
-   <region> was already started"
+ - (This tip may not be necessary but does seem to help in some cases) Put
+   `#pragma omp barrier` before each `likwid_markerStartRegion` call and after
+   each `likwid_markerStopRegion` call. This helps prevent "WARNING: stopping
+   an unknown/non-started region <region>" and "WARNING: Region <region> was
+   already started"
  - try to avoid redirecting output of a program that uses likwid to a file.
    This seems to cause many "WARN: Region <region> was already started" and
    "WARN: Stopping an unknown/not-started region <regon>" errors. Workarounds
@@ -144,24 +145,9 @@ We want all programmers to
 
 # TODO:
 ## Immediate:
- - [x] port usage isn't what we expected it... why on CPU-heavy polynomial
-       block, port4 (store data) is still the most saturated
-   - [x] what happens if we increase degree past 100? Same behavior...
-   - [x] inspect assembly to find stores
-   - [x] look at how we measure port usage
-     - corrected how we measure port usage. Values are still odd, though
-   - Dr. Saule will look at this
- - [x] work on likwid stability issues
-   - [x] BLOCKED: waiting to hear back from Thomas
-     - thomas said likwid_markerNextGroup should be called in a sequential
-       region. Seems to be solved?
-   - [x] teleconference with Thomas to fix
  - [ ] improve likwid documentation
-   - [x] BLOCKED: waiting to hear back from Thomas
-   - [x] update doxygen for likwid
-   - [x] update likwid examples
-   - [ ] ask Tom how he'd like me to contribute. Some ideas follow:
-     - [x] update `./examples/C-internalMarkerAPI.c`
+   - [ ] Tom has not made it clear how to contribute, but here are some ideas
+         for PRs:
      - [ ] write some wiki pages about general use (e.g. "There are three ways
            to use likwid...")
      - [ ] write test cases
@@ -176,19 +162,19 @@ We want all programmers to
            enough? 
    - [ ] change computation saturation to be per-core
  - [ ] improve software engineering
-   - [x] typedef long names in performance_monitor
-   - [x] remove old, unused things
    - [ ] improve makefile 
      - [ ] simplify: there's some redundant stuff in there
      - [ ] can I make it so there's a general rule for all examples?
      - [ ] tests don't work any more
+     - [ ] give convolution its own makefile???
+   - [ ] performance_monitor.cpp (see "improve-result-processing" branch)
+     - [ ] some things are aggregated across threads, some things are not
+     - [ ] we're still using groups even though there's really no need. It just
+           makes it so we have to iterate through all groups in a region to
+           find the right event/metric
+     - [ ] getting raw data from likwid and aggregating data are tightly
+           coupled and difficult to maintain. These should be separated.
    - [ ] fhv.cpp
-     - [x] move cairo stuff to library in lib
-     - [ ] separate functions for different parts of diagram
-     - [ ] cairo_save/cairo_restore operate as a stack machine: you can
-           save/restore in a nested manner
-     - [ ] make saturation diagram use a real text api and not the cairo "toy"
-           api
      - [ ] there's fhv's csv and performance_monitor's fhv. Should I continue
            to support these moving forward? Are these important tests?
            - if yes, somehow combine them and make the code cleaner
@@ -196,7 +182,6 @@ We want all programmers to
    - [ ] there are a lot of things in tests that simply don't work anymore
      - [ ] verify tests
      - [ ] verify examples
-   - [ ] give convolution its own makefile???
    - [ ] there are a lot of text files floating around (like in `tests/`). Can
          those be removed?
  - [ ] explore how well fhv works with other kernels and codebases
@@ -210,12 +195,9 @@ We want all programmers to
    - [ ] eventual goal is to have architecture detection totally automatic but
          for now it's adequate to have a few sets of parameters hardcoded that
          are selected automatically
- - [ ] add "command-used-to-generate" to json and svg
 
 ## Long-term:
 ### Problems to fix:
- - if we are continuing to warn users about unreasonably high values, give them
-   the option to disable the warning and count the values anyways
  - fix benchmark-likwid-vs-manual and thread_migration 
  - manual benchmark only prints runtime for flops region
    - in other words, runtime_by_tag doesn't seem to work for more than one 
@@ -253,7 +235,8 @@ We want all programmers to
  - combine benchmark in fhv with benchmark-likwid-vs-manual
    - rewrite computation_measurements to optionally include manual results
    - update CLI to optionally include manual results
- - improve benchmark
+ - improve benchmark: either decide to use another benchmark or improve the one
+   we have
    - consider other benchmark tools (see ["architecture of program"
      section](#architecture-of-program))
    - have it check bandwidth for all types of memory/cache
@@ -269,6 +252,11 @@ We want all programmers to
  - make it consistent what calls likwid
  - makefile has some unnecessary repetition of variables
    - compare ./examples/polynomial_expansion/makefile with ./makefile
+ - make consistent if examples are made in root or example version
+   - probably better to put makefiles in the directory of each example. Then,
+     if an example has different dependencies they don't affect other examples
+   - perhaps compile performance_monitor into a shared library that is then
+     grabbed by examples?
 
 # Parameters used to create visualizations
  - memory-stressed versions used parameters n=67108864 d=1 nbiter=800.
