@@ -20,18 +20,18 @@
 #define NUM_FLOPS 10000000
 #define NUM_COPIES 10000
 
-typedef unsigned long long ull;
+typedef long long int lli;
 
-void do_copy(double *arr, double *copy_arr, size_t n, ull num_copies) {
-  for (ull iter = 0; iter < num_copies; iter++) {
-    for (size_t i = 0; i < n; i++) {
+void do_copy(double *arr, double *copy_arr, lli n, lli num_copies) {
+  for (lli iter = 0; iter < num_copies; iter++) {
+    for (lli i = 0; i < n; i++) {
       copy_arr[i] = arr[i];
     }
   }
 }
 
-double do_flops(double a, double b, double c, ull num_flops) {
-  for (ull i = 0; i < num_flops; i++) {
+double do_flops(double a, double b, double c, lli num_flops) {
+  for (lli i = 0; i < num_flops; i++) {
     c = a * b + c;
   }
   return c;
@@ -83,7 +83,7 @@ int main()
   b = 3.2;
   c = 1.0;
 
-  size_t n = 256;
+  lli n = 256;
   double arr[n];
   double copy_arr[n];
 
@@ -115,7 +115,7 @@ int main()
 
   // these values are meaningless; the print is used to ensure computation and
   // copies aren't optimized away 
-  printf("c = %f, copy_arr[c %% n] = %f\n", c, copy_arr[((size_t)c) % n]);
+  printf("c = %f, copy_arr[c %% n] = %f\n", c, copy_arr[((lli)c) % n]);
 
   perfmon_readMarkerFile(filepath);
 
