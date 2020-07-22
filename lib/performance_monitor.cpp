@@ -228,14 +228,12 @@ performance_monitor::init(const char * event_group,
 
 void performance_monitor::startRegion(const char * tag)
 {
-#pragma omp barrier
   likwid_markerStartRegion(tag);
 }
 
 void performance_monitor::stopRegion(const char * tag)
 {
   likwid_markerStopRegion(tag);
-#pragma omp barrier
 
   int nevents = 20;
   double events[nevents];
@@ -368,6 +366,7 @@ void performance_monitor::buildResultsMaps()
         event_value = perfmon_getResultOfRegionThread(i, k, t);
         keep_event = true;
 
+
         if(event_value >= EVENT_VALUE_ERROR_THRESHOLD){
           if(!std::getenv(perfmon_keep_large_values_envvar)){
             std::cout << "WARNING: unreasonably high event value detected:"
@@ -459,13 +458,11 @@ void performance_monitor::buildResultsMaps()
   std::vector<double> port_usages(NUM_PORTS_IN_CORE);
 
   for (int t = 0; t < num_threads; t++){
-    printf("Thread %d\n", t);
 
     for (auto region = per_thread_results[event][t].begin();
     region != per_thread_results[event][t].end();
     ++region)
     {
-      printf("region %s\n", region->first.c_str());
       total_port_usage = 0;
       port_usages.clear();
 
@@ -480,14 +477,9 @@ void performance_monitor::buildResultsMaps()
           for(unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++){
             this_port_event_name = 
               uops_port_base_name + std::to_string(port_num);
-              printf("event name: %s\n", event->first.c_str());
             if (event->first.compare(this_port_event_name) == 0){
               total_port_usage += event->second;
               port_usages[port_num] = event->second;
-
-              printf("found port event! %s\n", this_port_event_name.c_str());
-              printf("event value: %f\n", event->second);
-              printf("port_usages[%d]: %f\n", port_num, port_usages[port_num]);
             }
           }
         }
@@ -504,12 +496,7 @@ void performance_monitor::buildResultsMaps()
         if(port_usage_value != 0.0){
           aggregate_results[geometric_mean][metric][region->first][groupName][this_port_usage_metric_name] *= port_usage_value;
         }
-
-        std::cout << "METRIC NAME:  " << this_port_usage_metric_name << std::endl;
-        std::cout << "METRIC VALUE: " << port_usage_value << std::endl;
       }
-      printf("thread %d         aggregate_results[sum][metric][region->first][groupName][%s]: %f\n",
-        t, this_port_usage_metric_name.c_str(), aggregate_results[sum][metric][region->first][groupName][this_port_usage_metric_name]);
     }
   }
 
@@ -1143,9 +1130,49 @@ void performance_monitor::resultsToJson(std::string param_info_string)
 
   json results;
   results["info"]["parameters"] = param_info_string;
-  results["saturation"] = saturation;
+
+  // don't add "all_regions" region
+
+  // TODO: honestly if we don't need the "all_regions" region then we shouldn't
+  // even build it in the first place. Evaluate if we need it.
+  for (auto const& region: saturation)
+  {
+    if(region.first.compare(all_regions_keyword) != 0)
+    {
+      // if we ARE NOT the all_regions region
+      results["saturation"][region.first] = region.second;
+    }
+  }
 
   double metric_value;
+
+  // for each thread
+  for (int t = 0; t < performance_monitor::num_threads; t++)
+  {
+
+    // for each region
+    for (auto const& region: per_thread_results[metric][t] )
+    {
+
+      // for each key metric
+      for (auto const& port_usage_metric: port_usage_metrics)
+      {
+
+        // for each group
+        for (auto const& group : region.second)
+        {
+          // if this group contains the current key metric:
+          if (group.second.count(port_usage_metric))
+          {
+            metric_value = group.second.at(port_usage_metric);
+
+            results["port_usage"][region.first]["thread_" + std::to_string(t)]
+              [port_usage_metric] = metric_value;
+          }
+        }
+      }
+    }
+  }
 
   // for each region
   for (auto const& region: aggregate_results[geometric_mean][metric] )
@@ -1163,8 +1190,8 @@ void performance_monitor::resultsToJson(std::string param_info_string)
         {
           metric_value = group.second.at(port_usage_metric);
 
-          results["port_usage"][region.first][port_usage_metric]
-            = metric_value;
+          results["port_usage"][region.first]["geometric_mean"]
+            [port_usage_metric] = metric_value;
         }
       }
     }
