@@ -1,18 +1,19 @@
 #pragma once
 
-#include <cmath>
-#include <cstring>
-#include <fstream>
+// add back only what is necessary
+// #include <cmath>
+// #include <cstring>
+// #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <likwid.h>
-#include <map>
+// #include <map>
 #include <math.h>
 #include <nlohmann/json.hpp>
 #include <omp.h>
-#include <sstream>
-#include <stdexcept>
-#include <stdlib.h>
+// #include <sstream>
+// #include <stdexcept>
+// #include <stdlib.h>
 #include <string>
 
 #include "architecture.h"
@@ -32,73 +33,84 @@
 // keywords
 #define perfmon_output_envvar "FHV_OUTPUT"
 #define perfmon_keep_large_values_envvar "FHV_KEEP_LARGE_VALUES"
-#define total_sp_flops_event_name "total sp flops"
+
+// remove
+// #define total_sp_flops_event_name "total sp flops"
+
+// remove
 // #define group_sum_by_region_keyword "group_sum_by_region"
-#define all_groups_keyword "all_groups"
+
+// remove
+// #define all_groups_keyword "all_groups"
+
 #define all_regions_keyword "all_regions"
 
 // port usage ratio names
-#define fhv_port_usage_group "FHV Port usage ratios"
-#define fhv_port_usage_ratio_start "Port"
-#define fhv_port_usage_ratio_end " usage ratio"
-#define fhv_port0_usage_ratio "Port0 usage ratio"
-#define fhv_port1_usage_ratio "Port1 usage ratio"
-#define fhv_port2_usage_ratio "Port2 usage ratio"
-#define fhv_port3_usage_ratio "Port3 usage ratio"
-#define fhv_port4_usage_ratio "Port4 usage ratio"
-#define fhv_port5_usage_ratio "Port5 usage ratio"
-#define fhv_port6_usage_ratio "Port6 usage ratio"
-#define fhv_port7_usage_ratio "Port7 usage ratio"
+const std::string fhv_performance_monitor_group = "FHV_PERFORMANCE_MONITOR";
 
-// enums for aggregation type and result type
-enum aggregation_type { sum, arithmetic_mean, geometric_mean };
-enum result_type { event, metric };
+// remove
+// const std::string fhv_port_usage_group = "FHV Port usage ratios";
+const std::string fhv_port_usage_ratio_start = "Port";
+const std::string fhv_port_usage_ratio_end = " usage ratio";
+
+// remove
+// #define fhv_port0_usage_ratio "Port0 usage ratio"
+// #define fhv_port1_usage_ratio "Port1 usage ratio"
+// #define fhv_port2_usage_ratio "Port2 usage ratio"
+// #define fhv_port3_usage_ratio "Port3 usage ratio"
+// #define fhv_port4_usage_ratio "Port4 usage ratio"
+// #define fhv_port5_usage_ratio "Port5 usage ratio"
+// #define fhv_port6_usage_ratio "Port6 usage ratio"
+// #define fhv_port7_usage_ratio "Port7 usage ratio"
 
 using json = nlohmann::json;
 
-// ---- TYPES
-// aggregate results
-
-// each includes group for "all groups" and region for "all regions"
-
-// aggregation type -> result type (event or metric) -> region name ->
-// group name -> thing name -> thing value
-
-typedef 
-std::map<
-  aggregation_type, std::map<
-    result_type, std::map<
-      std::string, std::map<
-        std::string, std::map<
-          std::string, double
-        >
-      >
-    >
-  >
->
-aggregate_results_map_t;
-
-// in the case of "per_thread_results", "thread" refers to the hardware
-// thread 
-
-// result type (event or metric) -> thread number -> region name -> group
-// name -> thing name -> thing value
-typedef
-std::map<
-  result_type, std::map<
-    int, std::map<
-      std::string, std::map<
-        std::string, std::map<
-          std::string, double
-        >
-      >
-    >
-  >
->
-per_thread_results_map_t;
-
 class performance_monitor {
   public:
+    // enums for aggregation type and result type
+    enum class aggregation_t { sum, arithmetic_mean, geometric_mean };
+    enum class result_t { event, metric };
+
+    // ---- TYPES
+
+    // TODO: consider adding multimaps from value to index of thing (or value
+    // to pointer to thing) for easy access and easy collection of all entries
+    // within a range using std::lower_bound and std::upper_bound
+
+    // represents a result unique to a thread. "thread" refers to the hardware
+    // thread 
+
+    struct PerThreadResult {
+      int thread_num;
+      performance_monitor::result_t result_type;
+      std::string region_name;
+      std::string group_name;
+      std::string result_name;
+      double result_value;
+    };
+
+    // represents a result aggregated across threads in a per-region manner
+    struct AggregateResult {
+      performance_monitor::aggregation_t aggregation_type;
+      performance_monitor::result_t result_type;
+      std::string region_name;
+      std::string group_name;
+      std::string result_name;
+      double result_value;
+    };
+
+    typedef
+    std::vector< PerThreadResult >
+    per_thread_results_t;
+
+    typedef 
+    std::vector< AggregateResult >
+    aggregate_results_t;
+
+    // maps region to saturation name to saturation value
+    typedef std::map<std::string, std::map<std::string, double>> 
+      saturation_map_t;
+
     // ------ attributes ------ //
     const static std::string likwidOutputFilepath;
     const static std::string jsonResultOutputFilepath;
@@ -162,33 +174,47 @@ class performance_monitor {
     // rewritten from the ground up... in general this file has a lot of
     // hard-to-read (and, therefore, hard to maintain) code and I feel like
     // this falls prey to that. Can these functions be simplified?
-    static void buildResultsMaps();
-    static void compareActualWithBench();
+    // consider removing and just build everything in close()
+    // static void buildResultsMaps();
+
+    // KEEP. Commented out for now
+    // static void compareActualWithBench();
 
     // print results
 
     // debug info about what groups and regions were found
-    static void printRegionGroupEventAndMetricData();
+
+    // consider removing
+    // static void printRegionGroupEventAndMetricData();
 
     // print everything, utility function that does everything below
-    static void printResults();
+    
+    // consider removing
+    // static void printResults();
 
     // print everything per core
     static void printDetailedResults();
 
     // print results aggregated across cores
-    static void printOnlyAggregate();
+
+    // keep, but commented out for now
+    // static void printAggregate();
 
     // print comparison between actual rates and theoretical maximums. Also
     // called "saturation"
 
     // prints comparison by region, but includes a special region "all_regions"
     // that supplies the average saturation
-    static void printComparison();
 
-    static void printHighlights();
-    static void printCsvHeader();
-    static void printCsvOutput();
+    // keep, but commented out for now
+    // static void printComparison();
+
+    // consider removing
+    // static void printHighlights();
+
+    // consider removing
+    // static void printCsvHeader();
+    // static void printCsvOutput();
 
     // output to json
     //  - gets file name from environment variable FHV_OUTPUT. If unset, will
@@ -198,34 +224,58 @@ class performance_monitor {
     //    visualization. For example, when metering convolution, the user may
     //    set the string to be "n=4000, m=6000, k=7". The visualization will
     //    preface this with the string "Parameters used to generate:"
+
+    // keep, but commented out for now
     static void resultsToJson(std::string param_info_string = "");
 
     // ------ getters ----- //
-    const static std::map<std::string, double> get_runtimes_by_tag();
-    const static aggregate_results_map_t get_aggregate_results();
-    const static per_thread_results_map_t get_per_thread_results();
-    const static std::map<std::string, std::map<std::string, double>>
-      get_saturation();
-    const static std::map<std::string, std::map<std::string, double>>
-      get_average_port_usage_info();
+
+    // consider removing
+    // const static std::map<std::string, double> get_runtimes_by_tag();
+
+    const static aggregate_results_t& get_aggregate_results();
+    const static per_thread_results_t& get_per_thread_results();
+
+    // consider removing: can we just put this into per_thread_results and aggregate_results?
+    // const static saturation_map_t& get_saturation();
 
   private:
     // ------ functions ------ //
     // dround = decimal round
     static double dround(double x, unsigned num_decimal_places);
 
+    static void print_per_thread_result(
+      performance_monitor::result_t result_type,
+      int thread_num,
+      std::string region,
+      std::string group,
+      std::string result_name,
+      double result_value,
+      std::string delim = " | ");
+
+    // used to build results structures
+    static void load_likwid_data();
+
     // ------ attributes ------ //
 
-    // --- constants and magic numbers
+    // --- important numbers
     static int num_threads;
 
     // names of saturation metrics
-    static const std::vector<const char *> saturationMetricGroups;
-    static const std::vector<const char *> saturation_metrics;
-    static const std::vector<float> saturationBenchmarkReferences;
+    
+    // remove
+    // static const std::vector<const char *> saturationMetricGroups;
+
+    // consider removing
+    // static const std::vector<const char *> saturation_metrics;
+
+    // try to avoid, consider removing
+    // static const std::vector<float> saturationBenchmarkReferences;
 
     // names of port usage metrics
-    static const std::vector<std::string> port_usage_metrics;
+
+    // consider removing
+    // static const std::vector<std::string> port_usage_metrics;
 
     // --- Data
 
@@ -233,14 +283,15 @@ class performance_monitor {
     // that's how it's calculated, but likwid seems to calculate flops on a
     // per-thread basis so this won't let us double-check the likwid
 
-    static std::map<std::string, double> runtimes_by_tag;
+    // consider removing
+    // static std::map<std::string, double> runtimes_by_tag;
 
-    static aggregate_results_map_t  aggregate_results;
+    static performance_monitor::aggregate_results_t  aggregate_results;
 
-    static per_thread_results_map_t per_thread_results;
+    static performance_monitor::per_thread_results_t per_thread_results;
 
     // map region to saturation name to saturation value
 
     // saturation name matches metric name
-    static std::map<std::string, std::map<std::string, double>> saturation;
+    static performance_monitor::saturation_map_t saturation;
 };

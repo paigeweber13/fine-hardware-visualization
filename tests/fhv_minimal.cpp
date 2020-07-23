@@ -1,15 +1,27 @@
-// does not yet work
-
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "performance_monitor.h"
 
-void copy(double * arr, double * copy_arr, size_t n){
-  for (size_t i = 0; i < n; i++){
-    copy_arr[i] = arr[i];
+#define NUM_FLOPS 10000000
+#define NUM_COPIES 10000
+
+typedef long long int lli;
+
+void do_copy(double *arr, double *copy_arr, lli n, lli num_copies) {
+  for (lli iter = 0; iter < num_copies; iter++) {
+    for (lli i = 0; i < n; i++) {
+      copy_arr[i] = arr[i];
+    }
   }
+}
+
+double do_flops(double a, double b, double c, lli num_flops) {
+  for (lli i = 0; i < num_flops; i++) {
+    c = a * b + c;
+  }
+  return c;
 }
 
 int main()
@@ -50,7 +62,7 @@ int main()
   b = 3.2;
   c = 0.0;
 
-  size_t n = 2048;
+  const lli n = 2048;
   double arr[n];
   double copy_arr[n];
 
@@ -59,42 +71,25 @@ int main()
     for (int j = 0; j < 8; j++)
     {
       printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
+
       performance_monitor::startRegion("double_flops");
-      for (int i = 0; i < 10000000; i++)
-      {
-        // 2e7 scalar double floating point operations per iteration
-        c = a * b + c;
-      }
+      c = do_flops(a, b, c, NUM_FLOPS);
       performance_monitor::stopRegion("double_flops");
+
       performance_monitor::startRegion("copy");
-      for (int i = 0; i < 10000; i++){
-        copy(arr, copy_arr, n);
-      }
+      do_copy(arr, copy_arr, n, NUM_COPIES);
       performance_monitor::stopRegion("copy");
+
       performance_monitor::nextGroup();
     }
   }
 
   printf("final c: %f\n", c);
   printf("final random part of copy_arr: %f\n", 
-         copy_arr[( (size_t) c ) % n]);
+         copy_arr[( (lli) c ) % n]);
 
-  likwid_markerClose();
+  performance_monitor::close();
 
-  // performance_monitor::printRegionGroupEventAndMetricData();
-
-  performance_monitor::buildResultsMaps();
   performance_monitor::printDetailedResults();
-  // performance_monitor::printOnlyAggregate();
-
-  performance_monitor::compareActualWithBench();
-  // performance_monitor::printComparison();
-
-  performance_monitor::printHighlights();
-
-  performance_monitor::resultsToJson();
-
-  std::cout << "\n";
-  // performance_monitor::printCsvHeader();
-  // performance_monitor::printCsvOutput();
+  // performance_monitor::printAggregateResults();
 }
