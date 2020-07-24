@@ -12,7 +12,8 @@
 #include <math.h>
 #include <nlohmann/json.hpp>
 #include <omp.h>
-// #include <sstream>
+#include <sstream>
+#include <stack>
 // #include <stdexcept>
 // #include <stdlib.h>
 #include <string>
@@ -80,7 +81,6 @@ class performance_monitor {
 
     // represents a result unique to a thread. "thread" refers to the hardware
     // thread 
-
     struct PerThreadResult {
       std::string region_name;
       int thread_num;
@@ -89,19 +89,22 @@ class performance_monitor {
       std::string result_name;
       double result_value;
 
-      bool operator<(const PerThreadResult& other);
+      bool operator<(const PerThreadResult& other) const;
+      bool matchesForAggregation(const PerThreadResult& other) const;
+      std::string toString(std::string delim = " | ") const;
     };
 
-    // represents a result aggregated across threads in a per-region manner
+    // represents a result aggregated across threads in a per-thread manner
     struct AggregateResult {
       std::string region_name;
-      performance_monitor::aggregation_t aggregation_type;
       std::string group_name;
       performance_monitor::result_t result_type;
       std::string result_name;
+      performance_monitor::aggregation_t aggregation_type;
       double result_value;
 
-      bool operator<(const AggregateResult& other);
+      bool operator<(const AggregateResult& other) const;
+      std::string toString(std::string delim = " | ") const;
     };
 
     typedef
@@ -201,9 +204,7 @@ class performance_monitor {
     static void printDetailedResults();
 
     // print results aggregated across cores
-
-    // keep, but commented out for now
-    // static void printAggregate();
+    static void printAggregateResults();
 
     // print comparison between actual rates and theoretical maximums. Also
     // called "saturation"
@@ -249,15 +250,6 @@ class performance_monitor {
     // dround = decimal round
     static double dround(double x, unsigned num_decimal_places);
 
-    static void print_per_thread_result(
-      performance_monitor::result_t result_type,
-      int thread_num,
-      std::string region,
-      std::string group,
-      std::string result_name,
-      double result_value,
-      std::string delim = " | ");
-
     static void validate_and_store_likwid_result(
       int thread_num,
       performance_monitor::result_t result_type,
@@ -266,8 +258,12 @@ class performance_monitor {
       const char * result_name, 
       double result_value);
 
-    // used to build results structures
+    // used to load likwid data
     static void load_likwid_data();
+
+    // used to aggregate results. Depends on "load_likwid_data" being called
+    // before this is called
+    static void perform_result_aggregation();
 
     // ------ attributes ------ //
 

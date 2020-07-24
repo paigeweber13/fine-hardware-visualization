@@ -61,7 +61,7 @@ const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 // PerThreadResult function definitions
 bool
 performance_monitor::PerThreadResult::operator<(
-  const PerThreadResult& other)
+  const PerThreadResult& other) const
 {
   // start by comparing region names
   if (this->region_name != other.region_name)
@@ -90,32 +90,44 @@ performance_monitor::PerThreadResult::operator<(
   }
 }
 
+bool
+performance_monitor::PerThreadResult::matchesForAggregation(
+  const PerThreadResult& other) const
+{
+  if(this->region_name == other.region_name
+    && this->group_name == other.group_name
+    && this->result_type == other.result_type
+    && this->result_name == other.result_name)
+    return true;
+  else 
+    return false;
+}
+
 // AggregateResult function definitions
 bool
 performance_monitor::AggregateResult::operator<(
-  const AggregateResult& other)
+  const AggregateResult& other) const
 {
   // start by comparing region names
   if (this->region_name != other.region_name)
     return this->region_name < other.region_name;
   else 
   {
-    // if region names match, order by aggregation type
-    if (this->aggregation_type != other.aggregation_type)
-      return this->aggregation_type < other.aggregation_type;
+    // if match, order by group name
+    if(this->group_name != other.group_name)
+      return this->group_name < other.group_name;
     else
     {
-      // if thread nums match, order by group name
-      if(this->group_name != other.group_name)
-        return this->group_name < other.group_name;
-      else
-      {
-        // if group names match, order by result type
-        if(this->result_type != other.result_type)
-          return this->result_type < other.result_type;
-        else {
-          // if result types match, order by result name
+      // if match, order by result type
+      if(this->result_type != other.result_type)
+        return this->result_type < other.result_type;
+      else {
+        // if match, order by result name
+        if (this->result_name != other.result_name)
           return this->result_name < other.result_name;
+        else {
+          // if match, order by aggregation type
+          return this->aggregation_type < other.aggregation_type;
         }
       }
     }
@@ -330,34 +342,62 @@ void performance_monitor::close(){
 
   // TODO: build results structures here
   load_likwid_data();
-
   std::sort(per_thread_results.begin(), per_thread_results.end());
+
+  perform_result_aggregation();
+  std::sort(aggregate_results.begin(), aggregate_results.end());
 }
 
-void performance_monitor::print_per_thread_result(
-  performance_monitor::result_t result_type,
-  int thread_num,
-  std::string region,
-  std::string group,
-  std::string result_name,
-  double result_value,
-  std::string delim
-){
+std::string performance_monitor::PerThreadResult::toString(
+  std::string delim) const 
+{
   std::string result_t_string;
 
-  if (result_type == performance_monitor::result_t::event)
+  if (this->result_type == performance_monitor::result_t::event)
     result_t_string = "event ";
-  else if (result_type == performance_monitor::result_t::metric)
+  else if (this->result_type == performance_monitor::result_t::metric)
     result_t_string = "metric";
 
-  std::cout 
-    << "region " << region << delim
-    << "thread " << std::setw(3) << thread_num << delim
-    << "group " << group << delim
+  std::stringstream ss;
+  ss << "region " << this->region_name << delim
+    << "thread " << std::setw(3) << this->thread_num << delim
+    << "group " << this->group_name << delim
     << result_t_string << delim
-    << result_name << delim
-    << result_value
+    << std::setw(40) << this->result_name << delim
+    << this->result_value
     << std::endl;
+  return ss.str();
+}
+
+std::string performance_monitor::AggregateResult::toString(
+  std::string delim) const
+{
+  std::string result_t_string;
+  std::string aggregation_t_string;
+
+  if (this->result_type == performance_monitor::result_t::event)
+    result_t_string = "event ";
+  else if (this->result_type == performance_monitor::result_t::metric)
+    result_t_string = "metric";
+
+  if (this->aggregation_type == performance_monitor::aggregation_t::sum)
+    aggregation_t_string = "sum";
+  else if (this->aggregation_type == 
+    performance_monitor::aggregation_t::arithmetic_mean)
+    aggregation_t_string = "arithmetic_mean";
+  else if (this->aggregation_type == 
+    performance_monitor::aggregation_t::geometric_mean)
+    aggregation_t_string = "geometric_mean";
+
+  std::stringstream ss;
+  ss << "region " << this->region_name << delim
+    << "group " << this->group_name << delim
+    << result_t_string << delim
+    << std::setw(40) << this->result_name << delim
+    << "aggregation_type " << std::setw(15) << aggregation_t_string << delim
+    << this->result_value
+    << std::endl;
+  return ss.str();
 }
 
 void performance_monitor::validate_and_store_likwid_result(
@@ -371,8 +411,8 @@ void performance_monitor::validate_and_store_likwid_result(
   bool keep_result = true;
 
   if(isnan(result_value)){
-    std::cout << "ERROR: likwid returned a NAN result value, indicating that "
-      << "something went wrong." << std::endl;
+    std::cout << "ERROR: likwid returned a NAN result value, which MAY "
+      << "indicate that something went wrong." << std::endl;
 
     keep_result = false;
   }
@@ -418,24 +458,23 @@ void performance_monitor::validate_and_store_likwid_result(
     }
   }
 
-  if(keep_result){
-    PerThreadResult perThreadResult;
-    perThreadResult.thread_num = thread_num;
-    perThreadResult.result_type = result_type;
-    perThreadResult.region_name = region_name;
-    perThreadResult.group_name = group_name;
-    perThreadResult.result_name = result_name;
-    perThreadResult.result_value = result_value;
+  // build result object in memory
+  PerThreadResult perThreadResult = {
+    .region_name = region_name,
+    .thread_num = thread_num,
+    .group_name = group_name,
+    .result_type = result_type,
+    .result_name = result_name,
+    .result_value = result_value
+  };
 
+  if(keep_result){
     per_thread_results.push_back(perThreadResult);
   }
   else
   {
-    std::cout << "The erroneous result is printed below:" << std::endl;
-
-    performance_monitor::print_per_thread_result(result_type, thread_num, 
-      region_name, group_name, result_name, result_value);
-    
+    std::cout << "The erroneous result is printed below:" << std::endl
+      << perThreadResult.toString();
     std::cout << std::endl;
   }
 }
@@ -482,6 +521,75 @@ void performance_monitor::load_likwid_data(){
   }
 }
 
+void performance_monitor::perform_result_aggregation()
+{
+  std::vector<PerThreadResult> ptr_copy(
+    performance_monitor::get_per_thread_results());
+  
+  // a stack is used because we add things in ascending position. Therefore, if
+  // we remove in descending position we will not offset anything that comes
+  // later 
+  while(ptr_copy.size() > 0)
+  {
+    std::stack<per_thread_results_t::iterator> indices_aggregated;
+
+    // initialize our 3 aggregations to the first thing in the vector
+    AggregateResult current_sum = {
+      .region_name = ptr_copy.begin()->region_name,
+      .group_name = ptr_copy.begin()->group_name,
+      .result_type = ptr_copy.begin()->result_type,
+      .result_name = ptr_copy.begin()->result_name,
+      .aggregation_type = performance_monitor::aggregation_t::sum,
+      .result_value = ptr_copy.begin()->result_value,
+    };
+
+    // copy the initialized "sum" object into the other two objects we need
+    AggregateResult current_arithmetic_mean = current_sum;
+    current_arithmetic_mean.aggregation_type = 
+      performance_monitor::aggregation_t::arithmetic_mean;
+
+    AggregateResult current_geometric_mean = current_sum;
+    current_geometric_mean.aggregation_type = 
+      performance_monitor::aggregation_t::geometric_mean;
+
+    indices_aggregated.push(ptr_copy.begin());
+
+    // for everything else, aggregate it if it is a match
+    for(auto it = ++(ptr_copy.begin()); it != ptr_copy.end(); ++it)
+    {
+      if(ptr_copy.begin()->matchesForAggregation(*it))
+      {
+        current_sum.result_value += it->result_value;
+        current_arithmetic_mean.result_value += it->result_value;
+        current_geometric_mean.result_value *= it->result_value;
+        indices_aggregated.push(it);
+      }
+    }
+
+    // finally, perform division for arithmetic means and take the power of
+    // geometric means
+
+    current_arithmetic_mean.result_value /= performance_monitor::num_threads;
+    current_geometric_mean.result_value = 
+      pow(
+        current_geometric_mean.result_value, 
+        1.0 / static_cast<double>(performance_monitor::num_threads)
+      );
+
+    // add the things we found to the aggregate results
+    performance_monitor::aggregate_results.push_back(current_sum);
+    performance_monitor::aggregate_results.push_back(current_arithmetic_mean);
+    performance_monitor::aggregate_results.push_back(current_geometric_mean);
+
+    // remove used things from ptr_copy
+    while (!indices_aggregated.empty())
+    {
+      ptr_copy.erase(indices_aggregated.top());
+      indices_aggregated.pop();
+    }
+  }
+}
+
 void performance_monitor::printDetailedResults(){
   std::cout << std::endl
     << "----- FHV Performance Monitor: detailed results ----- "
@@ -498,11 +606,31 @@ void performance_monitor::printDetailedResults(){
       << "something wrong with load_likwid_data()?" << std::endl;
   }
 
-  // for (size_t i = 0; i < performance_monitor::per_thread_results.size(); i++)
   for (PerThreadResult &ptr : performance_monitor::per_thread_results)
   {
-    print_per_thread_result(ptr.result_type, ptr.thread_num, ptr.region_name, 
-      ptr.group_name, ptr.result_name, ptr.result_value);
+    std::cout << ptr.toString();
+  }
+}
+
+void performance_monitor::printAggregateResults(){
+  std::cout << std::endl
+    << "----- FHV Performance Monitor: aggregate results ----- "
+    << std::endl;
+
+  if (performance_monitor::per_thread_results.size() == 0)
+  {
+    std::cout << "WARNING: there doesn't seem to be any aggregate results. "
+      << "This commonly happens because " << std::endl
+      << "performance_monitor::close() was not called. If it was called, "
+      << "then something is" << std::endl
+      << "wrong internally. Did performance_monitor::close() call "
+      << "perform_result_aggregation()? Is " << std::endl
+      << "something wrong with perform_result_aggregation()?" << std::endl;
+  }
+
+  for (AggregateResult &ar : performance_monitor::aggregate_results)
+  {
+    std::cout << ar.toString();
   }
 }
 
