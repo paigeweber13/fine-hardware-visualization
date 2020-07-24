@@ -1,6 +1,7 @@
 #pragma once
 
 // add back only what is necessary
+#include <algorithm>
 // #include <cmath>
 // #include <cstring>
 // #include <fstream>
@@ -81,22 +82,26 @@ class performance_monitor {
     // thread 
 
     struct PerThreadResult {
-      int thread_num;
-      performance_monitor::result_t result_type;
       std::string region_name;
+      int thread_num;
       std::string group_name;
+      performance_monitor::result_t result_type;
       std::string result_name;
       double result_value;
+
+      bool operator<(const PerThreadResult& other);
     };
 
     // represents a result aggregated across threads in a per-region manner
     struct AggregateResult {
-      performance_monitor::aggregation_t aggregation_type;
-      performance_monitor::result_t result_type;
       std::string region_name;
+      performance_monitor::aggregation_t aggregation_type;
       std::string group_name;
+      performance_monitor::result_t result_type;
       std::string result_name;
       double result_value;
+
+      bool operator<(const AggregateResult& other);
     };
 
     typedef
@@ -252,6 +257,14 @@ class performance_monitor {
       std::string result_name,
       double result_value,
       std::string delim = " | ");
+
+    static void validate_and_store_likwid_result(
+      int thread_num,
+      performance_monitor::result_t result_type,
+      const char * region_name, 
+      const char * group_name,
+      const char * result_name, 
+      double result_value);
 
     // used to build results structures
     static void load_likwid_data();

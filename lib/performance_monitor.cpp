@@ -58,6 +58,70 @@ const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_out
 // misc
 const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
 
+// PerThreadResult function definitions
+bool
+performance_monitor::PerThreadResult::operator<(
+  const PerThreadResult& other)
+{
+  // start by comparing region names
+  if (this->region_name != other.region_name)
+    return this->region_name < other.region_name;
+  else 
+  {
+    // if region names match, order by thread num
+    if (this->thread_num != other.thread_num)
+      return this->thread_num < other.thread_num;
+    else
+    {
+      // if thread nums match, order by group name
+      if(this->group_name != other.group_name)
+        return this->group_name < other.group_name;
+      else
+      {
+        // if group names match, order by result type
+        if(this->result_type != other.result_type)
+          return this->result_type < other.result_type;
+        else {
+          // if result types match, order by result name
+          return this->result_name < other.result_name;
+        }
+      }
+    }
+  }
+}
+
+// AggregateResult function definitions
+bool
+performance_monitor::AggregateResult::operator<(
+  const AggregateResult& other)
+{
+  // start by comparing region names
+  if (this->region_name != other.region_name)
+    return this->region_name < other.region_name;
+  else 
+  {
+    // if region names match, order by aggregation type
+    if (this->aggregation_type != other.aggregation_type)
+      return this->aggregation_type < other.aggregation_type;
+    else
+    {
+      // if thread nums match, order by group name
+      if(this->group_name != other.group_name)
+        return this->group_name < other.group_name;
+      else
+      {
+        // if group names match, order by result type
+        if(this->result_type != other.result_type)
+          return this->result_type < other.result_type;
+        else {
+          // if result types match, order by result name
+          return this->result_name < other.result_name;
+        }
+      }
+    }
+  }
+}
+
 // ------ utility functions ------ //
 
 double performance_monitor::dround(double x, unsigned num_decimal_places){
@@ -266,6 +330,8 @@ void performance_monitor::close(){
 
   // TODO: build results structures here
   load_likwid_data();
+
+  std::sort(per_thread_results.begin(), per_thread_results.end());
 }
 
 void performance_monitor::print_per_thread_result(
@@ -285,13 +351,93 @@ void performance_monitor::print_per_thread_result(
     result_t_string = "metric";
 
   std::cout 
-    << "thread " << std::setw(3) << thread_num << delim
     << "region " << region << delim
-    << result_t_string << delim
+    << "thread " << std::setw(3) << thread_num << delim
     << "group " << group << delim
+    << result_t_string << delim
     << result_name << delim
     << result_value
     << std::endl;
+}
+
+void performance_monitor::validate_and_store_likwid_result(
+  int thread_num,
+  performance_monitor::result_t result_type,
+  const char * region_name, 
+  const char * group_name,
+  const char * result_name, 
+  double result_value)
+{
+  bool keep_result = true;
+
+  if(isnan(result_value)){
+    std::cout << "ERROR: likwid returned a NAN result value, indicating that "
+      << "something went wrong." << std::endl;
+
+    keep_result = false;
+  }
+  else if(result_value < 0){
+    std::cout << "ERROR: likwid returned a negative result value, indicating "
+      << "that something went wrong." << std::endl;
+
+    keep_result = false;
+  }
+  else if(!std::getenv(perfmon_keep_large_values_envvar)){
+
+    if(result_type == performance_monitor::result_t::event &&
+      result_value >= EVENT_VALUE_ERROR_THRESHOLD)
+    {
+      std::cout << "WARNING: unreasonably high event value detected:"
+        << std::endl;
+
+      std::cout << std::endl
+        << "This event will be discarded. We will try to detect all "
+        << "metrics associated with this event, but do not guarantee to "
+        << "catch all of them." << std::endl
+        << std::endl
+        << "To disable detection and removal of 'unreasonably' high "
+        << "values, set the environment variable '" 
+        << perfmon_keep_large_values_envvar << "'." << std::endl
+        << std::endl;
+
+      keep_result = false;
+    }
+
+    if(result_type == performance_monitor::result_t::metric &&
+      result_value >= METRIC_VALUE_ERROR_THRESHOLD)
+    {
+      std::cout << "WARNING: unreasonably high metric value detected!"
+        << std::endl;
+
+      std::cout << std::endl
+        << "This metric will be discarded. To disable detection and "
+        << "removal of 'unreasonably' high values, set the environment "
+        << "variable '" << perfmon_keep_large_values_envvar << "'." 
+        << std::endl << std::endl;
+      keep_result = false;
+    }
+  }
+
+  if(keep_result){
+    PerThreadResult perThreadResult;
+    perThreadResult.thread_num = thread_num;
+    perThreadResult.result_type = result_type;
+    perThreadResult.region_name = region_name;
+    perThreadResult.group_name = group_name;
+    perThreadResult.result_name = result_name;
+    perThreadResult.result_value = result_value;
+
+    per_thread_results.push_back(perThreadResult);
+  }
+  else
+  {
+    std::cout << "The erroneous result is printed below:" << std::endl;
+
+    performance_monitor::print_per_thread_result(result_type, thread_num, 
+      region_name, group_name, result_name, result_value);
+    
+    std::cout << std::endl;
+  }
 }
 
 void performance_monitor::load_likwid_data(){
@@ -316,108 +462,24 @@ void performance_monitor::load_likwid_data(){
       const char * groupName = perfmon_getGroupName(gid);
 
       for (int k = 0; k < perfmon_getEventsOfRegion(i); k++){
-        // "getCounterName" gives name like "PMC0"
-
-        // event_name = perfmon_getCounterName(gid, k);
         const char * event_name = perfmon_getEventName(gid, k);
         double event_value = perfmon_getResultOfRegionThread(i, k, t);
-        bool keep_event = true;
 
-        if(event_value < 0){
-          std::cout << "ERROR: likwid returned a negative event value, "
-            << "indicating that something went wrong." << std::endl
-            << "The associated event is printed below:" << std::endl;
-
-          performance_monitor::print_per_thread_result(
-            performance_monitor::result_t::event, t, regionName, groupName,
-            event_name, event_value);
-
-          keep_event = false;
-        }
-        else if(event_value >= EVENT_VALUE_ERROR_THRESHOLD){
-          if(!std::getenv(perfmon_keep_large_values_envvar)){
-            std::cout << "WARNING: unreasonably high event value detected:"
-              << std::endl;
-
-            performance_monitor::print_per_thread_result(
-              performance_monitor::result_t::event, t, regionName, groupName,
-              event_name, event_value);
-
-            std::cout << std::endl
-              << "This event will be discarded. We will try to detect all "
-              << "metrics associated with this event, but do not guarantee to "
-              << "catch all of them." << std::endl
-              << std::endl
-              << "To disable detection and removal of 'unreasonably' high "
-              << "values, set the environment variable '" 
-              << perfmon_keep_large_values_envvar << "'." << std::endl
-              << std::endl;
-
-            keep_event = false;
-          }
-        }
-
-        if(keep_event){
-          PerThreadResult perThreadResult;
-          perThreadResult.thread_num = t;
-          perThreadResult.result_type = performance_monitor::result_t::event;
-          perThreadResult.region_name = regionName;
-          perThreadResult.group_name = groupName;
-          perThreadResult.result_name = event_name;
-          perThreadResult.result_value = event_value;
-
-          per_thread_results.push_back(perThreadResult);
-        }
+        validate_and_store_likwid_result(t, 
+          performance_monitor::result_t::event, regionName, groupName, 
+          event_name, event_value);
       }
 
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
         const char * metric_name = perfmon_getMetricName(gid, k);
         double metric_value = perfmon_getMetricOfRegionThread(i, k, t);
-        bool keep_metric = true;
 
-        if(isnan(metric_value)){
-          std::cout << "ERROR: likwid returned a NAN metric value, indicating "
-            << "that something went wrong." << std::endl
-            << "The associated metric is printed below:" << std::endl;
-
-          performance_monitor::print_per_thread_result(
-            performance_monitor::result_t::metric, t, regionName, groupName,
-            metric_name, metric_value);
-
-          keep_metric = false;
-        }
-        else if(metric_value >= METRIC_VALUE_ERROR_THRESHOLD){
-          if(!std::getenv(perfmon_keep_large_values_envvar)){
-            std::cout << "WARNING: unreasonably high metric value detected:"
-              << std::endl;
-
-            performance_monitor::print_per_thread_result(
-              performance_monitor::result_t::metric, t, regionName, groupName,
-              metric_name, metric_value);
-
-            std::cout << std::endl
-              << "This metric will be discarded. To disable detection and "
-              << "removal of 'unreasonably' high values, set the environment "
-              << "variable '" << perfmon_keep_large_values_envvar << "'." 
-              << std::endl << std::endl;
-            keep_metric = false;
-          }
-        }
-        if(keep_metric){
-          PerThreadResult perThreadResult;
-          perThreadResult.thread_num = t;
-          perThreadResult.result_type = performance_monitor::result_t::metric;
-          perThreadResult.region_name = regionName;
-          perThreadResult.group_name = groupName;
-          perThreadResult.result_name = metric_name;
-          perThreadResult.result_value = metric_value;
-
-          per_thread_results.push_back(perThreadResult);
-        }
+        validate_and_store_likwid_result(t, 
+          performance_monitor::result_t::metric, regionName, groupName, 
+          metric_name, metric_value);
       }
     }
   }
-
 }
 
 void performance_monitor::printDetailedResults(){
