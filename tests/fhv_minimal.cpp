@@ -90,6 +90,8 @@ int main()
 
   performance_monitor::close();
 
-  performance_monitor::printDetailedResults();
+  // performance_monitor::printDetailedResults();
   // performance_monitor::printAggregateResults();
+  performance_monitor::printHighlights();
+  // performance_monitor::resultsToJson();
 }

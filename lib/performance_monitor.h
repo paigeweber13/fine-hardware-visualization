@@ -216,7 +216,7 @@ class performance_monitor {
     // static void printComparison();
 
     // consider removing
-    // static void printHighlights();
+    static void printHighlights();
 
     // consider removing
     // static void printCsvHeader();
@@ -257,6 +257,8 @@ class performance_monitor {
       const char * group_name,
       const char * result_name, 
       double result_value);
+    
+    static void checkResults();
 
     // used to load likwid data
     static void load_likwid_data();

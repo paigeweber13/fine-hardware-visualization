@@ -364,6 +364,8 @@ std::string performance_monitor::PerThreadResult::toString(
     << "group " << this->group_name << delim
     << result_t_string << delim
     << std::setw(40) << this->result_name << delim
+    // TODO: get this working
+    // << std::setprecision(4) << std::fixed << std::right << std::setw(15)
     << this->result_value
     << std::endl;
   return ss.str();
@@ -590,21 +592,44 @@ void performance_monitor::perform_result_aggregation()
   }
 }
 
+void performance_monitor::checkResults(){
+  std::string error_str = "WARNING: there doesn't seem to be any results for "
+    "likwid. This commonly \n"
+    "happens because performance_monitor::close() was not called.\n";
+  
+  std::string error_more_info = "";
+  bool something_went_wrong = false;
+
+  if (performance_monitor::per_thread_results.size() == 0)
+  {
+    error_more_info += "If close() was called, then something is wrong "
+      "internally. Did close() call \n"
+      "load_likwid_data()? Is something wrong with load_likwid_data()?\n";
+    something_went_wrong = true;
+  }
+
+  if (performance_monitor::aggregate_results.size() == 0)
+  {
+    error_more_info += "If close() was called, then something is wrong "
+      "internally. Did close() call \n"
+      "perform_result_aggregation()? Is something wrong with "
+      "perform_result_aggregation()?\n";
+    something_went_wrong = true;
+  }
+
+  if (something_went_wrong) 
+  {
+    std::cout << error_str;
+    std::cout << error_more_info;
+  }
+}
+
 void performance_monitor::printDetailedResults(){
   std::cout << std::endl
     << "----- FHV Performance Monitor: detailed results ----- "
     << std::endl;
 
-  if (performance_monitor::per_thread_results.size() == 0)
-  {
-    std::cout << "WARNING: there doesn't seem to be any results for likwid. "
-      << "This commonly happens because " << std::endl
-      << "performance_monitor::close() was not called. If it was called, "
-      << "then something is" << std::endl
-      << "wrong internally. Did performance_monitor::close() call "
-      << "load_likwid_data()? Is " << std::endl
-      << "something wrong with load_likwid_data()?" << std::endl;
-  }
+  checkResults();
 
   for (PerThreadResult &ptr : performance_monitor::per_thread_results)
   {
@@ -617,16 +642,7 @@ void performance_monitor::printAggregateResults(){
     << "----- FHV Performance Monitor: aggregate results ----- "
     << std::endl;
 
-  if (performance_monitor::per_thread_results.size() == 0)
-  {
-    std::cout << "WARNING: there doesn't seem to be any aggregate results. "
-      << "This commonly happens because " << std::endl
-      << "performance_monitor::close() was not called. If it was called, "
-      << "then something is" << std::endl
-      << "wrong internally. Did performance_monitor::close() call "
-      << "perform_result_aggregation()? Is " << std::endl
-      << "something wrong with perform_result_aggregation()?" << std::endl;
-  }
+  checkResults();
 
   for (AggregateResult &ar : performance_monitor::aggregate_results)
   {
@@ -1140,55 +1156,61 @@ void performance_monitor::printAggregateResults(){
 //   std::cout << std::endl;
 // }
 
-// void performance_monitor::printHighlights(){
-//   if(aggregate_results.size() == 0){
-//     std::cout << "ERROR: you must run performance_monitor::buildResultsMaps"
-//               << " before printing\n"
-//               << "result highlights\n";
-//     return;
-//   }
-
-//   if(saturation.size() == 0){
-//     std::cout << "ERROR: you must run "
-//               << "performance_monitor::compareActualWithBench before\n"
-//               << "printing result highlights.\n";
-//     return;
-//   }
-
-//   double metric_value;
-//   // double rounded_metric_value;
+void performance_monitor::printHighlights(){
+  checkResults();
   
-//   std::cout << std::endl;
-//   std::cout << "\n ----- performance_monitor highlights report -----\n\n";
+  std::cout << std::endl 
+    << "----- performance_monitor highlights report -----" 
+    << std::endl;
 
-//   std::vector<std::string> sum_metrics = {
-//     mflops_metric_name,
-//     mflops_dp_metric_name,
-//     l2_bandwidth_metric_name,
-//     l2_data_volume_name,
-//     l2_evict_bandwidth_name,
-//     l2_evict_data_volume_name,
-//     l2_load_bandwidth_name,
-//     l2_load_data_volume_name,
-//     l3_bandwidth_metric_name,
-//     l3_data_volume_name,
-//     l3_evict_bandwidth_name,
-//     l3_evict_data_volume_name,
-//     l3_load_bandwidth_name,
-//     l3_load_data_volume_name,
-//     ram_bandwidth_metric_name,
-//     ram_data_volume_metric_name,
-//     ram_evict_bandwidth_name,
-//     ram_evict_data_volume_name,
-//     ram_load_bandwidth_name,
-//     ram_load_data_volume_name,
-//   };
+  std::vector<std::string> key_metrics = {
+    mflops_metric_name,
+    mflops_dp_metric_name,
+    l2_bandwidth_metric_name,
+    l2_data_volume_name,
+    l2_evict_bandwidth_name,
+    l2_evict_data_volume_name,
+    l2_load_bandwidth_name,
+    l2_load_data_volume_name,
+    l3_bandwidth_metric_name,
+    l3_data_volume_name,
+    l3_evict_bandwidth_name,
+    l3_evict_data_volume_name,
+    l3_load_bandwidth_name,
+    l3_load_data_volume_name,
+    ram_bandwidth_metric_name,
+    ram_data_volume_metric_name,
+    ram_evict_bandwidth_name,
+    ram_evict_data_volume_name,
+    ram_load_bandwidth_name,
+    ram_load_data_volume_name,
+  };
 
-//   auto per_core_metrics(port_usage_metrics);
-//   per_core_metrics.insert(per_core_metrics.end(), sum_metrics.begin(), 
-//     sum_metrics.end());
+  for (size_t i = 0; i < NUM_PORTS_IN_CORE; i++)
+  {
+    key_metrics.push_back(fhv_port_usage_ratio_start + std::to_string(i) + 
+      fhv_port_usage_ratio_end);
+  }
 
-//   std::cout << " ---- key metrics, summed across threads ----\n";
+  std::cout << "----- key metrics, per-thread -----" << std::endl;
+  for(const auto & ptr : performance_monitor::per_thread_results)
+  {
+    for(const auto & key_metric : key_metrics)
+    {
+      if (ptr.result_name == key_metric) std::cout << ptr.toString();
+    }
+  }
+
+  std::cout << "----- key metrics, aggregated across threads -----"
+    << std::endl;
+  for(const auto & ar : performance_monitor::aggregate_results)
+  {
+    for(const auto & key_metric : key_metrics)
+    {
+      if (ar.result_name == key_metric) std::cout << ar.toString();
+    }
+  }
+}
 
 //   // for each region
 //   for (auto region_it = aggregate_results[sum][metric].begin();
