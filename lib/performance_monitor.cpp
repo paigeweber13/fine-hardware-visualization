@@ -108,27 +108,21 @@ bool
 performance_monitor::AggregateResult::operator<(
   const AggregateResult& other) const
 {
-  // start by comparing region names
   if (this->region_name != other.region_name)
     return this->region_name < other.region_name;
   else 
   {
-    // if match, order by group name
-    if(this->group_name != other.group_name)
-      return this->group_name < other.group_name;
+    if (this->aggregation_type != other.aggregation_type)
+      return this->aggregation_type < other.aggregation_type;
     else
     {
-      // if match, order by result type
-      if(this->result_type != other.result_type)
-        return this->result_type < other.result_type;
+      if(this->group_name != other.group_name)
+        return this->group_name < other.group_name;
       else {
-        // if match, order by result name
-        if (this->result_name != other.result_name)
+        if(this->result_type != other.result_type)
+          return this->result_type < other.result_type;
+        else 
           return this->result_name < other.result_name;
-        else {
-          // if match, order by aggregation type
-          return this->aggregation_type < other.aggregation_type;
-        }
       }
     }
   }
@@ -361,8 +355,8 @@ std::string performance_monitor::PerThreadResult::toString(
   std::stringstream ss;
   ss << std::left << "region " << this->region_name << delim
     << "thread " << std::setw(3) << this->thread_num << delim
-    << "group " << std::setw(15) << this->group_name << delim
-    << result_t_string << delim
+    // << "group " << std::setw(15) << this->group_name << delim
+    // << result_t_string << delim
     << std::setw(40) << this->result_name << delim
     << std::setprecision(4) << std::fixed << std::right << std::setw(20)
     << this->result_value
@@ -392,10 +386,10 @@ std::string performance_monitor::AggregateResult::toString(
 
   std::stringstream ss;
   ss << std::left << "region " << this->region_name << delim
-    << "group " << std::setw(15) << this->group_name << delim
-    << result_t_string << delim
-    << std::setw(40) << this->result_name << delim
+    // << "group " << std::setw(15) << this->group_name << delim
+    // << result_t_string << delim
     << "aggregation_type " << std::setw(15) << aggregation_t_string << delim
+    << std::setw(40) << this->result_name << delim
     << std::setprecision(4) << std::fixed << std::right << std::setw(20)
     << this->result_value
     << std::endl;
