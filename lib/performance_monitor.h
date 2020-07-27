@@ -259,6 +259,7 @@ class performance_monitor {
       const char * result_name, 
       double result_value);
     
+    static void checkInit();
     static void checkResults();
 
     // used to load likwid data
@@ -274,6 +275,10 @@ class performance_monitor {
 
     // --- important numbers
     static int num_threads;
+
+    // identifies the most important metrics: the ones we will output to json
+    // for later use in visualization
+    static std::vector<std::string> key_metrics;
 
     // names of saturation metrics
     

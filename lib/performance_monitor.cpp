@@ -10,11 +10,13 @@ performance_monitor::per_thread_results_t
 // std::map<std::string, std::map<std::string, double>>
 //   performance_monitor::saturation;
 
-int performance_monitor::num_threads;
+int performance_monitor::num_threads = -1;
 
 // filenames
 const std::string performance_monitor::likwidOutputFilepath = "/tmp/likwid_marker.out";
 const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
+
+std::vector<std::string> performance_monitor::key_metrics;
 
 // consider removing
 // saturation metrics
@@ -261,6 +263,7 @@ performance_monitor::init(const char * event_group,
                           const char * sequential_regions,
                           const char * list_of_threads)
 {
+  // ----- Initialize likwid stuff ----- // 
   setEnvironmentVariables(event_group, list_of_threads);
 
   // likwid marker init reads the environment variables above
@@ -285,6 +288,13 @@ performance_monitor::init(const char * event_group,
 
     // pin each thread to single core. If you don't do this, many "stopping
     // non-started region x" errors will happen 
+
+    // currently, this only supports using the first n threads, where n is the
+    // number of threads specified with OMP_NUM_THREADS (or, the maximum number
+    // of threads if OMP_NUM_THREADS is not specified)
+
+    // TODO: support setting affinity with GOMP_CPU_AFFINITY or a custom
+    // environment variable that is used here to pin threads manually
     likwid_pinThread(omp_get_thread_num()); 
   }
 
@@ -293,6 +303,49 @@ performance_monitor::init(const char * event_group,
 
   // printf("Thread count initialized to %d\n", num_threads);
   // printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
+
+  
+  // ----- initialize variables ----- // 
+  // start by adding bandwidth, flops, etc
+  performance_monitor::key_metrics.clear();
+  performance_monitor::key_metrics.insert(
+    performance_monitor::key_metrics.begin(), 
+    {
+      mflops_metric_name,
+      mflops_dp_metric_name,
+      l2_bandwidth_metric_name,
+      l2_data_volume_name,
+      l2_evict_bandwidth_name,
+      l2_evict_data_volume_name,
+      l2_load_bandwidth_name,
+      l2_load_data_volume_name,
+      l3_bandwidth_metric_name,
+      l3_data_volume_name,
+      l3_evict_bandwidth_name,
+      l3_evict_data_volume_name,
+      l3_load_bandwidth_name,
+      l3_load_data_volume_name,
+      ram_bandwidth_metric_name,
+      ram_data_volume_metric_name,
+      ram_evict_bandwidth_name,
+      ram_evict_data_volume_name,
+      ram_load_bandwidth_name,
+      ram_load_data_volume_name,
+    });
+
+  // add port usage stuff to key metrics
+  for (size_t i = 0; i < NUM_PORTS_IN_CORE; i++)
+  {
+    performance_monitor::key_metrics.push_back(
+      fhv_port_usage_ratio_start + std::to_string(i) + 
+      fhv_port_usage_ratio_end);
+  }
+
+  // initialize num_threads
+  #pragma omp parallel
+  {
+    performance_monitor::num_threads = omp_get_num_threads();
+  }
 }
 
 void performance_monitor::startRegion(const char * tag)
@@ -476,11 +529,7 @@ void performance_monitor::validate_and_store_likwid_result(
 }
 
 void performance_monitor::load_likwid_data(){
-#pragma omp parallel
-  {
-    // needed because we use it to print results later
-    performance_monitor::num_threads = omp_get_num_threads();
-  }
+  checkInit();
 
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
 
@@ -648,6 +697,39 @@ void performance_monitor::calculate_port_usage_ratios()
       }
     }
   }
+}
+
+void performance_monitor::checkInit()
+{
+  std::string error_str = "";
+  bool something_went_wrong = false;
+
+  if (performance_monitor::key_metrics.size() == 0)
+  {
+    error_str += "WARNING: performance_monitor::key_metrics is empty!"
+      "printHighlights and\n"
+      "resultsToJson will not work. This usually happens because the user "
+      "failed to\n"
+      "call performance_monitor::init(). If init() was called, then something "
+      "is wrong\n"
+      "with init() internally.\n";
+    
+    something_went_wrong = true;
+  }
+  if (performance_monitor::num_threads == -1)
+  {
+    error_str += "WARNING: performance_monitor::num_threads was not set! This "
+      "usually happens\n"
+      "because the user failed to call performance_monitor::init(). FHV will "
+      "not be\n"
+      "able to build results. Major functionality will be disabled.\n"
+      "If init() was called, then something is wrong with init() "
+      "internally.\n";
+    
+    something_went_wrong = true;
+  }
+
+  if(something_went_wrong) std::cout << error_str;
 }
 
 void performance_monitor::checkResults(){
@@ -1215,45 +1297,17 @@ void performance_monitor::printAggregateResults(){
 // }
 
 void performance_monitor::printHighlights(){
+  checkInit();
   checkResults();
   
   std::cout << std::endl 
     << "----- performance_monitor highlights report -----" 
     << std::endl;
 
-  std::vector<std::string> key_metrics = {
-    mflops_metric_name,
-    mflops_dp_metric_name,
-    l2_bandwidth_metric_name,
-    l2_data_volume_name,
-    l2_evict_bandwidth_name,
-    l2_evict_data_volume_name,
-    l2_load_bandwidth_name,
-    l2_load_data_volume_name,
-    l3_bandwidth_metric_name,
-    l3_data_volume_name,
-    l3_evict_bandwidth_name,
-    l3_evict_data_volume_name,
-    l3_load_bandwidth_name,
-    l3_load_data_volume_name,
-    ram_bandwidth_metric_name,
-    ram_data_volume_metric_name,
-    ram_evict_bandwidth_name,
-    ram_evict_data_volume_name,
-    ram_load_bandwidth_name,
-    ram_load_data_volume_name,
-  };
-
-  for (size_t i = 0; i < NUM_PORTS_IN_CORE; i++)
-  {
-    key_metrics.push_back(fhv_port_usage_ratio_start + std::to_string(i) + 
-      fhv_port_usage_ratio_end);
-  }
-
   std::cout << "----- key metrics, per-thread -----" << std::endl;
   for(const auto & ptr : performance_monitor::per_thread_results)
   {
-    for(const auto & key_metric : key_metrics)
+    for(const auto & key_metric : performance_monitor::key_metrics)
     {
       if (ptr.result_name == key_metric) std::cout << ptr.toString();
     }
@@ -1263,7 +1317,7 @@ void performance_monitor::printHighlights(){
     << std::endl;
   for(const auto & ar : performance_monitor::aggregate_results)
   {
-    for(const auto & key_metric : key_metrics)
+    for(const auto & key_metric : performance_monitor::key_metrics)
     {
       if (ar.result_name == key_metric) std::cout << ar.toString();
     }
@@ -1535,6 +1589,14 @@ void performance_monitor::printHighlights(){
 //   std::cout << result_csv_line;
 // }
 
+
+void performance_monitor::resultsToJson(std::string param_info_string)
+{
+  checkInit();
+  checkResults();
+  
+  ;
+}
 
 // void performance_monitor::resultsToJson(std::string param_info_string)
 // {
