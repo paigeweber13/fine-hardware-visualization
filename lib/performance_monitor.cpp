@@ -340,8 +340,8 @@ void performance_monitor::nextGroup(){
 void performance_monitor::close(){
   likwid_markerClose();
 
-  // TODO: build results structures here
   load_likwid_data();
+  calculate_port_usage_ratios();
   std::sort(per_thread_results.begin(), per_thread_results.end());
 
   perform_result_aggregation();
@@ -359,13 +359,12 @@ std::string performance_monitor::PerThreadResult::toString(
     result_t_string = "metric";
 
   std::stringstream ss;
-  ss << "region " << this->region_name << delim
+  ss << std::left << "region " << this->region_name << delim
     << "thread " << std::setw(3) << this->thread_num << delim
-    << "group " << this->group_name << delim
+    << "group " << std::setw(15) << this->group_name << delim
     << result_t_string << delim
     << std::setw(40) << this->result_name << delim
-    // TODO: get this working
-    // << std::setprecision(4) << std::fixed << std::right << std::setw(15)
+    << std::setprecision(4) << std::fixed << std::right << std::setw(20)
     << this->result_value
     << std::endl;
   return ss.str();
@@ -392,11 +391,12 @@ std::string performance_monitor::AggregateResult::toString(
     aggregation_t_string = "geometric_mean";
 
   std::stringstream ss;
-  ss << "region " << this->region_name << delim
-    << "group " << this->group_name << delim
+  ss << std::left << "region " << this->region_name << delim
+    << "group " << std::setw(15) << this->group_name << delim
     << result_t_string << delim
     << std::setw(40) << this->result_name << delim
     << "aggregation_type " << std::setw(15) << aggregation_t_string << delim
+    << std::setprecision(4) << std::fixed << std::right << std::setw(20)
     << this->result_value
     << std::endl;
   return ss.str();
@@ -592,6 +592,70 @@ void performance_monitor::perform_result_aggregation()
   }
 }
 
+void performance_monitor::calculate_port_usage_ratios()
+{
+  // TODO: this should check if performance_monitor::num_threads has been 
+  // initialized
+
+  // create list of regions
+  std::set<std::string> regions;
+  for (const auto &ptr : per_thread_results)
+    regions.insert(ptr.region_name);
+
+  // build list of port usage event/metric names
+  std::vector<std::string> port_usage_event_names;
+  std::vector<std::string> port_usage_ratio_metric_names;
+  for (unsigned i = 0; i < NUM_PORTS_IN_CORE; i++)
+  {
+    port_usage_event_names.push_back(uops_port_base_name + std::to_string(i));
+    port_usage_ratio_metric_names.push_back(fhv_port_usage_ratio_start + 
+      std::to_string(i) + fhv_port_usage_ratio_end);
+  }
+
+  // instead of using this vector, we could iterate through per_thread_results
+  // again. The vector makes things easy, though
+  std::vector<double> uops_executed_port(NUM_PORTS_IN_CORE);
+  double total_num_port_ops = 0;
+
+  // first, sum all UOPS_DISPATCHED_PORT_PORT* on a per-thread, per-region
+  // basis
+  for (int t = 0; t < performance_monitor::num_threads; t++)
+  {
+    for (const auto &region_name : regions)
+    {
+      for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+      {
+        for (const PerThreadResult &ptr : performance_monitor::per_thread_results)
+        {
+          if(ptr.thread_num == t 
+            && ptr.region_name == region_name
+            && ptr.result_name == port_usage_event_names[port_num])
+          {
+            // sum 
+            total_num_port_ops += ptr.result_value;
+            uops_executed_port[port_num] = ptr.result_value;
+          }
+        }
+      }
+
+      // next, find ratios and create metrics for them
+      for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+      {
+        PerThreadResult port_usage_metric = {
+          .region_name = region_name,
+          .thread_num = t,
+          .group_name = fhv_performance_monitor_group,
+          .result_type = performance_monitor::result_t::metric,
+          .result_name = port_usage_ratio_metric_names[port_num],
+          .result_value = uops_executed_port[port_num] / total_num_port_ops
+        };
+
+        performance_monitor::per_thread_results.push_back(port_usage_metric);
+      }
+    }
+  }
+}
+
 void performance_monitor::checkResults(){
   std::string error_str = "WARNING: there doesn't seem to be any results for "
     "likwid. This commonly \n"
@@ -631,7 +695,7 @@ void performance_monitor::printDetailedResults(){
 
   checkResults();
 
-  for (PerThreadResult &ptr : performance_monitor::per_thread_results)
+  for (const PerThreadResult &ptr : performance_monitor::per_thread_results)
   {
     std::cout << ptr.toString();
   }
@@ -644,7 +708,7 @@ void performance_monitor::printAggregateResults(){
 
   checkResults();
 
-  for (AggregateResult &ar : performance_monitor::aggregate_results)
+  for (const AggregateResult &ar : performance_monitor::aggregate_results)
   {
     std::cout << ar.toString();
   }

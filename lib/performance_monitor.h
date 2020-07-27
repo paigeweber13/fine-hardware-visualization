@@ -12,6 +12,7 @@
 #include <math.h>
 #include <nlohmann/json.hpp>
 #include <omp.h>
+#include <set>
 #include <sstream>
 #include <stack>
 // #include <stdexcept>
@@ -266,6 +267,8 @@ class performance_monitor {
     // used to aggregate results. Depends on "load_likwid_data" being called
     // before this is called
     static void perform_result_aggregation();
+
+    static void calculate_port_usage_ratios();
 
     // ------ attributes ------ //
 
