@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 #include <immintrin.h>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -24,13 +25,13 @@ namespace po = boost::program_options;
 
 // ---- default values
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
-const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
+const std::uint64_t FLOAT_NUM_ITERATIONS =       100000000000;
 
 // each argument vector has num_iterations, mem_size_kb
 
-// 100000 iterations for a good average
+// 1000000 iterations for a good average
 // 100 kilobytes to fit well inside L2 cache
-std::vector<std::uint64_t> l2_args = {100000, 100};
+std::vector<std::uint64_t> l2_args = {1000000, 100};
 
 // 10000 iterations for a good average
 // 1000 kilobytes to fit well inside L3 cache
@@ -49,23 +50,20 @@ const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
 
 void benchmark_flops(precision p, uint64_t num_iter)
 {
-#pragma omp parallel
-  {
-    if(p == precision::SINGLE_P){
-      #pragma omp barrier
+  if(p == precision::SINGLE_P){
+    #pragma omp parallel
+    {
       likwid_markerStartRegion("flops_sp");
       flops_sp(num_iter);
       likwid_markerStopRegion("flops_sp");
-      #pragma omp barrier
-    } else if (p == precision::DOUBLE_P){
-      #pragma omp barrier
+    }
+  } else if (p == precision::DOUBLE_P){
+    #pragma omp parallel
+    {
       likwid_markerStartRegion("flops_dp");
       flops_dp(num_iter);
       likwid_markerStopRegion("flops_dp");
-      #pragma omp barrier
     }
-    #pragma omp barrier
-    likwid_markerNextGroup();
   }
 }
 
@@ -349,7 +347,9 @@ int main(int argc, char *argv[])
   }
   if (vm.count("print-perfmon-csv-header"))
   {
-    performance_monitor::printCsvHeader();
+    std::cout << "Sorry, csv printing has temporarily been disabled."
+      << std::endl;
+    // performance_monitor::printCsvHeader();
   }
 
   bool benchmark_done = false;
@@ -370,144 +370,85 @@ int main(int argc, char *argv[])
   }
   else if (vm.count("L2"))
   {
-    num_memory_iter = l2_args[0];
-    memory_size_kb = l2_args[1];
-    setenv("LIKWID_EVENTS",
-           "L2",
-           1);
-
-    likwid_markerInit();
-
-  #pragma omp parallel
-    {
-      likwid_markerThreadInit();
-      likwid_markerRegisterRegion("L2");
-      likwid_pinThread(omp_get_thread_num());
-    }
-    benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+    const char * region_name = "region_l2";
+    performance_monitor::init("L2", region_name, "");
+    benchmark_memory_bw(region_name, l2_args[0], l2_args[1]);
     benchmark_done = true;
   }
   else if (vm.count("L3"))
   {
-    num_memory_iter = l3_args[0];
-    memory_size_kb = l3_args[1];
-    setenv("LIKWID_EVENTS",
-           "L3",
-           1);
-
-    likwid_markerInit();
-
-  #pragma omp parallel
-    {
-      likwid_markerThreadInit();
-      likwid_markerRegisterRegion("L3");
-      likwid_pinThread(omp_get_thread_num());
-    }
-    benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+    const char * region_name = "region_l3";
+    performance_monitor::init("L3", region_name, "");
+    benchmark_memory_bw(region_name, l3_args[0], l3_args[1]);
     benchmark_done = true;
   }
   else if (vm.count("mem"))
   {
-    num_memory_iter = ram_args[0];
-    memory_size_kb = ram_args[1];
-    setenv("LIKWID_EVENTS",
-           "MEM",
-           1);
-
-    likwid_markerInit();
-
-  #pragma omp parallel
-    {
-      likwid_markerThreadInit();
-      likwid_markerRegisterRegion("MEM");
-      likwid_pinThread(omp_get_thread_num());
-    }
-    benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+    const char * region_name = "region_mem";
+    performance_monitor::init("MEM", region_name, "");
+    benchmark_memory_bw(region_name, ram_args[0], ram_args[1]);
     benchmark_done = true;
   }
   else if (vm.count("flops_sp"))
   {
-    setenv("LIKWID_EVENTS",
-           "FLOPS_SP",
-           1);
-
-    likwid_markerInit();
-
-  #pragma omp parallel
-    {
-      likwid_markerThreadInit();
-      likwid_markerRegisterRegion("flops_sp");
-      likwid_pinThread(omp_get_thread_num());
-    }
+    const char * region_name = "region_flops_sp";
+    performance_monitor::init("FLOPS_SP", region_name, "");
     benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
     benchmark_done = true;
   }
   else if (vm.count("flops_dp"))
   {
-    setenv("LIKWID_EVENTS",
-           "FLOPS_DP",
-           1);
-
-    likwid_markerInit();
-
-  #pragma omp parallel
-    {
-      likwid_markerThreadInit();
-      likwid_markerRegisterRegion("flops_sp");
-      likwid_pinThread(omp_get_thread_num());
-    }
+    const char * region_name = "region_flops_dp";
+    performance_monitor::init("FLOPS_DP", region_name, "");
     benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
     benchmark_done = true;
   }
 
   if(benchmark_done){
-    likwid_markerClose();
+    performance_monitor::close();
 
     if(o == pretty){
-      performance_monitor::buildResultsMaps();
-      performance_monitor::compareActualWithBench();
-
       performance_monitor::printHighlights();
     }
     else if (o == csv){
-      performance_monitor::buildResultsMaps();
+      std::cout << "Sorry, csv printing has temporarily been disabled." 
+        << std::endl;
+      // auto m = performance_monitor::get_aggregate_results()
+      //   .at(performance_monitor::aggregation_t::sum)
+      //   .at(performance_monitor::result_t::metric);
+      // auto e = performance_monitor::get_aggregate_results()
+      //   .at(performance_monitor::aggregation_t::sum)
+      //   .at(performance_monitor::result_t::event);
 
-      auto m = performance_monitor::get_aggregate_results()
-        .at(aggregation_type::sum)
-        .at(result_type::metric);
-      auto e = performance_monitor::get_aggregate_results()
-        .at(aggregation_type::sum)
-        .at(result_type::event);
-
-      std::cout << memory_size_kb << ","
-                << num_memory_iter << ","
-                << m["copy_bw"]["DATA"][load_to_store_ratio_metric_name] << ","
-                << e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
-                   * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
-                << e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"] 
-                   * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
-                << (e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
-                   + e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"])
-                   * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
-                << m["copy_bw"]["L2"][l2_bandwidth_metric_name] << ","
-                << m["copy_bw"]["L2"][l2_data_volume_name] << ","
-                << m["copy_bw"]["L2"][l2_evict_bandwidth_name] << ","
-                << m["copy_bw"]["L2"][l2_evict_data_volume_name] << ","
-                << m["copy_bw"]["L2"][l2_load_bandwidth_name] << ","
-                << m["copy_bw"]["L2"][l2_load_data_volume_name] << ","
-                << m["copy_bw"]["L3"][l3_bandwidth_metric_name] << ","
-                << m["copy_bw"]["L3"][l3_data_volume_name] << ","
-                << m["copy_bw"]["L3"][l3_evict_bandwidth_name] << ","
-                << m["copy_bw"]["L3"][l3_evict_data_volume_name] << ","
-                << m["copy_bw"]["L3"][l3_load_bandwidth_name] << ","
-                << m["copy_bw"]["L3"][l3_load_data_volume_name] << ","
-                << m["copy_bw"]["MEM"][ram_bandwidth_metric_name] << ","
-                << m["copy_bw"]["MEM"][ram_data_volume_metric_name] << ","
-                << m["copy_bw"]["MEM"][ram_evict_bandwidth_name] << ","
-                << m["copy_bw"]["MEM"][ram_evict_data_volume_name] << ","
-                << m["copy_bw"]["MEM"][ram_load_bandwidth_name] << ","
-                << m["copy_bw"]["MEM"][ram_load_data_volume_name] << "\n"
-                ;
+      // std::cout << memory_size_kb << ","
+      //           << num_memory_iter << ","
+      //           << m["copy_bw"]["DATA"][load_to_store_ratio_metric_name] << ","
+      //           << e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
+      //              * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
+      //           << e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"] 
+      //              * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
+      //           << (e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_LOADS"] 
+      //              + e["copy_bw"]["DATA"]["MEM_INST_RETIRED_ALL_STORES"])
+      //              * CACHE_LINE_SIZE_BYTES * BYTES_TO_GBYTES << ","
+      //           << m["copy_bw"]["L2"][l2_bandwidth_metric_name] << ","
+      //           << m["copy_bw"]["L2"][l2_data_volume_name] << ","
+      //           << m["copy_bw"]["L2"][l2_evict_bandwidth_name] << ","
+      //           << m["copy_bw"]["L2"][l2_evict_data_volume_name] << ","
+      //           << m["copy_bw"]["L2"][l2_load_bandwidth_name] << ","
+      //           << m["copy_bw"]["L2"][l2_load_data_volume_name] << ","
+      //           << m["copy_bw"]["L3"][l3_bandwidth_metric_name] << ","
+      //           << m["copy_bw"]["L3"][l3_data_volume_name] << ","
+      //           << m["copy_bw"]["L3"][l3_evict_bandwidth_name] << ","
+      //           << m["copy_bw"]["L3"][l3_evict_data_volume_name] << ","
+      //           << m["copy_bw"]["L3"][l3_load_bandwidth_name] << ","
+      //           << m["copy_bw"]["L3"][l3_load_data_volume_name] << ","
+      //           << m["copy_bw"]["MEM"][ram_bandwidth_metric_name] << ","
+      //           << m["copy_bw"]["MEM"][ram_data_volume_metric_name] << ","
+      //           << m["copy_bw"]["MEM"][ram_evict_bandwidth_name] << ","
+      //           << m["copy_bw"]["MEM"][ram_evict_data_volume_name] << ","
+      //           << m["copy_bw"]["MEM"][ram_load_bandwidth_name] << ","
+      //           << m["copy_bw"]["MEM"][ram_load_data_volume_name] << "\n"
+      //           ;
     }
   }
 
