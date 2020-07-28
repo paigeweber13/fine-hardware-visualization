@@ -5,23 +5,24 @@ Hardware Visualization
 - [Development Log](#development-log)
 - [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions)
+  - [Accomplishments](#accomplishments)
 - [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
   - [Questions](#questions-1)
-  - [Accomplishments](#accomplishments)
+  - [Accomplishments](#accomplishments-1)
   - [Next steps](#next-steps)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
   - [Questions](#questions-2)
-  - [Accomplishments](#accomplishments-1)
+  - [Accomplishments](#accomplishments-2)
 - [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-3)
-  - [Accomplishments](#accomplishments-2)
+  - [Accomplishments](#accomplishments-3)
 - [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-4)
-  - [Accomplishments](#accomplishments-3)
+  - [Accomplishments](#accomplishments-4)
 - [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
   - [Questions](#questions-5)
-  - [Accomplishments](#accomplishments-4)
+  - [Accomplishments](#accomplishments-5)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -108,6 +109,12 @@ Miscellaneous questions
   because they are used by C programmers as well as C++ programmers. I seem to
   remember that we decided to use C++ at the beginning. why not C? Do you think
   we'll have to port this to C at some point in the future?
+
+## Accomplishments
+- completely revamped how we process and store results. Things are now much
+  easier to work with and much less prone to bugs
+- did some research and formed some questions on how we will present per-core
+  saturation 
 
 # 2020-07-14 through 2020-07-21
 ## Questions
