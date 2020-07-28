@@ -38,11 +38,11 @@
 #define perfmon_keep_large_values_envvar "FHV_KEEP_LARGE_VALUES"
 
 // saturation keywords
-#define flops_sp_saturation_metric_name "FLOPS SP saturation"
-#define flops_dp_saturation_metric_name "FLOPS DP saturation"
-#define l2_saturation_metric_name "L2 bandwidth saturation"
-#define l3_saturation_metric_name "L3 bandwidth saturation"
-#define mem_saturation_metric_name "Memory bandwidth saturation"
+#define flops_sp_saturation_metric_name "Saturation FLOPS SP"
+#define flops_dp_saturation_metric_name "Saturation FLOPS DP"
+#define l2_saturation_metric_name "Saturation L2 bandwidth"
+#define l3_saturation_metric_name "Saturation L3 bandwidth"
+#define mem_saturation_metric_name "Saturation Memory bandwidth"
 
 // remove
 // #define total_sp_flops_event_name "total sp flops"

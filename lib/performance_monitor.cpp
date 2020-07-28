@@ -311,6 +311,11 @@ performance_monitor::init(const char * event_group,
   performance_monitor::key_metrics.insert(
     performance_monitor::key_metrics.begin(), 
     {
+      flops_sp_saturation_metric_name,
+      flops_dp_saturation_metric_name,
+      l2_saturation_metric_name,
+      l3_saturation_metric_name,
+      mem_saturation_metric_name,
       mflops_metric_name,
       mflops_dp_metric_name,
       l2_bandwidth_metric_name,
@@ -722,31 +727,31 @@ void performance_monitor::calculate_saturation(){
       {
         is_saturation_result = true;
         saturation_result_name = flops_sp_saturation_metric_name;
-        saturation_result_value = EXPERIENTIAL_SP_RATE_MFLOPS/ar.result_value;
+        saturation_result_value = ar.result_value/EXPERIENTIAL_SP_RATE_MFLOPS;
       }
       else if (ar.result_name == mflops_dp_metric_name)
       {
         is_saturation_result = true;
         saturation_result_name = flops_dp_saturation_metric_name;
-        saturation_result_value = EXPERIENTIAL_DP_RATE_MFLOPS/ar.result_value;
+        saturation_result_value = ar.result_value/EXPERIENTIAL_DP_RATE_MFLOPS;
       }
       else if (ar.result_name == l2_bandwidth_metric_name)
       {
         is_saturation_result = true;
         saturation_result_name = l2_saturation_metric_name;
-        saturation_result_value = EXPERIENTIAL_RW_BW_L2/ar.result_value;
+        saturation_result_value = ar.result_value/EXPERIENTIAL_RW_BW_L2;
       }
       else if (ar.result_name == l3_bandwidth_metric_name)
       {
         is_saturation_result = true;
         saturation_result_name = l3_saturation_metric_name;
-        saturation_result_value = EXPERIENTIAL_RW_BW_L3/ar.result_value;
+        saturation_result_value = ar.result_value/EXPERIENTIAL_RW_BW_L3;
       }
       else if (ar.result_name == ram_bandwidth_metric_name)
       {
         is_saturation_result = true;
         saturation_result_name = mem_saturation_metric_name;
-        saturation_result_value = EXPERIENTIAL_RW_BW_RAM/ar.result_value;
+        saturation_result_value = ar.result_value/EXPERIENTIAL_RW_BW_RAM;
       }
 
       if (is_saturation_result)
@@ -759,6 +764,8 @@ void performance_monitor::calculate_saturation(){
           .aggregation_type = performance_monitor::aggregation_t::geometric_mean,
           .result_value = saturation_result_value
         };
+        
+        performance_monitor::aggregate_results.push_back(new_ar);
       }
     }
   }
