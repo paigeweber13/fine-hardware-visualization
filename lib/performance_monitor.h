@@ -4,7 +4,7 @@
 #include <algorithm>
 // #include <cmath>
 // #include <cstring>
-// #include <fstream>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <likwid.h>
@@ -73,6 +73,12 @@ const std::string fhv_port_usage_ratio_end = " usage ratio";
 // #define fhv_port6_usage_ratio "Port6 usage ratio"
 // #define fhv_port7_usage_ratio "Port7 usage ratio"
 
+// JSON keywords
+const std::string json_info_section = "info";
+const std::string json_parameter_key = "parameters";
+const std::string json_results_section = "region_results";
+const std::string json_thread_section_base = "thread_";
+
 using json = nlohmann::json;
 
 class performance_monitor {
@@ -80,6 +86,12 @@ class performance_monitor {
     // enums for aggregation type and result type
     enum class aggregation_t { sum, arithmetic_mean, geometric_mean };
     enum class result_t { event, metric };
+
+    // to string functions for those
+    static std::string aggregationTypeToString(
+      const performance_monitor::aggregation_t &aggregation_type);
+    static std::string resultTypeToString(
+      const performance_monitor::result_t &result_type);
 
     // ---- TYPES
 

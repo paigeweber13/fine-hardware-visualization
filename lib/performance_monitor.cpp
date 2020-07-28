@@ -403,21 +403,42 @@ void performance_monitor::close(){
   std::sort(aggregate_results.begin(), aggregate_results.end());
 }
 
+std::string performance_monitor::aggregationTypeToString(
+  const performance_monitor::aggregation_t &aggregation_type)
+{
+  if (aggregation_type == performance_monitor::aggregation_t::sum)
+    return "sum";
+  else if (aggregation_type == 
+    performance_monitor::aggregation_t::arithmetic_mean)
+    return "arithmetic_mean";
+  else if (aggregation_type == 
+    performance_monitor::aggregation_t::geometric_mean)
+    return "geometric_mean";
+  else
+    return "unknown_aggregation_type";
+}
+
+std::string performance_monitor::resultTypeToString(
+  const performance_monitor::result_t &result_type)
+{
+  if (result_type == performance_monitor::result_t::event)
+    return "event";
+  else if (result_type == performance_monitor::result_t::metric)
+    return "metric";
+  else
+    return "unknown_result_type";
+}
+
 std::string performance_monitor::PerThreadResult::toString(
   std::string delim) const 
 {
-  std::string result_t_string;
-
-  if (this->result_type == performance_monitor::result_t::event)
-    result_t_string = "event ";
-  else if (this->result_type == performance_monitor::result_t::metric)
-    result_t_string = "metric";
+  std::string result_t_string = resultTypeToString(this->result_type);
 
   std::stringstream ss;
   ss << std::left << "region " << this->region_name << delim
     << "thread " << std::setw(3) << this->thread_num << delim
     // << "group " << std::setw(15) << this->group_name << delim
-    // << result_t_string << delim
+    // << std::setw(6) << result_t_string << delim
     << std::setw(40) << this->result_name << delim
     << std::setprecision(4) << std::fixed << std::right << std::setw(20)
     << this->result_value
@@ -428,27 +449,13 @@ std::string performance_monitor::PerThreadResult::toString(
 std::string performance_monitor::AggregateResult::toString(
   std::string delim) const
 {
-  std::string result_t_string;
+  std::string result_t_string = resultTypeToString(this->result_type);
   std::string aggregation_t_string;
-
-  if (this->result_type == performance_monitor::result_t::event)
-    result_t_string = "event ";
-  else if (this->result_type == performance_monitor::result_t::metric)
-    result_t_string = "metric";
-
-  if (this->aggregation_type == performance_monitor::aggregation_t::sum)
-    aggregation_t_string = "sum";
-  else if (this->aggregation_type == 
-    performance_monitor::aggregation_t::arithmetic_mean)
-    aggregation_t_string = "arithmetic_mean";
-  else if (this->aggregation_type == 
-    performance_monitor::aggregation_t::geometric_mean)
-    aggregation_t_string = "geometric_mean";
 
   std::stringstream ss;
   ss << std::left << "region " << this->region_name << delim
     // << "group " << std::setw(15) << this->group_name << delim
-    // << result_t_string << delim
+    // << std::setw(6) << result_t_string << delim
     << "aggregation_type " << std::setw(15) << aggregation_t_string << delim
     << std::setw(40) << this->result_name << delim
     << std::setprecision(4) << std::fixed << std::right << std::setw(20)
@@ -1668,7 +1675,45 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   checkResults();
   
   json results;
-  results["info"]["parameters"] = param_info_string;
+  
+  // set parameter info string
+  results[json_info_section][json_parameter_key] = param_info_string;
+
+  // populate json with per_thread_results
+  for (const auto & ptr : performance_monitor::per_thread_results)
+  {
+    for (const auto &key_metric : performance_monitor::key_metrics)
+    {
+      if(ptr.result_name == key_metric)
+      {
+        results[json_results_section][ptr.region_name]
+          [json_thread_section_base + std::to_string(ptr.thread_num)]
+          [ptr.result_name] = ptr.result_value;
+      }
+    }
+  }
+
+  // populate json with aggregate results
+  for (const auto & ar : performance_monitor::aggregate_results)
+  {
+    for (const auto &key_metric : performance_monitor::key_metrics)
+    {
+      if(ar.result_name == key_metric)
+      {
+        results[json_results_section][ar.region_name]
+          [aggregationTypeToString(ar.aggregation_type)]
+          [ar.result_name] = ar.result_value;
+      }
+    }
+  }
+
+  // write json to disk
+  std::string output_filename = jsonResultOutputFilepath;
+  if(const char* env_p = std::getenv(perfmon_output_envvar))
+    output_filename = env_p;
+
+  std::ofstream o(output_filename);
+  o << std::setw(4) << results << std::endl;
 }
 
 // void performance_monitor::resultsToJson(std::string param_info_string)
