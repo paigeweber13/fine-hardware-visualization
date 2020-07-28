@@ -37,6 +37,13 @@
 #define perfmon_output_envvar "FHV_OUTPUT"
 #define perfmon_keep_large_values_envvar "FHV_KEEP_LARGE_VALUES"
 
+// saturation keywords
+#define flops_sp_saturation_metric_name "FLOPS SP saturation"
+#define flops_dp_saturation_metric_name "FLOPS DP saturation"
+#define l2_saturation_metric_name "L2 bandwidth saturation"
+#define l3_saturation_metric_name "L3 bandwidth saturation"
+#define mem_saturation_metric_name "Memory bandwidth saturation"
+
 // remove
 // #define total_sp_flops_event_name "total sp flops"
 
@@ -46,7 +53,7 @@
 // remove
 // #define all_groups_keyword "all_groups"
 
-#define all_regions_keyword "all_regions"
+// #define all_regions_keyword "all_regions"
 
 // port usage ratio names
 const std::string fhv_performance_monitor_group = "FHV_PERFORMANCE_MONITOR";
@@ -271,6 +278,8 @@ class performance_monitor {
 
     static void calculate_port_usage_ratios();
 
+    static void calculate_saturation();
+
     // ------ attributes ------ //
 
     // --- important numbers
@@ -279,6 +288,8 @@ class performance_monitor {
     // identifies the most important metrics: the ones we will output to json
     // for later use in visualization
     static std::vector<std::string> key_metrics;
+
+    static std::vector<std::string> saturation_metrics;
 
     // names of saturation metrics
     

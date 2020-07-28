@@ -392,6 +392,9 @@ void performance_monitor::close(){
   std::sort(per_thread_results.begin(), per_thread_results.end());
 
   perform_result_aggregation();
+  // TODO: move calculate_saturation() to BEFORE perform_result_aggregation
+  // once we get per-core saturation workding
+  calculate_saturation(); 
   std::sort(aggregate_results.begin(), aggregate_results.end());
 }
 
@@ -694,6 +697,68 @@ void performance_monitor::calculate_port_usage_ratios()
         };
 
         performance_monitor::per_thread_results.push_back(port_usage_metric);
+      }
+    }
+  }
+}
+
+void performance_monitor::calculate_saturation(){
+  // TODO: eventually I want to build this on a per-thread basis and then have
+  // "perform_result_aggregation" automatically aggregate these. however, for
+  // now we're just going to build overall results manually and add them to
+  // "aggregate results" under "geometric mean"
+
+  bool is_saturation_result;
+  std::string saturation_result_name;
+  double saturation_result_value;
+
+  for (const auto & ar : performance_monitor::aggregate_results)
+  {
+    if(ar.aggregation_type == performance_monitor::aggregation_t::sum)
+    {
+      is_saturation_result = false;
+
+      if (ar.result_name == mflops_metric_name)
+      {
+        is_saturation_result = true;
+        saturation_result_name = flops_sp_saturation_metric_name;
+        saturation_result_value = EXPERIENTIAL_SP_RATE_MFLOPS/ar.result_value;
+      }
+      else if (ar.result_name == mflops_dp_metric_name)
+      {
+        is_saturation_result = true;
+        saturation_result_name = flops_dp_saturation_metric_name;
+        saturation_result_value = EXPERIENTIAL_DP_RATE_MFLOPS/ar.result_value;
+      }
+      else if (ar.result_name == l2_bandwidth_metric_name)
+      {
+        is_saturation_result = true;
+        saturation_result_name = l2_saturation_metric_name;
+        saturation_result_value = EXPERIENTIAL_RW_BW_L2/ar.result_value;
+      }
+      else if (ar.result_name == l3_bandwidth_metric_name)
+      {
+        is_saturation_result = true;
+        saturation_result_name = l3_saturation_metric_name;
+        saturation_result_value = EXPERIENTIAL_RW_BW_L3/ar.result_value;
+      }
+      else if (ar.result_name == ram_bandwidth_metric_name)
+      {
+        is_saturation_result = true;
+        saturation_result_name = mem_saturation_metric_name;
+        saturation_result_value = EXPERIENTIAL_RW_BW_RAM/ar.result_value;
+      }
+
+      if (is_saturation_result)
+      {
+        AggregateResult new_ar = {
+          .region_name = ar.region_name,
+          .group_name = fhv_performance_monitor_group,
+          .result_type = performance_monitor::result_t::metric,
+          .result_name = saturation_result_name,
+          .aggregation_type = performance_monitor::aggregation_t::geometric_mean,
+          .result_value = saturation_result_value
+        };
       }
     }
   }
@@ -1595,7 +1660,8 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   checkInit();
   checkResults();
   
-  ;
+  json results;
+  results["info"]["parameters"] = param_info_string;
 }
 
 // void performance_monitor::resultsToJson(std::string param_info_string)
