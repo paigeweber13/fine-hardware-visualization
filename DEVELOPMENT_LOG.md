@@ -3,22 +3,24 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Questions](#questions-1)
   - [Accomplishments](#accomplishments)
   - [Next steps](#next-steps)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
-  - [Questions](#questions-1)
+  - [Questions](#questions-2)
   - [Accomplishments](#accomplishments-1)
 - [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
-  - [Questions](#questions-2)
+  - [Questions](#questions-3)
   - [Accomplishments](#accomplishments-2)
 - [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
-  - [Questions](#questions-3)
+  - [Questions](#questions-4)
   - [Accomplishments](#accomplishments-3)
 - [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
-  - [Questions](#questions-4)
+  - [Questions](#questions-5)
   - [Accomplishments](#accomplishments-4)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
@@ -70,6 +72,42 @@ Hardware Visualization
 - [before 2020-02-11](#before-2020-02-11)
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
+
+# 2020-07-21 through 2020-07-28
+## Questions
+Follow up on polynomial expansion
+- have you made any progress on investigating polynomial_expansion? Why is
+  port4 the most saturated? Why when switching to clang++, port 0 and 1 are the
+  most saturated? 
+
+These questions all focus on how we should report per-thread saturation
+- Several questions on making things per-thread
+  - for computation (flop rates, instruction decoding, etc) it's pretty easy to
+    create an estimate for the maximum possible rate. However, it gets more
+    difficult with memory
+  - only one core can control the memory controller... I guess there's no way
+    to split up expected bandwidth between four cores, then. Is that right? 
+    - should we use a counter like "mem_instr_retired" to estimate pressure on
+      the memory? That could be done per-core. But then how will we know if
+      something will miss the TLB?
+  - For L1 and L2 cache, bandwidth varies widely between two threads on the
+    same core. If we use both threads, one will have 1.5-2.0x the bandwidth of
+    the other.
+  - L3 cahce, which is shared by all cores, has similar patterns of variation
+    but even greater magnitudes. One thread will report 16 GB/s of bandwidth
+    while the other only reports 2 GB/s
+- does it make sense to just run a single-threaded benchmark and use that as
+  the reference, even though we expect that performance to be much higher than
+  all threads are capable of simultaneously?
+
+Miscellaneous questions
+- does it make sense to provide an average saturation across all threads?
+- should `#define` or `const` be used? My instinct is `const` because then you
+  get type-checking. 
+- all the performance monitoring tools I've seen are written in C, presumably
+  because they are used by C programmers as well as C++ programmers. I seem to
+  remember that we decided to use C++ at the beginning. why not C? Do you think
+  we'll have to port this to C at some point in the future?
 
 # 2020-07-14 through 2020-07-21
 ## Questions
