@@ -14,6 +14,7 @@
 // #include "../lib/architecture.h"
 #include "../lib/computation_measurements.h"
 #include "../lib/performance_monitor.h"
+#include "../lib/performance_monitor_defines.hpp"
 #include "../lib/saturation_diagram.h"
 #include "likwid.h"
 
@@ -42,8 +43,7 @@ std::vector<std::uint64_t> l3_args = {10000, 1000};
 std::vector<std::uint64_t> ram_args = {20, 100000};
 
 // enums
-enum precision { SINGLE_P, DOUBLE_P };
-enum output_format { pretty, csv };
+enum class output_format { pretty, csv };
 
 // likwid results file path
 const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
@@ -172,15 +172,17 @@ void visualize(
   json j;
   i >> j;
 
-  std::string params = j["info"]["parameters"];
+  std::string params = j[json_info_section][json_parameter_key];
 
   std::string region_name;
-  for(auto &saturation_item: j["saturation"].items())
+  for(auto &saturation_item: j[json_results_section].items())
   {
     region_name = saturation_item.key();
     std::cout << "Creating visualization for region " << region_name 
       << std::endl;
-    json region_data = j["saturation"][region_name];
+    json region_data = j[json_results_section][region_name]
+      [performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::geometric_mean)];
 
     auto region_colors = saturation_diagram::calculate_saturation_colors(
       region_data, min_color, max_color);
@@ -191,7 +193,11 @@ void visualize(
       image_output_filename.substr(0, pos) + "_" + 
       region_name + ext;
 
-    saturation_diagram::draw_diagram_overview(region_colors, region_data, 
+    precision chosen_precision = 
+      region_data["DP [MFLOP/s]"] > region_data["SP [MFLOP/s]"] 
+      ? precision::DOUBLE_P : precision::SINGLE_P;
+
+    saturation_diagram::draw_diagram_overview(region_colors, chosen_precision, 
       min_color, max_color, region_name, params, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
@@ -226,7 +232,7 @@ int main(int argc, char *argv[])
   image_output_filename += time_str;
   image_output_filename += ".svg";
 
-  output_format o = pretty;
+  output_format o = output_format::pretty;
 
   // behavior if no arguments are supplied
   if (argc < 2)
@@ -407,10 +413,10 @@ int main(int argc, char *argv[])
   if(benchmark_done){
     performance_monitor::close();
 
-    if(o == pretty){
+    if(o == output_format::pretty){
       performance_monitor::printHighlights();
     }
-    else if (o == csv){
+    else if (o == output_format::csv){
       std::cout << "Sorry, csv printing has temporarily been disabled." 
         << std::endl;
       // auto m = performance_monitor::get_aggregate_results()

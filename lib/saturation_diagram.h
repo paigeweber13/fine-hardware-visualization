@@ -12,6 +12,7 @@
 
 #include "architecture.h"
 #include "likwid_defines.hpp"
+#include "performance_monitor_defines.hpp"
 
 using json = nlohmann::json;
 
@@ -45,9 +46,9 @@ class saturation_diagram {
      */ 
     static std::map<std::string, rgb_color>
     calculate_saturation_colors(
-      json region_saturation,
-      rgb_color min_color,
-      rgb_color max_color);
+      const json &region_saturation,
+      const rgb_color &min_color,
+      const rgb_color &max_color);
 
     /* ---- draw diagram ----
      * Draws an overview of the architecture that displays RAM, cores, and
@@ -63,7 +64,7 @@ class saturation_diagram {
     //     calculating region_colors elsewhere?
     static void draw_diagram_overview(
       std::map<std::string, rgb_color> region_colors,
-      json region_data,
+      precision precision_for_saturation,
       rgb_color min_color,
       rgb_color max_color,
       std::string region_name,
@@ -100,9 +101,9 @@ class saturation_diagram {
      * hardware has a native fused multiply-add instruction.
      */
     static rgb_color color_lerp( 
-      rgb_color min_color, 
-      rgb_color max_color, 
-      double t);
+      const rgb_color &min_color, 
+      const rgb_color &max_color, 
+      const double &t);
 
     /* ----- CLAMP ----- 
      * taken from: https://en.cppreference.com/w/cpp/algorithm/clamp
@@ -120,7 +121,7 @@ class saturation_diagram {
      *
      * expects 0.0 <= value <= 1.0
      */
-    static double scale(double value);
+    static double scale(const double value);
 
 
     /* ======== Helper functions: cairo ======== 
