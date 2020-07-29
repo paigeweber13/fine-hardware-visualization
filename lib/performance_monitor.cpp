@@ -311,11 +311,6 @@ performance_monitor::init(const char * event_group,
   performance_monitor::key_metrics.insert(
     performance_monitor::key_metrics.begin(), 
     {
-      flops_sp_saturation_metric_name,
-      flops_dp_saturation_metric_name,
-      l2_saturation_metric_name,
-      l3_saturation_metric_name,
-      mem_saturation_metric_name,
       mflops_metric_name,
       mflops_dp_metric_name,
       l2_bandwidth_metric_name,
@@ -345,6 +340,12 @@ performance_monitor::init(const char * event_group,
       fhv_port_usage_ratio_start + std::to_string(i) + 
       fhv_port_usage_ratio_end);
   }
+
+  // add saturation metrics
+  performance_monitor::key_metrics.insert(
+    performance_monitor::key_metrics.end(), 
+    fhv_saturation_metrics.begin(),
+    fhv_saturation_metrics.end());
 
   // initialize num_threads
   #pragma omp parallel
@@ -450,7 +451,8 @@ std::string performance_monitor::AggregateResult::toString(
   std::string delim) const
 {
   std::string result_t_string = resultTypeToString(this->result_type);
-  std::string aggregation_t_string;
+  std::string aggregation_t_string = aggregationTypeToString(
+    this->aggregation_type);
 
   std::stringstream ss;
   ss << std::left << "region " << this->region_name << delim
