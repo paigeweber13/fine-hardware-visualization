@@ -2,11 +2,13 @@
 
 #include <cairo.h>
 #include <cairo-svg.h>
+#include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <map>
 #include <pango/pangocairo.h>
 #include <tuple>
+#include <sstream>
 #include <string>
 #include <type_traits>
 
@@ -158,10 +160,8 @@ class saturation_diagram {
      * will limit to the horizonatal space specified, adding new lines as
      * needed to maintain the specified text box width.
      *
-     * this function returns the vertical distance needed to reach the
-     * rectangle. For alignments LEFT and BOTTOM, this is the distance taken by
-     * the text. For INSIDE, it is 0.
-     *
+     * This function returns the height taken by the text
+     * 
      * if "vertical" is true, "text_box_width" will be applied in the vertical
      * cairo dimension. Therefore, vertical distance is fixed and horizontal
      * distance is not. As a result, this function will instead return the
@@ -201,6 +201,10 @@ class saturation_diagram {
      * vertical dimension for position BOTTOM and horizontal for LEFT. The
      * rectangle will take the rest of <width>
      *
+     * In other words, for position LEFT, this function returns the distance
+     * from x to the rectangle. For position BOTTOM, this function returns the
+     * distance from the bottom of the rectangle to (y+height). For position
+     * CENTER, this returns 0.
      */
     static double cairo_draw_component(
       cairo_t *cr,

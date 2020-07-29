@@ -425,15 +425,34 @@ void saturation_diagram::draw_diagram_overview(
   // as key
   double swatch_x = description_x;
   double swatch_y = description_y + text_height + internal_margin;
+  double num_steps = 10;
   cairo_draw_swatch(cr, min_color, max_color, swatch_x, swatch_y, 
-    swatch_width, swatch_height, 10);
+    swatch_width, swatch_height, num_steps);
+
+  double swatch_legend_x = swatch_x;
+  double swatch_legend_y = swatch_y + swatch_height + small_internal_margin;
+  // not sure how to do this without hard-coding. However, since we are
+  // aligning right, it can be very large
+  double single_legend_item_width = 100; 
+  double legend_offset = -10;
+  double scaled_value;
+  for (unsigned i = 0; i < static_cast<unsigned>(num_steps) + 1; i++)
+  {
+    scaled_value = clamp(scale(static_cast<double>(i)/num_steps), 0.0, 1.0);
+    std::stringstream value_text;
+    value_text << std::setprecision(1) << std::fixed
+      << static_cast<double>(i)/num_steps;
+    text_height = pango_cairo_draw_text(cr, 
+      swatch_legend_x + legend_offset + scaled_value * content_width, 
+      swatch_legend_y, single_legend_item_width, value_text.str(),
+      description_font, PANGO_ALIGN_RIGHT, true);
+  }
 
   double swatch_label_x = swatch_x;
-  double swatch_label_y = swatch_y + swatch_height + small_internal_margin; 
+  double swatch_label_y = swatch_legend_y + text_height + small_internal_margin; 
   text_height = pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, 
-    content_width, "Low saturation", description_font, PANGO_ALIGN_LEFT);
-  pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, content_width, 
-    "High saturation", description_font, PANGO_ALIGN_RIGHT);
+    content_width, "Saturation level (higher is usually better)", 
+    description_font, PANGO_ALIGN_CENTER);
 
   // --- draw RAM --- //
   double ram_x = margin_x;
