@@ -1,22 +1,17 @@
 #pragma once
 
-// add back only what is necessary
 #include <algorithm>
-// #include <cmath>
-// #include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <likwid.h>
-// #include <map>
+#include <map>
 #include <math.h>
 #include <nlohmann/json.hpp>
 #include <omp.h>
 #include <set>
 #include <sstream>
 #include <stack>
-// #include <stdexcept>
-// #include <stdlib.h>
 #include <string>
 
 #include "architecture.h"
@@ -138,46 +133,11 @@ class performance_monitor {
     static void nextGroup();
     static void close();
 
-    // building data to print
-
-    // sum events and metrics across threads. Organize by region and group
-
-    // TODO: evaluate these functions. buildingResultsMaps may need to be
-    // rewritten from the ground up... in general this file has a lot of
-    // hard-to-read (and, therefore, hard to maintain) code and I feel like
-    // this falls prey to that. Can these functions be simplified?
-    // consider removing and just build everything in close()
-    // static void buildResultsMaps();
-
-    // KEEP. Commented out for now
-    // static void compareActualWithBench();
-
-    // print results
-
-    // debug info about what groups and regions were found
-
-    // consider removing
-    // static void printRegionGroupEventAndMetricData();
-
-    // print everything, utility function that does everything below
-    
-    // consider removing
-    // static void printResults();
-
     // print everything per core
     static void printDetailedResults();
 
     // print results aggregated across cores
     static void printAggregateResults();
-
-    // print comparison between actual rates and theoretical maximums. Also
-    // called "saturation"
-
-    // prints comparison by region, but includes a special region "all_regions"
-    // that supplies the average saturation
-
-    // keep, but commented out for now
-    // static void printComparison();
 
     // consider removing
     static void printHighlights();
@@ -186,7 +146,7 @@ class performance_monitor {
     // static void printCsvHeader();
     // static void printCsvOutput();
 
-    // output to json
+    // resultsToJson
     //  - gets file name from environment variable FHV_OUTPUT. If unset, will
     //    use a default name
     //  - param_info_string is entirely arbitrary and left to the user. The
@@ -195,25 +155,19 @@ class performance_monitor {
     //    set the string to be "n=4000, m=6000, k=7". The visualization will
     //    preface this with the string "Parameters used to generate:"
 
-    // keep, but commented out for now
     static void resultsToJson(std::string param_info_string = "");
 
     // ------ getters ----- //
 
-    // consider removing
-    // const static std::map<std::string, double> get_runtimes_by_tag();
-
     const static aggregate_results_t& get_aggregate_results();
     const static per_thread_results_t& get_per_thread_results();
-
-    // consider removing: can we just put this into per_thread_results and aggregate_results?
-    // const static saturation_map_t& get_saturation();
 
   private:
     // ------ functions ------ //
     // dround = decimal round
     static double dround(double x, unsigned num_decimal_places);
 
+    // helper function to validate data from likwid
     static void validate_and_store_likwid_result(
       int thread_num,
       performance_monitor::result_t result_type,
@@ -222,6 +176,7 @@ class performance_monitor {
       const char * result_name, 
       double result_value);
     
+    // used to make sure things got initialized correctly
     static void checkInit();
     static void checkResults();
 
@@ -232,8 +187,18 @@ class performance_monitor {
     // before this is called
     static void perform_result_aggregation();
 
+    // must be called after load_likwid_data(), as it depends on the loaded
+    // data. Should be called before perform_result_aggregation so that port
+    // usage ratios also get aggregated
     static void calculate_port_usage_ratios();
 
+    // must be called after load_likwid_data() and
+    // perform_result_aggregation(). This manually creates saturation values in
+    // "geometric mean" even though they are not actually means. They do,
+    // however, fill the same function: providing an overview
+
+    // TODO: make this per-thread and let perform_result_aggregation()
+    // aggregate it
     static void calculate_saturation();
 
     // ------ attributes ------ //
@@ -242,33 +207,9 @@ class performance_monitor {
     static int num_threads;
 
     // identifies the most important metrics: the ones we will output to json
-    // for later use in visualization
+    // for later use in visualization. This is a class variable because it is
+    // build in the init routine.
     static std::vector<std::string> key_metrics;
-
-    // names of saturation metrics
-    
-    // remove
-    // static const std::vector<const char *> saturationMetricGroups;
-
-    // consider removing
-    // static const std::vector<const char *> saturation_metrics;
-
-    // try to avoid, consider removing
-    // static const std::vector<float> saturationBenchmarkReferences;
-
-    // names of port usage metrics
-
-    // consider removing
-    // static const std::vector<std::string> port_usage_metrics;
-
-    // --- Data
-
-    // "runtimes by tag" should really be called "max runtime by tag" because
-    // that's how it's calculated, but likwid seems to calculate flops on a
-    // per-thread basis so this won't let us double-check the likwid
-
-    // consider removing
-    // static std::map<std::string, double> runtimes_by_tag;
 
     static performance_monitor::aggregate_results_t  aggregate_results;
 
