@@ -86,47 +86,31 @@ class performance_monitor {
     // ------ functions ------ //
     // actual functionality
 
-    // TODO: merge init functions and use optional parameters instead of
-    // overloading.  
+    // init()
+    //
+    // if parallel_regions or sequential_regions are not supplied, no regions
+    // will be registered. Registering regions is optional with likwid, but it
+    // reduces overhead, which can prevent wrong counts for short regions
+    // 
+    // the user may specify everything. The defaults choose an event_group that
+    // will give fhv everything it needs to create a visualization
+    //   - event_group should be of the format "FLOPS_SP|L2|..."
+    //   - parallel_regions and sequential_regions should be of the format
+    //      "region1,region2,..."
+    //   - parallel_regions are regions that will be executed in a parallel block
+    //   - sequential_regions are regions that will be executed in sequential
+    //      code 
+    //
+    // OMP_NUM_THREADS is respected. Currently, threads will be assigned
+    // sequentially from the first.
+    // 
+    // TODO: respect GOMP_CPU_AFFINITY
+    static void init(std::string parallel_regions = "",
+      std::string sequential_regions = "",
+      std::string event_groups = 
+        "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3");
 
-    // does a default set of groups that allows fhv to work normally. Also
-    // automatically uses the default number of threads created by openMP as
-    // below 
-    static void init(const char * parallel_regions,
-                     const char * sequential_regions);
-
-    // automatically uses the default number of threads created by openMP,
-    // which is probably the max number of threads supported by the hardware
-    static void init(const char * event_group, 
-                     const char * parallel_regions,
-                     const char * sequential_regions);
-
-    // lets you choose a number of threads and automatically chooses the first
-    // num_threads threads to create a list_of_threads
-    static void init(const char * event_group,
-                     const char * parallel_regions,
-                     const char * sequential_regions,
-                     int num_threads);
-
-    // lets you specify everything manually
-    //   event_group should be of the format "FLOPS_SP|L2|..."
-    //   parallel_regions and sequential_regions should be of the format
-    //    "region1,region2,..."
-    //   parallel_regions are regions that will be executed in a parallel block
-    //   sequential_regions are regions that will be executed in sequential
-    //    code 
-    //   list_of_threads should be of the format "0,2,..."
-    static void init(const char * event_group,
-                     const char * parallel_regions,
-                     const char * sequential_regions,
-                     const char * list_of_threads);
-
-    // static void setEnvironmentVariables(const char * regions);
-    // static void setEnvironmentVariables(const char * regions,
-    //                                     int num_threads);
-    static void setEnvironmentVariables(const char * regions,
-                                        const char * list_of_threads);
-    static void registerRegions(const char * regions);
+    static void registerRegions(const std::string regions);
 
     static void startRegion(const char * tag);
     static void stopRegion(const char * tag);
@@ -164,9 +148,6 @@ class performance_monitor {
 
   private:
     // ------ functions ------ //
-    // dround = decimal round
-    static double dround(double x, unsigned num_decimal_places);
-
     // helper function to validate data from likwid
     static void validate_and_store_likwid_result(
       int thread_num,

@@ -88,112 +88,18 @@ performance_monitor::AggregateResult::operator<(
   }
 }
 
-// ------ utility functions ------ //
-
-double performance_monitor::dround(double x, unsigned num_decimal_places){
-  double rounding_factor = pow(10., static_cast<double>(num_decimal_places));
-  double rounded_x = round(x * rounding_factor)/rounding_factor;
-  return rounded_x;
-}
-
 // ------ perfmon stuff ------ //
-
-void performance_monitor::init(const char * parallel_regions,
-                               const char * sequential_regions)
-{
-  init("MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
-       parallel_regions, sequential_regions);
-}
-
-void
-performance_monitor::init(const char * event_group, 
-                          const char * parallel_regions,
-                          const char * sequential_regions)
-{
-#pragma omp parallel
-  {
-    performance_monitor::num_threads = omp_get_num_threads();
-  }
-
-  init(event_group, parallel_regions, sequential_regions, num_threads);
-}
-
-void
-performance_monitor::init(const char * event_group, 
-                          const char * parallel_regions,
-                          const char * sequential_regions,
-                          int num_threads)
-{
-  std::string likwid_threads_string;
-  for(int i = 0; i < num_threads; i++){
-    likwid_threads_string += std::to_string(i);
-    if(i != num_threads - 1){
-      likwid_threads_string += ',';
-    }
-  }
-  const char * list_of_threads = likwid_threads_string.c_str();
-
-  init(event_group, parallel_regions, sequential_regions, list_of_threads);
-}
-
-// void
-// performance_monitor::setEnvironmentVariables(
-//   const char * event_group)
-// {
-//   int num_threads;
-// #pragma omp parallel
-//   {
-//     num_threads = omp_get_num_threads();
-//   }
-
-//   setEnvironmentVariables(event_group, num_threads);
-// }
-
-// void
-// performance_monitor::setEnvironmentVariables(
-//   const char * event_group,
-//   int num_threads)
-// {
-//   std::string likwid_threads_string;
-//   for(int i = 0; i < num_threads; i++){
-//     likwid_threads_string += std::to_string(i);
-//     if(i != num_threads - 1){
-//       likwid_threads_string += ',';
-//     }
-//   }
-//   const char * list_of_threads = likwid_threads_string.c_str();
-
-//   setEnvironmentVariables(event_group, list_of_threads);
-// }
-
-void
-performance_monitor::setEnvironmentVariables(
-  const char * event_group,
-  const char * list_of_threads)
-{
-  remove(likwidOutputFilepath.c_str());
-
-  setenv("LIKWID_EVENTS", event_group, 1);
-  setenv("LIKWID_MODE", accessmode.c_str(), 1);
-
-  // output filepath
-  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 1); 
-  
-  // list of threads to use
-  setenv("LIKWID_THREADS", list_of_threads, 1);
-
-  // forces likwid to take control of registers even if they are in use
-  setenv("LIKWID_FORCE", "1", 1);
-}
 
 void
 performance_monitor::registerRegions(
-    const char *regions)
+    const std::string regions)
 {
-  if (strcmp(regions, "") == 0)
+  if (regions == "")
+  {
+    std::cout << "WARNING: No regions supplied! Doing nothing." << std::endl;
     return;
+  }
 
-  std::string regions_string(regions);
   std::string delimiter = ",";
 
   size_t start_pos = 0;
@@ -201,11 +107,11 @@ performance_monitor::registerRegions(
   std::string token;
   do
   {
-    end_pos = regions_string.find(delimiter, start_pos);
+    end_pos = regions.find(delimiter, start_pos);
     if (end_pos != std::string::npos)
-      token = regions_string.substr(start_pos, end_pos - start_pos);
+      token = regions.substr(start_pos, end_pos - start_pos);
     else
-      token = regions_string.substr(start_pos, end_pos);
+      token = regions.substr(start_pos, end_pos);
 
     std::cout << "registering region " + token + " on thread " +
                      std::to_string(omp_get_thread_num()) + "\n";
@@ -214,54 +120,68 @@ performance_monitor::registerRegions(
   } while (end_pos != std::string::npos);
 }
 
-void
-performance_monitor::init(const char * event_group, 
-                          const char * parallel_regions,
-                          const char * sequential_regions,
-                          const char * list_of_threads)
+void performance_monitor::init(std::string parallel_regions,
+  std::string sequential_regions, std::string event_groups)
 {
-  // ----- Initialize likwid stuff ----- // 
-  setEnvironmentVariables(event_group, list_of_threads);
-
-  // likwid marker init reads the environment variables above
-  likwid_markerInit();
-
-
-#pragma omp parallel
+  // initialize num_threads
+  #pragma omp parallel
   {
-    // Init marker api for current thread
-    likwid_markerThreadInit(); 
-
-    // about 'likwid_markerRegisterRegion:`
-
-    // optional according to
-    // https://github.com/RRZE-HPC/likwid/wiki/TutorialMarkerC
-
-    // BUT highly recommended when using accessD according to
-    // https://github.com/RRZE-HPC/likwid/wiki/likwid-perfctr#using-the-marker-api
-
-    // initialize every parallel region supplied
-    registerRegions(parallel_regions);
-
-    // pin each thread to single core. If you don't do this, many "stopping
-    // non-started region x" errors will happen 
-
-    // currently, this only supports using the first n threads, where n is the
-    // number of threads specified with OMP_NUM_THREADS (or, the maximum number
-    // of threads if OMP_NUM_THREADS is not specified)
-
-    // TODO: support setting affinity with GOMP_CPU_AFFINITY or a custom
-    // environment variable that is used here to pin threads manually
-    likwid_pinThread(omp_get_thread_num()); 
+    performance_monitor::num_threads = omp_get_num_threads();
   }
 
-  // initialize every sequential region supplied
-  registerRegions(sequential_regions);
+  std::string likwid_threads_string;
+  for(int i = 0; i < performance_monitor::num_threads; i++){
+    likwid_threads_string += std::to_string(i);
+    if(i != num_threads - 1){
+      likwid_threads_string += ',';
+    }
+  }
 
-  // printf("Thread count initialized to %d\n", num_threads);
-  // printf("Number of groups setup: %d\n", perfmon_getNumberOfGroups());
+  setenv("LIKWID_EVENTS", event_groups.c_str(), 1);
+  setenv("LIKWID_THREADS", likwid_threads_string.c_str(), 1);
+  setenv("LIKWID_FILEPATH", performance_monitor::likwidOutputFilepath.c_str(), 
+    1);
+  setenv("LIKWID_MODE", performance_monitor::accessmode.c_str(), 1);
+  setenv("LIKWID_FORCE", "1", 1);
+  // setenv("LIKWID_DEBUG", "3", 1);
 
+  likwid_markerInit();
+
+  #pragma omp parallel
+  {
+    likwid_pinThread(omp_get_thread_num());
+
+    /* LIKWID_MARKER_THREADINIT was required with past versions of likwid but
+     * now is now commonly not needed and is, in fact, deprecated with likwid
+     * v5.0.1
+     *
+     * It is only required if the pinning library fails and there is a risk of
+     * threads getting migrated. I am currently unaware of any runtime system
+     * that doesn't work. 
+     */ 
+    // LIKWID_MARKER_THREADINIT;
+  }
+
+  /* Registering regions is optional but strongly recommended, as it reduces
+   * overhead of LIKWID_MARKER_START and prevents wrong counts in short
+   * regions.
+   *
+   * There must be a barrier between registering a region and starting that
+   * region. Typically these are done in separate parallel blocks, relying on
+   * the implicit barrier at the end of the parallel block. Usually there is
+   * a parallel block for initialization and a parallel block for execution.
+   */
+  if(sequential_regions != "")
+    registerRegions(sequential_regions);
   
+  if(parallel_regions != "")
+  {
+    #pragma omp parallel
+    {
+      registerRegions(parallel_regions);
+    }
+  }
+
   // ----- initialize variables ----- // 
   // start by adding bandwidth, flops, etc
   performance_monitor::key_metrics.clear();
@@ -303,12 +223,6 @@ performance_monitor::init(const char * event_group,
     performance_monitor::key_metrics.end(), 
     fhv_saturation_metrics.begin(),
     fhv_saturation_metrics.end());
-
-  // initialize num_threads
-  #pragma omp parallel
-  {
-    performance_monitor::num_threads = omp_get_num_threads();
-  }
 }
 
 void performance_monitor::startRegion(const char * tag)
