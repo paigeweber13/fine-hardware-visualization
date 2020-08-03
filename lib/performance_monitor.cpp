@@ -113,8 +113,8 @@ performance_monitor::registerRegions(
     else
       token = regions.substr(start_pos, end_pos);
 
-    std::cout << "registering region " + token + " on thread " +
-                     std::to_string(omp_get_thread_num()) + "\n";
+    // std::cout << "DEBUG: registering region " + token + " on thread " +
+    //                  std::to_string(omp_get_thread_num()) + "\n";
     likwid_markerRegisterRegion(token.c_str());
     start_pos = end_pos + delimiter.length();
   } while (end_pos != std::string::npos);
