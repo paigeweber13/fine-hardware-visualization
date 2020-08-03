@@ -72,7 +72,7 @@ RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib PATH=$(LIKWID_PREFIX)/sbin:$
 ### meta-rules for easier calling
 build: $(EXEC)
 
-tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
+tests: run-tests/thread_migration bin/tests/likwid_minimal-run run-tests/benchmark-likwid-vs-manual bin/tests/fhv_minimal-run
 
 build-examples: $(EXAMPLE_EXECS)
 
@@ -184,13 +184,13 @@ bin/tests/benchmark-likwid-vs-manual: $(OBJ_DIR)/benchmark-likwid-vs-manual.o $(
 	$(ld-command)
 
 run-tests/benchmark-likwid-vs-manual: bin/tests/benchmark-likwid-vs-manual 
-	bin/tests/benchmark-likwid-vs-manual
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/benchmark-likwid-vs-manual
 
 bin/tests/thread_migration: $(OBJ_DIR)/thread_migration.o $(LIB_OBJS)  | $(TEST_EXEC_DIR)
 	$(ld-command)
 
 run-tests/thread_migration: bin/tests/thread_migration
-	bin/tests/thread_migration 0; \
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/thread_migration 0; \
 	# bin/tests/thread_migration 1; \
 	bin/tests/thread_migration 2;
 
@@ -208,13 +208,13 @@ bin/tests/likwid_minimal-run-with-cli: bin/tests/likwid_minimal
 run-tests/port-counter-cli: bin/tests/likwid_minimal
 	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
 	# commented out 
-	$(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
 
 bin/tests/fhv_minimal: $(OBJ_DIR)/fhv_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
 	$(ld-command)
 
-run-tests/fhv_minimal: bin/tests/fhv_minimal
-	bin/tests/fhv_minimal
+bin/tests/fhv_minimal-run: bin/tests/fhv_minimal
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/fhv_minimal
 
 ### variables for Likwid/fhv perfmon examples. These are designed to have fewer
   # dependencies than those required to compile fhv, to demonstrate what 
