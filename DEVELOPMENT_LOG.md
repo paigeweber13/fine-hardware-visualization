@@ -3,26 +3,28 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
+- [2020-07-28 through 2020-08-04](#2020-07-28-through-2020-08-04)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions-1)
   - [Accomplishments](#accomplishments-1)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Accomplishments](#accomplishments-2)
   - [Next steps](#next-steps)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
   - [Questions](#questions-2)
-  - [Accomplishments](#accomplishments-2)
+  - [Accomplishments](#accomplishments-3)
 - [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-3)
-  - [Accomplishments](#accomplishments-3)
+  - [Accomplishments](#accomplishments-4)
 - [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-4)
-  - [Accomplishments](#accomplishments-4)
+  - [Accomplishments](#accomplishments-5)
 - [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
   - [Questions](#questions-5)
-  - [Accomplishments](#accomplishments-5)
+  - [Accomplishments](#accomplishments-6)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -74,6 +76,16 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-07-28 through 2020-08-04
+## Questions
+See last week
+
+## Accomplishments
+- Finished restructuring performance_monitor
+- Added numbers to legend
+- revisited examples and made them all work again
+- some minor work on software engineering in makefiles
+
 # 2020-07-21 through 2020-07-28
 ## Questions
 Follow up on polynomial expansion
@@ -82,6 +94,8 @@ Follow up on polynomial expansion
   most saturated? 
 
 These questions all focus on how we should report per-thread saturation
+- we're going to do per-thread saturation. I also felt it makes sense to have
+  an "overview" that shows an average. Is this useful?
 - Several questions on making things per-thread
   - for computation (flop rates, instruction decoding, etc) it's pretty easy to
     create an estimate for the maximum possible rate. However, it gets more
@@ -101,8 +115,19 @@ These questions all focus on how we should report per-thread saturation
   the reference, even though we expect that performance to be much higher than
   all threads are capable of simultaneously?
 
-Miscellaneous questions
-- does it make sense to provide an average saturation across all threads?
+Miscellaneous questions:
+- is creating separate svgs for overview/detailed view a good course of action
+  for now? 
+  - from what I understand, the final goal/vision is to have an interactive
+    diagram the user can pan and zoom, right?
+  - alternative is to create very small drawings and expect people to zoom into
+    the svgs....
+- for likwid documentation: does it make sense for me to write documentation
+  even though I'm frequently wrong about expected usage? (Thomas and I talked
+  for months before I finally learned that likwid_markerNextGroup() must be
+  called in a serial region)
+
+Low-priority
 - should `#define` or `const` be used? My instinct is `const` because then you
   get type-checking. 
 - all the performance monitoring tools I've seen are written in C, presumably
@@ -117,18 +142,6 @@ Miscellaneous questions
   saturation 
 
 # 2020-07-14 through 2020-07-21
-## Questions
-- is creating separate svgs for overview/detailed view a good course of action
-  for now? 
-  - from what I understand, the final goal/vision is to have an interactive
-    diagram the user can pan and zoom, right?
-  - alternative is to create very small drawings and expect people to zoom into
-    the svgs....
-- for likwid documentation: does it make sense for me to write documentation
-  even though I'm frequently wrong about expected usage? (Thomas and I talked
-  for months before I finally learned that likwid_markerNextGroup() must be
-  called in a serial region)
-
 ## Accomplishments
 - [pull request](https://github.com/RRZE-HPC/likwid/pull/303) for likwid is
   merged!

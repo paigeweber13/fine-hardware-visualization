@@ -1,44 +1,29 @@
 # TODO:
 ## Immediate:
-- [ ] improve likwid documentation
-  - [ ] Tom has not made it clear how to contribute, but here are some ideas
-        for PRs:
-    - [ ] write some wiki pages about general use (e.g. "There are three ways
-          to use likwid...")
-    - [ ] write test cases
-    - [ ] consider improving doxygen comments and writing man pages for usage
-- [ ] more counters to visualize.
-  - [ ] quickly finish looking at all perfgroups
-  - [ ] Dr. Saule identified the following areas as key. What counters and
-        perfgroups can help us identify performance in these areas?
-    - [ ] port usage
-    - [ ] instruction decoding: can you decode instructions quickly enough?
-    - [ ] micro-instruction retiring: can you fetch instructions quickly
-          enough? 
-  - [ ] change computation saturation to be per-core
-- [ ] improve software engineering
-  - [ ] improve makefile 
-    - [ ] simplify: there's some redundant stuff in there
-    - [ ] can I make it so there's a general rule for all examples?
-    - [ ] tests don't work any more
-    - [ ] give convolution its own makefile???
-  - [ ] performance_monitor.cpp (see "improve-result-processing" branch)
-    - [ ] some things are aggregated across threads, some things are not
-    - [ ] we're still using groups even though there's really no need. It just
+- [ ] re-label current "draw_overview" to "draw_detail" 
+- [ ] create new "draw_overview" function
+- [ ] add port_usage to diagram
+- [ ] quickly finish looking at all perfgroups
+- [ ] look at other counters we can use for 3 key areas
+  - [ ] port usage
+  - [ ] instruction decoding: can you decode instructions quickly enough?
+  - [ ] micro-instruction retiring: can you fetch instructions quickly
+        enough? 
+- [ ] how do we do saturation per-core?
+  - [ ] I assume we're not using flops anymore, just 3 key areas above?
+  - [ ] how do we benchmark? Just run a single thread? run all threads and
+        average? 
+  - [ ] change calculate_saturation() so that it calculates per-core and then
+        those values are aggregated automatically by
+        perform_result_aggregation()
+- [x] improve software engineering
+  - [x] performance_monitor.cpp (see "improve-result-processing" branch)
+    - [x] some things are aggregated across threads, some things are not
+    - [x] we're still using groups even though there's really no need. It just
           makes it so we have to iterate through all groups in a region to
           find the right event/metric
-    - [ ] getting raw data from likwid and aggregating data are tightly
+    - [x] getting raw data from likwid and aggregating data are tightly
           coupled and difficult to maintain. These should be separated.
-  - [ ] fhv.cpp
-    - [ ] there's fhv's csv and performance_monitor's fhv. Should I continue
-          to support these moving forward? Are these important tests?
-          - if yes, somehow combine them and make the code cleaner
-          - if no, remove
-  - [ ] there are a lot of things in tests that simply don't work anymore
-    - [ ] verify tests
-    - [ ] verify examples
-  - [ ] there are a lot of text files floating around (like in `tests/`). Can
-        those be removed?
 - [ ] explore how well fhv works with other kernels and codebases
   - [ ] consider standard benchmarks
   - [ ] Dr. Saule may be able to throw together some software that
@@ -72,7 +57,7 @@
   `examples/polynomial_expansion/data` for examples.
   - parameters which demonstrated higher saturation are: n=67108864 d=1
     nbiter=800
-     
+
 ### Features to add:
 - make core saturation (and therefore, color of the core) an average of many
   key metrics.
@@ -102,16 +87,33 @@
   - NUMA: This is the case where it's most important. There's potential for
     the bus(es) between CPUs to be saturated, when it wouldn't be saturated if
     it was memory directly to CPU
+- support GOMP_CPU_AFFINITY
+- [ ] improve likwid documentation
+  - [ ] Tom has not made it clear how to contribute, but here are some ideas
+        for PRs:
+    - [ ] write some wiki pages about general use (e.g. "There are three ways
+          to use likwid...")
+    - [ ] write test cases
+    - [ ] consider improving doxygen comments and writing man pages for usage
+
+### Improve software engineering
+- makefile has some unnecessary repetition of variables
+  - compare ./examples/polynomial_expansion/makefile with ./makefile
+- [ ] improve software engineering in makefile 
+  - [ ] simplify: there's some redundant stuff in there
+  - [ ] tests don't work any more
+  - [ ] EASY: move convolution rules to own makefile
+- EASY: move polynomial expansion into this repository instead of keeping it as a submodule
+- [ ] there are a lot of things in tests that simply don't work anymore
+  - [ ] verify tests
+  - [ ] verify examples
 - saturation_diagram.cpp
   - move "num_caches_per_core" to architecture
   - move diagram parameters to config file
-
-### Improve software engineering
-- make it consistent what calls likwid
-- makefile has some unnecessary repetition of variables
-  - compare ./examples/polynomial_expansion/makefile with ./makefile
-- make consistent if examples are made in root or example version
-  - probably better to put makefiles in the directory of each example. Then,
-    if an example has different dependencies they don't affect other examples
-  - perhaps compile performance_monitor into a shared library that is then
-    grabbed by examples?
+- replace `#define`s with `const` declarations
+- [ ] there's fhv's csv and performance_monitor's fhv. Should I continue
+      to support these moving forward? Are these important tests?
+      - if yes, somehow combine them and make the code cleaner
+      - if no, remove
+- [ ] there are a lot of text files floating around (like in `tests/`). Can
+      those be removed?
