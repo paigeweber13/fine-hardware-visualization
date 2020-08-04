@@ -1,53 +1,4 @@
-CXX=g++
-CXXFLAGS_DEBUG=-g -Wall -std=c++14 $(INC_DIRS) -march=native -mtune=native \
-  -fopenmp -DLIKWID_PERFMON
-CXXFLAGS=$(CXXFLAGS_DEBUG) -O3
-LDFLAGS=$(LIB_DIRS) $(LIBS) -march=native -mtune=native -fopenmp
-CXXASSEMBLYFLAGS=-S -g -fverbose-asm
-
-# make sure likwid is installed to this prefix
-# manual install to this directory is preferred because then we can run without
-# sudo permission
-LIKWID_PREFIX=/usr/local/likwid-master
-# LIKWID_PREFIX=/usr/local/likwid-v4.3.4
-# LIKWID_PREFIX=/usr/local
-LIKWID_INC_DIR=-I$(LIKWID_PREFIX)/include
-FHV_INC_DIRS=-I./lib
-PANGOCAIRO_INC_DIRS=$(shell pkg-config --cflags pangocairo)
-INC_DIRS=$(LIKWID_INC_DIR) $(FHV_INC_DIRS) $(PANGOCAIRO_INC_DIRS)
-
-LIKWID_LIB_DIR=-L$(LIKWID_PREFIX)/lib
-LIB_DIRS=$(LIKWID_LIB_DIR)
-
-LIKWID_LIB_FLAG=-llikwid
-BOOST_PO_LIB_FLAG=-lboost_program_options
-PANGOCAIRO_LIB_FLAG=$(shell pkg-config --libs pangocairo)
-LIBS=$(LIKWID_LIB_FLAG) $(BOOST_PO_LIB_FLAG) $(PANGOCAIRO_LIB_FLAG)
-
-MAIN_DIR=src
-SRC_DIR=lib
-OBJ_DIR=obj
-ASM_DIR=asm
-EXEC_DIR=bin
-TEST_EXEC_DIR=$(EXEC_DIR)/tests
-TEST_DIR=tests
-
-SOURCES=$(wildcard lib/*.cpp)
-HEADERS=$(wildcard lib/*.h)
-MAINS=$(wildcard src/*.cpp)
-TEST_MAINS=$(wildcard tests/*.cpp)
-TEST_MAINS_C+=$(wildcard tests/*.c)
-
-LIB_OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-OBJS=$(LIB_OBJS)
-OBJS+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-OBJS+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(OBJ_DIR)/%.o)
-OBJS+=$(MAINS:$(MAIN_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-
-ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
-ASM+=$(TEST_MAINS:$(TEST_DIR)/%.cpp=$(ASM_DIR)/%.s)
-ASM+=$(TEST_MAINS_C:$(TEST_DIR)/%.c=$(ASM_DIR)/%.s)
-ASM+=$(MAINS:$(MAIN_DIR)/%.cpp=$(ASM_DIR)/%.s)
+include ./config.mk
 
 ### examples
 EXAMPLE_DIR=examples
@@ -56,23 +7,10 @@ EXAMPLE_EXECS+=$(EXAMPLE_DIR)/convolution/bin/convolution-manual
 EXAMPLE_EXECS+=$(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli
 EXAMPLE_EXECS+=$(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon
 
-### perfgroup things
-SYSTEM_PERFGROUPS_DIR=$(LIKWID_PREFIX)/share/likwid/
-PERFGROUPS_ROOT_DIR_NAME=perfgroups
-PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
-
-### exec
-EXEC_NAME=fhv
-EXEC=$(EXEC_DIR)/$(EXEC_NAME)
-
-### prefix used to ensure likwid libraries and access daemon are detected and 
-  # used at runtime
-RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib PATH=$(LIKWID_PREFIX)/sbin:$$PATH
-
 ### meta-rules for easier calling
 build: $(EXEC)
 
-tests: run-tests/thread_migration run-tests/likwid_minimal run-tests/benchmark-likwid-vs-manual
+tests: run-tests/thread_migration bin/tests/likwid_minimal-run run-tests/benchmark-likwid-vs-manual bin/tests/fhv_minimal-run
 
 build-examples: $(EXAMPLE_EXECS)
 
@@ -184,13 +122,13 @@ bin/tests/benchmark-likwid-vs-manual: $(OBJ_DIR)/benchmark-likwid-vs-manual.o $(
 	$(ld-command)
 
 run-tests/benchmark-likwid-vs-manual: bin/tests/benchmark-likwid-vs-manual 
-	bin/tests/benchmark-likwid-vs-manual
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/benchmark-likwid-vs-manual
 
 bin/tests/thread_migration: $(OBJ_DIR)/thread_migration.o $(LIB_OBJS)  | $(TEST_EXEC_DIR)
 	$(ld-command)
 
 run-tests/thread_migration: bin/tests/thread_migration
-	bin/tests/thread_migration 0; \
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/thread_migration 0; \
 	# bin/tests/thread_migration 1; \
 	bin/tests/thread_migration 2;
 
@@ -208,13 +146,13 @@ bin/tests/likwid_minimal-run-with-cli: bin/tests/likwid_minimal
 run-tests/port-counter-cli: bin/tests/likwid_minimal
 	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
 	# commented out 
-	$(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m bin/tests/likwid_minimal
 
 bin/tests/fhv_minimal: $(OBJ_DIR)/fhv_minimal.o $(LIB_OBJS) | $(TEST_EXEC_DIR)
 	$(ld-command)
 
-run-tests/fhv_minimal: bin/tests/fhv_minimal
-	bin/tests/fhv_minimal
+bin/tests/fhv_minimal-run: bin/tests/fhv_minimal
+	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib bin/tests/fhv_minimal
 
 ### variables for Likwid/fhv perfmon examples. These are designed to have fewer
   # dependencies than those required to compile fhv, to demonstrate what 
@@ -249,6 +187,7 @@ $(EXAMPLE_DIR)/convolution/bin:
 $(EXAMPLE_DIR)/convolution/data:
 	mkdir $(EXAMPLE_DIR)/convolution/data
 
+# compile rules
 $(EXAMPLE_DIR)/convolution/bin/convolution: $(EXAMPLE_DIR)/convolution/convolution.cpp | $(EXAMPLE_DIR)/convolution/bin
 	$(compile-command-example)
 
@@ -261,14 +200,18 @@ $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli: $(EXAMPLE_DIR)/convolutio
 $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon: $(EXAMPLE_DIR)/convolution/convolution.cpp $(OBJ_DIR)/performance_monitor.o | $(EXAMPLE_DIR)/convolution/bin
 	$(compile-command-example-fhv-perfmon)
 
-run-example-convolution: $(EXAMPLE_DIR)/convolution/bin/convolution
-	$(EXAMPLE_DIR)/convolution/bin/convolution 4000 4000 15 10
+# run rules
+# CONVOLUTION_RUN_PARAMS=4000 4000 15 10
+CONVOLUTION_RUN_PARAMS=1000 1000 15 10
 
-run-example-convolution-manual: $(EXAMPLE_DIR)/convolution/bin/convolution-manual
-	$(EXAMPLE_DIR)/convolution/bin/convolution-manual 4000 4000 15 10
+$(EXAMPLE_DIR)/convolution/bin/convolution-run: $(EXAMPLE_DIR)/convolution/bin/convolution
+	$(EXAMPLE_DIR)/convolution/bin/convolution $(CONVOLUTION_RUN_PARAMS)
 
-run-example-convolution-likwid-cli: $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli
-	$(RUN_CMD_PREFIX) $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g L3 -g FLOPS_SP -M 1 -m $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli 4000 4000 15 10
+$(EXAMPLE_DIR)/convolution/bin/convolution-manual-run: $(EXAMPLE_DIR)/convolution/bin/convolution-manual
+	$(EXAMPLE_DIR)/convolution/bin/convolution-manual $(CONVOLUTION_RUN_PARAMS)
 
-run-example-convolution-fhv-perfmon: $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon | $(EXAMPLE_DIR)/convolution/data
-	FHV_OUTPUT=$(EXAMPLE_DIR)/convolution/data/convolution.json $(RUN_CMD_PREFIX) $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon 4000 4000 15 10
+$(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli-run: $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli
+	$(RUN_CMD_PREFIX) likwid-perfctr -C S0:0-3 -g L3 -g FLOPS_SP -M 1 -m $(EXAMPLE_DIR)/convolution/bin/convolution-likwid-cli $(CONVOLUTION_RUN_PARAMS)
+
+$(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon-run: $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon | $(EXAMPLE_DIR)/convolution/data
+	FHV_OUTPUT=$(EXAMPLE_DIR)/convolution/data/convolution.json $(RUN_CMD_PREFIX) $(EXAMPLE_DIR)/convolution/bin/convolution-fhv-perfmon $(CONVOLUTION_RUN_PARAMS)

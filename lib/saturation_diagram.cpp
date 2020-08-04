@@ -2,9 +2,9 @@
 
 rgb_color 
 saturation_diagram::color_lerp( 
-  rgb_color min_color, 
-  rgb_color max_color, 
-  double t) 
+  const rgb_color &min_color, 
+  const rgb_color &max_color, 
+  const double &t) 
 {
   return rgb_color(
     std::get<0>(min_color) + t * (std::get<0>(max_color) - std::get<0>(min_color)),
@@ -21,7 +21,7 @@ saturation_diagram::clamp( const T& v, const T& lo, const T& hi )
     return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
-double saturation_diagram::scale(double value){
+double saturation_diagram::scale(const double value){
   #define c 7
   return (log2(value) + c)/c;
 }
@@ -30,25 +30,32 @@ double saturation_diagram::scale(double value){
 
 std::map<std::string, rgb_color>
 saturation_diagram::calculate_saturation_colors(
-  json region_saturation,
-  rgb_color min_color,
-  rgb_color max_color
-  )
+  const json &region_saturation,
+  const rgb_color &min_color,
+  const rgb_color &max_color)
 {
   auto saturation_colors = std::map< std::string, 
     std::tuple<double, double, double> >();
+  double this_saturation;
 
-  for (auto const& metric: region_saturation.items())
+  for (const auto &metric: region_saturation.items())
   {
-    // clamp values to [0.0,1.0]
-    metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
-    // scale using custom function
-    metric.value() = scale(metric.value());
-    // clamp again because scale can give negative values for very small input
-    metric.value() = clamp(static_cast<double>(metric.value()), 0.0, 1.0);
+    for (const auto &saturation_metric : fhv_saturation_metrics)
+    {
+      if (metric.key() == saturation_metric)
+      {
+        this_saturation = metric.value();
+        // clamp values to [0.0,1.0]
+        this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+        // scale using custom function
+        this_saturation = scale(this_saturation);
+        // clamp again because scale can give negative values for very small input
+        this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
 
-    saturation_colors[metric.key()] = 
-      color_lerp(min_color, max_color, metric.value());
+        saturation_colors[metric.key()] = 
+          color_lerp(min_color, max_color, this_saturation);
+      }
+    }
   }
 
   return saturation_colors;
@@ -311,7 +318,7 @@ double saturation_diagram::cairo_draw_component(
 
 void saturation_diagram::draw_diagram_overview(
   std::map<std::string, rgb_color> region_colors,
-  json region_data,
+  precision precision_for_saturation,
   rgb_color min_color,
   rgb_color max_color,
   std::string region_name,
@@ -320,18 +327,17 @@ void saturation_diagram::draw_diagram_overview(
 )
 {
   rgb_color computation_color;
-  std::string chosen_precision;
+  std::string chosen_precision_str;
   
-  if(region_data["DP [MFLOP/s]"] >
-    region_data["SP [MFLOP/s]"])
+  if(precision_for_saturation == precision::DOUBLE_P)
   {
-    computation_color = region_colors["DP [MFLOP/s]"];
-    chosen_precision = "double-precision";
+    computation_color = region_colors[flops_dp_saturation_metric_name];
+    chosen_precision_str = "double-precision";
   }
   else 
   {
-    computation_color = region_colors["SP [MFLOP/s]"];
-    chosen_precision = "single-precision";
+    computation_color = region_colors[flops_sp_saturation_metric_name];
+    chosen_precision_str = "single-precision";
   }
 
   // variables for cairo
@@ -403,8 +409,8 @@ void saturation_diagram::draw_diagram_overview(
   // computation color notes
   description += 
     "Note: both single- and double-precision floating point operations were "
-    "measured. Here the cores are visualized using " + chosen_precision + " "
-    "saturation, because it was higher.\n\n";
+    "measured. Here the cores are visualized using " + chosen_precision_str 
+    + " saturation, because it was higher.\n\n";
 
   // l1 cache note
   description += 
@@ -415,25 +421,44 @@ void saturation_diagram::draw_diagram_overview(
     content_width, description, description_font);
 
   // --- draw swatch/legend --- //
+  // TODO : make drawing swatch/legend own function. Add numbers for saturation
+  // as key
   double swatch_x = description_x;
   double swatch_y = description_y + text_height + internal_margin;
+  double num_steps = 10;
   cairo_draw_swatch(cr, min_color, max_color, swatch_x, swatch_y, 
-    swatch_width, swatch_height, 10);
+    swatch_width, swatch_height, num_steps);
+
+  double swatch_legend_x = swatch_x;
+  double swatch_legend_y = swatch_y + swatch_height + small_internal_margin;
+  // not sure how to do this without hard-coding. However, since we are
+  // aligning right, it can be very large
+  double single_legend_item_width = 100; 
+  double legend_offset = -10;
+  double scaled_value;
+  for (unsigned i = 0; i < static_cast<unsigned>(num_steps) + 1; i++)
+  {
+    scaled_value = clamp(scale(static_cast<double>(i)/num_steps), 0.0, 1.0);
+    std::stringstream value_text;
+    value_text << std::setprecision(1) << std::fixed
+      << static_cast<double>(i)/num_steps;
+    text_height = pango_cairo_draw_text(cr, 
+      swatch_legend_x + legend_offset + scaled_value * content_width, 
+      swatch_legend_y, single_legend_item_width, value_text.str(),
+      description_font, PANGO_ALIGN_RIGHT, true);
+  }
 
   double swatch_label_x = swatch_x;
-  double swatch_label_y = swatch_y + swatch_height + small_internal_margin; 
+  double swatch_label_y = swatch_legend_y + text_height + small_internal_margin; 
   text_height = pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, 
-    content_width, "Low saturation", description_font, PANGO_ALIGN_LEFT);
-  pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, content_width, 
-    "High saturation", description_font, PANGO_ALIGN_RIGHT);
+    content_width, "Saturation level (higher is usually better)", 
+    description_font, PANGO_ALIGN_CENTER);
 
   // --- draw RAM --- //
-  // TODO: replace this and other components with a custom "draw rectangle"
-  // command 
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
   cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
-    region_colors[ram_bandwidth_metric_name], "RAM", big_label_font,
+    region_colors[mem_saturation_metric_name], "RAM", big_label_font,
     label_position::INSIDE);
 
   // --- line from RAM to L3 cache --- //
@@ -448,7 +473,7 @@ void saturation_diagram::draw_diagram_overview(
   double l3_x = 200;
   double l3_y = line_end_y;
   cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height, 
-    region_colors[l3_bandwidth_metric_name], "L3 Cache", big_label_font);
+    region_colors[l3_saturation_metric_name], "L3 Cache", big_label_font);
 
   // --- draw socket 0 --- //
   double socket0_x = margin_x;
@@ -524,8 +549,13 @@ void saturation_diagram::draw_diagram_overview(
       }
       else
       {
-        cache_color = region_colors[
-          "L" + std::to_string(cache_num + 1) + " bandwidth [MBytes/s]"];
+        if(cache_num == 1)
+          cache_color = region_colors[l2_saturation_metric_name];
+        else if(cache_num == 2)
+          cache_color = region_colors[l3_saturation_metric_name];
+        else
+          std::cout << "ERROR: unknown cache number in draw_diagram_overview"
+            << std::endl;
       }
 
       cairo_draw_component(cr, cache_x, cache_y, cache_width, 
