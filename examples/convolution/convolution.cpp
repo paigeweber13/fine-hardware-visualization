@@ -59,28 +59,7 @@ int main(int argc, char ** argv){
 #endif
 
 #ifdef FHV_PERFMON
-  // eventually replace with fhv_perfmon calls
-
-  const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
-
-  // so 14 group/region combos
-  setenv("LIKWID_EVENTS",
-         "MEM|L2|L3|FLOPS_SP|FLOPS_DP|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3",
-         1);
-  // setenv("LIKWID_EVENTS", "MEM_DP|L2", 1);
-  setenv("LIKWID_MODE", "1", 1);
-  // output filepath
-  setenv("LIKWID_FILEPATH", filepath, 1); 
-  setenv("LIKWID_THREADS", "0,1,2,3", 1); // list of threads
-  setenv("LIKWID_FORCE", "1", 1);
-
-  likwid_markerInit();
-  #pragma omp parallel
-  {
-    likwid_markerThreadInit();
-    likwid_markerRegisterRegion("convolution");
-    likwid_pinThread(omp_get_thread_num());
-  }
+  performance_monitor::init();
 #endif
 
   for (size_t i = 0; i < static_cast<size_t>(nbiter); i++)
@@ -91,7 +70,7 @@ int main(int argc, char ** argv){
     likwid_markerNextGroup();
 #endif
 #ifdef FHV_PERFMON
-    likwid_markerNextGroup();
+  performance_monitor::nextGroup();
 #endif
   }
 
@@ -117,17 +96,12 @@ int main(int argc, char ** argv){
 #endif
 
 #ifdef FHV_PERFMON
-  likwid_markerClose();
+  performance_monitor::close();
 
-  performance_monitor::buildResultsMaps();
   // performance_monitor::printDetailedResults();
-  // performance_monitor::printOnlyAggregate();
-
-  performance_monitor::compareActualWithBench();
-  // performance_monitor::printComparison();
+  // performance_monitor::printAggregateResults();
 
   performance_monitor::printHighlights();
-
   performance_monitor::resultsToJson();
 #endif
 
@@ -209,10 +183,7 @@ convolve(
     likwid_markerStartRegion("convolution");
     #endif
     #ifdef FHV_PERFMON
-    // eventually, replace with perfmon call:
-
-    // performance_monitor::startRegion("convolution");
-    likwid_markerStartRegion("convolution");
+    performance_monitor::startRegion("convolution");
     #endif
 
     float sum;
@@ -236,10 +207,7 @@ convolve(
     likwid_markerStopRegion("convolution");
     #endif
     #ifdef FHV_PERFMON
-    // eventually, replace with perfmon call:
-
-    // performance_monitor::stopRegion("convolution");
-    likwid_markerStopRegion("convolution");
+    performance_monitor::stopRegion("convolution");
     #endif
   }
 }
