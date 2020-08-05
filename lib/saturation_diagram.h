@@ -14,6 +14,8 @@
 
 #include "architecture.h"
 #include "likwid_defines.hpp"
+// needed for "aggregationTypeToString"
+#include "performance_monitor.h"
 #include "performance_monitor_defines.hpp"
 
 using json = nlohmann::json;
