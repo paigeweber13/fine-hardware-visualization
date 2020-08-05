@@ -23,9 +23,15 @@ using json = nlohmann::json;
 // ----- simple color type ----- //
 typedef std::tuple<double, double, double> rgb_color;
 
-enum label_position {
+enum class label_position {
   INSIDE, BOTTOM, LEFT
 };
+
+// magic numbers
+
+// TODO: should anything else be here?
+const double stroke_thickness_normal = 10.0;
+const double stroke_thickness_thin = 5.0;
 
 class saturation_diagram {
   public:
@@ -217,7 +223,8 @@ class saturation_diagram {
       rgb_color fill_color,
       std::string label,
       PangoFontDescription * font_desc,
-      label_position position = label_position::INSIDE);
+      label_position position = label_position::INSIDE,
+      double stroke_width = stroke_thickness_normal);
 
   private:
 };

@@ -175,9 +175,6 @@ void saturation_diagram::test_color_lerp(
   );
   cairo_t *cr = cairo_create(surface);
 
-  double line_thickness = 10.0;
-  cairo_set_line_width(cr, line_thickness);
-
   cairo_draw_swatch(cr, min_color, max_color, 0, 0, width, height, num_steps);
 
   // --- done drawing things, clean up
@@ -277,7 +274,8 @@ double saturation_diagram::cairo_draw_component(
   rgb_color fill_color,
   std::string label,
   PangoFontDescription * font_desc,
-  label_position position)
+  label_position position,
+  double stroke_width)
 {
   cairo_save(cr);
 
@@ -289,6 +287,8 @@ double saturation_diagram::cairo_draw_component(
   // height in vertical dimension relative to text
   int text_height; // pango units
   double cairo_text_height = 0; // cairo units
+
+  cairo_set_line_width(cr, stroke_width);
 
   PangoLayout *layout = pango_cairo_create_layout(cr);
 
@@ -414,8 +414,6 @@ void saturation_diagram::draw_diagram_detail(
   const double internal_margin = 25;
   const double large_internal_margin = 50;
 
-  const double line_thickness = 10.0;
-
   // size of different diagram components
   const double content_width = image_width - 2 * margin_x;
 
@@ -437,7 +435,6 @@ void saturation_diagram::draw_diagram_detail(
     image_height
   );
   cairo_t *cr = cairo_create(surface);
-  cairo_set_line_width(cr, line_thickness);
 
   // --- title and description text --- //
   double title_x = margin_x;
@@ -568,7 +565,7 @@ void saturation_diagram::draw_diagram_detail(
     // - actual drawing of core
     text_height = cairo_draw_component(cr, core_x, core_y, core_width, 
       core_and_cache_height, rgb_color(1, 1, 1), "Core " + std::to_string(core_num + 1), 
-      big_label_font, label_position::LEFT);
+      big_label_font, label_position::LEFT, stroke_thickness_thin);
 
     // --- threads within core:
 
@@ -586,7 +583,7 @@ void saturation_diagram::draw_diagram_detail(
       cairo_draw_component(cr, thread_x, thread_y, thread_width, thread_height,
         computation_color, 
         "Thread " + std::to_string(core_num * THREADS_PER_CORE + thread_num),
-        big_label_font);
+        big_label_font, label_position::INSIDE, stroke_thickness_thin);
 
       // ----- draw ports in thread
       port_width = thread_width * (1.0/static_cast<double>(NUM_PORTS_IN_CORE));
@@ -602,7 +599,7 @@ void saturation_diagram::draw_diagram_detail(
             [fhv_port_usage_ratio_start + std::to_string(port_num) 
               + fhv_port_usage_ratio_end],
           "Port " + std::to_string(port_num), 
-          description_font);
+          description_font, label_position::INSIDE, stroke_thickness_thin);
       }
     }
 
@@ -640,7 +637,7 @@ void saturation_diagram::draw_diagram_detail(
       cairo_draw_component(cr, cache_x, cache_y, cache_width, 
         core_cache_height, cache_color, 
         "L" + std::to_string(cache_num + 1) + " Cache",
-        small_label_font);
+        small_label_font, label_position::INSIDE, stroke_thickness_thin);
     }
   }
 
