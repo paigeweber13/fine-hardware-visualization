@@ -180,9 +180,7 @@ void visualize(
     region_name = saturation_item.key();
     std::cout << "Creating visualization for region " << region_name 
       << std::endl;
-    json region_data = j[json_results_section][region_name]
-      [performance_monitor::aggregationTypeToString(
-        performance_monitor::aggregation_t::geometric_mean)];
+    json region_data = j[json_results_section][region_name];
 
     auto region_colors = saturation_diagram::calculate_saturation_colors(
       region_data, min_color, max_color);
@@ -197,7 +195,7 @@ void visualize(
       region_data["DP [MFLOP/s]"] > region_data["SP [MFLOP/s]"] 
       ? precision::DOUBLE_P : precision::SINGLE_P;
 
-    saturation_diagram::draw_diagram_overview(region_colors, chosen_precision, 
+    saturation_diagram::draw_diagram_detail(region_colors, chosen_precision, 
       min_color, max_color, region_name, params, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;

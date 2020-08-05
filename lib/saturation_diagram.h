@@ -46,7 +46,7 @@ class saturation_diagram {
      * The return value of this function is intended to be passed to
      * draw_diagram. 
      */ 
-    static std::map<std::string, rgb_color>
+    static json
     calculate_saturation_colors(
       const json &region_saturation,
       const rgb_color &min_color,
@@ -64,8 +64,8 @@ class saturation_diagram {
     //   - even if we remove region_data dependency, does it make more sense to
     //     just calculate the region colors here? Is there a benefit to
     //     calculating region_colors elsewhere?
-    static void draw_diagram_overview(
-      std::map<std::string, rgb_color> region_colors,
+    static void draw_diagram_detail(
+      json region_colors,
       precision precision_for_saturation,
       rgb_color min_color,
       rgb_color max_color,
@@ -74,8 +74,8 @@ class saturation_diagram {
       std::string output_filename);
 
     
-    static void draw_diagram_core_detail(
-      std::map<std::string, rgb_color> region_colors,
+    static void draw_diagram_overview(
+      json region_colors,
       rgb_color min_color,
       rgb_color max_color,
       std::string region_name,

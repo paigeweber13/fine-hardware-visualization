@@ -28,32 +28,74 @@ double saturation_diagram::scale(const double value){
 
 // ---- calculate saturation colors ----- // 
 
-std::map<std::string, rgb_color>
+json
 saturation_diagram::calculate_saturation_colors(
   const json &region_saturation,
   const rgb_color &min_color,
   const rgb_color &max_color)
 {
-  auto saturation_colors = std::map< std::string, 
-    std::tuple<double, double, double> >();
+  json saturation_colors;
   double this_saturation;
 
-  for (const auto &metric: region_saturation.items())
+  for (const auto &region_section: region_saturation.items())
   {
-    for (const auto &saturation_metric : fhv_saturation_metrics)
-    {
-      if (metric.key() == saturation_metric)
-      {
-        this_saturation = metric.value();
-        // clamp values to [0.0,1.0]
-        this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
-        // scale using custom function
-        this_saturation = scale(this_saturation);
-        // clamp again because scale can give negative values for very small input
-        this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+    // TODO: combine the two for loops (and if statements) below to make a
+    // single loop. This loop would iterate over a data structure that
+    // incorporates everything we need a color for. Something like
+    // "color_metrics" instead of "saturation_metrics" and
+    // "port_usage_metrics". Doing both per-and geometric_mean cases for
+    // everything will make combining these loops simpler 
 
-        saturation_colors[metric.key()] = 
-          color_lerp(min_color, max_color, this_saturation);
+    // if we're in the "geometric_mean" part of this region's results, then
+    // we'll search for each saturation metric
+    if(region_section.key() == performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::geometric_mean) )
+    {
+      for (const auto &metric: region_section.value().items())
+      {
+        for (const auto &saturation_metric : fhv_saturation_metrics)
+        {
+          if (metric.key() == saturation_metric)
+          {
+            this_saturation = metric.value();
+            // clamp values to [0.0,1.0]
+            this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+            // scale using custom function
+            this_saturation = scale(this_saturation);
+            // clamp again because scale can give negative values for very small input
+            this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+
+            saturation_colors[region_section.key()][metric.key()] 
+              = color_lerp(min_color, max_color, this_saturation);
+          }
+        }
+      }
+    }
+
+    if(region_section.key().substr(0, 7) == json_thread_section_base)
+    {
+      for (const auto &metric: region_section.value().items())
+      {
+        // TODO: we're basically rebuilding a list of the port usage events
+        // here.... can we create this in performance_monitor_defines and then
+        // reuse it both here and in performance monitor?
+        for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+        {
+          if (metric.key() == fhv_port_usage_ratio_start + 
+            std::to_string(port_num) + fhv_port_usage_ratio_end)
+          {
+            this_saturation = metric.value();
+            // clamp values to [0.0,1.0]
+            this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+            // scale using custom function
+            this_saturation = scale(this_saturation);
+            // clamp again because scale can give negative values for very small input
+            this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+
+            saturation_colors[region_section.key()][metric.key()] 
+              = color_lerp(min_color, max_color, this_saturation);
+          }
+        }
       }
     }
   }
@@ -316,8 +358,8 @@ double saturation_diagram::cairo_draw_component(
   return cairo_text_height;
 }
 
-void saturation_diagram::draw_diagram_overview(
-  std::map<std::string, rgb_color> region_colors,
+void saturation_diagram::draw_diagram_detail(
+  json region_colors,
   precision precision_for_saturation,
   rgb_color min_color,
   rgb_color max_color,
@@ -331,12 +373,18 @@ void saturation_diagram::draw_diagram_overview(
   
   if(precision_for_saturation == precision::DOUBLE_P)
   {
-    computation_color = region_colors[flops_dp_saturation_metric_name];
+    computation_color = region_colors[
+      performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::geometric_mean)]
+      [flops_dp_saturation_metric_name];
     chosen_precision_str = "double-precision";
   }
   else 
   {
-    computation_color = region_colors[flops_sp_saturation_metric_name];
+    computation_color = region_colors[
+      performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::geometric_mean)]
+      [flops_sp_saturation_metric_name];
     chosen_precision_str = "single-precision";
   }
 
@@ -356,8 +404,8 @@ void saturation_diagram::draw_diagram_overview(
    * 
    * TODO: someday, move these to a config file
    */
-  const double image_width = 800;
-  const double image_height = 1800;
+  const double image_width = 1200;
+  const double image_height = 2000;
 
   const double margin_x = 50;
   const double margin_y = 50;
@@ -458,7 +506,10 @@ void saturation_diagram::draw_diagram_overview(
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
   cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
-    region_colors[mem_saturation_metric_name], "RAM", big_label_font,
+    region_colors
+      [performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::geometric_mean)]
+      [mem_saturation_metric_name], "RAM", big_label_font,
     label_position::INSIDE);
 
   // --- line from RAM to L3 cache --- //
@@ -470,10 +521,13 @@ void saturation_diagram::draw_diagram_overview(
   cairo_line_to(cr, line_end_x, line_end_y);
 
   // --- draw L3 cache --- //
-  double l3_x = 200;
+  double l3_x = margin_x + content_width * (1.0/5.0);
   double l3_y = line_end_y;
   cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height, 
-    region_colors[l3_saturation_metric_name], "L3 Cache", big_label_font);
+    region_colors
+      [performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::geometric_mean)]
+      [l3_saturation_metric_name], "L3 Cache", big_label_font);
 
   // --- draw socket 0 --- //
   double socket0_x = margin_x;
@@ -519,10 +573,12 @@ void saturation_diagram::draw_diagram_overview(
     // --- threads within core:
 
     double thread_x, thread_y, thread_width, thread_height;
+    double port_width, port_height, port_x, port_y;
     for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++)
     {
       thread_width = (core_width - text_height) / THREADS_PER_CORE;
-      thread_height = core_height;
+      // don't take all of core height, leave room for ports
+      thread_height = core_height * (2.0/3.0); 
 
       thread_x = core_x + text_height + thread_num * thread_width;
       thread_y = core_y;
@@ -531,6 +587,23 @@ void saturation_diagram::draw_diagram_overview(
         computation_color, 
         "Thread " + std::to_string(core_num * THREADS_PER_CORE + thread_num),
         big_label_font);
+
+      // ----- draw ports in thread
+      port_width = thread_width * (1.0/static_cast<double>(NUM_PORTS_IN_CORE));
+      port_height = core_height * (1.0/3.0);
+      port_y = thread_y + thread_height;
+
+      for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+      {
+        port_x = thread_x + port_num * port_width;
+        cairo_draw_component(cr, port_x, port_y, port_width, port_height,
+          region_colors
+            [json_thread_section_base + std::to_string(thread_num)]
+            [fhv_port_usage_ratio_start + std::to_string(port_num) 
+              + fhv_port_usage_ratio_end],
+          "Port " + std::to_string(port_num), 
+          description_font);
+      }
     }
 
     // --- caches attached to core:
@@ -540,7 +613,7 @@ void saturation_diagram::draw_diagram_overview(
     for (unsigned cache_num = 0; cache_num < num_attached_caches; cache_num++)
     {
       cache_x = core_x + text_height;
-      cache_y = core_y + core_height + cache_num * core_cache_height;
+      cache_y = port_y + port_height + cache_num * core_cache_height;
       cache_width = core_width - text_height;
 
       if (cache_num == 0)
@@ -550,9 +623,15 @@ void saturation_diagram::draw_diagram_overview(
       else
       {
         if(cache_num == 1)
-          cache_color = region_colors[l2_saturation_metric_name];
+          cache_color = region_colors
+            [performance_monitor::aggregationTypeToString(
+              performance_monitor::aggregation_t::geometric_mean)]
+            [l2_saturation_metric_name];
         else if(cache_num == 2)
-          cache_color = region_colors[l3_saturation_metric_name];
+          cache_color = region_colors
+            [performance_monitor::aggregationTypeToString(
+              performance_monitor::aggregation_t::geometric_mean)]
+            [l3_saturation_metric_name];
         else
           std::cout << "ERROR: unknown cache number in draw_diagram_overview"
             << std::endl;
@@ -576,8 +655,8 @@ void saturation_diagram::draw_diagram_overview(
   cairo_surface_destroy(surface);
 }
 
-void saturation_diagram::draw_diagram_core_detail(
-  std::map<std::string, rgb_color> region_colors,
+void saturation_diagram::draw_diagram_overview(
+  json region_colors,
   rgb_color min_color,
   rgb_color max_color,
   std::string region_name,
