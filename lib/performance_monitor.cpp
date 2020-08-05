@@ -16,7 +16,8 @@ const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_out
 std::vector<std::string> performance_monitor::key_metrics;
 
 // misc
-const std::string performance_monitor::accessmode = ACCESSMODE_DAEMON;
+const std::string performance_monitor::accessmode = 
+  std::to_string(ACCESSMODE_DAEMON);
 
 // PerThreadResult function definitions
 bool

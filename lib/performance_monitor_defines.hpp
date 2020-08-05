@@ -8,8 +8,6 @@
 // high values bug (see https://github.com/RRZE-HPC/likwid/issues/292 )
 #define EVENT_VALUE_ERROR_THRESHOLD 1.84467e19 
 #define METRIC_VALUE_ERROR_THRESHOLD 1e10 
-#define ACCESSMODE_DAEMON "1"
-#define ACCESSMODE_DIRECT "0"
 #define MFLOPS_TO_TFLOPS 1e-6
 #define OPS_PER_SP_256_VECTOR 8
 #define OPS_PER_SP_128_VECTOR 4
