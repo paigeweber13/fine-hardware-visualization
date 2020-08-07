@@ -100,6 +100,14 @@ See last week. Additional questions listed here
     something I've been struggling to do as I examine even just the perfgropus
     supplied by likwid (which is a small subset of the total number of
     performance counters supplied by intel)
+- as the number of things we want to measure grows, would it make sense to use
+  the likwid stethoscope mode?
+  - but I know the execution loads can change throughout the execution of a
+    program.... Perhaps it makes sense to do many short stethoscope
+    measurements across execution?
+  - right now we're only showing the average state across entire execution
+    anyways 
+  - this could make a pretty animation
 
 ## Accomplishments
 - Finished restructuring performance_monitor

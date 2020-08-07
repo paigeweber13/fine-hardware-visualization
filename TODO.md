@@ -1,14 +1,26 @@
 # TODO:
 ## Immediate:
-- [ ] re-label current "draw_overview" to "draw_detail" 
-- [ ] create new "draw_overview" function
-- [ ] add port_usage to diagram
-- [ ] quickly finish looking at all perfgroups
-- [ ] look at other counters we can use for 3 key areas
-  - [ ] port usage
+- [x] re-label current "draw_overview" to "draw_detail" 
+- [x] create new "draw_overview" function
+- [x] add port_usage to diagram
+  - [x] make ports actually colored
+  - [x] make outline width adjustable
+  - [x] reduce outline width for stuff inside socket
+- [x] quickly finish looking at all perfgroups
+- [~] look at other counters we can use for 3 key areas
+  - [x] port usage
   - [ ] instruction decoding: can you decode instructions quickly enough?
+        (front-end)
   - [ ] micro-instruction retiring: can you fetch instructions quickly
-        enough? 
+        enough? .... back end? maybe? I'm not sure I understand if "fetching
+        instructions" refers to getting new instructions from memory or how the
+        back-end sometimes has to wait for operands to be available
+  - [ ] TMA performance group sounds like exactly what we need for the last two
+  - [ ] plan to implement these but don't do it just yet. We want to decide
+        per-core vs overall saturation first
+- [ ] Read more on Top-down Microarchitecture Analysis method
+  - [ ] draft up diagram for how we can utilize these new counters in our
+        visualization
 - [ ] how do we do saturation per-core?
   - [ ] I assume we're not using flops anymore, just 3 key areas above?
   - [ ] how do we benchmark? Just run a single thread? run all threads and
@@ -16,6 +28,9 @@
   - [ ] change calculate_saturation() so that it calculates per-core and then
         those values are aggregated automatically by
         perform_result_aggregation()
+  - [ ] once we decide how we'll do per-core vs. overall saturation, make the
+        necessary changes to performance_monitor and saturation_diagram
+- [ ] implement new counters that highlight 3 key areas
 - [x] improve software engineering
   - [x] performance_monitor.cpp (see "improve-result-processing" branch)
     - [x] some things are aggregated across threads, some things are not
@@ -117,3 +132,4 @@
       - if no, remove
 - [ ] there are a lot of text files floating around (like in `tests/`). Can
       those be removed?
+- [ ] EASY: rename *.h to *.hpp to make it clear they are C++ headers
