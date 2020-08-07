@@ -3,7 +3,7 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-07-28 through 2020-08-04](#2020-07-28-through-2020-08-04)
+- [2020-07-28 through 2020-08-](#2020-07-28-through-2020-08-)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
 - [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
@@ -76,15 +76,37 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# 2020-07-28 through 2020-08-04
+# 2020-07-28 through 2020-08-
 ## Questions
-See last week
+See last week. Additional questions listed here
+
+- Do you know any professors that teach web development who would be willing to
+  answer some questions for me? I'm working on a side project that will involve
+  building a webapp
+- one of the key performance groups you mentioned is "micro instruction
+  retiring", and one of the ways you explained that was "can you fetch
+  instructions quickly enough". What exactly does that mean? Does that mean you
+  can fetch operands quickly enough from memory? Does that mean getting new
+  instructions from memory? Is this factor unique to the front-end or back-end
+  of the processor?
+- how does TMA group sound for identifying performance in our 3 key areas?
+  - certainly seems to highlight uop decoding and retiring
+- what do you think about using machine learning to gain insights into the
+  immense number of performance counters available to us?
+  - I don't think our final project has a need for machine learning, but maybe
+    during the research process it could give us some insights into what
+    counters and metrics are important. Thoughts?
+  - It can find patterns while sorting through huge amounts of data, which is
+    something I've been struggling to do as I examine even just the perfgropus
+    supplied by likwid (which is a small subset of the total number of
+    performance counters supplied by intel)
 
 ## Accomplishments
 - Finished restructuring performance_monitor
 - Added numbers to legend
 - revisited examples and made them all work again
 - some minor work on software engineering in makefiles
+- added port usage to saturation diagram
 
 # 2020-07-21 through 2020-07-28
 ## Questions
@@ -614,28 +636,228 @@ considered and only remains for the purpose of logging past work
        for RAM
  - TODO: expand sections after this one
  - FALSE_SHARE 
+   - conceptually, false sharing is when multiple threads share a cacheline
+     containing a value that will not be changed, but something else in the
+     cacheline gets changed, forcing the value to be stored to memory and then
+     re-loaded by all threads, even if they only use the read-only part of the
+     cacheline. 
    - uses two counters: MEM_INST_RETIRED_ALL (all memory instructions) and 
      MEM_LOAD_L3_HIT_RETIRED.XSNP_HITM. Description in intel docs says: 
      "Retired load instructions which data sources were HitM responses from 
      shared L3."
+   - FALSE_SHARE, cpu-heavy
+     - false sharing is much higher for basic code at 166 GB vs 2 GB in the
+       optimized case
+     - false sharing rate (falsely shared ops / total mem ops) is also higher
+       for basic code at 0.0157 (1.5%), compared with 0.0005 (0.05%) for opt 
+       code
+   - FALSE_SHARE, mem-heavy
+     - again, false sharing volumes are higher for basic code (4.08 TB??) vs 
+       34 GB for opt code
+     - notice that in general false sharing volumes are higher
+     - false sharing rates are higher for basic code as well: 0.195 vs 0.0147
+       for opt
  - FLOPS_AVX
    - not super useful. Just gives a subset of information available in 
      FLOPS_SP and FLOPS_DP
  - FLOPS_SP/FLOPS_DP vectorization ratio
+   - percentage of flop operations that were vector operations
    - went from numbers in the order of 1e-10 (in basic) to 100 (in opt)
  - ICACHE
+   - stats like L1I request rate, L1I miss rate, and L1I stall rate
+   - avg values used
+   - ICACHE, cpu-heavy
+     - request rate: 0.4209 in basic, 0.1442 in opt
+     - miss rate:    0.0001 in basic, 0.0001 in opt
+     - stall rate:   0.0005 in basic, 0.0004 in opt
+   - ICACHE, mem-heavy
+     - request rate: 0.1825 in basic, 0.1396 in opt
+     - miss rate:    0.0004 in basic, 0.0003 in opt
+     - stall rate:   0.0021 in basic, 0.0017 in opt
  - L2CACHE
+   - whereas the L2 performance group provides data like bandwidth and data 
+     volume, L2CACHE measures request rates and miss rates. Here, we will 
+     focus on request rates (L2 requests / total num instructions) and miss
+     ratios (L2 misses / L2 requests). We will consider average rates across
+     threads.
+   - L2CACHE, cpu-heavy
+     - |               | basic  | opt    |  
+       |---------------|--------|--------|  
+       | request rate: | 0.0221 | 0.0158 |
+       | miss ratio:   | 0.3516 | 0.2799 |
+   - L2CACHE, mem-heavy
+     - |               | basic  | opt    |  
+       |---------------|--------|--------|  
+       | request rate: | 0.2058 | 0.2890 |
+       | miss ratio:   | 0.3538 | 0.2844 |
  - L3CACHE
+   - L3CACHE, cpu-heavy
+     - |               | basic  | opt    |  
+       |---------------|--------|--------|  
+       | request rate: | 0.0000 | 0.0001 |
+       | miss ratio:   | 0.4099 | 0.8734 |
+   - L3CACHE, mem-heavy
+     - |               | basic  | opt    |  
+       |---------------|--------|--------|  
+       | request rate: | 0.0000 | 0.0006 |
+       | miss ratio:   | 0.4930 | 0.8640 |
  - PORT_USAGE*
    - we record these already, but we don't use them in the visualization
  - RECOVERY
+   - RECOVERY, cpu-heavy
+     - avg recovery duration: 6.0592 in basic, 5.9054 in opt
+   - RECOVERY, mem-heavy
+     - avg recovery duration: 6.3531 in basic, 6.0475 in opt
  - TLB_DATA
+   - TLB_DATA, cpu-heavy
+     - |                          | basic  | opt    |  
+       |--------------------------|--------|--------|  
+       | load miss rate:          | 0.0000 | 0.0001 |
+       | load miss avg duration:  | 37.912 | 31.365 |
+       | store miss rate:         | 0.0000 | 0.0000 |
+       | store miss avg duration: | 15.253 | 23.535 |
+   - TLB_DATA, mem-heavy
+     - |                          | basic  | opt    |  
+       |--------------------------|--------|--------|  
+       | load miss rate:          | 0.0001 | 0.0011 |
+       | load miss avg duration:  | 31.853 | 29.965 |
+       | store miss rate:         | 0.0000 | 0.0000 |
+       | store miss avg duration: | 7.0166 | 33.291 |
  - TLB_INSTR
+   - TLB_INSTR, cpu-heavy
+     - |                     | basic  | opt    |  
+       |---------------------|--------|--------|  
+       | miss rate:          | 0.0000 | 0.0000 |
+       | miss avg duration:  | 55.168 | 73.526 |
+   - TLB_INSTR, mem-heavy
+     - |                     | basic  | opt    |  
+       |---------------------|--------|--------|  
+       | miss rate:          | 0.0000 | 0.0000 |
+       | miss avg duration:  | 51.307 | 67.659 |
  - TMA
- - UOPS_EXEC
- - UOPS_ISSUE
+   - intel article about this methodology: https://software.intel.com/content/www/us/en/develop/documentation/vtune-cookbook/top/methodologies/top-down-microarchitecture-analysis-method.html
+   - one counter is "UOPS_RETIRED_RETIRE_SLOTS". Intel documentation describes
+     this counter by saying "Counts the retirement slots used". The above link
+     describes a slot as a theoretical place for a uop. Each cycle has four
+     slots
+   - IDQ_UOPS_NOT_DELIVERED_CORE: Intel docs describe this one as "Counts the 
+     number of uops not delivered to by the Instruction Decode Queue (IDQ) to 
+     the back-end of the pipeline when there were no back-end stalls. This 
+     event counts for one SMT thread in a given cycle."
+   - INT_MISC_RECOVERY_CYCLES: Intel docs describe this one as "Core cycles 
+     the allocator was stalled due to recovery from earlier machine clear event
+     for this thread (for example, misprediction or memory order conflict).
+   - these are used to create metrics for retired, front-end bound, back-end 
+     bound, and badly-speculated instructions. We will evaluate those here.
+     - front-end bound is calculated by IDQ_UOPS_NOT_DELIVERED_CORE/total_slots
+       * 100. In other words, fetch bubbles/total slots * 100
+     - badly-speculated percentage is calculated by finding uops not retired
+       and dividing my number of slots. Finding uops not retired is somewhat
+       complicated. Likwid does this by finding 
+       (UOPS_ISSUED_ANY-UOPS_RETIRED_RETIRE_SLOTS+(4*INT_MISC_RECOVERY_CYCLES))
+       so they include INT_MISC_RECOVERY_CYCLES as part of the ops completed
+     - percent retired is simply UOPS_RETIRED_RETIRE_SLOTS/total slots * 100
+     - back-end bound is complicated and I'm not sure I understand it. So I
+       will just paste the formula here
+       Back End [%] = (
+         1 - (
+           ( 
+             IDQ_UOPS_NOT_DELIVERED_CORE + UOPS_ISSUED_ANY
+             + (4*INT_MISC_RECOVERY_CYCLES)
+           )
+           / (4 * CPU_CLK_UNHALTED_CORE)
+         )
+       ) * 100
+   - All measurements are given in percentages and are averaged across threads
+   - TMA, cpu-heavy
+     - |                 | basic  | opt    |  
+       |-----------------|--------|--------|  
+       | front-end bound | 10.591 | 11.323 |
+       | bad speculation | 01.029 | 00.181 |
+       | retired         | 22.159 | 31.584 |
+       | back-end bound  | 66.220 | 56.912 |
+   - TMA, mem-heavy
+     - |                 | basic  | opt    |  
+       |-----------------|--------|--------|  
+       | front-end bound | 08.084 | 04.665 |
+       | bad speculation | 04.753 | 00.455 |
+       | retired         | 05.484 | 20.653 |
+       | back-end bound  | 81.678 | 74.228 |
+   - Front-end stalls are due to lack of frontend bandwidth or high front-end
+     latency.
+   - bad speculation is caused by branch mispredicts or machine clears
+   - back-end stalls are the hardest to diagnose. They can be memory-bound or
+     core-bound.
+     - core-bound: Are one or two ports saturated? (esp. ports that don't do 
+       vector operations). Are we doing scalar ops where vector ops are 
+       possible? Are several consecutive divide operations competing for use
+       of the divide units?
+     - memory bound: some level of the memory subsystem is being over-stressed.
+       Is the application trying to make many stores to memory? Does the data
+       structure have poor locality, preventing good caching? Do loads depend
+       on prior stores?
  - UOPS
+   - just measures raw numbers of UOPS. less useful, probably.
+   - Noticed that for the cpu case, optimized code has between 1/10th and 1/5th
+     the uops issued, executed, and retired as the basic code.
+   - for the mem-heavy case, the optimized code had about 1/20th the uops 
+     issued, 1/10 the uops executed, and 1/10th the uops retired
+   - uops retired was consistently higher than uops executed.... I'm unclear 
+     why, because the intel documentation made it sound like retired meant
+     executed, especially because uops from miss-predictions are NOT counted
+     as "retired"
+     - source: link at beginning of TMA section says the following: "The 
+       completion of a uOp’s execution is called retirement"
+ - UOPS_EXEC
+   - measures portion of cycles were used by uops and portion that were 
+     stalled. Also measures average stall duration.
+   - measures "the execution stage in the pipeline" according to likwid
+   - UOPS_EXEC, cpu-bound:
+     - |                             | basic  | opt    |  
+       |-----------------------------|--------|--------|  
+       | used cycles ratio [%]       | 59.513 | 86.070 |
+       | stalled cycles ratio [%]    | 40.487 | 13.930 |
+       | avg stall duration [cycles] | 1.18e11| 3.56e9 |
+   - UOPS_EXEC, mem-bound:
+     - |                             | basic  | opt    |  
+       |-----------------------------|--------|--------|  
+       | used cycles ratio [%]       | 14.577 | 46.261 |
+       | stalled cycles ratio [%]    | 85.424 | 53.739 |
+       | avg stall duration [cycles] | 1.07e12| 2.09e10|
+   - my processor runs at 2.40GHz, 2.40e9.... meaning on average a stall is
+     more than 1 second??? That seems unlikely...
+   - likwid calculates average stall duration with the following formula:
+     Avg stall duration [cycles] = UOPS_EXECUTED_STALL_CYCLES 
+     / UOPS_EXECUTED_STALL_CYCLES:EDGEDETECT
+ - UOPS_ISSUE
+   - measures "the issue stage in the pipeline" according to likwid
+   - UOPS_ISSUE, cpu-bound:
+     - |                             | basic  | opt    |  
+       |-----------------------------|--------|--------|  
+       | used cycles ratio [%]       | 24.226 | 31.994 |
+       | stalled cycles ratio [%]    | 75.774 | 68.002 |
+       | avg stall duration [cycles] | 2.15e11| 1.74e10|
+   - UOPS_ISSUE, mem-bound:
+     - |                             | basic  | opt    |  
+       |-----------------------------|--------|--------|  
+       | used cycles ratio [%]       | 06.524 | 22.595 |
+       | stalled cycles ratio [%]    | 93.477 | 77.405 |
+       | avg stall duration [cycles] | 1.18e12| 2.94e10|
  - UOPS_RETIRE
+   - measures "the retirement stage in the pipeline (re-order buffer)" 
+     according to likwid
+   - UOPS_RETIRE, cpu-bound:
+     - |                             | basic  | opt    |  
+       |-----------------------------|--------|--------|  
+       | used cycles ratio [%]       | 33.636 | 50.088 |
+       | stalled cycles ratio [%]    | 66.364 | 49.912 |
+       | avg stall duration [cycles] | 1.96e11| 1.27e10|
+   - UOPS_RETIRE, mem-bound:
+     - |                             | basic  | opt    |  
+       |-----------------------------|--------|--------|  
+       | used cycles ratio [%]       | 07.639 | 27.381 |
+       | stalled cycles ratio [%]    | 92.361 | 72.620 |
+       | avg stall duration [cycles] | 1.18e12| 2.81e10|
 
 ### Counters we're already using
  - FLOPS_DP - already used
