@@ -3,6 +3,7 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
+- [Biggest questions, main points](#biggest-questions-main-points)
 - [2020-07-28 through 2020-08-](#2020-07-28-through-2020-08-)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
@@ -76,6 +77,19 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# Biggest questions, main points
+- How will we do per-core saturation measurements? How will we average them for
+  the overviews?
+  - How should we get a benchmark for single-thread performance in key areas?
+    Should we run one thread alone? Run all threads and take the average?
+  - Will we average "saturation" for multiple performance measurements (e.g.
+    portion back-end bound, decoding rate, etc) for the overall saturation?
+- What new counters will we use?
+  - Does the Top-down Microarchitecture Analysis method make sense? Does this
+    fit the 3 core areas you mentioned weeks ago?
+  - What about L2CACHE, L3CACHE, CYCLE_ACTIVITY, ICACHE, etc?
+  - What will we benchmark from these groups?
+
 # 2020-07-28 through 2020-08-
 ## Questions
 See last week. Additional questions listed here
@@ -115,6 +129,25 @@ See last week. Additional questions listed here
 - revisited examples and made them all work again
 - some minor work on software engineering in makefiles
 - added port usage to saturation diagram
+- Identified some counters that we can use to measure 3 key performance areas:
+  - TMA!!!
+  - CYCLE_ACTIVITY/CYCLE_STALLS: stalls due to L1D misses, L2 misses, and L3
+    misses (memory loads) - can help diagnose back-end bound applications
+  - L2CACHE, L3CACHE for diagnosing memory issues
+  - ICACHE for instruction fetching?
+  - UOPS_EXEC/ISSUE/RETIRE might be good if we can understand them...
+  - BRANCH for front-end bound?
+- feel like a good procedure is: 
+  1. use TMA to determine front-end/back-end bound
+  1. if back-end bound, look at memory (for memory-bound cases) and port-usage
+     (for core-bound cases)
+     - use counters L2CACHE, L3CACHE, CYCLE_ACTIVITY, etc
+  1. if front-end bound, look at code size and branching
+  1. if bad-speculation, not really sure what to do. Intel docs recommend
+     "compiler techniques such as profile-guided optimization" 
+  1. if retiring, code is probably good. However, consider if the code is
+     retiring non-useful operations. At this point, looking at flops and
+     bandwidth may be appropriate
 
 # 2020-07-21 through 2020-07-28
 ## Questions
