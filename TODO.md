@@ -19,12 +19,16 @@
   - [ ] plan to implement these but don't do it just yet. We want to decide
         per-core vs overall saturation first
 - [ ] Read more on Top-down Microarchitecture Analysis method
-  - [ ] draft up diagram for how we can utilize these new counters in our
+  - [x] draft up diagram for how we can utilize these new counters in our
         visualization
 - [ ] how do we do saturation per-core?
   - [ ] I assume we're not using flops anymore, just 3 key areas above?
   - [ ] how do we benchmark? Just run a single thread? run all threads and
         average? 
+  - [ ] how do we measure capability of core to decode and retire instructions?
+        Should we use the TMA method of trying to keep the percentage of
+        instructions stalled on back end below a certain percentage? See
+        https://software.intel.com/content/www/us/en/develop/documentation/vtune-cookbook/top/methodologies/top-down-microarchitecture-analysis-method.html#top-down-microarchitecture-analysis-method_GUID-FEA77CD8-F9F1-446A-8102-07D3234CDB68
   - [ ] change calculate_saturation() so that it calculates per-core and then
         those values are aggregated automatically by
         perform_result_aggregation()
@@ -110,6 +114,12 @@
           to use likwid...")
     - [ ] write test cases
     - [ ] consider improving doxygen comments and writing man pages for usage
+- [ ] consider adding `multimap`s to be used to index the vector of `struct`s
+      for easy access
+  - what's the use case for this?
+- [ ] respect GOMP_CPU_AFFINITY so users can set which specific threads they
+      want to use
+  - what's the use case for this?
 
 ### Improve software engineering
 - makefile has some unnecessary repetition of variables
@@ -133,3 +143,8 @@
 - [ ] there are a lot of text files floating around (like in `tests/`). Can
       those be removed?
 - [ ] EASY: rename *.h to *.hpp to make it clear they are C++ headers
+- [ ] EASY: add fhv_ prefix to fhv constants
+- [ ] line 79 of saturation_diagram.cpp: are we just rebuilding list of
+      port_usage values there? does it make sense to have a list created in
+      performance_monitor_defines.hpp? (the list of port_usage keys *is*
+      dynamic so this might be tough)
