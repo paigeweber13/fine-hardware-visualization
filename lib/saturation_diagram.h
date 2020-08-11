@@ -64,14 +64,6 @@ class saturation_diagram {
      * Draws an overview of the architecture that displays RAM, cores, and
      * caches 
      */
-    // TODO: evaluate if this should really be provided region_colors. 
-    //   - it depends on region_data to decide to use DP or SP flops. But in
-    //     the future we want to change this to be an average of things like
-    //     port usage, instruction decoding, and instruction retiring
-    //   - it depends on min_color and max_color to draw swatch
-    //   - even if we remove region_data dependency, does it make more sense to
-    //     just calculate the region colors here? Is there a benefit to
-    //     calculating region_colors elsewhere?
     static void draw_diagram_detail(
       json region_colors,
       precision precision_for_saturation,

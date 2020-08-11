@@ -34,10 +34,6 @@ class performance_monitor {
 
     // ---- TYPES
 
-    // TODO: consider adding multimaps from value to index of thing (or value
-    // to pointer to thing) for easy access and easy collection of all entries
-    // within a range using std::lower_bound and std::upper_bound
-
     // represents a result unique to a thread. "thread" refers to the hardware
     // thread 
     struct PerThreadResult {
@@ -104,7 +100,6 @@ class performance_monitor {
     // OMP_NUM_THREADS is respected. Currently, threads will be assigned
     // sequentially from the first.
     // 
-    // TODO: respect GOMP_CPU_AFFINITY
     static void init(std::string parallel_regions = "",
       std::string sequential_regions = "",
       std::string event_groups = 
