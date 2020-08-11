@@ -82,6 +82,7 @@ Hardware Visualization
   the overviews?
   - How should we get a benchmark for single-thread performance in key areas?
     Should we run one thread alone? Run all threads and take the average?
+    - what about Memory, where only one thread reports metrics?
   - Will we average "saturation" for multiple performance measurements (e.g.
     portion back-end bound, decoding rate, etc) for the overall saturation?
 - What new counters will we use?
@@ -89,14 +90,20 @@ Hardware Visualization
     fit the 3 core areas you mentioned weeks ago?
   - What about L2CACHE, L3CACHE, CYCLE_ACTIVITY, ICACHE, etc?
   - What will we benchmark from these groups?
+- [Here](https://app.lucidchart.com/documents/view/5ac956c3-ac5c-4717-ade2-6b13cec09f26/0_0)
+  is a diagram presenting drafts of the visualizations we'll create. How does
+  this look? What changes would you make?
+- Info on TMA
+  - most came from [an intel article](https://software.intel.com/content/www/us/en/develop/documentation/vtune-cookbook/top/methodologies/top-down-microarchitecture-analysis-method.html)
+  - There was also a handy
+    [graphic](https://i.postimg.cc/V5QKV26D/20200810-181103.png). Original
+    source is
+    [here](http://www.cs.technion.ac.il/~erangi/TMA_using_Linux_perf__Ahmad_Yasin.pdf)
 
 # 2020-07-28 through 2020-08-
 ## Questions
 See last week. Additional questions listed here
 
-- Do you know any professors that teach web development who would be willing to
-  answer some questions for me? I'm working on a side project that will involve
-  building a webapp
 - one of the key performance groups you mentioned is "micro instruction
   retiring", and one of the ways you explained that was "can you fetch
   instructions quickly enough". What exactly does that mean? Does that mean you
@@ -119,9 +126,21 @@ See last week. Additional questions listed here
   - but I know the execution loads can change throughout the execution of a
     program.... Perhaps it makes sense to do many short stethoscope
     measurements across execution?
+  - this may be a good way to get a sense for how execution changes as a
+    program runs
   - right now we're only showing the average state across entire execution
     anyways 
   - this could make a pretty animation
+- stethoscope is not really meant for fine-tuned execution. We could hack it to
+  do this though? I don't know how we'd trigger it from code
+  - what other technologies might allow us to do this?
+  - require people to create fine-tuned groups? this is unwieldy
+
+Not related to this project
+- Do you know any professors that teach web development who would be willing to
+  answer some questions for me? I'm working on a side project that will involve
+  building a webapp
+- What OS do supercomputer clusters use? CentOS? RHEL? OpenSUSE?
 
 ## Accomplishments
 - Finished restructuring performance_monitor
@@ -197,6 +216,10 @@ Low-priority
   because they are used by C programmers as well as C++ programmers. I seem to
   remember that we decided to use C++ at the beginning. why not C? Do you think
   we'll have to port this to C at some point in the future?
+
+*END OF QUESTIONS THAT ARE STILL UNANSWERED*
+
+-------------------------------------------------------
 
 ## Accomplishments
 - completely revamped how we process and store results. Things are now much
