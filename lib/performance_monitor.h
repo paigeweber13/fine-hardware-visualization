@@ -23,7 +23,8 @@ using json = nlohmann::json;
 class performance_monitor {
   public:
     // enums for aggregation type and result type
-    enum class aggregation_t { sum, arithmetic_mean, geometric_mean };
+    enum class aggregation_t { sum, arithmetic_mean, geometric_mean, 
+      saturation };
     enum class result_t { event, metric };
 
     // to string functions for those
@@ -73,11 +74,6 @@ class performance_monitor {
     // maps region to saturation name to saturation value
     typedef std::map<std::string, std::map<std::string, double>> 
       saturation_map_t;
-
-    // ------ attributes ------ //
-    const static std::string likwidOutputFilepath;
-    const static std::string jsonResultOutputFilepath;
-    const static std::string accessmode;
 
     // ------ functions ------ //
     // actual functionality
@@ -181,11 +177,6 @@ class performance_monitor {
 
     // --- important numbers
     static int num_threads;
-
-    // identifies the most important metrics: the ones we will output to json
-    // for later use in visualization. This is a class variable because it is
-    // build in the init routine.
-    static std::vector<std::string> key_metrics;
 
     static performance_monitor::aggregate_results_t  aggregate_results;
 

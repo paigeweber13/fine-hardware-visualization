@@ -50,13 +50,18 @@ class saturation_diagram {
       unsigned height,
       unsigned num_steps);
 
+    static rgb_color calculate_single_color(
+      const double &value,
+      const rgb_color &min_color,
+      const rgb_color &max_color);
+
     /* ---- calculate saturation colors ----- 
      * The return value of this function is intended to be passed to
      * draw_diagram. 
      */ 
     static json
     calculate_saturation_colors(
-      const json &region_saturation,
+      const json &region_data,
       const rgb_color &min_color,
       const rgb_color &max_color);
 
@@ -76,6 +81,7 @@ class saturation_diagram {
     
     static void draw_diagram_overview(
       json region_colors,
+      precision precision_for_saturation,
       rgb_color min_color,
       rgb_color max_color,
       std::string region_name,

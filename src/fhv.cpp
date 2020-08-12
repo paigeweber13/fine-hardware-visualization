@@ -46,7 +46,7 @@ std::vector<std::uint64_t> ram_args = {20, 100000};
 enum class output_format { pretty, csv };
 
 // likwid results file path
-const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
+const char *filepath = likwidOutputFilepath.c_str();
 
 void benchmark_flops(precision p, uint64_t num_iter)
 {
@@ -195,7 +195,7 @@ void visualize(
       region_data["DP [MFLOP/s]"] > region_data["SP [MFLOP/s]"] 
       ? precision::DOUBLE_P : precision::SINGLE_P;
 
-    saturation_diagram::draw_diagram_detail(region_colors, chosen_precision, 
+    saturation_diagram::draw_diagram_overview(region_colors, chosen_precision, 
       min_color, max_color, region_name, params, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;

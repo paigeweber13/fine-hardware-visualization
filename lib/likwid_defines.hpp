@@ -1,4 +1,8 @@
 #pragma once
+
+// Intended to be used to track the keys that likwid uses. Intended to be
+// static.
+
 // JUSTIFICATION: using defines for these things turns incorrect spellings into
 // compile-time errors instead of runtime errors. This is good!
 

@@ -9,16 +9,6 @@ performance_monitor::per_thread_results_t
 
 int performance_monitor::num_threads = -1;
 
-// filenames
-const std::string performance_monitor::likwidOutputFilepath = "/tmp/likwid_marker.out";
-const std::string performance_monitor::jsonResultOutputFilepath = "./perfmon_output.json";
-
-std::vector<std::string> performance_monitor::key_metrics;
-
-// misc
-const std::string performance_monitor::accessmode = 
-  std::to_string(ACCESSMODE_DAEMON);
-
 // PerThreadResult function definitions
 bool
 performance_monitor::PerThreadResult::operator<(
@@ -140,9 +130,9 @@ void performance_monitor::init(std::string parallel_regions,
 
   setenv("LIKWID_EVENTS", event_groups.c_str(), 1);
   setenv("LIKWID_THREADS", likwid_threads_string.c_str(), 1);
-  setenv("LIKWID_FILEPATH", performance_monitor::likwidOutputFilepath.c_str(), 
+  setenv("LIKWID_FILEPATH", likwidOutputFilepath.c_str(), 
     1);
-  setenv("LIKWID_MODE", performance_monitor::accessmode.c_str(), 1);
+  setenv("LIKWID_MODE", accessmode.c_str(), 1);
   setenv("LIKWID_FORCE", "1", 1);
   // setenv("LIKWID_DEBUG", "3", 1);
 
@@ -182,48 +172,6 @@ void performance_monitor::init(std::string parallel_regions,
       registerRegions(parallel_regions);
     }
   }
-
-  // ----- initialize variables ----- // 
-  // start by adding bandwidth, flops, etc
-  performance_monitor::key_metrics.clear();
-  performance_monitor::key_metrics.insert(
-    performance_monitor::key_metrics.begin(), 
-    {
-      mflops_metric_name,
-      mflops_dp_metric_name,
-      l2_bandwidth_metric_name,
-      l2_data_volume_name,
-      l2_evict_bandwidth_name,
-      l2_evict_data_volume_name,
-      l2_load_bandwidth_name,
-      l2_load_data_volume_name,
-      l3_bandwidth_metric_name,
-      l3_data_volume_name,
-      l3_evict_bandwidth_name,
-      l3_evict_data_volume_name,
-      l3_load_bandwidth_name,
-      l3_load_data_volume_name,
-      ram_bandwidth_metric_name,
-      ram_data_volume_metric_name,
-      ram_evict_bandwidth_name,
-      ram_evict_data_volume_name,
-      ram_load_bandwidth_name,
-      ram_load_data_volume_name,
-    });
-
-  // add port usage stuff to key metrics
-  for (size_t i = 0; i < NUM_PORTS_IN_CORE; i++)
-  {
-    performance_monitor::key_metrics.push_back(
-      fhv_port_usage_ratio_start + std::to_string(i) + 
-      fhv_port_usage_ratio_end);
-  }
-
-  // add saturation metrics
-  performance_monitor::key_metrics.insert(
-    performance_monitor::key_metrics.end(), 
-    fhv_saturation_metrics.begin(),
-    fhv_saturation_metrics.end());
 }
 
 void performance_monitor::startRegion(const char * tag)
@@ -249,8 +197,6 @@ void performance_monitor::close(){
 
   load_likwid_data();
   calculate_port_usage_ratios();
-  // TODO: move calculate_saturation() to HERE (before
-  // perform_result_aggregation) once we get per-core saturation workding
   std::sort(per_thread_results.begin(), per_thread_results.end());
 
   perform_result_aggregation();
@@ -269,6 +215,9 @@ std::string performance_monitor::aggregationTypeToString(
   else if (aggregation_type == 
     performance_monitor::aggregation_t::geometric_mean)
     return "geometric_mean";
+  else if (aggregation_type == 
+    performance_monitor::aggregation_t::saturation)
+    return "saturation";
   else
     return "unknown_aggregation_type";
 }
@@ -515,16 +464,6 @@ void performance_monitor::calculate_port_usage_ratios()
   for (const auto &ptr : per_thread_results)
     regions.insert(ptr.region_name);
 
-  // build list of port usage event/metric names
-  std::vector<std::string> port_usage_event_names;
-  std::vector<std::string> port_usage_ratio_metric_names;
-  for (unsigned i = 0; i < NUM_PORTS_IN_CORE; i++)
-  {
-    port_usage_event_names.push_back(uops_port_base_name + std::to_string(i));
-    port_usage_ratio_metric_names.push_back(fhv_port_usage_ratio_start + 
-      std::to_string(i) + fhv_port_usage_ratio_end);
-  }
-
   // instead of using this vector, we could iterate through per_thread_results
   // again. The vector makes things easy, though
   std::vector<double> uops_executed_port(NUM_PORTS_IN_CORE);
@@ -542,7 +481,7 @@ void performance_monitor::calculate_port_usage_ratios()
         {
           if(ptr.thread_num == t 
             && ptr.region_name == region_name
-            && ptr.result_name == port_usage_event_names[port_num])
+            && ptr.result_name == likwid_port_usage_event_names[port_num])
           {
             // sum 
             total_num_port_ops += ptr.result_value;
@@ -559,7 +498,7 @@ void performance_monitor::calculate_port_usage_ratios()
           .thread_num = t,
           .group_name = fhv_performance_monitor_group,
           .result_type = performance_monitor::result_t::metric,
-          .result_name = port_usage_ratio_metric_names[port_num],
+          .result_name = fhv_port_usage_metrics[port_num],
           .result_value = uops_executed_port[port_num] / total_num_port_ops
         };
 
@@ -573,7 +512,7 @@ void performance_monitor::calculate_saturation(){
   // TODO: eventually I want to build this on a per-thread basis and then have
   // "perform_result_aggregation" automatically aggregate these. however, for
   // now we're just going to build overall results manually and add them to
-  // "aggregate results" under "geometric mean"
+  // "aggregate results" under the special key "saturation"
 
   bool is_saturation_result;
   std::string saturation_result_name;
@@ -623,7 +562,7 @@ void performance_monitor::calculate_saturation(){
           .group_name = fhv_performance_monitor_group,
           .result_type = performance_monitor::result_t::metric,
           .result_name = saturation_result_name,
-          .aggregation_type = performance_monitor::aggregation_t::geometric_mean,
+          .aggregation_type = performance_monitor::aggregation_t::saturation,
           .result_value = saturation_result_value
         };
         
@@ -638,18 +577,6 @@ void performance_monitor::checkInit()
   std::string error_str = "";
   bool something_went_wrong = false;
 
-  if (performance_monitor::key_metrics.size() == 0)
-  {
-    error_str += "WARNING: performance_monitor::key_metrics is empty!"
-      "printHighlights and\n"
-      "resultsToJson will not work. This usually happens because the user "
-      "failed to\n"
-      "call performance_monitor::init(). If init() was called, then something "
-      "is wrong\n"
-      "with init() internally.\n";
-    
-    something_went_wrong = true;
-  }
   if (performance_monitor::num_threads == -1)
   {
     error_str += "WARNING: performance_monitor::num_threads was not set! This "
@@ -725,7 +652,6 @@ void performance_monitor::printAggregateResults(){
 }
 
 void performance_monitor::printHighlights(){
-  checkInit();
   checkResults();
   
   std::cout << std::endl 
@@ -735,7 +661,7 @@ void performance_monitor::printHighlights(){
   std::cout << "----- key metrics, per-thread -----" << std::endl;
   for(const auto & ptr : performance_monitor::per_thread_results)
   {
-    for(const auto & key_metric : performance_monitor::key_metrics)
+    for(const auto & key_metric : fhv_key_metrics)
     {
       if (ptr.result_name == key_metric) std::cout << ptr.toString();
     }
@@ -745,7 +671,7 @@ void performance_monitor::printHighlights(){
     << std::endl;
   for(const auto & ar : performance_monitor::aggregate_results)
   {
-    for(const auto & key_metric : performance_monitor::key_metrics)
+    for(const auto & key_metric : fhv_key_metrics)
     {
       if (ar.result_name == key_metric) std::cout << ar.toString();
     }
@@ -765,7 +691,7 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   // populate json with per_thread_results
   for (const auto & ptr : performance_monitor::per_thread_results)
   {
-    for (const auto &key_metric : performance_monitor::key_metrics)
+    for (const auto &key_metric : fhv_key_metrics)
     {
       if(ptr.result_name == key_metric)
       {
@@ -779,7 +705,7 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   // populate json with aggregate results
   for (const auto & ar : performance_monitor::aggregate_results)
   {
-    for (const auto &key_metric : performance_monitor::key_metrics)
+    for (const auto &key_metric : fhv_key_metrics)
     {
       if(ar.result_name == key_metric)
       {
@@ -791,7 +717,7 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   }
 
   // write json to disk
-  std::string output_filename = jsonResultOutputFilepath;
+  std::string output_filename = jsonResultOutputDefaultFilepath;
   if(const char* env_p = std::getenv(perfmon_output_envvar))
     output_filename = env_p;
 
