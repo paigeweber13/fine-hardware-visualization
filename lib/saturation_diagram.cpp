@@ -1,4 +1,5 @@
 #include "saturation_diagram.h"
+#include "cairo.h"
 
 rgb_color 
 saturation_diagram::color_lerp( 
@@ -226,7 +227,8 @@ void saturation_diagram::pango_cairo_draw_layout(
 
   if (vertical) {
     cairo_rel_move_to(cr, 0, text_box_width);
-    cairo_rotate(cr, -90 * G_PI / 180.0);
+    // cairo_rotate(cr, -90 * G_PI / 180.0);
+    cairo_rotate(cr, -G_PI/2);
   }
 
   pango_cairo_update_layout(cr, layout);
@@ -370,12 +372,6 @@ void saturation_diagram::cairo_draw_arrow(
   double stroke_width
 )
 {
-  if(arrow_direction == direction::LEFT || arrow_direction == direction::RIGHT)
-  {
-    std::cout << "Arrow direction not supported!" << std::endl;
-    return;
-  }
-
   cairo_save(cr);
 
   // ratios of arrowhead size to box size
@@ -383,41 +379,66 @@ void saturation_diagram::cairo_draw_arrow(
   // Must be >= 1.0. Arrowhead will extend past width
   double arrowhead_width_ratio = 1.5; 
   // Must be <= 1.0. Arrowhead will take part of total height 
-  double arrowhead_height_ratio = 0.25;
-
-  // height in vertical dimension relative to text
-  int text_height; // pango units
-  double cairo_text_height = 0; // cairo units
-
-  cairo_set_line_width(cr, stroke_width);
-
-  PangoLayout *layout = pango_cairo_create_layout(cr);
-
-  pango_cairo_make_text_layout(layout, font_desc, label, width,
-    PANGO_ALIGN_CENTER, height);
-  pango_layout_get_size(layout, NULL, &text_height);
-  cairo_text_height = static_cast<double>(text_height) / PANGO_SCALE;
+  double arrowhead_height_ratio = 0.35;
 
   cairo_move_to(cr, x, y);
+  cairo_set_line_width(cr, stroke_width);
 
-  // rotate here
+  cairo_save(cr); // start rotated things
+  {
+    double arrow_width = width;
+    double arrow_height = height;
 
-  // working down the right side of the arrow
+    // default direction is down. No changes needed if down.
+    if (arrow_direction == direction::UP) {
+      cairo_rel_move_to(cr, width, height);
+      cairo_rotate(cr, G_PI);
+    }
+    else if (arrow_direction == direction::LEFT) {
+      cairo_rel_move_to(cr, width, 0);
+      cairo_rotate(cr, G_PI / 2.0);
+      arrow_width = height;
+      arrow_height = width;
+    }
+    else if (arrow_direction == direction::RIGHT) {
+      cairo_rel_move_to(cr, 0, height);
+      cairo_rotate(cr, -G_PI / 2.0);
+      arrow_width = height;
+      arrow_height = width;
+    }
 
-  cairo_rel_line_to(cr, width, 0); // top horizontal line
-  cairo_rel_line_to(cr, 0, height * (1.0 - arrowhead_height_ratio)); // right vertical line
-  double arrowhead_width = width * arrowhead_width_ratio;
-  double arrowhead_ledge_size = (arrowhead_width - width) / 2;
-  cairo_rel_line_to(cr, arrowhead_ledge_size, 0); // right arrowhead ledge
-  cairo_rel_line_to(cr, -(arrowhead_width / 2.0), 
-    height * arrowhead_height_ratio); // right arrowhead slant
+    // working down the right side of the arrow
+    
+    // top horizontal line
+    cairo_rel_line_to(cr, arrow_width, 0); 
 
-  // working our way back up
+    // right vertical line
+    cairo_rel_line_to(cr, 0, arrow_height * (1.0 - arrowhead_height_ratio)); 
 
-  cairo_rel_line_to(cr, -(arrowhead_width / 2.0), 
-    -(height * arrowhead_height_ratio)); // left arrowhead slant
-  cairo_rel_line_to(cr, arrowhead_ledge_size, 0); // left arrowhead ledge
-  cairo_rel_line_to(cr, 0, -(height * (1.0 - arrowhead_height_ratio))); // right vertical line
+    double arrowhead_width = arrow_width * arrowhead_width_ratio;
+    double arrowhead_ledge_size = (arrowhead_width - arrow_width) / 2;
+
+    // right arrowhead ledge
+    cairo_rel_line_to(cr, arrowhead_ledge_size, 0); 
+
+    // right arrowhead slant
+    cairo_rel_line_to(cr, -(arrowhead_width / 2.0), 
+      arrow_height * arrowhead_height_ratio); 
+
+    // working our way back up
+
+    // left arrowhead slant
+    cairo_rel_line_to(cr, -(arrowhead_width / 2.0), 
+      -(arrow_height * arrowhead_height_ratio)); 
+    
+    // left arrowhead ledge
+    cairo_rel_line_to(cr, arrowhead_ledge_size, 0); 
+
+    // right vertical line
+    cairo_rel_line_to(cr, 0, 
+      -(arrow_height * (1.0 - arrowhead_height_ratio))); 
+  }
+  cairo_restore(cr); // done with rotated things
 
   cairo_set_source_rgb(
     cr,
@@ -431,6 +452,18 @@ void saturation_diagram::cairo_draw_arrow(
 
   // because text is on top of rectangle, have to draw it AFTER fill and
   // stroke happen
+
+  // height in vertical dimension relative to text
+  int text_height; // pango units
+  double cairo_text_height; // cairo units
+
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+
+  pango_cairo_make_text_layout(layout, font_desc, label, width,
+    PANGO_ALIGN_CENTER, height);
+  pango_layout_get_size(layout, NULL, &text_height);
+  cairo_text_height = static_cast<double>(text_height) / PANGO_SCALE;
+
   pango_cairo_draw_layout(cr, x, y + height/2 - cairo_text_height/2, layout); 
 
   // cleanup
@@ -503,7 +536,7 @@ void saturation_diagram::draw_diagram_overview(
   // memory/cache things
   const double ram_width = content_width;
   const double ram_height = 200;
-  const double transfer_arrow_height = 100;
+  const double transfer_arrow_height = 150;
   const double l3_width = content_width * (3.0/5.0);
   const double l3_height = 100;
   const double core_cache_height = 50;
@@ -611,7 +644,37 @@ void saturation_diagram::draw_diagram_overview(
   cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_load_y, ram_l3_load_width,
     transfer_arrow_height, 
     rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
-    direction::DOWN, "load", small_label_font);
+    direction::DOWN, "load", small_label_font, stroke_thickness_thin);
+
+  double w = 100; double h = 300;
+
+  cairo_rectangle(cr,  100, 100, w, h);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+  cairo_draw_arrow(cr, 100, 100, w, h, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::DOWN, "down", small_label_font, stroke_thickness_thin);
+
+  cairo_rectangle(cr,  300, 100, h, w);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+  cairo_draw_arrow(cr, 300, 100, h, w,
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::LEFT, "left", small_label_font, stroke_thickness_thin);
+
+  cairo_rectangle(cr,  650, 100, h, w);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+  cairo_draw_arrow(cr, 650, 100, h, w,
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::RIGHT, "right", small_label_font, stroke_thickness_thin);
+
+  cairo_rectangle(cr,  1000, 100, w, h);
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+  cairo_draw_arrow(cr, 1000, 100, w, h, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::UP, "up", small_label_font, stroke_thickness_thin);
 
   // rgb_color(254.0/255.0, 192.0/255.0, 206.0/255.0) // rose pink
   // rgb_color(227.0/255.0, 135.0/255.0, 158.0/255.0) // charm pink
