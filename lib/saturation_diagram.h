@@ -27,6 +27,10 @@ enum class label_position {
   INSIDE, BOTTOM, LEFT
 };
 
+enum class direction {
+  UP, RIGHT, DOWN, LEFT
+};
+
 // magic numbers
 
 // TODO: should anything else be here?
@@ -222,6 +226,18 @@ class saturation_diagram {
       std::string label,
       PangoFontDescription * font_desc,
       label_position position = label_position::INSIDE,
+      double stroke_width = stroke_thickness_normal);
+
+    static void cairo_draw_arrow(
+      cairo_t *cr,
+      double x,
+      double y,
+      double width,
+      double height,
+      rgb_color fill_color,
+      direction arrow_direction,
+      std::string label,
+      PangoFontDescription * font_desc,
       double stroke_width = stroke_thickness_normal);
 
   private:

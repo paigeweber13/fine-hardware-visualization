@@ -357,6 +357,87 @@ double saturation_diagram::cairo_draw_component(
   return cairo_text_height;
 }
 
+void saturation_diagram::cairo_draw_arrow(
+  cairo_t *cr,
+  double x,
+  double y,
+  double width,
+  double height,
+  rgb_color fill_color,
+  direction arrow_direction,
+  std::string label,
+  PangoFontDescription * font_desc,
+  double stroke_width
+)
+{
+  if(arrow_direction == direction::LEFT || arrow_direction == direction::RIGHT)
+  {
+    std::cout << "Arrow direction not supported!" << std::endl;
+    return;
+  }
+
+  cairo_save(cr);
+
+  // ratios of arrowhead size to box size
+  
+  // Must be >= 1.0. Arrowhead will extend past width
+  double arrowhead_width_ratio = 1.5; 
+  // Must be <= 1.0. Arrowhead will take part of total height 
+  double arrowhead_height_ratio = 0.25;
+
+  // height in vertical dimension relative to text
+  int text_height; // pango units
+  double cairo_text_height = 0; // cairo units
+
+  cairo_set_line_width(cr, stroke_width);
+
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+
+  pango_cairo_make_text_layout(layout, font_desc, label, width,
+    PANGO_ALIGN_CENTER, height);
+  pango_layout_get_size(layout, NULL, &text_height);
+  cairo_text_height = static_cast<double>(text_height) / PANGO_SCALE;
+
+  cairo_move_to(cr, x, y);
+
+  // rotate here
+
+  // working down the right side of the arrow
+
+  cairo_rel_line_to(cr, width, 0); // top horizontal line
+  cairo_rel_line_to(cr, 0, height * (1.0 - arrowhead_height_ratio)); // right vertical line
+  double arrowhead_width = width * arrowhead_width_ratio;
+  double arrowhead_ledge_size = (arrowhead_width - width) / 2;
+  cairo_rel_line_to(cr, arrowhead_ledge_size, 0); // right arrowhead ledge
+  cairo_rel_line_to(cr, -(arrowhead_width / 2.0), 
+    height * arrowhead_height_ratio); // right arrowhead slant
+
+  // working our way back up
+
+  cairo_rel_line_to(cr, -(arrowhead_width / 2.0), 
+    -(height * arrowhead_height_ratio)); // left arrowhead slant
+  cairo_rel_line_to(cr, arrowhead_ledge_size, 0); // left arrowhead ledge
+  cairo_rel_line_to(cr, 0, -(height * (1.0 - arrowhead_height_ratio))); // right vertical line
+
+  cairo_set_source_rgb(
+    cr,
+    std::get<0>(fill_color),
+    std::get<1>(fill_color),
+    std::get<2>(fill_color));
+  cairo_fill_preserve(cr);
+
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_stroke(cr);
+
+  // because text is on top of rectangle, have to draw it AFTER fill and
+  // stroke happen
+  pango_cairo_draw_layout(cr, x, y + height/2 - cairo_text_height/2, layout); 
+
+  // cleanup
+  cairo_restore(cr);
+  g_object_unref(layout);
+}
+
 void saturation_diagram::draw_diagram_overview(
   json region_colors,
   precision precision_for_saturation,
@@ -418,13 +499,17 @@ void saturation_diagram::draw_diagram_overview(
 
   const double swatch_width = content_width;
   const double swatch_height = 50;
+
+  // memory/cache things
   const double ram_width = content_width;
   const double ram_height = 200;
+  const double transfer_arrow_height = 100;
   const double l3_width = content_width * (3.0/5.0);
   const double l3_height = 100;
+  const double core_cache_height = 50;
+
   const double socket0_width = content_width ;
   const double socket0_height = 775;
-  const double core_cache_height = 50;
 
   double text_height;
 
@@ -475,9 +560,11 @@ void saturation_diagram::draw_diagram_overview(
 
   double swatch_legend_x = swatch_x;
   double swatch_legend_y = swatch_y + swatch_height + small_internal_margin;
+
   // not sure how to do this without hard-coding. However, since we are
   // aligning right, it can be very large
   double single_legend_item_width = 100; 
+
   double legend_offset = -10;
   double scaled_value;
   for (unsigned i = 0; i < static_cast<unsigned>(num_steps) + 1; i++)
@@ -515,6 +602,20 @@ void saturation_diagram::draw_diagram_overview(
   double line_end_y = line_start_y + 150;
   cairo_move_to(cr, line_start_x, line_start_y);
   cairo_line_to(cr, line_end_x, line_end_y);
+
+  // --- Load/store arrows from RAM to L3 cache --- //
+  double ram_l3_load_x = ram_x + ram_width/5.0;
+  double ram_l3_load_y = ram_y + ram_height;
+  double ram_l3_load_width = ram_width/5.0;
+  // TODO: replace with saturation color
+  cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_load_y, ram_l3_load_width,
+    transfer_arrow_height, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::DOWN, "load", small_label_font);
+
+  // rgb_color(254.0/255.0, 192.0/255.0, 206.0/255.0) // rose pink
+  // rgb_color(227.0/255.0, 135.0/255.0, 158.0/255.0) // charm pink
+  // rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0) // peach crayola 
 
   // --- draw L3 cache --- //
   double l3_x = margin_x + content_width * (1.0/5.0);
