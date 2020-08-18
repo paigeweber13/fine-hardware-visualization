@@ -518,7 +518,7 @@ void saturation_diagram::draw_diagram_overview(
    * TODO: someday, move these to a config file
    */
   const double image_width = 1200;
-  const double image_height = 2000;
+  const double image_height = 2400;
 
   const double margin_x = 50;
   const double margin_y = 50;
@@ -537,12 +537,16 @@ void saturation_diagram::draw_diagram_overview(
   const double ram_width = content_width;
   const double ram_height = 200;
   const double transfer_arrow_height = 150;
-  const double l3_width = content_width * (3.0/5.0);
+  const double l3_width = ram_width;
   const double l3_height = 100;
+  const double l2_width = l3_width;
+  const double l2_height = l3_height;
+  const double l1_width = l2_width;
+  const double l1_height = l2_height;
   const double core_cache_height = 50;
 
-  const double socket0_width = content_width ;
-  const double socket0_height = 775;
+  const double core_width = content_width ;
+  const double core_height = 775;
 
   double text_height;
 
@@ -628,74 +632,97 @@ void saturation_diagram::draw_diagram_overview(
       [mem_saturation_metric_name], "RAM", big_label_font,
     label_position::INSIDE);
 
-  // --- line from RAM to L3 cache --- //
-  double line_start_x = ram_x + ram_width/2;
-  double line_start_y = ram_y + ram_height;
-  double line_end_x = line_start_x;
-  double line_end_y = line_start_y + 150;
-  cairo_move_to(cr, line_start_x, line_start_y);
-  cairo_line_to(cr, line_end_x, line_end_y);
-
   // --- Load/store arrows from RAM to L3 cache --- //
   double ram_l3_load_x = ram_x + ram_width/5.0;
-  double ram_l3_load_y = ram_y + ram_height;
-  double ram_l3_load_width = ram_width/5.0;
+  double ram_l3_store_x = ram_x + 3.0*ram_width/5.0;
+  double ram_l3_arrow_y = ram_y + ram_height;
+  double ram_l3_arrow_width = ram_width / 5.0;
+
   // TODO: replace with saturation color
-  cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_load_y, ram_l3_load_width,
+  cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_arrow_y, ram_l3_arrow_width,
     transfer_arrow_height, 
     rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
-  double w = 100; double h = 300;
-
-  cairo_rectangle(cr,  100, 100, w, h);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-  cairo_draw_arrow(cr, 100, 100, w, h, 
+  cairo_draw_arrow(cr, ram_l3_store_x, ram_l3_arrow_y, ram_l3_arrow_width,
+    transfer_arrow_height, 
     rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
-    direction::DOWN, "down", small_label_font, stroke_thickness_thin);
-
-  cairo_rectangle(cr,  300, 100, h, w);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-  cairo_draw_arrow(cr, 300, 100, h, w,
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
-    direction::LEFT, "left", small_label_font, stroke_thickness_thin);
-
-  cairo_rectangle(cr,  650, 100, h, w);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-  cairo_draw_arrow(cr, 650, 100, h, w,
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
-    direction::RIGHT, "right", small_label_font, stroke_thickness_thin);
-
-  cairo_rectangle(cr,  1000, 100, w, h);
-  cairo_set_source_rgb(cr, 0, 0, 0);
-  cairo_stroke(cr);
-  cairo_draw_arrow(cr, 1000, 100, w, h, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
-    direction::UP, "up", small_label_font, stroke_thickness_thin);
-
-  // rgb_color(254.0/255.0, 192.0/255.0, 206.0/255.0) // rose pink
-  // rgb_color(227.0/255.0, 135.0/255.0, 158.0/255.0) // charm pink
-  // rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0) // peach crayola 
+    direction::UP, "store", small_label_font, stroke_thickness_thin);
 
   // --- draw L3 cache --- //
-  double l3_x = margin_x + content_width * (1.0/5.0);
-  double l3_y = line_end_y;
+  double l3_x = ram_x;
+  double l3_y = ram_l3_arrow_y + transfer_arrow_height;
   cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height, 
     region_colors
       [performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
       [l3_saturation_metric_name], "L3 Cache", big_label_font);
 
-  // --- draw socket 0 --- //
-  double socket0_x = margin_x;
-  double socket0_y = l3_y + l3_height;
-  text_height = cairo_draw_component(cr, socket0_x, socket0_y, socket0_width, 
-    socket0_height, rgb_color(1, 1, 1), "Socket 0", big_label_font, 
-    label_position::BOTTOM);
+  // --- Load/store arrows from L3 to L2 cache --- //
+  double l3_l2_load_x = ram_l3_load_x;
+  double l3_l2_store_x = ram_l3_store_x;
+  double l3_l2_arrow_y = l3_y + l3_height;
+  double l3_l2_arrow_width = l3_width / 5.0;
 
+  // TODO: replace with saturation color
+  cairo_draw_arrow(cr, l3_l2_load_x, l3_l2_arrow_y, l3_l2_arrow_width,
+    transfer_arrow_height, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::DOWN, "load", small_label_font, stroke_thickness_thin);
+
+  cairo_draw_arrow(cr, l3_l2_store_x, l3_l2_arrow_y, l3_l2_arrow_width,
+    transfer_arrow_height, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::UP, "store", small_label_font, stroke_thickness_thin);
+
+  // --- draw L2 cache --- //
+  double l2_x = l3_x;
+  double l2_y = l3_l2_arrow_y + transfer_arrow_height;
+  cairo_draw_component(cr, l2_x, l2_y, l2_width, l2_height, 
+    region_colors
+      [performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::saturation)]
+      [l2_saturation_metric_name], "L2 Cache", big_label_font);
+
+  // --- Load/store arrows from L2 to L1 cache --- //
+  double l2_l1_load_x = l3_l2_load_x;
+  double l2_l1_store_x = l3_l2_store_x;
+  double l2_l1_arrow_y = l2_y + l2_height;
+  double l2_l1_arrow_width = l2_width / 5.0;
+
+  // TODO: replace with saturation color
+  cairo_draw_arrow(cr, l2_l1_load_x, l2_l1_arrow_y, l2_l1_arrow_width,
+    transfer_arrow_height, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::DOWN, "load", small_label_font, stroke_thickness_thin);
+
+  cairo_draw_arrow(cr, l2_l1_store_x, l2_l1_arrow_y, l2_l1_arrow_width,
+    transfer_arrow_height, 
+    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    direction::UP, "store", small_label_font, stroke_thickness_thin);
+
+  // --- draw L1 cache --- //
+  double l1_x = l2_x; 
+  double l1_y = l2_l1_arrow_y + transfer_arrow_height;
+  cairo_draw_component(cr, l1_x, l1_y, l1_width, l1_height, 
+    rgb_color(1,1,1), "L1 Cache", big_label_font);
+
+  // --- draw core container block --- //
+  double core_x = margin_x;
+  double core_y = l1_y + l1_height;
+  cairo_draw_component(cr, core_x, core_y, core_width, 
+    core_height, rgb_color(1, 1, 1), "", big_label_font, 
+    label_position::INSIDE);
+  
+  // --- draw block with "in-core performance" label --- //
+  double in_core_x = core_x + internal_margin;
+  double in_core_y = core_y + internal_margin;
+  double in_core_height = core_height - 2 * internal_margin;
+  double in_core_width = core_width - 2 * internal_margin;
+  text_height = cairo_draw_component(cr, in_core_x, in_core_y, in_core_width, 
+    in_core_height, rgb_color(1, 1, 1), "In-core performance", big_label_font, 
+    label_position::LEFT);
+  
   // --- draw cores --- //
   for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++)
   {
@@ -703,8 +730,8 @@ void saturation_diagram::draw_diagram_overview(
 
     // this considers margins on both sides, which will be unequal in size
     // because the text on the left has some margin built in
-    const double core_width = socket0_width - internal_margin 
-      - large_internal_margin;
+    const double core_width = in_core_width - internal_margin 
+      - large_internal_margin - text_height;
 
     // height is more complicated because there are at least 3 margins: above,
     // below, and in the middle. There may be multiple in-the-middle margins.
@@ -712,17 +739,17 @@ void saturation_diagram::draw_diagram_overview(
     // so, let's consider the first margin to be part of the socket0 space and
     // add one margin per core for the remaining margins
     const double core_and_cache_height = 
-      (socket0_height - text_height - large_internal_margin)
+      (in_core_height - text_height - large_internal_margin)
       / CORES_PER_SOCKET - large_internal_margin;
     const double core_height = core_and_cache_height - num_attached_caches 
       * core_cache_height;
 
     // less margin on the left side
-    const double core_x = socket0_x + internal_margin;
+    const double core_x = in_core_x + internal_margin + text_height;
     // calculating y is also complex. We start with socket0_y and add the first
     // margin, then again consider one margin to be part of space needed for
     // the combined core and cache.
-    const double core_y = socket0_y + large_internal_margin
+    const double core_y = in_core_y + large_internal_margin
       + core_num * (core_and_cache_height + large_internal_margin);
 
     // - actual drawing of core
