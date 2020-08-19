@@ -3,33 +3,39 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+- [2020-08-18 through 2020-08-25](#2020-08-18-through-2020-08-25)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
+- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+  - [Questions](#questions-1)
+  - [Accomplishments](#accomplishments-1)
+    - [Intel TMA method](#intel-tma-method)
+    - [Intel vTune](#intel-vtune)
+    - [General](#general)
   - [Next steps](#next-steps)
 - [Biggest questions, main points](#biggest-questions-main-points)
 - [2020-07-28 through 2020-08-11](#2020-07-28-through-2020-08-11)
-  - [Questions](#questions-1)
-  - [Accomplishments](#accomplishments-1)
-- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions-2)
   - [Accomplishments](#accomplishments-2)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
+  - [Questions](#questions-3)
   - [Accomplishments](#accomplishments-3)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Accomplishments](#accomplishments-4)
   - [Next steps](#next-steps-1)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
-  - [Questions](#questions-3)
-  - [Accomplishments](#accomplishments-4)
-- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-4)
   - [Accomplishments](#accomplishments-5)
-- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-5)
   - [Accomplishments](#accomplishments-6)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-6)
   - [Accomplishments](#accomplishments-7)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-7)
+  - [Accomplishments](#accomplishments-8)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -80,6 +86,11 @@ Hardware Visualization
 - [before 2020-02-11](#before-2020-02-11)
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
+
+# 2020-08-18 through 2020-08-25
+## Questions
+
+## Accomplishments
 
 # 2020-08-11 through 2020-08-18
 ## Questions
@@ -132,11 +143,40 @@ Not related to this project
       automatically generated later.
   - diagram: configures size of things in diagram. May be edited by end-user,
     but there may not even be a need for that
+- Consider
+  [this](https://software.intel.com/content/www/us/en/develop/documentation/vtune-cookbook/top/tuning-recipes/poor-port-utilization.html):
+  what does it mean to have "Vector capacity Usage" at 100%? if we have one
+  full sized AVX vector operation, does the counter immediately jump to 100%?
+
+### Intel TMA method
+- Seems to be showing latency, not bandwidth
+- multiple instructions could be waiting on the same memory operation
+- perhaps more abstract than what we are going for? Perhaps we want something more low-level, more raw?
+	- In TMA, if an add is stalled by memory, the memory will be highlighted. 
+	- In our application, if an add is stalled, the add ports will be highlighted
+- Retired instructions still contribute to usage, latency, etc. However, they're kind of ignored...
+
+### Intel vTune
+- Do MUL and FMA count the same?
+- as soon as you put in one vector operation, does Vector Capacity Usage jump to 100%?
+
+### General
+- "a lot of the tools I've seen are hard to use, interface with, and understand"
+- as long as what we do is easy to use, it's okay if we don't let people see everything
+	- we want to show people as their code is executing like maybe at first there's a lot of I/O so that flashes, but then there's computation and so that flashes.
+	- Quick overview for experienced programmers
+	- intro to architecture (maybe even in CS 1) for new students
+- "the closwer we are to the actualy architecture, the harder it is to see where the load is"
+- someday it may be useful to bake in expectations. Have the user say "this is what I expect my application to do. If it doesn't do this, tell me"
+	- For instance, "I expect my application to be flop bound and do 20 million flops" so if it does 20 billion flops, we know something is wrong
 
 ## Next steps
-- Add benchmarks for new counters
-- Finish implementing tracking (and saturation colors) for new counters
-- Finish restructuring diagram to fit detailed overview
+- Finish adjusting diagram to be a detailed overview
+- Add load/store benchmarks
+- Add load/store saturation
+- Gather a set of simple test applications
+  - NAS parallel benchmarks
+- Using these tests, compare our application to intel vTune
 
 # Biggest questions, main points
 - How will we do per-core saturation measurements? How will we average them for

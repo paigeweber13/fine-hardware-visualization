@@ -1,50 +1,13 @@
 # TODO:
 ## Immediate:
-- [x] re-label current "draw_overview" to "draw_detail" 
-- [x] create new "draw_overview" function
-- [x] add port_usage to diagram
-  - [x] make ports actually colored
-  - [x] make outline width adjustable
-  - [x] reduce outline width for stuff inside socket
-- [x] quickly finish looking at all perfgroups
-- [~] look at other counters we can use for 3 key areas
-  - [x] port usage
-  - [ ] instruction decoding: can you decode instructions quickly enough?
-        (front-end)
-  - [ ] micro-instruction retiring: can you fetch instructions quickly
-        enough? .... back end? maybe? I'm not sure I understand if "fetching
-        instructions" refers to getting new instructions from memory or how the
-        back-end sometimes has to wait for operands to be available
-  - [ ] TMA performance group sounds like exactly what we need for the last two
-  - [ ] plan to implement these but don't do it just yet. We want to decide
-        per-core vs overall saturation first
-- [ ] Read more on Top-down Microarchitecture Analysis method
-  - [x] draft up diagram for how we can utilize these new counters in our
-        visualization
-- [ ] how do we do saturation per-core?
-  - [ ] I assume we're not using flops anymore, just 3 key areas above?
-  - [ ] how do we benchmark? Just run a single thread? run all threads and
-        average? 
-  - [ ] how do we measure capability of core to decode and retire instructions?
-        Should we use the TMA method of trying to keep the percentage of
-        instructions stalled on back end below a certain percentage? See
-        https://software.intel.com/content/www/us/en/develop/documentation/vtune-cookbook/top/methodologies/top-down-microarchitecture-analysis-method.html#top-down-microarchitecture-analysis-method_GUID-FEA77CD8-F9F1-446A-8102-07D3234CDB68
-  - [ ] change calculate_saturation() so that it calculates per-core and then
-        those values are aggregated automatically by
-        perform_result_aggregation()
-  - [ ] once we decide how we'll do per-core vs. overall saturation, make the
-        necessary changes to performance_monitor and saturation_diagram
-- [ ] implement new counters that highlight 3 key areas
-- [x] improve software engineering
-  - [x] performance_monitor.cpp (see "improve-result-processing" branch)
-    - [x] some things are aggregated across threads, some things are not
-    - [x] we're still using groups even though there's really no need. It just
-          makes it so we have to iterate through all groups in a region to
-          find the right event/metric
-    - [x] getting raw data from likwid and aggregating data are tightly
-          coupled and difficult to maintain. These should be separated.
+- [ ] Finish adjusting diagram to be a detailed overview
+- [ ] Add load/store benchmarks
+- [ ] Add load/store saturation
+- [ ] Gather a set of simple test applications
+  - [ ] NAS parallel benchmarks
+- [ ] Using these tests, compare our application to intel vTune
 - [ ] explore how well fhv works with other kernels and codebases
-  - [ ] consider standard benchmarks
+  - [ ] consider NAS parallel benchmarks
   - [ ] Dr. Saule may be able to throw together some software that
         demonstrates stress on more granular things like TLB or instruction
         decoder
@@ -78,6 +41,24 @@
     nbiter=800
 
 ### Features to add:
+- [ ] implement per-core saturation levels
+  - [ ] I assume we're not using flops anymore, just 3 key areas above?
+  - [ ] how do we benchmark? Just run a single thread? run all threads and
+        average? 
+  - [ ] change calculate_saturation() so that it calculates per-core and then
+        those values are aggregated automatically by
+        perform_result_aggregation()
+  - [ ] once we decide how we'll do per-core vs. overall saturation, make the
+        necessary changes to performance_monitor and saturation_diagram
+- [ ] implement new counters that highlight 3 key areas
+  - [x] port usage
+  - [ ] instruction decoding: can you decode instructions quickly enough?
+        (front-end)
+  - [ ] micro-instruction retiring: can you fetch instructions quickly
+        enough? .... back end? maybe? I'm not sure I understand if "fetching
+        instructions" refers to getting new instructions from memory or how the
+        back-end sometimes has to wait for operands to be available
+  - [ ] TMA is an option for this
 - make core saturation (and therefore, color of the core) an average of many
   key metrics.
   - For example, might average flop saturation, instruction decoding, port
@@ -120,6 +101,9 @@
 - [ ] respect GOMP_CPU_AFFINITY so users can set which specific threads they
       want to use
   - what's the use case for this?
+- [ ] create two config files
+  - [ ] diagram parameters
+  - [ ] architecture (and port_usage and key_metrics and saturation_metrics)
 
 ### Improve software engineering
 - makefile has some unnecessary repetition of variables
@@ -148,3 +132,8 @@
       port_usage values there? does it make sense to have a list created in
       performance_monitor_defines.hpp? (the list of port_usage keys *is*
       dynamic so this might be tough)
+- [ ] solve port-usage problem
+  - [ ] give performance_monitor_defines an init function that can create port
+        usage keys dynamically
+  - [ ] move key_metrics, saturation, and port_usage keys to architecture
+        config file
