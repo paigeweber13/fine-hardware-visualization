@@ -191,12 +191,8 @@ void visualize(
       image_output_filename.substr(0, pos) + "_" + 
       region_name + ext;
 
-    precision chosen_precision = 
-      region_data["DP [MFLOP/s]"] > region_data["SP [MFLOP/s]"] 
-      ? precision::DOUBLE_P : precision::SINGLE_P;
-
-    saturation_diagram::draw_diagram_overview(region_colors, chosen_precision, 
-      min_color, max_color, region_name, params, this_image_output_filename);
+    saturation_diagram::draw_diagram_overview(region_colors, min_color, 
+      max_color, region_name, params, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
   }

@@ -75,7 +75,6 @@ class saturation_diagram {
      */
     static void draw_diagram_detail(
       json region_colors,
-      precision precision_for_saturation,
       rgb_color min_color,
       rgb_color max_color,
       std::string region_name,
@@ -85,7 +84,6 @@ class saturation_diagram {
     
     static void draw_diagram_overview(
       json region_colors,
-      precision precision_for_saturation,
       rgb_color min_color,
       rgb_color max_color,
       std::string region_name,

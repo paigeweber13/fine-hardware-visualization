@@ -1,5 +1,4 @@
 #include "saturation_diagram.h"
-#include "cairo.h"
 
 rgb_color 
 saturation_diagram::color_lerp( 
@@ -473,7 +472,6 @@ void saturation_diagram::cairo_draw_arrow(
 
 void saturation_diagram::draw_diagram_overview(
   json region_colors,
-  precision precision_for_saturation,
   rgb_color min_color,
   rgb_color max_color,
   std::string region_name,
@@ -481,26 +479,6 @@ void saturation_diagram::draw_diagram_overview(
   std::string output_filename
 )
 {
-  rgb_color computation_color;
-  std::string chosen_precision_str;
-  
-  if(precision_for_saturation == precision::DOUBLE_P)
-  {
-    computation_color = region_colors[
-      performance_monitor::aggregationTypeToString(
-        performance_monitor::aggregation_t::saturation)]
-      [flops_dp_saturation_metric_name];
-    chosen_precision_str = "double-precision";
-  }
-  else 
-  {
-    computation_color = region_colors[
-      performance_monitor::aggregationTypeToString(
-        performance_monitor::aggregation_t::saturation)]
-      [flops_sp_saturation_metric_name];
-    chosen_precision_str = "single-precision";
-  }
-
   // variables for cairo
   PangoFontDescription *title_font = pango_font_description_from_string ("Sans 40");
   PangoFontDescription *description_font = pango_font_description_from_string ("Sans 12");
@@ -546,7 +524,7 @@ void saturation_diagram::draw_diagram_overview(
   const double core_cache_height = 50;
 
   const double core_width = content_width ;
-  const double core_height = 775;
+  const double core_height = 500;
 
   double text_height;
 
@@ -571,12 +549,6 @@ void saturation_diagram::draw_diagram_overview(
   std::string description;
   if(parameters.compare("") != 0)
     description += parameters + "\n\n";
-
-  // computation color notes
-  description += 
-    "Note: both single- and double-precision floating point operations were "
-    "measured. Here the cores are visualized using " + chosen_precision_str 
-    + " saturation, because it was higher.\n\n";
 
   // l1 cache note
   description += 
@@ -722,114 +694,50 @@ void saturation_diagram::draw_diagram_overview(
   text_height = cairo_draw_component(cr, in_core_x, in_core_y, in_core_width, 
     in_core_height, rgb_color(1, 1, 1), "In-core performance", big_label_font, 
     label_position::LEFT);
+
+  // --- draw FLOPs saturations
+
+  // for both single and double precision
+  double flops_width = (in_core_width - text_height) / 2.0;
+  double flops_height = in_core_height * 2.0/3.0;
+
+  // single precision
+  double single_p_x = in_core_x + text_height;
+  double single_p_y = in_core_y;
+  cairo_draw_component(cr, single_p_x, single_p_y, flops_width, flops_height, 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [flops_dp_saturation_metric_name], 
+    "Single-precision FLOP/s", big_label_font, label_position::INSIDE);
+
+  // double precision
+  double double_p_x = single_p_x + flops_width;
+  double double_p_y = single_p_y;
+  cairo_draw_component(cr, double_p_x, double_p_y, flops_width, flops_height, 
+    region_colors[
+      performance_monitor::aggregationTypeToString(
+        performance_monitor::aggregation_t::saturation)]
+      [flops_sp_saturation_metric_name],
+    "Double-precision FLOP/s", big_label_font, label_position::INSIDE);
   
-  // --- draw cores --- //
-  for (unsigned core_num = 0; core_num < CORES_PER_SOCKET; core_num++)
+  // --- draw ports in core
+  double port_width = (in_core_width - text_height) * 
+    (1.0/static_cast<double>(NUM_PORTS_IN_CORE));
+  double port_height = in_core_height - flops_height;
+  double port_y = in_core_y + flops_height;
+  double port_x;
+
+  for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
   {
-    // cache numbers
-
-    // this considers margins on both sides, which will be unequal in size
-    // because the text on the left has some margin built in
-    const double core_width = in_core_width - internal_margin 
-      - large_internal_margin - text_height;
-
-    // height is more complicated because there are at least 3 margins: above,
-    // below, and in the middle. There may be multiple in-the-middle margins.
-
-    // so, let's consider the first margin to be part of the socket0 space and
-    // add one margin per core for the remaining margins
-    const double core_and_cache_height = 
-      (in_core_height - text_height - large_internal_margin)
-      / CORES_PER_SOCKET - large_internal_margin;
-    const double core_height = core_and_cache_height - num_attached_caches 
-      * core_cache_height;
-
-    // less margin on the left side
-    const double core_x = in_core_x + internal_margin + text_height;
-    // calculating y is also complex. We start with socket0_y and add the first
-    // margin, then again consider one margin to be part of space needed for
-    // the combined core and cache.
-    const double core_y = in_core_y + large_internal_margin
-      + core_num * (core_and_cache_height + large_internal_margin);
-
-    // - actual drawing of core
-    text_height = cairo_draw_component(cr, core_x, core_y, core_width, 
-      core_and_cache_height, rgb_color(1, 1, 1), "Core " + std::to_string(core_num + 1), 
-      big_label_font, label_position::LEFT, stroke_thickness_thin);
-
-    // --- threads within core:
-
-    double thread_x, thread_y, thread_width, thread_height;
-    double port_width, port_height, port_x, port_y;
-    for (unsigned thread_num = 0; thread_num < THREADS_PER_CORE; thread_num++)
-    {
-      thread_width = (core_width - text_height) / THREADS_PER_CORE;
-      // don't take all of core height, leave room for ports
-      thread_height = core_height * (2.0/3.0); 
-
-      thread_x = core_x + text_height + thread_num * thread_width;
-      thread_y = core_y;
-
-      cairo_draw_component(cr, thread_x, thread_y, thread_width, thread_height,
-        computation_color, 
-        "Thread " + std::to_string(core_num * THREADS_PER_CORE + thread_num),
-        big_label_font, label_position::INSIDE, stroke_thickness_thin);
-
-      // ----- draw ports in thread
-      port_width = thread_width * (1.0/static_cast<double>(NUM_PORTS_IN_CORE));
-      port_height = core_height * (1.0/3.0);
-      port_y = thread_y + thread_height;
-
-      for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
-      {
-        port_x = thread_x + port_num * port_width;
-        cairo_draw_component(cr, port_x, port_y, port_width, port_height,
-          region_colors
-            [performance_monitor::aggregationTypeToString(
-              performance_monitor::aggregation_t::geometric_mean)]
-            [fhv_port_usage_ratio_start + std::to_string(port_num) 
-              + fhv_port_usage_ratio_end],
-          "Port " + std::to_string(port_num), 
-          description_font, label_position::INSIDE, stroke_thickness_thin);
-      }
-    }
-
-    // --- caches attached to core:
-
-    double cache_x, cache_y, cache_width;
-    rgb_color cache_color;
-    for (unsigned cache_num = 0; cache_num < num_attached_caches; cache_num++)
-    {
-      cache_x = core_x + text_height;
-      cache_y = port_y + port_height + cache_num * core_cache_height;
-      cache_width = core_width - text_height;
-
-      if (cache_num == 0)
-      {
-        cache_color = rgb_color(1, 1, 1);
-      }
-      else
-      {
-        if(cache_num == 1)
-          cache_color = region_colors
-            [performance_monitor::aggregationTypeToString(
-              performance_monitor::aggregation_t::saturation)]
-            [l2_saturation_metric_name];
-        else if(cache_num == 2)
-          cache_color = region_colors
-            [performance_monitor::aggregationTypeToString(
-              performance_monitor::aggregation_t::saturation)]
-            [l3_saturation_metric_name];
-        else
-          std::cout << "ERROR: unknown cache number in draw_diagram_overview"
-            << std::endl;
-      }
-
-      cairo_draw_component(cr, cache_x, cache_y, cache_width, 
-        core_cache_height, cache_color, 
-        "L" + std::to_string(cache_num + 1) + " Cache",
-        small_label_font, label_position::INSIDE, stroke_thickness_thin);
-    }
+    port_x = in_core_x + text_height + port_num * port_width;
+    cairo_draw_component(cr, port_x, port_y, port_width, port_height,
+      region_colors
+        [performance_monitor::aggregationTypeToString(
+          performance_monitor::aggregation_t::geometric_mean)]
+        [fhv_port_usage_ratio_start + std::to_string(port_num) 
+          + fhv_port_usage_ratio_end],
+      "Port " + std::to_string(port_num), 
+      small_label_font, label_position::INSIDE, stroke_thickness_thin);
   }
 
   // --- done drawing things, clean up
@@ -845,7 +753,6 @@ void saturation_diagram::draw_diagram_overview(
 
 void saturation_diagram::draw_diagram_detail(
   json region_colors,
-  precision precision_for_saturation,
   rgb_color min_color,
   rgb_color max_color,
   std::string region_name,
