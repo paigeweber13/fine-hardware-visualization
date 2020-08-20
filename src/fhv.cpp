@@ -32,7 +32,7 @@ const std::uint64_t FLOAT_NUM_ITERATIONS =       100000000000;
 
 // 1000000 iterations for a good average
 // 100 kilobytes to fit well inside L2 cache
-std::vector<std::uint64_t> l2_args = {1000000, 100};
+std::vector<std::uint64_t> l2_args = {3000000, 100};
 
 // 10000 iterations for a good average
 // 1000 kilobytes to fit well inside L3 cache
@@ -77,40 +77,15 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
 void benchmark_cache_and_memory(std::uint64_t num_iterations,
                           std::uint64_t data_size_kb)
 {
-  setenv("LIKWID_EVENTS",
-         "L2|L3|MEM|DATA",
-         1);
-
-  likwid_markerInit();
-
-#pragma omp parallel
-  {
-    likwid_markerThreadInit();
-    likwid_markerRegisterRegion("copy_bw");
-    likwid_pinThread(omp_get_thread_num());
-  }
-  
+  performance_monitor::init("copy_bw", "", "L2|L3|MEM|DATA");
   bandwidth_rw("copy_bw", 4, num_iterations, 1, data_size_kb);
 }
 
 void benchmark_all()
 {
-  setenv("LIKWID_EVENTS",
-         "FLOPS_SP|FLOPS_DP|L2|L3|MEM",
-         1);
 
-  likwid_markerInit();
-
-#pragma omp parallel
-  {
-    likwid_markerThreadInit();
-    likwid_markerRegisterRegion("flops_sp");
-    likwid_markerRegisterRegion("flops_dp");
-    likwid_markerRegisterRegion("L2");
-    likwid_markerRegisterRegion("L3");
-    likwid_markerRegisterRegion("MEM");
-    likwid_pinThread(omp_get_thread_num());
-  }
+  performance_monitor::init("flops_sp,flops_dp,L2,L3,MEM", "", 
+    "FLOPS_SP|FLOPS_DP|L2|L3|MEM");
 
   std::cout << "starting single precision flop benchmark" << std::endl;
   benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
@@ -213,8 +188,9 @@ int main(int argc, char *argv[])
 
   // for use with csv output: keeps a consistent name no matter what vector is
   // used for arguments
-  std::uint64_t num_memory_iter = 0;
-  std::uint64_t memory_size_kb = 0;
+
+  // std::uint64_t num_memory_iter = 0;
+  // std::uint64_t memory_size_kb = 0;
 
   std::string perfmon_output_filename;
 
@@ -362,8 +338,8 @@ int main(int argc, char *argv[])
   }
   else if (vm.count("benchmark-cache-and-memory"))
   {
-    num_memory_iter = cache_and_memory_args[0];
-    memory_size_kb = cache_and_memory_args[1];
+    // num_memory_iter = cache_and_memory_args[0];
+    // memory_size_kb = cache_and_memory_args[1];
     benchmark_cache_and_memory(cache_and_memory_args[0],
                                cache_and_memory_args[1]);
     benchmark_done = true;
@@ -371,35 +347,35 @@ int main(int argc, char *argv[])
   else if (vm.count("L2"))
   {
     const char * region_name = "region_l2";
-    performance_monitor::init("L2", region_name, "");
+    performance_monitor::init(region_name, "", "L2");
     benchmark_memory_bw(region_name, l2_args[0], l2_args[1]);
     benchmark_done = true;
   }
   else if (vm.count("L3"))
   {
     const char * region_name = "region_l3";
-    performance_monitor::init("L3", region_name, "");
+    performance_monitor::init(region_name, "", "L3");
     benchmark_memory_bw(region_name, l3_args[0], l3_args[1]);
     benchmark_done = true;
   }
   else if (vm.count("mem"))
   {
     const char * region_name = "region_mem";
-    performance_monitor::init("MEM", region_name, "");
+    performance_monitor::init(region_name, "", "MEM");
     benchmark_memory_bw(region_name, ram_args[0], ram_args[1]);
     benchmark_done = true;
   }
   else if (vm.count("flops_sp"))
   {
     const char * region_name = "region_flops_sp";
-    performance_monitor::init("FLOPS_SP", region_name, "");
+    performance_monitor::init(region_name, "", "FLOPS_SP");
     benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
     benchmark_done = true;
   }
   else if (vm.count("flops_dp"))
   {
     const char * region_name = "region_flops_dp";
-    performance_monitor::init("FLOPS_DP", region_name, "");
+    performance_monitor::init(region_name, "", "FLOPS_DP");
     benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
     benchmark_done = true;
   }

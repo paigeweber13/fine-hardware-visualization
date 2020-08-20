@@ -1,5 +1,4 @@
 #include "computation_measurements.h"
-#include "likwid.h"
 
 __m256 flops_sp(std::uint64_t num_iterations)
 {
@@ -101,42 +100,40 @@ double bandwidth_rw(const char *tag, std::uint64_t num_groups,
 
     for (group = 0; group < num_groups; group++)
     {
-    // thr_num = omp_get_thread_num();
-    for (i = 0; i < outer_iter; i++) {
-      //Get time snapshot just for one iteration
-      if (i == outer_iter/ 2) {
-        //	start = system_clock::now();
-        //	Maybe start likwid region here
-        //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        
-        #pragma omp barrier
-        likwid_markerStartRegion(tag);
-      }
-      for (k = 0; k < num_iterations_to_measure; k++){
-        for (j = 0; j < num_doubles; j += 1){
-          copy_array[j] = array[j];
+      // thr_num = omp_get_thread_num();
+      for (i = 0; i < outer_iter; i++) {
+        //Get time snapshot just for one iteration
+        if (i == outer_iter/ 2) {
+          //	start = system_clock::now();
+          //	Maybe start likwid region here
+          //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
+          
+          performance_monitor::startRegion(tag);
         }
+        for (k = 0; k < num_iterations_to_measure; k++){
+          for (j = 0; j < num_doubles; j += 1){
+            copy_array[j] = array[j];
+          }
+        }
+          // for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
+          // {
+          //   // Loading 256-bits into memory address of array
+          //   buffer = _mm256_load_pd(array + j);
+          //   // Storing 256-bits from buffer into address of cpy_arr
+          //   _mm256_store_pd(copy_array + j, buffer);
+          // }
+        //Get time snapshot just for one iteration
+        if (i == outer_iter/ 2) {
+          //	end = system_clock::now();
+          //	Maybe stop likwid regin here
+          //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
+          
+          performance_monitor::stopRegion(tag);
+        }
+        asm(""); //Say no to loop optimization
       }
-        // for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
-        // {
-        //   // Loading 256-bits into memory address of array
-        //   buffer = _mm256_load_pd(array + j);
-        //   // Storing 256-bits from buffer into address of cpy_arr
-        //   _mm256_store_pd(copy_array + j, buffer);
-        // }
-      //Get time snapshot just for one iteration
-      if (i == outer_iter/ 2) {
-        //	end = system_clock::now();
-        //	Maybe stop likwid regin here
-        //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
-        
-        likwid_markerStopRegion(tag);
-        #pragma omp barrier
-      }
-      asm(""); //Say no to loop optimization
-    }
-#pragma omp barrier
-    likwid_markerNextGroup();
+
+      performance_monitor::nextGroup();
     }
   }
 

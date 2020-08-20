@@ -1,0 +1,103 @@
+
+----- performance_monitor highlights report -----
+----- key metrics, per-thread -----
+region region_l2 | thread 0   | Port0 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port1 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port2 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port3 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port4 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port5 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port6 usage ratio                        |                 -nan
+region region_l2 | thread 0   | Port7 usage ratio                        |                 -nan
+region region_l2 | thread 0   | L2 bandwidth [MBytes/s]                  |           40034.4113
+region region_l2 | thread 0   | L2 data volume [GBytes]                  |               0.0003
+region region_l2 | thread 0   | L2D evict bandwidth [MBytes/s]           |           14510.4548
+region region_l2 | thread 0   | L2D evict data volume [GBytes]           |               0.0001
+region region_l2 | thread 0   | L2D load bandwidth [MBytes/s]            |           19328.2679
+region region_l2 | thread 0   | L2D load data volume [GBytes]            |               0.0001
+region region_l2 | thread 1   | Port0 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port1 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port2 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port3 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port4 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port5 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port6 usage ratio                        |                 -nan
+region region_l2 | thread 1   | Port7 usage ratio                        |                 -nan
+region region_l2 | thread 1   | L2 bandwidth [MBytes/s]                  |           22062.9073
+region region_l2 | thread 1   | L2 data volume [GBytes]                  |               0.0003
+region region_l2 | thread 1   | L2D evict bandwidth [MBytes/s]           |            6553.8841
+region region_l2 | thread 1   | L2D evict data volume [GBytes]           |               0.0001
+region region_l2 | thread 1   | L2D load bandwidth [MBytes/s]            |           11064.4984
+region region_l2 | thread 1   | L2D load data volume [GBytes]            |               0.0001
+region region_l2 | thread 2   | Port0 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port1 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port2 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port3 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port4 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port5 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port6 usage ratio                        |                 -nan
+region region_l2 | thread 2   | Port7 usage ratio                        |                 -nan
+region region_l2 | thread 2   | L2 bandwidth [MBytes/s]                  |           25397.8189
+region region_l2 | thread 2   | L2 data volume [GBytes]                  |               0.0002
+region region_l2 | thread 2   | L2D evict bandwidth [MBytes/s]           |            8606.9616
+region region_l2 | thread 2   | L2D evict data volume [GBytes]           |               0.0001
+region region_l2 | thread 2   | L2D load bandwidth [MBytes/s]            |           11977.6170
+region region_l2 | thread 2   | L2D load data volume [GBytes]            |               0.0001
+region region_l2 | thread 3   | Port0 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port1 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port2 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port3 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port4 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port5 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port6 usage ratio                        |                 -nan
+region region_l2 | thread 3   | Port7 usage ratio                        |                 -nan
+region region_l2 | thread 3   | L2 bandwidth [MBytes/s]                  |           24047.1230
+region region_l2 | thread 3   | L2 data volume [GBytes]                  |               0.0003
+region region_l2 | thread 3   | L2D evict bandwidth [MBytes/s]           |            7506.1077
+region region_l2 | thread 3   | L2D evict data volume [GBytes]           |               0.0001
+region region_l2 | thread 3   | L2D load bandwidth [MBytes/s]            |           12032.5544
+region region_l2 | thread 3   | L2D load data volume [GBytes]            |               0.0001
+----- key metrics, aggregated across threads -----
+region region_l2 | aggregation_type sum             | Port0 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port1 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port2 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port3 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port4 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port5 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port6 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | Port7 usage ratio                        |                 -nan
+region region_l2 | aggregation_type sum             | L2 bandwidth [MBytes/s]                  |          111542.2605
+region region_l2 | aggregation_type sum             | L2 data volume [GBytes]                  |               0.0010
+region region_l2 | aggregation_type sum             | L2D evict bandwidth [MBytes/s]           |           37177.4082
+region region_l2 | aggregation_type sum             | L2D evict data volume [GBytes]           |               0.0003
+region region_l2 | aggregation_type sum             | L2D load bandwidth [MBytes/s]            |           54402.9377
+region region_l2 | aggregation_type sum             | L2D load data volume [GBytes]            |               0.0005
+region region_l2 | aggregation_type arithmetic_mean | Port0 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port1 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port2 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port3 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port4 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port5 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port6 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | Port7 usage ratio                        |                 -nan
+region region_l2 | aggregation_type arithmetic_mean | L2 bandwidth [MBytes/s]                  |           27885.5651
+region region_l2 | aggregation_type arithmetic_mean | L2 data volume [GBytes]                  |               0.0003
+region region_l2 | aggregation_type arithmetic_mean | L2D evict bandwidth [MBytes/s]           |            9294.3520
+region region_l2 | aggregation_type arithmetic_mean | L2D evict data volume [GBytes]           |               0.0001
+region region_l2 | aggregation_type arithmetic_mean | L2D load bandwidth [MBytes/s]            |           13600.7344
+region region_l2 | aggregation_type arithmetic_mean | L2D load data volume [GBytes]            |               0.0001
+region region_l2 | aggregation_type geometric_mean  | Port0 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port1 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port2 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port3 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port4 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port5 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port6 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | Port7 usage ratio                        |                 -nan
+region region_l2 | aggregation_type geometric_mean  | L2 bandwidth [MBytes/s]                  |           27101.2257
+region region_l2 | aggregation_type geometric_mean  | L2 data volume [GBytes]                  |               0.0003
+region region_l2 | aggregation_type geometric_mean  | L2D evict bandwidth [MBytes/s]           |            8853.4209
+region region_l2 | aggregation_type geometric_mean  | L2D evict data volume [GBytes]           |               0.0001
+region region_l2 | aggregation_type geometric_mean  | L2D load bandwidth [MBytes/s]            |           13249.9192
+region region_l2 | aggregation_type geometric_mean  | L2D load data volume [GBytes]            |               0.0001
+region region_l2 | aggregation_type saturation      | Saturation L2 bandwidth                  |               0.7427
