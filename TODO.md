@@ -104,6 +104,7 @@
 - [ ] create two config files
   - [ ] diagram parameters
   - [ ] architecture (and port_usage and key_metrics and saturation_metrics)
+- [ ] make benchmarking long enough to work even on fast clusters
 
 ### Improve software engineering
 - makefile has some unnecessary repetition of variables

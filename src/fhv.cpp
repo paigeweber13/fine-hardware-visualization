@@ -30,17 +30,18 @@ const std::uint64_t FLOAT_NUM_ITERATIONS =       100000000000;
 
 // each argument vector has num_iterations, mem_size_kb
 
-// 1000000 iterations for a good average
+// 3000000 total iterations for a good average
+// 1 measured iteration
 // 100 kilobytes to fit well inside L2 cache
-std::vector<std::uint64_t> l2_args = {3000000, 100};
+std::vector<std::uint64_t> l2_args = {3000000, 1, 100};
 
 // 10000 iterations for a good average
 // 1000 kilobytes to fit well inside L3 cache
-std::vector<std::uint64_t> l3_args = {10000, 1000};
+std::vector<std::uint64_t> l3_args = {10000, 1, 1000};
 
 // 20 iterations for a good average
 // 100000 kilobytes (100MB) so it can't all be cached
-std::vector<std::uint64_t> ram_args = {20, 100000};
+std::vector<std::uint64_t> ram_args = {20, 1, 100000};
 
 // enums
 enum class output_format { pretty, csv };
@@ -72,13 +73,6 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
   // memory type becomes the performance group. Typically this is "L2", "L3",
   // or "RAM"
   bandwidth_rw(memory_type.c_str(), 1, num_iterations, 1, mem_size_kb);
-}
-
-void benchmark_cache_and_memory(std::uint64_t num_iterations,
-                          std::uint64_t data_size_kb)
-{
-  performance_monitor::init("copy_bw", "", "L2|L3|MEM|DATA");
-  bandwidth_rw("copy_bw", 4, num_iterations, 1, data_size_kb);
 }
 
 void benchmark_all()
@@ -228,21 +222,24 @@ int main(int argc, char *argv[])
     ("L2,2", po::value<std::vector<std::uint64_t>>(&l2_args)->
              multitoken()->zero_tokens(),
              ("benchmark L2 cache bandwidth. May be followed by number "
-              "of iterations and size of data transfer in kilobytes. "
+              "of total iterations, number of measured iterations, and size "
+              "of data transfer in kilobytes. "
               "Default: " + to_string(l2_args[0]) + " " + 
               to_string(l2_args[1])).c_str()
               )
     ("L3,3", po::value<std::vector<std::uint64_t>>(&l3_args)->
              multitoken()->zero_tokens(),
              ("benchmark L3 cache bandwidth. May be followed by number "
-              "of iterations and size of data transfer in kilobytes. "
+              "of total iterations, number of measured iterations, and size "
+              "of data transfer in kilobytes. "
               "Default: " + to_string(l3_args[0]) + " " + 
               to_string(l3_args[1])).c_str()
               )
     ("mem,m", po::value<std::vector<std::uint64_t>>(&ram_args)->
               multitoken()->zero_tokens(),
               ("benchmark memory (ram) bandwidth. May be followed by number "
-               "of iterations and size of data transfer in kilobytes. "
+              "of total iterations, number of measured iterations, and size "
+              "of data transfer in kilobytes. "
                "Default: " + to_string(ram_args[0]) + " " + 
                to_string(ram_args[1])).c_str()
                )
@@ -340,29 +337,34 @@ int main(int argc, char *argv[])
   {
     // num_memory_iter = cache_and_memory_args[0];
     // memory_size_kb = cache_and_memory_args[1];
-    benchmark_cache_and_memory(cache_and_memory_args[0],
-                               cache_and_memory_args[1]);
+    performance_monitor::init("copy_bw", "", "L2|L3|MEM|DATA");
+    int num_groups = 4;
+    bandwidth_rw("copy_bw", num_groups, cache_and_memory_args[0], 
+      cache_and_memory_args[1], cache_and_memory_args[2]);
     benchmark_done = true;
   }
   else if (vm.count("L2"))
   {
     const char * region_name = "region_l2";
     performance_monitor::init(region_name, "", "L2");
-    benchmark_memory_bw(region_name, l2_args[0], l2_args[1]);
+    int num_groups = 1;
+    bandwidth_rw(region_name, num_groups, l2_args[0], l2_args[1], l2_args[2]);
     benchmark_done = true;
   }
   else if (vm.count("L3"))
   {
     const char * region_name = "region_l3";
     performance_monitor::init(region_name, "", "L3");
-    benchmark_memory_bw(region_name, l3_args[0], l3_args[1]);
+    int num_groups = 1;
+    bandwidth_rw(region_name, num_groups, l3_args[0], l3_args[1], l3_args[2]);
     benchmark_done = true;
   }
   else if (vm.count("mem"))
   {
     const char * region_name = "region_mem";
     performance_monitor::init(region_name, "", "MEM");
-    benchmark_memory_bw(region_name, ram_args[0], ram_args[1]);
+    int num_groups = 1;
+    bandwidth_rw(region_name, num_groups, ram_args[0], ram_args[1], ram_args[2]);
     benchmark_done = true;
   }
   else if (vm.count("flops_sp"))

@@ -76,7 +76,11 @@ double bandwidth_rw(const char *tag, std::uint64_t num_groups,
                     std::uint64_t num_iterations_per_group,
                     std::uint64_t num_iterations_to_measure,
                     std::uint64_t size_kib) {
-  // reduction(max:ticks) previously at the end of this pragma
+  // std::cout << "params:" << std::endl
+  //   << "  num_groups: " << num_groups << std::endl
+  //   << "  num_iterations_per_group: " << num_iterations_per_group << std::endl
+  //   << "  num_iterations_to_measure: " << num_iterations_to_measure << std::endl
+  //   << "  size_kib: " << size_kib << std::endl;
 
   // unsigned thr_num;
   // __m256d buffer;
