@@ -485,9 +485,12 @@ void saturation_diagram::draw_diagram_overview(
   PangoFontDescription *big_label_font = pango_font_description_from_string ("Sans 40");
   PangoFontDescription *small_label_font = pango_font_description_from_string ("Sans 25");
 
+  // TODO: NO LONGER USED. Will this be used eventually? Remove??
+  
   // TODO: should be in architecture, perhaps derived from likwid's
   // L*_CACHE_GROUPS 
-  const unsigned num_attached_caches = 2;
+
+  // const unsigned num_attached_caches = 2;
 
   /* ----- drawing constants ----- 
    *
@@ -521,7 +524,9 @@ void saturation_diagram::draw_diagram_overview(
   const double l2_height = l3_height;
   const double l1_width = l2_width;
   const double l1_height = l2_height;
-  const double core_cache_height = 50;
+  // TODO: NO LONGER USED. Will this be used eventually? Remove??
+
+  // const double core_cache_height = 50;
 
   const double core_width = content_width ;
   const double core_height = 500;
