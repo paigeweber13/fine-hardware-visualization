@@ -89,8 +89,20 @@ Hardware Visualization
 
 # 2020-08-18 through 2020-08-25
 ## Questions
+- C port adequate?
+- Thoughts on fixing likwid vs improving handwritten benchmarks?
 
 ## Accomplishments
+- as I was adding separate load/store to diagram, noticed benchmarks were poor:
+  some of the test cases we were using performed better than the benchmark
+- tinkered with benchmark to improve performance
+- ended up using likwid-bench
+- likwid-bench broke for bandwidth tests too large for any cache (meant to test
+  RAM bw)
+- looked into NAS parallel benchmarks
+  - 90% are in fortran
+  - [found a C port](https://github.com/benchmark-subsetting/NPB3.0-omp-C) that
+    seems to be pretty good
 
 # 2020-08-11 through 2020-08-18
 ## Questions
