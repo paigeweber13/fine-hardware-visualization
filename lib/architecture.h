@@ -35,16 +35,16 @@ const float EXPERIENTIAL_DP_RATE_MFLOPS = 91583.672;     // ~92  GFlop/s
 // -- memory -- 
 // all measurements are in MiB/s
 const float EXPERIENTIAL_R_BW_L1  = 0.;              //
-const float EXPERIENTIAL_R_BW_L2  = 147551.1156;     // ~147 GB/s
-const float EXPERIENTIAL_R_BW_L3  =  83891.1112;     // ~84  GB/s
-const float EXPERIENTIAL_R_BW_RAM = 0.         ;     // 
+const float EXPERIENTIAL_R_BW_L2  = 172162.1187;     // ~172 GB/s
+const float EXPERIENTIAL_R_BW_L3  =  94259.5077;     // ~ 94 GB/s
+const float EXPERIENTIAL_R_BW_RAM =  23520.7488;     // ~ 24 GB/s
 
 const float EXPERIENTIAL_W_BW_L1  = 0.;              //
-const float EXPERIENTIAL_W_BW_L2  =  71547.2828;     // ~72  GB/s
-const float EXPERIENTIAL_W_BW_L3  =  42270.7171;     // ~42  GB/s
-const float EXPERIENTIAL_W_BW_RAM = 0.          ;    // 
+const float EXPERIENTIAL_W_BW_L2  = 109407.8277;     // ~109 GB/s
+const float EXPERIENTIAL_W_BW_L3  =  63675.2813;     // ~ 63 GB/s
+const float EXPERIENTIAL_W_BW_RAM =  12160.8669;     // ~ 12 GB/s
 
 const float EXPERIENTIAL_RW_BW_L1  = 0.;             //
 const float EXPERIENTIAL_RW_BW_L2  = 214060.9152;    // ~214 GB/s
-const float EXPERIENTIAL_RW_BW_L3  = 125636.2645;    // ~126 GB/s
-const float EXPERIENTIAL_RW_BW_RAM =  24208.177734;  // ~24  GB/s
+const float EXPERIENTIAL_RW_BW_L3  = 127028.1843;    // ~127 GB/s
+const float EXPERIENTIAL_RW_BW_RAM =  24208.177734;  // ~ 24 GB/s
