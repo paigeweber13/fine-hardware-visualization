@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 // Intended to be used to track the keys that likwid uses. Intended to be
 // static.
 

@@ -603,10 +603,9 @@ void saturation_diagram::draw_diagram_overview(
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
   cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
-    region_colors
-      [performance_monitor::aggregationTypeToString(
+    region_colors[performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [fhv_mem_saturation_metric_name], "RAM", big_label_font,
+      [fhv_mem_rw_saturation_metric_name], "RAM", big_label_font,
     label_position::INSIDE);
 
   // --- Load/store arrows from RAM to L3 cache --- //
@@ -618,12 +617,16 @@ void saturation_diagram::draw_diagram_overview(
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_arrow_y, ram_l3_arrow_width,
     transfer_arrow_height, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [fhv_mem_r_saturation_metric_name],
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
   cairo_draw_arrow(cr, ram_l3_store_x, ram_l3_arrow_y, ram_l3_arrow_width,
     transfer_arrow_height, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [fhv_mem_w_saturation_metric_name],
     direction::UP, "store", small_label_font, stroke_thickness_thin);
 
   // --- draw L3 cache --- //
@@ -633,7 +636,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors
       [performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [fhv_l3_saturation_metric_name], "L3 Cache", big_label_font);
+      [fhv_l3_rw_saturation_metric_name], "L3 Cache", big_label_font);
 
   // --- Load/store arrows from L3 to L2 cache --- //
   double l3_l2_load_x = ram_l3_load_x;
@@ -644,12 +647,16 @@ void saturation_diagram::draw_diagram_overview(
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, l3_l2_load_x, l3_l2_arrow_y, l3_l2_arrow_width,
     transfer_arrow_height, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [fhv_l3_r_saturation_metric_name],
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
   cairo_draw_arrow(cr, l3_l2_store_x, l3_l2_arrow_y, l3_l2_arrow_width,
     transfer_arrow_height, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [fhv_l3_w_saturation_metric_name],
     direction::UP, "store", small_label_font, stroke_thickness_thin);
 
   // --- draw L2 cache --- //
@@ -659,7 +666,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors
       [performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [fhv_l2_saturation_metric_name], "L2 Cache", big_label_font);
+      [fhv_l2_rw_saturation_metric_name], "L2 Cache", big_label_font);
 
   // --- Load/store arrows from L2 to L1 cache --- //
   double l2_l1_load_x = l3_l2_load_x;
@@ -670,12 +677,16 @@ void saturation_diagram::draw_diagram_overview(
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, l2_l1_load_x, l2_l1_arrow_y, l2_l1_arrow_width,
     transfer_arrow_height, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [fhv_l2_r_saturation_metric_name],
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
   cairo_draw_arrow(cr, l2_l1_store_x, l2_l1_arrow_y, l2_l1_arrow_width,
     transfer_arrow_height, 
-    rgb_color(255.0/255.0, 191.0/255.0, 160.0/255.0), // peach crayola 
+    region_colors[performance_monitor::aggregationTypeToString(
+      performance_monitor::aggregation_t::saturation)]
+      [fhv_l2_w_saturation_metric_name],
     direction::UP, "store", small_label_font, stroke_thickness_thin);
 
   // --- draw L1 cache --- //

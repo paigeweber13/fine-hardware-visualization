@@ -91,31 +91,55 @@ const std::vector<std::string> fhv_saturation_source_metrics = {
   mflops_metric_name,
   mflops_dp_metric_name,
   l2_bandwidth_metric_name,
+  l2_evict_bandwidth_name,
+  l2_load_bandwidth_name,
   l3_bandwidth_metric_name,
+  l3_evict_bandwidth_name,
+  l3_load_bandwidth_name,
   ram_bandwidth_metric_name,
+  ram_evict_bandwidth_name,
+  ram_load_bandwidth_name,
 };
 
 // saturation keywords
 const std::string fhv_flops_sp_saturation_metric_name = "Saturation FLOPS SP";
 const std::string fhv_flops_dp_saturation_metric_name = "Saturation FLOPS DP";
-const std::string fhv_l2_saturation_metric_name = "Saturation L2 bandwidth";
-const std::string fhv_l3_saturation_metric_name = "Saturation L3 bandwidth";
-const std::string fhv_mem_saturation_metric_name = "Saturation Memory bandwidth";
+const std::string fhv_l2_rw_saturation_metric_name = "Saturation L2 read/write bandwidth";
+const std::string fhv_l2_w_saturation_metric_name = "Saturation L2 write bandwidth";
+const std::string fhv_l2_r_saturation_metric_name = "Saturation L2 read bandwidth";
+const std::string fhv_l3_rw_saturation_metric_name = "Saturation L3 read/write bandwidth";
+const std::string fhv_l3_w_saturation_metric_name = "Saturation L3 write bandwidth";
+const std::string fhv_l3_r_saturation_metric_name = "Saturation L3 read bandwidth";
+const std::string fhv_mem_rw_saturation_metric_name = "Saturation Memory read/write bandwidth";
+const std::string fhv_mem_w_saturation_metric_name = "Saturation Memory write bandwidth";
+const std::string fhv_mem_r_saturation_metric_name = "Saturation Memory read bandwidth";
 
 const std::vector<std::string> fhv_saturation_metric_names = {
   fhv_flops_sp_saturation_metric_name,
   fhv_flops_dp_saturation_metric_name,
-  fhv_l2_saturation_metric_name,
-  fhv_l3_saturation_metric_name,
-  fhv_mem_saturation_metric_name,
+  fhv_l2_rw_saturation_metric_name,
+  fhv_l2_w_saturation_metric_name,
+  fhv_l2_r_saturation_metric_name,
+  fhv_l3_rw_saturation_metric_name,
+  fhv_l3_w_saturation_metric_name,
+  fhv_l3_r_saturation_metric_name,
+  fhv_mem_rw_saturation_metric_name,
+  fhv_mem_w_saturation_metric_name,
+  fhv_mem_r_saturation_metric_name,
 };
 
 const std::vector<double> fhv_saturation_reference_rates = {
   EXPERIENTIAL_SP_RATE_MFLOPS,
   EXPERIENTIAL_DP_RATE_MFLOPS,
   EXPERIENTIAL_RW_BW_L2,
+  EXPERIENTIAL_W_BW_L2,
+  EXPERIENTIAL_R_BW_L2,
   EXPERIENTIAL_RW_BW_L3,
+  EXPERIENTIAL_W_BW_L3,
+  EXPERIENTIAL_R_BW_L3,
   EXPERIENTIAL_RW_BW_RAM,
+  EXPERIENTIAL_W_BW_RAM,
+  EXPERIENTIAL_R_BW_RAM,
 };
 
 const std::vector<std::string> fhv_other_diagram_metrics = {
@@ -158,9 +182,17 @@ const std::vector<std::string> fhv_key_metrics = {
   // notice that everything below here is also in saturation metrics
   fhv_flops_sp_saturation_metric_name,
   fhv_flops_dp_saturation_metric_name,
-  fhv_l2_saturation_metric_name,
-  fhv_l3_saturation_metric_name,
-  fhv_mem_saturation_metric_name,
+  fhv_flops_sp_saturation_metric_name,
+  fhv_flops_dp_saturation_metric_name,
+  fhv_l2_rw_saturation_metric_name,
+  fhv_l2_w_saturation_metric_name,
+  fhv_l2_r_saturation_metric_name,
+  fhv_l3_rw_saturation_metric_name,
+  fhv_l3_w_saturation_metric_name,
+  fhv_l3_r_saturation_metric_name,
+  fhv_mem_rw_saturation_metric_name,
+  fhv_mem_w_saturation_metric_name,
+  fhv_mem_r_saturation_metric_name,
   fhv_port0_usage_ratio,
   fhv_port1_usage_ratio,
   fhv_port2_usage_ratio,
