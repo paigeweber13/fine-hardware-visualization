@@ -69,7 +69,7 @@ saturation_diagram::calculate_saturation_colors(
     {
       for (const auto &metric: region_section.value().items())
       {
-        for (const auto &saturation_metric : fhv_saturation_metrics)
+        for (const auto &saturation_metric : fhv_saturation_metric_names)
         {
           if (metric.key() == saturation_metric)
           {
@@ -606,7 +606,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors
       [performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [mem_saturation_metric_name], "RAM", big_label_font,
+      [fhv_mem_saturation_metric_name], "RAM", big_label_font,
     label_position::INSIDE);
 
   // --- Load/store arrows from RAM to L3 cache --- //
@@ -633,7 +633,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors
       [performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [l3_saturation_metric_name], "L3 Cache", big_label_font);
+      [fhv_l3_saturation_metric_name], "L3 Cache", big_label_font);
 
   // --- Load/store arrows from L3 to L2 cache --- //
   double l3_l2_load_x = ram_l3_load_x;
@@ -659,7 +659,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors
       [performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [l2_saturation_metric_name], "L2 Cache", big_label_font);
+      [fhv_l2_saturation_metric_name], "L2 Cache", big_label_font);
 
   // --- Load/store arrows from L2 to L1 cache --- //
   double l2_l1_load_x = l3_l2_load_x;
@@ -712,7 +712,7 @@ void saturation_diagram::draw_diagram_overview(
   cairo_draw_component(cr, single_p_x, single_p_y, flops_width, flops_height, 
     region_colors[performance_monitor::aggregationTypeToString(
       performance_monitor::aggregation_t::saturation)]
-      [flops_dp_saturation_metric_name], 
+      [fhv_flops_dp_saturation_metric_name], 
     "Single-precision FLOP/s", big_label_font, label_position::INSIDE);
 
   // double precision
@@ -722,7 +722,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors[
       performance_monitor::aggregationTypeToString(
         performance_monitor::aggregation_t::saturation)]
-      [flops_sp_saturation_metric_name],
+      [fhv_flops_sp_saturation_metric_name],
     "Double-precision FLOP/s", big_label_font, label_position::INSIDE);
   
   // --- draw ports in core

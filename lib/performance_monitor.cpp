@@ -524,35 +524,15 @@ void performance_monitor::calculate_saturation(){
     {
       is_saturation_result = false;
 
-      if (ar.result_name == mflops_metric_name)
+      for (size_t i = 0; i < fhv_saturation_metric_names.size(); i++)
       {
-        is_saturation_result = true;
-        saturation_result_name = flops_sp_saturation_metric_name;
-        saturation_result_value = ar.result_value/EXPERIENTIAL_SP_RATE_MFLOPS;
-      }
-      else if (ar.result_name == mflops_dp_metric_name)
-      {
-        is_saturation_result = true;
-        saturation_result_name = flops_dp_saturation_metric_name;
-        saturation_result_value = ar.result_value/EXPERIENTIAL_DP_RATE_MFLOPS;
-      }
-      else if (ar.result_name == l2_bandwidth_metric_name)
-      {
-        is_saturation_result = true;
-        saturation_result_name = l2_saturation_metric_name;
-        saturation_result_value = ar.result_value/EXPERIENTIAL_RW_BW_L2;
-      }
-      else if (ar.result_name == l3_bandwidth_metric_name)
-      {
-        is_saturation_result = true;
-        saturation_result_name = l3_saturation_metric_name;
-        saturation_result_value = ar.result_value/EXPERIENTIAL_RW_BW_L3;
-      }
-      else if (ar.result_name == ram_bandwidth_metric_name)
-      {
-        is_saturation_result = true;
-        saturation_result_name = mem_saturation_metric_name;
-        saturation_result_value = ar.result_value/EXPERIENTIAL_RW_BW_RAM;
+        if (ar.result_name == fhv_saturation_source_metrics[i])
+        {
+          is_saturation_result = true;
+          saturation_result_name = fhv_saturation_metric_names[i];
+          saturation_result_value = 
+            ar.result_value/fhv_saturation_reference_rates[i];
+        }
       }
 
       if (is_saturation_result)

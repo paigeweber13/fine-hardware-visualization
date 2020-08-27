@@ -1,5 +1,6 @@
 #pragma once
 
+#include "architecture.h"
 #include <likwid.h>
 #include <string>
 #include <vector>
@@ -31,14 +32,6 @@ const std::string accessmode = std::to_string(ACCESSMODE_DAEMON);
 const std::string jsonResultOutputDefaultFilepath = "./perfmon_output.json";
 #define perfmon_output_envvar "FHV_OUTPUT"
 #define perfmon_keep_large_values_envvar "FHV_KEEP_LARGE_VALUES"
-
-// saturation keywords
-// TODO: add "fhv_" prefix
-#define flops_sp_saturation_metric_name "Saturation FLOPS SP"
-#define flops_dp_saturation_metric_name "Saturation FLOPS DP"
-#define l2_saturation_metric_name "Saturation L2 bandwidth"
-#define l3_saturation_metric_name "Saturation L3 bandwidth"
-#define mem_saturation_metric_name "Saturation Memory bandwidth"
 
 // const std::string fhv_port_usage_group = "FHV Port usage ratios";
 const std::string fhv_port_usage_ratio_start = "Port";
@@ -94,12 +87,35 @@ const std::vector<std::string> fhv_port_usage_metrics = {
   fhv_port7_usage_ratio
 };
 
-const std::vector<std::string> fhv_saturation_metrics = {
-  flops_sp_saturation_metric_name,
-  flops_dp_saturation_metric_name,
-  l2_saturation_metric_name,
-  l3_saturation_metric_name,
-  mem_saturation_metric_name
+const std::vector<std::string> fhv_saturation_source_metrics = {
+  mflops_metric_name,
+  mflops_dp_metric_name,
+  l2_bandwidth_metric_name,
+  l3_bandwidth_metric_name
+  ram_bandwidth_metric_name
+};
+
+// saturation keywords
+const std::string fhv_flops_sp_saturation_metric_name = "Saturation FLOPS SP";
+const std::string fhv_flops_dp_saturation_metric_name = "Saturation FLOPS DP";
+const std::string fhv_l2_saturation_metric_name = "Saturation L2 bandwidth";
+const std::string fhv_l3_saturation_metric_name = "Saturation L3 bandwidth";
+const std::string fhv_mem_saturation_metric_name = "Saturation Memory bandwidth";
+
+const std::vector<std::string> fhv_saturation_metric_names = {
+  fhv_flops_sp_saturation_metric_name,
+  fhv_flops_dp_saturation_metric_name,
+  fhv_l2_saturation_metric_name,
+  fhv_l3_saturation_metric_name,
+  fhv_mem_saturation_metric_name,
+};
+
+const std::vector<double> fhv_saturation_reference_rates = {
+  EXPERIENTIAL_SP_RATE_MFLOPS,
+  EXPERIENTIAL_DP_RATE_MFLOPS,
+  EXPERIENTIAL_RW_BW_L2,
+  EXPERIENTIAL_RW_BW_L3,
+  EXPERIENTIAL_RW_BW_RAM
 };
 
 const std::vector<std::string> fhv_other_diagram_metrics = {
@@ -140,11 +156,11 @@ const std::vector<std::string> fhv_key_metrics = {
   ram_load_data_volume_name,
 
   // notice that everything below here is also in saturation metrics
-  flops_sp_saturation_metric_name,
-  flops_dp_saturation_metric_name,
-  l2_saturation_metric_name,
-  l3_saturation_metric_name,
-  mem_saturation_metric_name,
+  fhv_flops_sp_saturation_metric_name,
+  fhv_flops_dp_saturation_metric_name,
+  fhv_l2_saturation_metric_name,
+  fhv_l3_saturation_metric_name,
+  fhv_mem_saturation_metric_name,
   fhv_port0_usage_ratio,
   fhv_port1_usage_ratio,
   fhv_port2_usage_ratio,
