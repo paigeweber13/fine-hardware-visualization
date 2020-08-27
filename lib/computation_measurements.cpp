@@ -119,12 +119,15 @@ double bandwidth_rw(const char *tag, std::uint64_t num_groups,
             copy_array[j] = array[j];
           }
         }
-          // for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
+          // for (k = 0; k < num_iterations_to_measure; k++)
           // {
-          //   // Loading 256-bits into memory address of array
-          //   buffer = _mm256_load_pd(array + j);
-          //   // Storing 256-bits from buffer into address of cpy_arr
-          //   _mm256_store_pd(copy_array + j, buffer);
+          //   for (j = 0; j < num_doubles; j += DOUBLES_PER_VECTOR)
+          //   {
+          //     // Loading 256-bits into memory address of array
+          //     buffer = _mm256_load_pd(array + j);
+          //     // Storing 256-bits from buffer into address of cpy_arr
+          //     _mm256_store_pd(copy_array + j, buffer);
+          //   }
           // }
         //Get time snapshot just for one iteration
         if (i == outer_iter/ 2) {
