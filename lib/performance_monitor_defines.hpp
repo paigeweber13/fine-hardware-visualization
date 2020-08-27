@@ -10,11 +10,11 @@
 // magic numbers
 // this is the value that seems to always come up in the likwid unreasonably
 // high values bug (see https://github.com/RRZE-HPC/likwid/issues/292 )
-#define EVENT_VALUE_ERROR_THRESHOLD 1.84467e19 
-#define METRIC_VALUE_ERROR_THRESHOLD 1e10 
-#define MFLOPS_TO_TFLOPS 1e-6
-#define OPS_PER_SP_256_VECTOR 8
-#define OPS_PER_SP_128_VECTOR 4
+const double EVENT_VALUE_ERROR_THRESHOLD = 1.84467e19;
+const double METRIC_VALUE_ERROR_THRESHOLD = 1e10;
+const double MFLOPS_TO_TFLOPS = 1e-6;
+const double OPS_PER_SP_256_VECTOR = 8;
+const double OPS_PER_SP_128_VECTOR = 4;
 
 // ----- LIKWID-related configuration ----- //
 
@@ -30,8 +30,8 @@ const std::string accessmode = std::to_string(ACCESSMODE_DAEMON);
  */
 
 const std::string jsonResultOutputDefaultFilepath = "./perfmon_output.json";
-#define perfmon_output_envvar "FHV_OUTPUT"
-#define perfmon_keep_large_values_envvar "FHV_KEEP_LARGE_VALUES"
+const std::string perfmon_output_envvar = "FHV_OUTPUT";
+const std::string perfmon_keep_large_values_envvar = "FHV_KEEP_LARGE_VALUES";
 
 // const std::string fhv_port_usage_group = "FHV Port usage ratios";
 const std::string fhv_port_usage_ratio_start = "Port";
@@ -73,7 +73,7 @@ const std::vector<std::string> likwid_port_usage_event_names = {
   uops_port_base_name + std::to_string(4),
   uops_port_base_name + std::to_string(5),
   uops_port_base_name + std::to_string(6),
-  uops_port_base_name + std::to_string(7)
+  uops_port_base_name + std::to_string(7),
 };
 
 const std::vector<std::string> fhv_port_usage_metrics = {
@@ -84,15 +84,15 @@ const std::vector<std::string> fhv_port_usage_metrics = {
   fhv_port4_usage_ratio,
   fhv_port5_usage_ratio,
   fhv_port6_usage_ratio,
-  fhv_port7_usage_ratio
+  fhv_port7_usage_ratio,
 };
 
 const std::vector<std::string> fhv_saturation_source_metrics = {
   mflops_metric_name,
   mflops_dp_metric_name,
   l2_bandwidth_metric_name,
-  l3_bandwidth_metric_name
-  ram_bandwidth_metric_name
+  l3_bandwidth_metric_name,
+  ram_bandwidth_metric_name,
 };
 
 // saturation keywords
@@ -115,7 +115,7 @@ const std::vector<double> fhv_saturation_reference_rates = {
   EXPERIENTIAL_DP_RATE_MFLOPS,
   EXPERIENTIAL_RW_BW_L2,
   EXPERIENTIAL_RW_BW_L3,
-  EXPERIENTIAL_RW_BW_RAM
+  EXPERIENTIAL_RW_BW_RAM,
 };
 
 const std::vector<std::string> fhv_other_diagram_metrics = {
@@ -127,7 +127,7 @@ const std::vector<std::string> fhv_other_diagram_metrics = {
   fhv_port4_usage_ratio,
   fhv_port5_usage_ratio,
   fhv_port6_usage_ratio,
-  fhv_port7_usage_ratio
+  fhv_port7_usage_ratio,
 };
 
 // Intended use:
@@ -168,7 +168,7 @@ const std::vector<std::string> fhv_key_metrics = {
   fhv_port4_usage_ratio,
   fhv_port5_usage_ratio,
   fhv_port6_usage_ratio,
-  fhv_port7_usage_ratio
+  fhv_port7_usage_ratio,
 };
 
 enum class precision { SINGLE_P, DOUBLE_P };

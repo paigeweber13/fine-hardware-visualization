@@ -291,7 +291,7 @@ void performance_monitor::validate_and_store_likwid_result(
 
     keep_result = false;
   }
-  else if(!std::getenv(perfmon_keep_large_values_envvar)){
+  else if(!std::getenv(perfmon_keep_large_values_envvar.c_str())){
 
     if(result_type == performance_monitor::result_t::event &&
       result_value >= EVENT_VALUE_ERROR_THRESHOLD)
@@ -698,7 +698,7 @@ void performance_monitor::resultsToJson(std::string param_info_string)
 
   // write json to disk
   std::string output_filename = jsonResultOutputDefaultFilepath;
-  if(const char* env_p = std::getenv(perfmon_output_envvar))
+  if(const char* env_p = std::getenv(perfmon_output_envvar.c_str()))
     output_filename = env_p;
 
   std::ofstream o(output_filename);
