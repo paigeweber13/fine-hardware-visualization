@@ -1,8 +1,8 @@
 # TODO:
 ## Immediate:
-- [ ] Finish adjusting diagram to be a detailed overview
-- [ ] Add load/store benchmarks
-- [ ] Add load/store saturation
+- [x] Finish adjusting diagram to be a detailed overview
+- [x] Add load/store benchmarks
+- [x] Add load/store saturation
 - [ ] Gather a set of simple test applications
   - [ ] NAS parallel benchmarks
 - [ ] Using these tests, compare our application to intel vTune
