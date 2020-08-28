@@ -4,8 +4,8 @@
 #include <iostream>
 #include <omp.h>
 
-#include "../lib/computation_measurements.h"
-#include "../lib/performance_monitor.h"
+#include "../lib/computation_measurements.hpp"
+#include "../lib/performance_monitor.hpp"
 
 #define NUM_MEM_OPERATIONS_PER_ITER 2
 

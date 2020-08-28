@@ -1,4 +1,4 @@
-#include "saturation_diagram.h"
+#include "saturation_diagram.hpp"
 
 rgb_color 
 saturation_diagram::color_lerp( 

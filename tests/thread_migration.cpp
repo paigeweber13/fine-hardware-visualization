@@ -1,8 +1,8 @@
 #include <likwid.h>
 #include <sched.h>
 
-#include "../lib/computation_measurements.h"
-#include "../lib/performance_monitor.h"
+#include "../lib/computation_measurements.hpp"
+#include "../lib/performance_monitor.hpp"
 
 // starting/stopping regions seems to cause everything to get reported on
 // threads 0 and 1

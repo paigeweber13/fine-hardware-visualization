@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string>
 
-#include "performance_monitor.h"
+#include "performance_monitor.hpp"
 
 void copy(double *arr, double *copy_arr, size_t n) {
   for (size_t i = 0; i < n; i++) {

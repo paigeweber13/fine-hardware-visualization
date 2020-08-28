@@ -12,10 +12,10 @@
 #include <string>
 #include <type_traits>
 
-#include "architecture.h"
+#include "architecture.hpp"
 #include "likwid_defines.hpp"
 // needed for "aggregationTypeToString"
-#include "performance_monitor.h"
+#include "performance_monitor.hpp"
 #include "performance_monitor_defines.hpp"
 
 using json = nlohmann::json;

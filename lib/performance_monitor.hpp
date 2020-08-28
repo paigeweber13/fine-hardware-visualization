@@ -14,7 +14,7 @@
 #include <stack>
 #include <string>
 
-#include "architecture.h"
+#include "architecture.hpp"
 #include "likwid_defines.hpp"
 #include "performance_monitor_defines.hpp"
 

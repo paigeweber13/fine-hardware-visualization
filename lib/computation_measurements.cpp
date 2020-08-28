@@ -1,4 +1,4 @@
-#include "computation_measurements.h"
+#include "computation_measurements.hpp"
 
 __m256 flops_sp(std::uint64_t num_iterations)
 {

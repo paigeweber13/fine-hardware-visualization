@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "performance_monitor.h"
+#include "performance_monitor.hpp"
 
 #define NUM_FLOPS 10000000
 #define NUM_COPIES 10000

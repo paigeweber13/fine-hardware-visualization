@@ -11,11 +11,11 @@
 #include <nlohmann/json.hpp>
 #include <omp.h>
 
-// #include "../lib/architecture.h"
-#include "../lib/computation_measurements.h"
-#include "../lib/performance_monitor.h"
+// #include "../lib/architecture.hpp"
+#include "../lib/computation_measurements.hpp"
+#include "../lib/performance_monitor.hpp"
 #include "../lib/performance_monitor_defines.hpp"
-#include "../lib/saturation_diagram.h"
+#include "../lib/saturation_diagram.hpp"
 #include "likwid.h"
 
 using namespace std;

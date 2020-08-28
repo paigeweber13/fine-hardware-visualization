@@ -10,7 +10,7 @@
 #endif
 
 #ifdef FHV_PERFMON
-#include <performance_monitor.h>
+#include <performance_monitor.hpp>
 #include <likwid.h>
 #endif
 

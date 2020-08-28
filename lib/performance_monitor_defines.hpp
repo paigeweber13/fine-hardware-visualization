@@ -1,6 +1,6 @@
 #pragma once
 
-#include "architecture.h"
+#include "architecture.hpp"
 #include <likwid.h>
 #include <string>
 #include <vector>
