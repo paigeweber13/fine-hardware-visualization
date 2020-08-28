@@ -1,0 +1,12 @@
+data
+
+# execs
+polynomial
+polynomial_manual
+polynomial_likwid
+polynomial_fhv_perfmon
+
+polynomial_block
+polynomial_block_likwid
+polynomial_block_manual
+polynomial_block_fhv_perfmon
