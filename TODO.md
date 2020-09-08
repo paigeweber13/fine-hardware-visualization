@@ -3,8 +3,22 @@
 - [x] Finish adjusting diagram to be a detailed overview
 - [x] Add load/store benchmarks
 - [x] Add load/store saturation
-- [ ] Gather a set of simple test applications
-  - [ ] NAS parallel benchmarks
+- [ ] adjust build chain before adding NAS parallel benchmarks
+  - [x] merge polynomial_expansion into this repo, remove submodule
+  - [x] Empty makefile to start over. 
+  - [x] rename *.h to *.hpp
+  - [x] remove compile commands in convolution/makefile that are not reused
+  - [x] simplify config.mk
+  - [ ] test makefile
+  - [ ] change how fhv and others are run (LD_LIBRARY_PATH now must include
+        path to libfhv_perfmon.so)
+  - [ ] simplify polynomial_expansion/makefile
+  - [ ] Build "performance_monitor.cpp" into a shared library
+- [ ] Setup NAS parallel benchmarks
+  - [ ] for now, keep as separate project (we don't depend on anything from
+        here except built library, anyways). These can be added to examples
+        later if we can simplify the code.
+  - [ ] fork repo, adjust it to use fhv performance monitor
 - [ ] Using these tests, compare our application to intel vTune
 - [ ] explore how well fhv works with other kernels and codebases
   - [ ] consider NAS parallel benchmarks

@@ -91,7 +91,13 @@ Hardware Visualization
 ## Questions
 - is it valuable to have a miss rate? (would be easy to implement for L2, L3.
   unclear how difficult it would be for L1)
+  - speaking of L1, the more I learn about CPU (and GPU) architecture, the more
+    confused I get on what exactly it is.... Seems more closely tied to core
+    than other caches, especially since I and D are separate... also, likwid
+    doesn't seem able to directly measure L1 bandwidth. 
 - C port of NAS benchmarks adequate?
+- seems like all performance monitoring tools are written in C. Will we need to
+  port this tool to C eventually?
 
 ## Accomplishments
 - as I was adding separate load/store to diagram, noticed benchmarks were poor:
@@ -104,6 +110,15 @@ Hardware Visualization
   - 90% are in fortran
   - [found a C port](https://github.com/benchmark-subsetting/NPB3.0-omp-C) that
     seems to be pretty good
+- began changing makefile to produce shared library for easy inclusion at
+  compile time (for measuring nas parallel benchmarks)
+
+How do we measure NAS parallel benchmarks using our program?
+- source code will have `#ifdef FHV_PERFMON ... #endif` sections
+- how to compile?
+  - in make.def, include fhv stuff and add -DFHV_PERFMON flag?
+  - add `PERFMON=` variable, to be specified when make is run, that will
+    automatically include things and add flag?
 
 # 2020-08-11 through 2020-08-18
 ## Questions
