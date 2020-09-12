@@ -24,6 +24,7 @@ BUILT_LIB_DIR=$(BUILD_DIR)/lib
 EXEC_DIR=$(BUILD_DIR)/bin
 TEST_EXEC_DIR=$(EXEC_DIR)/tests
 OBJ_DIR=$(BUILD_DIR)/obj
+TEST_OBJ_DIR=$(OBJ_DIR)/tests
 ASM_DIR=$(BUILD_DIR)/asm
 
 # name of executable
