@@ -122,6 +122,7 @@ _build: $(EXEC) $(PERFMON_LIB)
 _install: $(EXEC) $(PERFMON_LIB)
 	@cp $(EXEC) $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME);
 	@cp $(PERFMON_LIB) $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME);
+	@cp $(SRC_DIR)/performance_monitor.h $(FHV_PERFMON_PREFIX)/include/performance_monitor.h
 
 _build-examples: 
 	@cd examples/polynomial_expansion; make;
