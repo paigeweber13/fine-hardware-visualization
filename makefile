@@ -5,12 +5,15 @@
 
 include ./config.mk
 
-### variables
+
+### constants
 
 #### Directories 
-
 SRC_DIR=src
 TEST_DIR=tests
+
+#### exec
+EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 
 #### Files
 HEADERS=$(wildcard $(SRC_DIR)/*.hpp)
@@ -22,8 +25,17 @@ OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 SOURCES_SHARED_LIB=$(SRC_DIR)/performance_monitor.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.S) \
-$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.S)
+ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s) \
+$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
+
+#### perfgroup things
+SYSTEM_PERFGROUPS_DIR=$(LIKWID_PREFIX)/share/likwid/
+PERFGROUPS_ROOT_DIR_NAME=perfgroups
+PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
+
+#### perfmon lib
+PERFMON_LIB=$(BUILT_LIB_DIR)/$(PERFMON_LIB_NAME)
+
 
 #### Flags for compilation proper
 
@@ -33,10 +45,13 @@ PANGOCAIRO_INC_DIRS=$(shell pkg-config --cflags pangocairo)
 # combine everything above
 INC_DIRS=$(LIKWID_INC_DIR) $(FHV_INC_DIRS) $(PANGOCAIRO_INC_DIRS)
 
+# used as parts of constants below
 CXXFLAGS_BASE=$(INC_DIRS) -std=c++14 -fopenmp -DLIKWID_PERFMON
 CXXFLAGS_DEBUG=$(CXXFLAGS_BASE) -Wall -g 
+
+# used in actual compilation
 CXXFLAGS=$(CXXFLAGS_BASE) $(ADDITIONAL_COMPILER_FLAGS)
-CXXFLAGS_SHARED_LIB=$(CXXFLAGS_BASE) -fpic
+CXXFLAGS_SHARED_LIB=$(CXXFLAGS_BASE) $(ADDITIONAL_COMPILER_FLAGS) -fpic
 CXXASSEMBLYFLAGS=$(CXXFLAGS_BASE) -S -g -fverbose-asm
 
 
@@ -50,34 +65,22 @@ LIKWID_LIB_FLAG=-llikwid
 PERFMON_LIB_FLAG=-l$(PERFMON_LIB_NAME_SHORT)
 BOOST_PO_LIB_FLAG=-lboost_program_options
 PANGOCAIRO_LIB_FLAG=$(shell pkg-config --libs pangocairo)
-# combine everything above
 OPENMP_LIB_FLAG=-fopenmp
+# combine everything above
 LIBS=$(LIKWID_LIB_FLAG) $(PERFMON_LIB_FLAG) $(BOOST_PO_LIB_FLAG) \
 $(PANGOCAIRO_LIB_FLAG) $(OPENMP_LIB_FLAG)
 
-LDFLAGS=$(LIB_DIRS) $(LIBS)
+LDFLAGS=$(LIB_DIRS) $(ADDITIONAL_LINKER_FLAGS) $(LIBS)
 # TODO: test if we need -fopenmp during linking
 # LDFLAGS=$(LIB_DIRS) $(LIBS) -fopenmp
 
-LDFLAGS_SHARED_LIB=-shared
+LDFLAGS_SHARED_LIB=$(ADDITIONAL_LINKER_FLAGS) -shared
 
 
-#### perfgroup things
-SYSTEM_PERFGROUPS_DIR=$(LIKWID_PREFIX)/share/likwid/
-PERFGROUPS_ROOT_DIR_NAME=perfgroups
-PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
+#### meta-rules: These are the rules designed for the user to call
 
-#### exec
-EXEC=$(EXEC_DIR)/$(EXEC_NAME)
+all: build
 
-#### perfmon lib
-PERFMON_LIB=$(BUILT_LIB_DIR)/$(PERFMON_LIB_NAME)
-
-#### prefix used to ensure likwid libraries and access daemon are detected and 
-  # used at runtime
-RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
-
-#### meta-rules for easier calling
 build: $(EXEC) $(PERFMON_LIB)
 
 install: $(EXEC) $(PERFMON_LIB)
@@ -91,12 +94,15 @@ build-examples:
 	@cd examples/polynomial_expansion; make;
 	@cd examples/convolution; make;
 
-assembly: $(ASM) 
+assembly: $(ASM)
 
 fhv: $(EXEC)
 	$(EXEC)
 
 perfgroups: $(PERFGROUPS_DIRS)
+
+clean:
+	rm -rf $(wildcard $(BUILD_DIR)/*)
 
 #### utility rules
 # TODO: what do we want this rule to do?
@@ -110,8 +116,9 @@ debug:
 debug: LDFLAGS += -Q --help=target
 # debug: clean build
 
-clean:
-	rm -rf $(wildcard $(BUILD_DIR)/*)
+
+## Inner workings: this is the end of meta-rules
+
 
 ### COMPILATION PROPER
 $(OBJS): $(SOURCES) $(HEADERS) | $(OBJ_DIR)
