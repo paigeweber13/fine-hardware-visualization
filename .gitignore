@@ -1,6 +1,5 @@
 # binaries and intermediate files
-bin
-obj
+build
 examples/**/bin
 tests/likwid_minimal
 

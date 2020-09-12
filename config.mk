@@ -19,7 +19,7 @@ LIKWID_PREFIX=/usr/local/likwid-master
 FHV_PERFMON_PREFIX=/usr/local/fhv
 
 #### Directories
-BUILD_DIR=build
+BUILD_DIR=./build
 BUILT_LIB_DIR=$(BUILD_DIR)/lib
 EXEC_DIR=$(BUILD_DIR)/bin
 TEST_EXEC_DIR=$(EXEC_DIR)/tests

@@ -51,14 +51,15 @@ PERFMON_LIB_FLAG=-l$(PERFMON_LIB_NAME_SHORT)
 BOOST_PO_LIB_FLAG=-lboost_program_options
 PANGOCAIRO_LIB_FLAG=$(shell pkg-config --libs pangocairo)
 # combine everything above
+OPENMP_LIB_FLAG=-fopenmp
 LIBS=$(LIKWID_LIB_FLAG) $(PERFMON_LIB_FLAG) $(BOOST_PO_LIB_FLAG) \
-$(PANGOCAIRO_LIB_FLAG)
+$(PANGOCAIRO_LIB_FLAG) $(OPENMP_LIB_FLAG)
 
 LDFLAGS=$(LIB_DIRS) $(LIBS)
 # TODO: test if we need -fopenmp during linking
 # LDFLAGS=$(LIB_DIRS) $(LIBS) -fopenmp
 
-LDFLAGS_SHARED_LIB=$(LIB_DIRS) $(LIBS) -shared
+LDFLAGS_SHARED_LIB=-shared
 
 
 #### perfgroup things
@@ -138,18 +139,18 @@ $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
 $(OBJ_DIR)/performance_monitor.o: $(SRC_DIR)/performance_monitor.cpp
-	$(compile-command)
+	$(compile-command-shared-lib)
 
 
 ### LINKING
 
 ## linking perfmon shared lib
 $(PERFMON_LIB): $(OBJS_SHARED_LIB) | $(BUILT_LIB_DIR)
-	$(CXX) $(LDFLAGS_SHARED_LIB) $^ -o $@
+	$(CXX) $^ $(LDFLAGS_SHARED_LIB) -o $@
 
 ## linking executable
 $(EXEC): $(OBJS) $(PERFMON_LIB) | $(EXEC_DIR)
-	$(CXX) $(LDFLAGS) $(OBJS) -o $@
+	$(CXX) $(OBJS) $(LDFLAGS) -o $@
 
 ### CREATING ASSEMBLY
 $(ASM): | $(ASM_DIR)
