@@ -1,8 +1,11 @@
 include ../../config.mk
 
-FHV_INCLUDE_DIR=-I../../$(SRC_DIR)
+FHV_INCLUDE_DIR=-I../../src
+FHV_LIB_DIR=../../$(BUILT_LIB_DIR)
+FHV_LIB_FLAGS=-L$(FHV_LIB_DIR) -lfhv_perfmon
 
-FHV_OBJ=../../$(OBJ_DIR)/performance_monitor.o
+LIKWID_INC_FLAG=-I$(LIKWID_PREFIX)/include
+LIKWID_LIB_FLAGS=-L$(LIKWID_PREFIX)/lib -llikwid
 
 CONVOLUTION_CXXFLAGS=-fopenmp -march=native -mtune=native -O3
 
@@ -29,11 +32,11 @@ $(CXX) -DMANUAL_MEASUREMENT $(CONVOLUTION_CXXFLAGS) $< -o $@
 endef
 
 define compile-command-example-likwid-cli
-$(CXX) -DLIKWID_CLI $(CONVOLUTION_CXXFLAGS) $< $(LIKWID_INC_DIR) $(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -o $@
+$(CXX) -DLIKWID_CLI $(CONVOLUTION_CXXFLAGS) $< $(LIKWID_INC_FLAG) $(LIKWID_LIB_FLAGS) -o $@
 endef
 
 define compile-command-example-fhv-perfmon
-$(CXX) -DFHV_PERFMON $(CONVOLUTION_CXXFLAGS) $< $(FHV_OBJ) $(FHV_INCLUDE_DIR) $(LIKWID_INC_DIR) $(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -o $@
+$(CXX) -DFHV_PERFMON $(CONVOLUTION_CXXFLAGS) $< $(LIKWID_INC_FLAG) $(LIKWID_LIB_FLAGS) $(FHV_INCLUDE_DIR) $(FHV_LIB_FLAGS) -o $@
 endef
 
 # rule to create bin directory:
