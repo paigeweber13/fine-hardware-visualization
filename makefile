@@ -115,7 +115,15 @@ LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
 $(ADDITIONAL_LINKER_FLAGS)
 
 
-#### meta-rules: These are the rules designed for the user to call
+
+#### prefix used to ensure likwid libraries and access daemon are detected and 
+# used at runtime. 
+
+RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(BUILT_LIB_DIR) \
+PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
+
+
+#### meta-rules: These implement the functionality that users call 
 
 _build: $(EXEC) $(PERFMON_LIB)
 

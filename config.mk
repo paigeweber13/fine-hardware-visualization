@@ -37,19 +37,3 @@ PERFMON_LIB_NAME=lib$(PERFMON_LIB_NAME_SHORT).so
 # This is pre-populated with recommended flags.
 ADDITIONAL_COMPILER_FLAGS=-Wall -march=native -mtune=native -O3
 ADDITIONAL_LINKER_FLAGS=
-
-#### prefix used to ensure likwid libraries and access daemon are detected and 
-# used at runtime. This is actually a constant, but goes here because it is
-# intended for use in examples and by the end-user
-
-
-### for development/debugging
-RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(BUILT_LIB_DIR) \
-PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
-
-### intended for end-users
-#RUN_CMD_PREFIX=\
-LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib \
-PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
-
-#PERFMON_HEADER_INCLUDE=$(FHV_PERFMON_PREFIX)/include
