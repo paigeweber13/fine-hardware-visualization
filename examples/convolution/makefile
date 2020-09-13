@@ -23,19 +23,19 @@ $(BIN_DIR)/convolution-likwid-cli-run $(BIN_DIR)/convolution-fhv-perfmon-run
 clean:
 	rm -f $(EXECS)
 
-define compile-command-example
+define compile-command
 $(CXX) $(CONVOLUTION_CXXFLAGS) $< -o $@
 endef
 
-define compile-command-example-manual
+define compile-command-manual
 $(CXX) -DMANUAL_MEASUREMENT $(CONVOLUTION_CXXFLAGS) $< -o $@
 endef
 
-define compile-command-example-likwid-cli
+define compile-command-likwid-cli
 $(CXX) -DLIKWID_CLI $(CONVOLUTION_CXXFLAGS) $< $(LIKWID_INC_FLAG) $(LIKWID_LIB_FLAGS) -o $@
 endef
 
-define compile-command-example-fhv-perfmon
+define compile-command-fhv-perfmon
 $(CXX) -DFHV_PERFMON $(CONVOLUTION_CXXFLAGS) $< $(LIKWID_INC_FLAG) $(LIKWID_LIB_FLAGS) $(FHV_INCLUDE_DIR) $(FHV_LIB_FLAGS) -o $@
 endef
 
@@ -48,16 +48,16 @@ $(DATA_DIR):
 
 # compile rules
 $(BIN_DIR)/convolution: convolution.cpp | $(BIN_DIR)
-	$(compile-command-example)
+	$(compile-command)
 
 $(BIN_DIR)/convolution-manual: convolution.cpp | $(BIN_DIR)
-	$(compile-command-example-manual)
+	$(compile-command-manual)
 
 $(BIN_DIR)/convolution-likwid-cli: convolution.cpp | $(BIN_DIR)
-	$(compile-command-example-likwid-cli)
+	$(compile-command-likwid-cli)
 
 $(BIN_DIR)/convolution-fhv-perfmon: convolution.cpp $(FHV_OBJ) | $(BIN_DIR)
-	$(compile-command-example-fhv-perfmon)
+	$(compile-command-fhv-perfmon)
 
 # run rules
 # CONVOLUTION_RUN_PARAMS=4000 4000 15 10
