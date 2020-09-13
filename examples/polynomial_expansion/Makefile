@@ -2,7 +2,7 @@ include ../../config.mk
 
 FHV_INCLUDE_FLAG=-I../../src
 FHV_LIB_DIR=../../$(BUILT_LIB_DIR)
-FHV_LIB_FLAGS=-L$(FHV_LIB_DIR) -lfhvperfmon
+FHV_LIB_FLAGS=-L$(FHV_LIB_DIR) -lfhv_perfmon
 
 LIKWID_INC_FLAG=-I$(LIKWID_PREFIX)/include
 LIKWID_LIB_FLAGS=-L$(LIKWID_PREFIX)/lib -llikwid
