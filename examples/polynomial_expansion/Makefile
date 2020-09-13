@@ -43,16 +43,16 @@ POLY_RUN_PARAMS=1024 1000 100
 
 ### polynomial: basic code
 # Complie rules:
-polynomial: polynomial.cpp $(FHV_OBJ)
+polynomial: polynomial.cpp 
 	$(CXX) $< $(CXXFLAGS) $(LDFLAGS) -o $@
 
-polynomial_manual: polynomial.cpp $(FHV_OBJ)
+polynomial_manual: polynomial.cpp 
 	$(CXX) $< $(MANUAL_CXXFLAGS) $(MANUAL_LDFLAGS) -o $@
 
-polynomial_likwid: polynomial.cpp $(FHV_OBJ)
+polynomial_likwid: polynomial.cpp 
 	$(CXX) $< $(LIKWID_CXXFLAGS) $(LIKWID_LDFLAGS) -o $@
 
-polynomial_fhv_perfmon: polynomial.cpp $(FHV_OBJ)
+polynomial_fhv_perfmon: polynomial.cpp 
 	$(CXX) $< $(FHV_PERFMON_CXXFLAGS) $(FHV_PERFMON_LDFLAGS) -o $@
 
 # run rules:
@@ -70,16 +70,16 @@ polynomial_fhv_perfmon-run: polynomial_fhv_perfmon
 
 ### polynomial_block: optimized code
 # Complie rules:
-polynomial_block: polynomial_block.cpp $(FHV_OBJ)
+polynomial_block: polynomial_block.cpp 
 	$(CXX) $< $(CXXFLAGS) $(LDFLAGS) -o $@
 
-polynomial_block_manual: polynomial_block.cpp $(FHV_OBJ)
+polynomial_block_manual: polynomial_block.cpp 
 	$(CXX) $< $(MANUAL_CXXFLAGS) $(MANUAL_LDFLAGS) -o $@
 
-polynomial_block_likwid: polynomial_block.cpp $(FHV_OBJ)
+polynomial_block_likwid: polynomial_block.cpp 
 	$(CXX) $< $(LIKWID_CXXFLAGS) $(LIKWID_LDFLAGS) -o $@
 
-polynomial_block_fhv_perfmon: polynomial_block.cpp $(FHV_OBJ)
+polynomial_block_fhv_perfmon: polynomial_block.cpp 
 	$(CXX) $< $(FHV_PERFMON_CXXFLAGS) $(FHV_PERFMON_LDFLAGS) -o $@
 
 # run rules:
