@@ -9,11 +9,11 @@
   - [x] rename *.h to *.hpp
   - [x] remove compile commands in convolution/makefile that are not reused
   - [x] simplify config.mk
-  - [ ] test makefile
-  - [ ] change how fhv and others are run (LD_LIBRARY_PATH now must include
+  - [x] test makefile
+  - [x] change how fhv and others are run (LD_LIBRARY_PATH now must include
         path to libfhv_perfmon.so)
-  - [ ] simplify polynomial_expansion/makefile
-  - [ ] Build "performance_monitor.cpp" into a shared library
+  - [x] simplify polynomial_expansion/makefile
+  - [x] Build "performance_monitor.cpp" into a shared library
 - [ ] Setup NAS parallel benchmarks
   - [ ] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples

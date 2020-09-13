@@ -112,6 +112,7 @@ Hardware Visualization
     seems to be pretty good
 - began changing makefile to produce shared library for easy inclusion at
   compile time (for measuring nas parallel benchmarks)
+- finished converting build chain to produce and use a shared library
 
 How do we measure NAS parallel benchmarks using our program?
 - source code will have `#ifdef FHV_PERFMON ... #endif` sections
