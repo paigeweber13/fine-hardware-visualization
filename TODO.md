@@ -21,7 +21,7 @@
   - [ ] fork repo, adjust it to use fhv performance monitor
 - [ ] Using these tests, compare our application to intel vTune
 - [ ] explore how well fhv works with other kernels and codebases
-  - [ ] consider NAS parallel benchmarks
+  - [ ] consider NAS parallel benchmarks (see above)
   - [ ] Dr. Saule may be able to throw together some software that
         demonstrates stress on more granular things like TLB or instruction
         decoder

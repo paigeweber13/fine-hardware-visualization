@@ -3,7 +3,7 @@ This file tracks my past accomplishments and work as I have developed Fine
 Hardware Visualization
 
 - [Development Log](#development-log)
-- [2020-08-18 through 2020-08-](#2020-08-18-through-2020-08-)
+- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
   - [Questions](#questions)
   - [Accomplishments](#accomplishments)
 - [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
@@ -87,7 +87,7 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# 2020-08-18 through 2020-08-
+# 2020-08-18 through 2020-08-30
 ## Questions
 - is it valuable to have a miss rate? (would be easy to implement for L2, L3.
   unclear how difficult it would be for L1)
