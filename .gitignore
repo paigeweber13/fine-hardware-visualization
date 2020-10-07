@@ -26,4 +26,5 @@ asm
 *.swp
 Session.vim
 .python-version
+.idea
 
