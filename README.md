@@ -1,4 +1,4 @@
-# Fine Hardware Visualization
+# Fine Hardware Visualization (FHV)
 This software is designed to present the user with a visualization of their 
 computer architecture and indicate what parts of that
 architecture are most loaded to identify bottlenecks in high-performance
@@ -29,14 +29,31 @@ may be found [in my github profile](https://github.com/rileyweber13).
   - [Others:](#others)
     - [Works by Martin Schultz:](#works-by-martin-schultz)
 
-# Prerequisites
+# Installation
+In summary, to install all dependencies on ubuntu (should work with all 
+debian-based systems), follow the workflow below:
+1. compile likwid from source: see [here](https://github.com/RRZE-HPC/likwid)
+2. edit `LIKWID_PREFIX` in config.mk in the fhv root directory to match the
+   location where likwid was installed in step 1
+3. Install build dependencies for fhv with the command `sudo apt-get install 
+   libboost-program-options-dev libcairo2-dev libpango1.0-dev`
+4. In the directory of fhv, run the following commands: 
+   - `make`
+   - `make perfgroups`
+   - (optional, untested) `make install`
+
+If you'd like more details of what is used and why, read the prerequisites 
+section.
+
+# Dependencies
 ## Compiled from source
  - **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
    for memory counters and is confirmed to use `likwid-accessD` without root
    permissions. If this version is available with your package manager, use
    that. Otherwise, build it from source. Instructions to do this are available
    [here](https://github.com/RRZE-HPC/likwid). Be sure to change
-   `LIKWID_PREFIX` in the makefile to match wherever likwid is installed
+   `LIKWID_PREFIX` in this repository's makefile to match wherever likwid is 
+   installed
  - additional perfgroups not included with likwid. These can be installed by
    running `make perfgroups` in the root directory.
 
@@ -49,6 +66,11 @@ may be found [in my github profile](https://github.com/rileyweber13).
  - **cairo:** available [here](https://www.cairographics.org/), also
    installable with `sudo apt install libcairo2-dev` The makefile uses
    `pkg-config` to ensure cairo is automatically found and included.
+ - **pango:** pango is used for text rendering in conjunction with cairo.
+   The pangocairo interface comes preinstalled with cairo, but this does not
+   include development tools. Pango is available 
+   [here](https://pango.gnome.org/Download), or installable on ubuntu with 
+   `sudo apt install libpango1.0-dev`
 
 ## Automatically included
  - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
@@ -57,19 +79,23 @@ may be found [in my github profile](https://github.com/rileyweber13).
 # Running
 **warning:** in an effort to reduce workload until I get a minimal proof of
 concept, I've stopped maintaining basically everything in this repository
-(benchmarks, tests are notable examples). So don't expect `make tests` (test
-suite) or `make bench` to work right now.
+(benchmarks, tests are notable examples). So many of the tests (`make tests`)
+don't work right now.
 
 What still works:
- - minimal example of likwid: `make run-tests/likwid-minimal`
- - minimal example of the fhv performance monitor: `make run-tests/fhv-minimal`
- - convolution: `cd convolution-fast && make test`
- - fhv benchmarks: `make bin/fhv` and then `bin/fhv -s 100000` or the like.
-   Note that sometimes has problems with "stopping non-started region", seems
-   to be when you run benchmark-all. This is noted in the section "problems to
-   fix"
- - polynomial_expansion: First run `git submodule init && git submodule update`. Then, see `tests/visualization-color-tests.sh` demonstrates 
-   usage
+ - minimal example of likwid: `make build/bin/tests/likwid-minimal-run`
+ - minimal example of the fhv performance monitor: `make 
+   build/bin/tests/fhv-minimal-run`
+ - convolution: 
+   - `cd examples/convolution`
+   - `make bin/convolution-likwid-cli-run`
+   - `make bin/convolution-fhv-perfmon-run`
+ - fhv benchmarks *seem* to be working but haven't been rigorously tested:
+   run `make` and then
+   `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:./build/lib build/bin/fhv -s 10000`
+   or similar. Note that sometimes has problems with "stopping non-started 
+   region", seems to be when you run benchmark-all. This is noted in the 
+   section "problems to fix"
 
 # Usage Notes
  - Region names must not have spaces
