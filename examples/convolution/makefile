@@ -1,5 +1,6 @@
 include ../../config.mk
 
+# Variables
 FHV_INCLUDE_DIR=-I../../src
 FHV_LIB_DIR=../../$(BUILT_LIB_DIR)
 FHV_LIB_FLAGS=-L$(FHV_LIB_DIR) -lfhv_perfmon
@@ -15,6 +16,10 @@ DATA_DIR=data
 EXECS=$(BIN_DIR)/convolution $(BIN_DIR)/convolution-manual \
 $(BIN_DIR)/convolution-likwid-cli $(BIN_DIR)/convolution-fhv-perfmon
 
+RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_LIB_DIR) \
+PATH="/usr/local/likwid-master/sbin:/usr/local/likwid-master/bin:$PATH"
+
+# rules
 all: $(EXECS)
 
 run-all: $(BIN_DIR)/convolution-run $(BIN_DIR)/convolution-manual-run \
