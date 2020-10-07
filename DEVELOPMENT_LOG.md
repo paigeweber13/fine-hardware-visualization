@@ -87,6 +87,13 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-09-30 through 2020-10-07
+## Accomplishments
+- Got HR issue worked out, clear to work again
+- had to reinstall linux due to many issues I was having (most notably, unable
+  to `startx` or start desktop environment
+- Started getting fhv and NPB to compile again
+
 # 2020-08-18 through 2020-08-30
 ## Questions
 - is it valuable to have a miss rate? (would be easy to implement for L2, L3.
