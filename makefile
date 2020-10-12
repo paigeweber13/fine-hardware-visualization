@@ -61,6 +61,7 @@ OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 SOURCES_SHARED_LIB=$(SRC_DIR)/performance_monitor.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+HEADERS_SHARED_LIB=$(SRC_DIR)/performance_monitor.hpp
 
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s) \
 $(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
@@ -127,10 +128,10 @@ PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
 
 _build: $(EXEC) $(PERFMON_LIB)
 
-_install: $(EXEC) $(PERFMON_LIB)
-	@cp $(EXEC) $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME);
-	@cp $(PERFMON_LIB) $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME);
-	@cp $(SRC_DIR)/performance_monitor.h $(FHV_PERFMON_PREFIX)/include/performance_monitor.h
+_install: $(EXEC) $(PERFMON_LIB) $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)
+	@cp $(EXEC) $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME)
+	@cp $(PERFMON_LIB) $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME)
+	@cp $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)/include/
 
 _build-examples: 
 	@cd examples/polynomial_expansion; make;
@@ -237,6 +238,16 @@ $(TEST_OBJ_DIR):
 $(ASM_DIR):
 	$(mkdir-command)
 
+$(FHV_PERFMON_PREFIX): $(FHV_PERFMON_PREFIX)/bin $(FHV_PERFMON_PREFIX)/lib $(FHV_PERFMON_PREFIX)/include
+$(FHV_PERFMON_PREFIX)/bin:
+	$(mkdir-command)
+
+$(FHV_PERFMON_PREFIX)/lib:
+	$(mkdir-command)
+
+$(FHV_PERFMON_PREFIX)/include:
+	$(mkdir-command)
+
 ### rules to copy perfgroups
 .PHONY: $(PERFGROUPS_DIRS)
 
@@ -259,13 +270,13 @@ endef
 
 _tests: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual \
 $(TEST_EXEC_DIR)/thread_migration $(TEST_EXEC_DIR)/likwid_minimal \
-$(TEST_EXEC_DIR)/fhv-fhv_minimal
+$(TEST_EXEC_DIR)/fhv_minimal
 
 _tests-run: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual-run \
 $(TEST_EXEC_DIR)/thread_migration-run $(TEST_EXEC_DIR)/likwid_minimal-run \
 $(TEST_EXEC_DIR)/likwid_minimal-run-with-cli \
 $(TEST_EXEC_DIR)/likwid_minimal-run-port-counter \
-$(TEST_EXEC_DIR)/fhv-fhv_minimal-run
+$(TEST_EXEC_DIR)/fhv_minimal-run
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp | $(TEST_OBJ_DIR)
 	$(compile-command)
