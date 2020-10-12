@@ -87,6 +87,22 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-10-07 through 2020-10-14
+## Accomplishments
+- much improved build process, began adding fhv metering to the BT benchmark
+- added FHV stuff to `make.def` in the NPB3.0-omp-C repository
+- found out I still cant enter hours? Emailed Linda and cc'd you
+
+## Questions
+- we will need to either get NPB to compile with g++ or get fhv to work in C...
+- seems like everything is written in C: likwid, NPB, etc... are we losing
+  anything by requiring C++? Will we have to port this program to C someday?
+- Tom (of likwid) has enlisted my help improving the likwid documentation. Do
+  you think this is a valuable use of my research hours? Should I spend a 
+  couple hours per week working on their documentation?
+  - honestly I'm not super interested in it... but I'm wondering if it's 
+    worth doing anyways
+
 # 2020-09-30 through 2020-10-07
 ## Accomplishments
 - Got HR issue worked out, clear to work again

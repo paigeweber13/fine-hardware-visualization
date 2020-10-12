@@ -3,7 +3,7 @@
 - [x] Finish adjusting diagram to be a detailed overview
 - [x] Add load/store benchmarks
 - [x] Add load/store saturation
-- [ ] adjust build chain before adding NAS parallel benchmarks
+- [x] adjust build chain before adding NAS parallel benchmarks
   - [x] merge polynomial_expansion into this repo, remove submodule
   - [x] Empty makefile to start over. 
   - [x] rename *.h to *.hpp
@@ -14,11 +14,14 @@
         path to libfhv_perfmon.so)
   - [x] simplify polynomial_expansion/makefile
   - [x] Build "performance_monitor.cpp" into a shared library
+- [ ] fix polynomial_expansion to use new build process
+- [ ] make sure convolution pulls header from build dir and not src dir
 - [ ] Setup NAS parallel benchmarks
-  - [ ] for now, keep as separate project (we don't depend on anything from
+  - [x] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples
         later if we can simplify the code.
   - [ ] fork repo, adjust it to use fhv performance monitor
+    - [ ] start with BT: identify key part and add an fhv region
 - [ ] Using these tests, compare our application to intel vTune
 - [ ] explore how well fhv works with other kernels and codebases
   - [ ] consider NAS parallel benchmarks (see above)
@@ -53,6 +56,9 @@
   `examples/polynomial_expansion/data` for examples.
   - parameters which demonstrated higher saturation are: n=67108864 d=1
     nbiter=800
+- cleanup polynomial_expansion:
+  - build to separate bin dir
+  - adjust scripts to match
 
 ### Features to add:
 - [ ] implement per-core saturation levels
