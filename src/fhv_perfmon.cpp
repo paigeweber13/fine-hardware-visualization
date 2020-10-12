@@ -1,17 +1,17 @@
-#include "performance_monitor.hpp"
+#include "fhv_perfmon.hpp"
 
 // declarations
-performance_monitor::aggregate_results_t 
-  performance_monitor::aggregate_results;
+fhv_perfmon::aggregate_results_t
+  fhv_perfmon::aggregate_results;
 
-performance_monitor::per_thread_results_t 
-  performance_monitor::per_thread_results;
+fhv_perfmon::per_thread_results_t
+  fhv_perfmon::per_thread_results;
 
-int performance_monitor::num_threads = -1;
+int fhv_perfmon::num_threads = -1;
 
 // PerThreadResult function definitions
 bool
-performance_monitor::PerThreadResult::operator<(
+fhv_perfmon::PerThreadResult::operator<(
   const PerThreadResult& other) const
 {
   // start by comparing region names
@@ -42,7 +42,7 @@ performance_monitor::PerThreadResult::operator<(
 }
 
 bool
-performance_monitor::PerThreadResult::matchesForAggregation(
+fhv_perfmon::PerThreadResult::matchesForAggregation(
   const PerThreadResult& other) const
 {
   if(this->region_name == other.region_name
@@ -56,7 +56,7 @@ performance_monitor::PerThreadResult::matchesForAggregation(
 
 // AggregateResult function definitions
 bool
-performance_monitor::AggregateResult::operator<(
+fhv_perfmon::AggregateResult::operator<(
   const AggregateResult& other) const
 {
   if (this->region_name != other.region_name)
@@ -82,7 +82,7 @@ performance_monitor::AggregateResult::operator<(
 // ------ perfmon stuff ------ //
 
 void
-performance_monitor::registerRegions(
+fhv_perfmon::registerRegions(
     const std::string regions)
 {
   if (regions == "")
@@ -111,17 +111,17 @@ performance_monitor::registerRegions(
   } while (end_pos != std::string::npos);
 }
 
-void performance_monitor::init(std::string parallel_regions,
-  std::string sequential_regions, std::string event_groups)
+void fhv_perfmon::init(std::string parallel_regions,
+                       std::string sequential_regions, std::string event_groups)
 {
   // initialize num_threads
   #pragma omp parallel
   {
-    performance_monitor::num_threads = omp_get_num_threads();
+      fhv_perfmon::num_threads = omp_get_num_threads();
   }
 
   std::string likwid_threads_string;
-  for(int i = 0; i < performance_monitor::num_threads; i++){
+  for(int i = 0; i < fhv_perfmon::num_threads; i++){
     likwid_threads_string += std::to_string(i);
     if(i != num_threads - 1){
       likwid_threads_string += ',';
@@ -174,17 +174,17 @@ void performance_monitor::init(std::string parallel_regions,
   }
 }
 
-void performance_monitor::startRegion(const char * tag)
+void fhv_perfmon::startRegion(const char * tag)
 {
   likwid_markerStartRegion(tag);
 }
 
-void performance_monitor::stopRegion(const char * tag)
+void fhv_perfmon::stopRegion(const char * tag)
 {
   likwid_markerStopRegion(tag);
 }
 
-void performance_monitor::nextGroup(){
+void fhv_perfmon::nextGroup(){
 #pragma omp barrier
 #pragma omp single
   {
@@ -192,7 +192,7 @@ void performance_monitor::nextGroup(){
   }
 }
 
-void performance_monitor::close(){
+void fhv_perfmon::close(){
   likwid_markerClose();
 
   load_likwid_data();
@@ -204,36 +204,36 @@ void performance_monitor::close(){
   std::sort(aggregate_results.begin(), aggregate_results.end());
 }
 
-std::string performance_monitor::aggregationTypeToString(
-  const performance_monitor::aggregation_t &aggregation_type)
+std::string fhv_perfmon::aggregationTypeToString(
+  const fhv_perfmon::aggregation_t &aggregation_type)
 {
-  if (aggregation_type == performance_monitor::aggregation_t::sum)
+  if (aggregation_type == fhv_perfmon::aggregation_t::sum)
     return "sum";
-  else if (aggregation_type == 
-    performance_monitor::aggregation_t::arithmetic_mean)
+  else if (aggregation_type ==
+           fhv_perfmon::aggregation_t::arithmetic_mean)
     return "arithmetic_mean";
-  else if (aggregation_type == 
-    performance_monitor::aggregation_t::geometric_mean)
+  else if (aggregation_type ==
+           fhv_perfmon::aggregation_t::geometric_mean)
     return "geometric_mean";
-  else if (aggregation_type == 
-    performance_monitor::aggregation_t::saturation)
+  else if (aggregation_type ==
+           fhv_perfmon::aggregation_t::saturation)
     return "saturation";
   else
     return "unknown_aggregation_type";
 }
 
-std::string performance_monitor::resultTypeToString(
-  const performance_monitor::result_t &result_type)
+std::string fhv_perfmon::resultTypeToString(
+  const fhv_perfmon::result_t &result_type)
 {
-  if (result_type == performance_monitor::result_t::event)
+  if (result_type == fhv_perfmon::result_t::event)
     return "event";
-  else if (result_type == performance_monitor::result_t::metric)
+  else if (result_type == fhv_perfmon::result_t::metric)
     return "metric";
   else
     return "unknown_result_type";
 }
 
-std::string performance_monitor::PerThreadResult::toString(
+std::string fhv_perfmon::PerThreadResult::toString(
   std::string delim) const 
 {
   std::string result_t_string = resultTypeToString(this->result_type);
@@ -250,7 +250,7 @@ std::string performance_monitor::PerThreadResult::toString(
   return ss.str();
 }
 
-std::string performance_monitor::AggregateResult::toString(
+std::string fhv_perfmon::AggregateResult::toString(
   std::string delim) const
 {
   std::string result_t_string = resultTypeToString(this->result_type);
@@ -269,13 +269,13 @@ std::string performance_monitor::AggregateResult::toString(
   return ss.str();
 }
 
-void performance_monitor::validate_and_store_likwid_result(
-  int thread_num,
-  performance_monitor::result_t result_type,
-  const char * region_name, 
-  const char * group_name,
-  const char * result_name, 
-  double result_value)
+void fhv_perfmon::validate_and_store_likwid_result(
+        int thread_num,
+        fhv_perfmon::result_t result_type,
+        const char * region_name,
+        const char * group_name,
+        const char * result_name,
+        double result_value)
 {
   bool keep_result = true;
 
@@ -293,7 +293,7 @@ void performance_monitor::validate_and_store_likwid_result(
   }
   else if(!std::getenv(perfmon_keep_large_values_envvar.c_str())){
 
-    if(result_type == performance_monitor::result_t::event &&
+    if(result_type == fhv_perfmon::result_t::event &&
       result_value >= EVENT_VALUE_ERROR_THRESHOLD)
     {
       std::cout << "WARNING: unreasonably high event value detected:"
@@ -312,7 +312,7 @@ void performance_monitor::validate_and_store_likwid_result(
       keep_result = false;
     }
 
-    if(result_type == performance_monitor::result_t::metric &&
+    if(result_type == fhv_perfmon::result_t::metric &&
       result_value >= METRIC_VALUE_ERROR_THRESHOLD)
     {
       std::cout << "WARNING: unreasonably high metric value detected!"
@@ -348,7 +348,7 @@ void performance_monitor::validate_and_store_likwid_result(
   }
 }
 
-void performance_monitor::load_likwid_data(){
+void fhv_perfmon::load_likwid_data(){
   checkInit();
 
   perfmon_readMarkerFile(likwidOutputFilepath.c_str());
@@ -369,27 +369,27 @@ void performance_monitor::load_likwid_data(){
         const char * event_name = perfmon_getEventName(gid, k);
         double event_value = perfmon_getResultOfRegionThread(i, k, t);
 
-        validate_and_store_likwid_result(t, 
-          performance_monitor::result_t::event, regionName, groupName, 
-          event_name, event_value);
+        validate_and_store_likwid_result(t,
+                                         fhv_perfmon::result_t::event, regionName, groupName,
+                                         event_name, event_value);
       }
 
       for (int k = 0; k < perfmon_getNumberOfMetrics(gid); k++){
         const char * metric_name = perfmon_getMetricName(gid, k);
         double metric_value = perfmon_getMetricOfRegionThread(i, k, t);
 
-        validate_and_store_likwid_result(t, 
-          performance_monitor::result_t::metric, regionName, groupName, 
-          metric_name, metric_value);
+        validate_and_store_likwid_result(t,
+                                         fhv_perfmon::result_t::metric, regionName, groupName,
+                                         metric_name, metric_value);
       }
     }
   }
 }
 
-void performance_monitor::perform_result_aggregation()
+void fhv_perfmon::perform_result_aggregation()
 {
   std::vector<PerThreadResult> ptr_copy(
-    performance_monitor::get_per_thread_results());
+          fhv_perfmon::get_per_thread_results());
   
   // a stack is used because we add things in ascending position. Therefore, if
   // we remove in descending position we will not offset anything that comes
@@ -404,18 +404,18 @@ void performance_monitor::perform_result_aggregation()
       .group_name = ptr_copy.begin()->group_name,
       .result_type = ptr_copy.begin()->result_type,
       .result_name = ptr_copy.begin()->result_name,
-      .aggregation_type = performance_monitor::aggregation_t::sum,
+      .aggregation_type = fhv_perfmon::aggregation_t::sum,
       .result_value = ptr_copy.begin()->result_value,
     };
 
     // copy the initialized "sum" object into the other two objects we need
     AggregateResult current_arithmetic_mean = current_sum;
     current_arithmetic_mean.aggregation_type = 
-      performance_monitor::aggregation_t::arithmetic_mean;
+      fhv_perfmon::aggregation_t::arithmetic_mean;
 
     AggregateResult current_geometric_mean = current_sum;
     current_geometric_mean.aggregation_type = 
-      performance_monitor::aggregation_t::geometric_mean;
+      fhv_perfmon::aggregation_t::geometric_mean;
 
     indices_aggregated.push(ptr_copy.begin());
 
@@ -434,17 +434,17 @@ void performance_monitor::perform_result_aggregation()
     // finally, perform division for arithmetic means and take the power of
     // geometric means
 
-    current_arithmetic_mean.result_value /= performance_monitor::num_threads;
+    current_arithmetic_mean.result_value /= fhv_perfmon::num_threads;
     current_geometric_mean.result_value = 
       pow(
         current_geometric_mean.result_value, 
-        1.0 / static_cast<double>(performance_monitor::num_threads)
+        1.0 / static_cast<double>(fhv_perfmon::num_threads)
       );
 
     // add the things we found to the aggregate results
-    performance_monitor::aggregate_results.push_back(current_sum);
-    performance_monitor::aggregate_results.push_back(current_arithmetic_mean);
-    performance_monitor::aggregate_results.push_back(current_geometric_mean);
+    fhv_perfmon::aggregate_results.push_back(current_sum);
+    fhv_perfmon::aggregate_results.push_back(current_arithmetic_mean);
+    fhv_perfmon::aggregate_results.push_back(current_geometric_mean);
 
     // remove used things from ptr_copy
     while (!indices_aggregated.empty())
@@ -455,7 +455,7 @@ void performance_monitor::perform_result_aggregation()
   }
 }
 
-void performance_monitor::calculate_port_usage_ratios()
+void fhv_perfmon::calculate_port_usage_ratios()
 {
   checkInit();
 
@@ -471,13 +471,13 @@ void performance_monitor::calculate_port_usage_ratios()
 
   // first, sum all UOPS_DISPATCHED_PORT_PORT* on a per-thread, per-region
   // basis
-  for (int t = 0; t < performance_monitor::num_threads; t++)
+  for (int t = 0; t < fhv_perfmon::num_threads; t++)
   {
     for (const auto &region_name : regions)
     {
       for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
       {
-        for (const PerThreadResult &ptr : performance_monitor::per_thread_results)
+        for (const PerThreadResult &ptr : fhv_perfmon::per_thread_results)
         {
           if(ptr.thread_num == t 
             && ptr.region_name == region_name
@@ -497,18 +497,18 @@ void performance_monitor::calculate_port_usage_ratios()
           .region_name = region_name,
           .thread_num = t,
           .group_name = fhv_performance_monitor_group,
-          .result_type = performance_monitor::result_t::metric,
+          .result_type = fhv_perfmon::result_t::metric,
           .result_name = fhv_port_usage_metrics[port_num],
           .result_value = uops_executed_port[port_num] / total_num_port_ops
         };
 
-        performance_monitor::per_thread_results.push_back(port_usage_metric);
+        fhv_perfmon::per_thread_results.push_back(port_usage_metric);
       }
     }
   }
 }
 
-void performance_monitor::calculate_saturation(){
+void fhv_perfmon::calculate_saturation(){
   // TODO: eventually I want to build this on a per-thread basis and then have
   // "perform_result_aggregation" automatically aggregate these. however, for
   // now we're just going to build overall results manually and add them to
@@ -518,9 +518,9 @@ void performance_monitor::calculate_saturation(){
   std::string saturation_result_name;
   double saturation_result_value;
 
-  for (const auto & ar : performance_monitor::aggregate_results)
+  for (const auto & ar : fhv_perfmon::aggregate_results)
   {
-    if(ar.aggregation_type == performance_monitor::aggregation_t::sum)
+    if(ar.aggregation_type == fhv_perfmon::aggregation_t::sum)
     {
       is_saturation_result = false;
 
@@ -540,28 +540,28 @@ void performance_monitor::calculate_saturation(){
         AggregateResult new_ar = {
           .region_name = ar.region_name,
           .group_name = fhv_performance_monitor_group,
-          .result_type = performance_monitor::result_t::metric,
+          .result_type = fhv_perfmon::result_t::metric,
           .result_name = saturation_result_name,
-          .aggregation_type = performance_monitor::aggregation_t::saturation,
+          .aggregation_type = fhv_perfmon::aggregation_t::saturation,
           .result_value = saturation_result_value
         };
         
-        performance_monitor::aggregate_results.push_back(new_ar);
+        fhv_perfmon::aggregate_results.push_back(new_ar);
       }
     }
   }
 }
 
-void performance_monitor::checkInit()
+void fhv_perfmon::checkInit()
 {
   std::string error_str = "";
   bool something_went_wrong = false;
 
-  if (performance_monitor::num_threads == -1)
+  if (fhv_perfmon::num_threads == -1)
   {
-    error_str += "WARNING: performance_monitor::num_threads was not set! This "
+    error_str += "WARNING: fhv_perfmon::num_threads was not set! This "
       "usually happens\n"
-      "because the user failed to call performance_monitor::init(). FHV will "
+      "because the user failed to call fhv_perfmon::init(). FHV will "
       "not be\n"
       "able to build results. Major functionality will be disabled.\n"
       "If init() was called, then something is wrong with init() "
@@ -573,15 +573,15 @@ void performance_monitor::checkInit()
   if(something_went_wrong) std::cout << error_str;
 }
 
-void performance_monitor::checkResults(){
+void fhv_perfmon::checkResults(){
   std::string error_str = "WARNING: there doesn't seem to be any results for "
     "likwid. This commonly \n"
-    "happens because performance_monitor::close() was not called.\n";
+    "happens because fhv_perfmon::close() was not called.\n";
   
   std::string error_more_info = "";
   bool something_went_wrong = false;
 
-  if (performance_monitor::per_thread_results.size() == 0)
+  if (fhv_perfmon::per_thread_results.size() == 0)
   {
     error_more_info += "If close() was called, then something is wrong "
       "internally. Did close() call \n"
@@ -589,7 +589,7 @@ void performance_monitor::checkResults(){
     something_went_wrong = true;
   }
 
-  if (performance_monitor::aggregate_results.size() == 0)
+  if (fhv_perfmon::aggregate_results.size() == 0)
   {
     error_more_info += "If close() was called, then something is wrong "
       "internally. Did close() call \n"
@@ -605,41 +605,41 @@ void performance_monitor::checkResults(){
   }
 }
 
-void performance_monitor::printDetailedResults(){
+void fhv_perfmon::printDetailedResults(){
   std::cout << std::endl
     << "----- FHV Performance Monitor: detailed results ----- "
     << std::endl;
 
   checkResults();
 
-  for (const PerThreadResult &ptr : performance_monitor::per_thread_results)
+  for (const PerThreadResult &ptr : fhv_perfmon::per_thread_results)
   {
     std::cout << ptr.toString();
   }
 }
 
-void performance_monitor::printAggregateResults(){
+void fhv_perfmon::printAggregateResults(){
   std::cout << std::endl
     << "----- FHV Performance Monitor: aggregate results ----- "
     << std::endl;
 
   checkResults();
 
-  for (const AggregateResult &ar : performance_monitor::aggregate_results)
+  for (const AggregateResult &ar : fhv_perfmon::aggregate_results)
   {
     std::cout << ar.toString();
   }
 }
 
-void performance_monitor::printHighlights(){
+void fhv_perfmon::printHighlights(){
   checkResults();
   
   std::cout << std::endl 
-    << "----- performance_monitor highlights report -----" 
+    << "----- fhv_perfmon highlights report -----"
     << std::endl;
 
   std::cout << "----- key metrics, per-thread -----" << std::endl;
-  for(const auto & ptr : performance_monitor::per_thread_results)
+  for(const auto & ptr : fhv_perfmon::per_thread_results)
   {
     for(const auto & key_metric : fhv_key_metrics)
     {
@@ -649,7 +649,7 @@ void performance_monitor::printHighlights(){
 
   std::cout << "----- key metrics, aggregated across threads -----"
     << std::endl;
-  for(const auto & ar : performance_monitor::aggregate_results)
+  for(const auto & ar : fhv_perfmon::aggregate_results)
   {
     for(const auto & key_metric : fhv_key_metrics)
     {
@@ -658,7 +658,7 @@ void performance_monitor::printHighlights(){
   }
 }
 
-void performance_monitor::resultsToJson(std::string param_info_string)
+void fhv_perfmon::resultsToJson(std::string param_info_string)
 {
   checkInit();
   checkResults();
@@ -669,7 +669,7 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   results[json_info_section][json_parameter_key] = param_info_string;
 
   // populate json with per_thread_results
-  for (const auto & ptr : performance_monitor::per_thread_results)
+  for (const auto & ptr : fhv_perfmon::per_thread_results)
   {
     for (const auto &key_metric : fhv_key_metrics)
     {
@@ -683,7 +683,7 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   }
 
   // populate json with aggregate results
-  for (const auto & ar : performance_monitor::aggregate_results)
+  for (const auto & ar : fhv_perfmon::aggregate_results)
   {
     for (const auto &key_metric : fhv_key_metrics)
     {
@@ -705,14 +705,14 @@ void performance_monitor::resultsToJson(std::string param_info_string)
   o << std::setw(4) << results << std::endl;
 }
 
-const performance_monitor::aggregate_results_t&
-performance_monitor::get_aggregate_results()
+const fhv_perfmon::aggregate_results_t&
+fhv_perfmon::get_aggregate_results()
 {
 	return aggregate_results;
 }
 
-const performance_monitor::per_thread_results_t&
-performance_monitor::get_per_thread_results()
+const fhv_perfmon::per_thread_results_t&
+fhv_perfmon::get_per_thread_results()
 {
   return per_thread_results;
 }

@@ -112,7 +112,7 @@ double bandwidth_rw(const char *tag, std::uint64_t num_groups,
           //	Maybe start likwid region here
           //    printf("likwid start region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
           
-          performance_monitor::startRegion(tag);
+          fhv_perfmon::startRegion(tag);
         }
         for (k = 0; k < num_iterations_to_measure; k++){
           for (j = 0; j < num_doubles; j += 1){
@@ -135,12 +135,12 @@ double bandwidth_rw(const char *tag, std::uint64_t num_groups,
           //	Maybe stop likwid regin here
           //    printf("likwid stop region %s on thread %d\n", bw->mark_tag, omp_get_thread_num());
           
-          performance_monitor::stopRegion(tag);
+          fhv_perfmon::stopRegion(tag);
         }
         asm(""); //Say no to loop optimization
       }
 
-      performance_monitor::nextGroup();
+      fhv_perfmon::nextGroup();
     }
   }
 

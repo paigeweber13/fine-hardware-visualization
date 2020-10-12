@@ -7,7 +7,7 @@
 #include <likwid.h>
 #include <omp.h>
 
-#include "performance_monitor.hpp"
+#include "fhv_perfmon.hpp"
 
 #define KILO_BYTE_SIZE 1024
 #define BYTES_PER_DOUBLE 8

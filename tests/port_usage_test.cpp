@@ -1,5 +1,5 @@
 // can be compiled with something like:
-// `cd ..; make; cd tests; g++ ../obj/performance_monitor.o port_usage_test.cpp -L/usr/local/likwid-master/lib -I/usr/local/likwid-master/include -I../lib -march=native -mtune=native -fopenmp -llikwid -o port_usage_test`
+// `cd ..; make; cd tests; g++ ../obj/fhv_perfmon.o port_usage_test.cpp -L/usr/local/likwid-master/lib -I/usr/local/likwid-master/include -I../lib -march=native -mtune=native -fopenmp -llikwid -o port_usage_test`
 
 // and run with something like `LD_LIBRARY_PATH=/usr/local/likwid-master/lib ./port_usage_test | less`
 
@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string>
 
-#include "performance_monitor.hpp"
+#include "fhv_perfmon.hpp"
 
 void copy(double *arr, double *copy_arr, size_t n) {
   for (size_t i = 0; i < n; i++) {
@@ -196,13 +196,13 @@ void compare_port_usage_totals(
 }
 
 int main() {
-  printf("\n\nThis is a minimal example of how the fhv performance_monitor \n"
+  printf("\n\nThis is a minimal example of how the fhv fhv_perfmon \n"
          "aggregation prints work\n");
 
-  performance_monitor::init("PORT_USAGE1|PORT_USAGE2|PORT_USAGE3|PORT_USAGE_TEST", "double_flops,copy", "");
+  fhv_perfmon::init("PORT_USAGE1|PORT_USAGE2|PORT_USAGE3|PORT_USAGE_TEST", "double_flops,copy", "");
   // ---- begin likwid initialization
 
-  // const char *filepath = performance_monitor::likwidOutputFilepath.c_str();
+  // const char *filepath = fhv_perfmon::likwidOutputFilepath.c_str();
 
   // so 14 group/region combos
 //   setenv("LIKWID_EVENTS",
@@ -240,18 +240,18 @@ int main() {
   {
     for (int j = 0; j < 4; j++) {
       printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
-      performance_monitor::startRegion("double_flops");
+      fhv_perfmon::startRegion("double_flops");
       for (int i = 0; i < 10000000; i++) {
         // 2e7 scalar double floating point operations per iteration
         c = a * b + c;
       }
-      performance_monitor::stopRegion("double_flops");
-      performance_monitor::startRegion("copy");
+      fhv_perfmon::stopRegion("double_flops");
+      fhv_perfmon::startRegion("copy");
       for (int i = 0; i < 10000; i++) {
         copy(arr, copy_arr, n);
       }
-      performance_monitor::stopRegion("copy");
-      performance_monitor::nextGroup();
+      fhv_perfmon::stopRegion("copy");
+      fhv_perfmon::nextGroup();
     }
   }
 
@@ -260,23 +260,23 @@ int main() {
 
   likwid_markerClose();
 
-  // performance_monitor::printRegionGroupEventAndMetricData();
+  // fhv_perfmon::printRegionGroupEventAndMetricData();
 
-  performance_monitor::buildResultsMaps();
-  performance_monitor::printDetailedResults();
-  // performance_monitor::printOnlyAggregate();
+  fhv_perfmon::buildResultsMaps();
+  fhv_perfmon::printDetailedResults();
+  // fhv_perfmon::printOnlyAggregate();
 
-  performance_monitor::compareActualWithBench();
-  // performance_monitor::printComparison();
+  fhv_perfmon::compareActualWithBench();
+  // fhv_perfmon::printComparison();
 
-  performance_monitor::printHighlights();
+  fhv_perfmon::printHighlights();
 
-  // performance_monitor::resultsToJson();
+  // fhv_perfmon::resultsToJson();
 
   std::cout << "\n";
-  // performance_monitor::printCsvHeader();
-  // performance_monitor::printCsvOutput();
+  // fhv_perfmon::printCsvHeader();
+  // fhv_perfmon::printCsvOutput();
 
-  compare_port_usage_totals(performance_monitor::get_per_thread_results(),
-                            performance_monitor::get_aggregate_results());
+  compare_port_usage_totals(fhv_perfmon::get_per_thread_results(),
+                            fhv_perfmon::get_aggregate_results());
 }

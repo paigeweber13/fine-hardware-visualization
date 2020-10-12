@@ -59,9 +59,11 @@ SOURCES=$(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/fhv_main.cpp \
 $(SRC_DIR)/saturation_diagram.cpp
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-SOURCES_SHARED_LIB=$(SRC_DIR)/performance_monitor.cpp
+SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-HEADERS_SHARED_LIB=$(SRC_DIR)/performance_monitor.hpp
+HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp $(SRC_DIR)/likwid_defines.hpp $(SRC_DIR)/performance_monitor_defines.hpp
+
+NLOHMANN_JSON_HEADER=$(SRC_DIR)/nlohmann/json.hpp
 
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s) \
 $(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
@@ -132,6 +134,7 @@ _install: $(EXEC) $(PERFMON_LIB) $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)
 	@cp $(EXEC) $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME)
 	@cp $(PERFMON_LIB) $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME)
 	@cp $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)/include/
+	@cp $(NLOHMANN_JSON_HEADER) $(FHV_PERFMON_PREFIX)/include/nlohmann/
 
 _build-examples: 
 	@cd examples/polynomial_expansion; make;
@@ -179,14 +182,14 @@ $(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
 $(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
 	$(compile-command)
 
-## compilation of performance_monitor lib
+## compilation of fhv_perfmon lib
 $(OBJS_SHARED_LIB): $(SOURCES_SHARED_LIB) $(HEADERS) | $(OBJ_DIR)
 
 define compile-command-shared-lib
 $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
-$(OBJ_DIR)/performance_monitor.o: $(SRC_DIR)/performance_monitor.cpp
+$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
 	$(compile-command-shared-lib)
 
 
@@ -238,7 +241,7 @@ $(TEST_OBJ_DIR):
 $(ASM_DIR):
 	$(mkdir-command)
 
-$(FHV_PERFMON_PREFIX): $(FHV_PERFMON_PREFIX)/bin $(FHV_PERFMON_PREFIX)/lib $(FHV_PERFMON_PREFIX)/include
+$(FHV_PERFMON_PREFIX): $(FHV_PERFMON_PREFIX)/bin $(FHV_PERFMON_PREFIX)/lib $(FHV_PERFMON_PREFIX)/include $(FHV_PERFMON_PREFIX)/include/nlohmann
 $(FHV_PERFMON_PREFIX)/bin:
 	$(mkdir-command)
 
@@ -246,6 +249,9 @@ $(FHV_PERFMON_PREFIX)/lib:
 	$(mkdir-command)
 
 $(FHV_PERFMON_PREFIX)/include:
+	$(mkdir-command)
+
+$(FHV_PERFMON_PREFIX)/include/nlohmann:
 	$(mkdir-command)
 
 ### rules to copy perfgroups

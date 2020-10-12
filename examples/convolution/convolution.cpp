@@ -11,7 +11,7 @@
 #endif
 
 #ifdef FHV_PERFMON
-#include <performance_monitor.hpp>
+#include <fhv_perfmon.hpp>
 #include <likwid.h>
 #endif
 
@@ -59,7 +59,7 @@ int main(int argc, char ** argv){
 #endif
 
 #ifdef FHV_PERFMON
-  performance_monitor::init();
+  fhv_perfmon::init();
 #endif
 
   for (size_t i = 0; i < static_cast<size_t>(nbiter); i++)
@@ -70,7 +70,7 @@ int main(int argc, char ** argv){
     likwid_markerNextGroup();
 #endif
 #ifdef FHV_PERFMON
-  performance_monitor::nextGroup();
+  fhv_perfmon::nextGroup();
 #endif
   }
 
@@ -96,13 +96,13 @@ int main(int argc, char ** argv){
 #endif
 
 #ifdef FHV_PERFMON
-  performance_monitor::close();
+  fhv_perfmon::close();
 
-  // performance_monitor::printDetailedResults();
-  // performance_monitor::printAggregateResults();
+  // fhv_perfmon::printDetailedResults();
+  // fhv_perfmon::printAggregateResults();
 
-  performance_monitor::printHighlights();
-  performance_monitor::resultsToJson();
+  fhv_perfmon::printHighlights();
+  fhv_perfmon::resultsToJson();
 #endif
 
   destroy_image(input, n);
@@ -183,7 +183,7 @@ convolve(
     likwid_markerStartRegion("convolution");
     #endif
     #ifdef FHV_PERFMON
-    performance_monitor::startRegion("convolution");
+    fhv_perfmon::startRegion("convolution");
     #endif
 
     float sum;
@@ -207,7 +207,7 @@ convolve(
     likwid_markerStopRegion("convolution");
     #endif
     #ifdef FHV_PERFMON
-    performance_monitor::stopRegion("convolution");
+    fhv_perfmon::stopRegion("convolution");
     #endif
   }
 }

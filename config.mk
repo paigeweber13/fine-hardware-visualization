@@ -13,7 +13,7 @@ LIKWID_PREFIX=/usr/local/likwid-master
 # LIKWID_PREFIX=/usr/local/likwid-v4.3.4
 # LIKWID_PREFIX=/usr/local
 
-# this is where "make install" will install the performance_monitor library and
+# this is where "make install" will install the fhv_perfmon library and
 # the "fhv" executable. Examples will use this directory to load the
 # performance monitor
 FHV_PERFMON_PREFIX=/usr/local/fhv

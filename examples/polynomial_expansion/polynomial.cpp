@@ -10,7 +10,7 @@
 #endif
 
 #ifdef FHV_PERFMON
-#include <performance_monitor.hpp>
+#include <fhv_perfmon.hpp>
 #include <likwid.h>
 #endif
 
@@ -35,7 +35,7 @@ void polynomial_expansion(float *poly, int degree,
     likwid_markerStartRegion("poly");
   #endif
   #ifdef FHV_PERFMON
-    performance_monitor::startRegion("poly");
+    fhv_perfmon::startRegion("poly");
   #endif
 
 #pragma omp for schedule(runtime)
@@ -48,7 +48,7 @@ void polynomial_expansion(float *poly, int degree,
     likwid_markerStopRegion("poly");
   #endif
   #ifdef FHV_PERFMON
-    performance_monitor::stopRegion("poly");
+    fhv_perfmon::stopRegion("poly");
   #endif
   }
 }
@@ -67,7 +67,7 @@ void likwid_cli_init(){
 
 void fhv_perfmon_init(){
 #ifdef FHV_PERFMON
-  performance_monitor::init("poly", "");
+  fhv_perfmon::init("poly", "");
 #endif
 }
 
@@ -116,7 +116,7 @@ int main (int argc, char* argv[]) {
   likwid_markerNextGroup();
 #endif
 #ifdef FHV_PERFMON
-  performance_monitor::nextGroup();
+  fhv_perfmon::nextGroup();
 #endif
 
   }
@@ -133,14 +133,14 @@ int main (int argc, char* argv[]) {
 #endif
 
 #ifdef FHV_PERFMON
-  performance_monitor::close();
+  fhv_perfmon::close();
 
-  performance_monitor::printHighlights();
+  fhv_perfmon::printHighlights();
   std::string param_info = "polynomial basic params: n: " +
     std::to_string(n) + ", " +
     "degree: " + std::to_string(degree) + ", " +
     "number of iterations: " + std::to_string(nbiter);
-  performance_monitor::resultsToJson(param_info);
+  fhv_perfmon::resultsToJson(param_info);
 #endif
 
   delete[] array;

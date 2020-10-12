@@ -20,7 +20,7 @@
 
 using json = nlohmann::json;
 
-class performance_monitor {
+class fhv_perfmon {
   public:
     // enums for aggregation type and result type
     enum class aggregation_t { sum, arithmetic_mean, geometric_mean, 
@@ -29,9 +29,9 @@ class performance_monitor {
 
     // to string functions for those
     static std::string aggregationTypeToString(
-      const performance_monitor::aggregation_t &aggregation_type);
+      const fhv_perfmon::aggregation_t &aggregation_type);
     static std::string resultTypeToString(
-      const performance_monitor::result_t &result_type);
+      const fhv_perfmon::result_t &result_type);
 
     // ---- TYPES
 
@@ -41,7 +41,7 @@ class performance_monitor {
       std::string region_name;
       int thread_num;
       std::string group_name;
-      performance_monitor::result_t result_type;
+      fhv_perfmon::result_t result_type;
       std::string result_name;
       double result_value;
 
@@ -54,9 +54,9 @@ class performance_monitor {
     struct AggregateResult {
       std::string region_name;
       std::string group_name;
-      performance_monitor::result_t result_type;
+      fhv_perfmon::result_t result_type;
       std::string result_name;
-      performance_monitor::aggregation_t aggregation_type;
+      fhv_perfmon::aggregation_t aggregation_type;
       double result_value;
 
       bool operator<(const AggregateResult& other) const;
@@ -141,12 +141,12 @@ class performance_monitor {
     // ------ functions ------ //
     // helper function to validate data from likwid
     static void validate_and_store_likwid_result(
-      int thread_num,
-      performance_monitor::result_t result_type,
-      const char * region_name, 
-      const char * group_name,
-      const char * result_name, 
-      double result_value);
+            int thread_num,
+            fhv_perfmon::result_t result_type,
+            const char * region_name,
+            const char * group_name,
+            const char * result_name,
+            double result_value);
     
     // used to make sure things got initialized correctly
     static void checkInit();
@@ -178,8 +178,8 @@ class performance_monitor {
     // --- important numbers
     static int num_threads;
 
-    static performance_monitor::aggregate_results_t  aggregate_results;
+    static fhv_perfmon::aggregate_results_t  aggregate_results;
 
-    static performance_monitor::per_thread_results_t per_thread_results;
+    static fhv_perfmon::per_thread_results_t per_thread_results;
 
 };

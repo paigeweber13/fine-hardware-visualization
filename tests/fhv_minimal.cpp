@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "performance_monitor.hpp"
+#include "fhv_perfmon.hpp"
 
 #define NUM_FLOPS 10000000
 #define NUM_COPIES 10000
@@ -26,11 +26,11 @@ double do_flops(double a, double b, double c, lli num_flops) {
 
 int main()
 {
-  printf("\nThis is a minimal example of how the fhv performance_monitor works"
+  printf("\nThis is a minimal example of how the fhv fhv_perfmon works"
          "\n");
 
-  // performance_monitor::init("double_flops,copy");
-  performance_monitor::init();
+  // fhv_perfmon::init("double_flops,copy");
+  fhv_perfmon::init();
 
   double a, b, c;
   a = 1.8;
@@ -47,15 +47,15 @@ int main()
     {
       printf("thread %d, iteration %d\n", omp_get_thread_num(), j);
 
-      performance_monitor::startRegion("double_flops");
+      fhv_perfmon::startRegion("double_flops");
       c = do_flops(a, b, c, NUM_FLOPS);
-      performance_monitor::stopRegion("double_flops");
+      fhv_perfmon::stopRegion("double_flops");
 
-      performance_monitor::startRegion("copy");
+      fhv_perfmon::startRegion("copy");
       do_copy(arr, copy_arr, n, NUM_COPIES);
-      performance_monitor::stopRegion("copy");
+      fhv_perfmon::stopRegion("copy");
 
-      performance_monitor::nextGroup();
+      fhv_perfmon::nextGroup();
     }
   }
 
@@ -63,10 +63,10 @@ int main()
   printf("final random part of copy_arr: %f\n", 
          copy_arr[( (lli) c ) % n]);
 
-  performance_monitor::close();
+  fhv_perfmon::close();
 
-  // performance_monitor::printDetailedResults();
-  // performance_monitor::printAggregateResults();
-  performance_monitor::printHighlights();
-  performance_monitor::resultsToJson();
+  // fhv_perfmon::printDetailedResults();
+  // fhv_perfmon::printAggregateResults();
+  fhv_perfmon::printHighlights();
+  fhv_perfmon::resultsToJson();
 }

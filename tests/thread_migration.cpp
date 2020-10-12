@@ -2,7 +2,7 @@
 #include <sched.h>
 
 #include "../lib/computation_measurements.hpp"
-#include "../lib/performance_monitor.hpp"
+#include "../lib/fhv_perfmon.hpp"
 
 // starting/stopping regions seems to cause everything to get reported on
 // threads 0 and 1
@@ -12,13 +12,13 @@ void migrate_cores_12_to_cores_34(){
   __m256 d;
   __m256 e;
 
-  performance_monitor::init("FLOPS_SP");
+  fhv_perfmon::init("FLOPS_SP");
   omp_set_num_threads(4);
   printf("here, only omp threads 0 and 1 are allowed to do work\n");
 
 #pragma omp parallel
   {
-    performance_monitor::startRegion("flops");
+    fhv_perfmon::startRegion("flops");
     #pragma omp barrier
 
     int original_core = sched_getcpu();
@@ -28,9 +28,9 @@ void migrate_cores_12_to_cores_34(){
     // compute round 1
     if(omp_thread == 0 || omp_thread == 1){
       printf("Thread %d doing work on core %d\n", omp_thread, original_core);
-      // performance_monitor::startRegion("flops");
+      // fhv_perfmon::startRegion("flops");
       d = flops_sp(10000000);
-      // performance_monitor::stopRegion("flops");
+      // fhv_perfmon::stopRegion("flops");
     }
 
     // migrate threads
@@ -47,17 +47,17 @@ void migrate_cores_12_to_cores_34(){
     // compute round 2
     if(omp_thread == 0 || omp_thread == 1){
       printf("Thread %d doing work on core %d\n", omp_thread, new_core);
-      // performance_monitor::startRegion("flops");
+      // fhv_perfmon::startRegion("flops");
       e = flops_sp(10000000);
-      // performance_monitor::stopRegion("flops");
+      // fhv_perfmon::stopRegion("flops");
     }
 
     #pragma omp barrier
-    performance_monitor::stopRegion("flops");
+    fhv_perfmon::stopRegion("flops");
   }
 
-  performance_monitor::close();
-  performance_monitor::printResults();
+  fhv_perfmon::close();
+  fhv_perfmon::printResults();
 }
 
 void migrate_thread_core_0_to_2()
@@ -65,12 +65,12 @@ void migrate_thread_core_0_to_2()
   __m256 d;
   __m256 e;
 
-  performance_monitor::init("FLOPS_SP");
+  fhv_perfmon::init("FLOPS_SP");
   printf("here, one thread is migrated from core 0 to core 2\n");
 
 #pragma omp parallel
 {
-  performance_monitor::startRegion("flops");
+  fhv_perfmon::startRegion("flops");
 }
 
   likwid_pinThread(0);
@@ -81,23 +81,23 @@ void migrate_thread_core_0_to_2()
 
 #pragma omp parallel
 {
-  performance_monitor::stopRegion("flops");
+  fhv_perfmon::stopRegion("flops");
 }
 
-  performance_monitor::close();
-  performance_monitor::printResults();
+  fhv_perfmon::close();
+  fhv_perfmon::printResults();
 }
 
 void migrate_all_to_one(){
   __m256 d;
   __m256 e;
 
-  performance_monitor::init("FLOPS_SP");
+  fhv_perfmon::init("FLOPS_SP");
   omp_set_num_threads(4);
 
 #pragma omp parallel
   {
-    performance_monitor::startRegion("flops");
+    fhv_perfmon::startRegion("flops");
     // #pragma omp barrier
 
     int omp_thread = omp_get_thread_num();
@@ -121,11 +121,11 @@ void migrate_all_to_one(){
     d += flops_sp(10000000);
 
     #pragma omp barrier
-    performance_monitor::stopRegion("flops");
+    fhv_perfmon::stopRegion("flops");
   }
 
-  performance_monitor::close();
-  performance_monitor::printResults();
+  fhv_perfmon::close();
+  fhv_perfmon::printResults();
 }
 
 int main(int argc, char *argv[])

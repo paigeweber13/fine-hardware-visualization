@@ -13,7 +13,7 @@
 
 // #include "architecture.hpp"
 #include "computation_measurements.hpp"
-#include "performance_monitor.hpp"
+#include "fhv_perfmon.hpp"
 #include "performance_monitor_defines.hpp"
 #include "saturation_diagram.hpp"
 #include "likwid.h"
@@ -78,8 +78,8 @@ void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
 void benchmark_all()
 {
 
-  performance_monitor::init("flops_sp,flops_dp,L2,L3,MEM", "", 
-    "FLOPS_SP|FLOPS_DP|L2|L3|MEM");
+  fhv_perfmon::init("flops_sp,flops_dp,L2,L3,MEM", "",
+                    "FLOPS_SP|FLOPS_DP|L2|L3|MEM");
 
   std::cout << "starting single precision flop benchmark" << std::endl;
   benchmark_flops(precision::SINGLE_P, FLOAT_NUM_ITERATIONS);
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
       "The CSV output for which this is the header provides detailed memory "
       "data.")
     ("print-perfmon-csv-header", "print header of csv that perfmon uses "
-      "internally. This corresponds with performance_monitor::printCsvOutput "
+      "internally. This corresponds with fhv_perfmon::printCsvOutput "
       "and provides details about saturation of CPU/memory and port usage.")
     ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
                     "a visualization from data output to json during program " 
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
   {
     std::cout << "Sorry, csv printing has temporarily been disabled."
       << std::endl;
-    // performance_monitor::printCsvHeader();
+    // fhv_perfmon::printCsvHeader();
   }
 
   bool benchmark_done = false;
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
   {
     // num_memory_iter = cache_and_memory_args[0];
     // memory_size_kb = cache_and_memory_args[1];
-    performance_monitor::init("copy_bw", "", "L2|L3|MEM|DATA");
+    fhv_perfmon::init("copy_bw", "", "L2|L3|MEM|DATA");
     int num_groups = 4;
     bandwidth_rw("copy_bw", num_groups, cache_and_memory_args[0], 
       cache_and_memory_args[1], cache_and_memory_args[2]);
@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
   else if (vm.count("L2"))
   {
     const char * region_name = "region_l2";
-    performance_monitor::init(region_name, "", "L2");
+    fhv_perfmon::init(region_name, "", "L2");
     int num_groups = 1;
     bandwidth_rw(region_name, num_groups, l2_args[0], l2_args[1], l2_args[2]);
     benchmark_done = true;
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
   else if (vm.count("L3"))
   {
     const char * region_name = "region_l3";
-    performance_monitor::init(region_name, "", "L3");
+    fhv_perfmon::init(region_name, "", "L3");
     int num_groups = 1;
     bandwidth_rw(region_name, num_groups, l3_args[0], l3_args[1], l3_args[2]);
     benchmark_done = true;
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
   else if (vm.count("mem"))
   {
     const char * region_name = "region_mem";
-    performance_monitor::init(region_name, "", "MEM");
+    fhv_perfmon::init(region_name, "", "MEM");
     int num_groups = 1;
     bandwidth_rw(region_name, num_groups, ram_args[0], ram_args[1], ram_args[2]);
     benchmark_done = true;
@@ -370,33 +370,33 @@ int main(int argc, char *argv[])
   else if (vm.count("flops_sp"))
   {
     const char * region_name = "region_flops_sp";
-    performance_monitor::init(region_name, "", "FLOPS_SP");
+    fhv_perfmon::init(region_name, "", "FLOPS_SP");
     benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
     benchmark_done = true;
   }
   else if (vm.count("flops_dp"))
   {
     const char * region_name = "region_flops_dp";
-    performance_monitor::init(region_name, "", "FLOPS_DP");
+    fhv_perfmon::init(region_name, "", "FLOPS_DP");
     benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
     benchmark_done = true;
   }
 
   if(benchmark_done){
-    performance_monitor::close();
+    fhv_perfmon::close();
 
     if(o == output_format::pretty){
-      performance_monitor::printHighlights();
+      fhv_perfmon::printHighlights();
     }
     else if (o == output_format::csv){
       std::cout << "Sorry, csv printing has temporarily been disabled." 
         << std::endl;
-      // auto m = performance_monitor::get_aggregate_results()
-      //   .at(performance_monitor::aggregation_t::sum)
-      //   .at(performance_monitor::result_t::metric);
-      // auto e = performance_monitor::get_aggregate_results()
-      //   .at(performance_monitor::aggregation_t::sum)
-      //   .at(performance_monitor::result_t::event);
+      // auto m = fhv_perfmon::get_aggregate_results()
+      //   .at(fhv_perfmon::aggregation_t::sum)
+      //   .at(fhv_perfmon::result_t::metric);
+      // auto e = fhv_perfmon::get_aggregate_results()
+      //   .at(fhv_perfmon::aggregation_t::sum)
+      //   .at(fhv_perfmon::result_t::event);
 
       // std::cout << memory_size_kb << ","
       //           << num_memory_iter << ","
