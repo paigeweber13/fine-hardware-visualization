@@ -87,6 +87,12 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-10-14 through 2020-10-21
+## Accomplishments
+- all commits working on NPB-C are on the branch "add-fhv-measuring", which 
+  is available here: 
+  https://github.com/rileyweber13/NPB3.0-omp-C/tree/add-fhv-measuring
+
 # 2020-10-07 through 2020-10-14
 ## Accomplishments
 - much improved build process, began adding fhv metering to the BT benchmark
@@ -95,8 +101,11 @@ Hardware Visualization
 
 ## Questions
 - we will need to either get NPB to compile with g++ or get fhv to work in C...
+  - probably easier to get NPB to compile with g++
 - seems like everything is written in C: likwid, NPB, etc... are we losing
   anything by requiring C++? Will we have to port this program to C someday?
+  - C is highly standardized: easy to interface with other languages
+  - we may need this someday but 
 - Tom (of likwid) has enlisted my help improving the likwid documentation. Do
   you think this is a valuable use of my research hours? Should I spend a 
   couple hours per week working on their documentation?

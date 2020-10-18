@@ -21,7 +21,12 @@
         here except built library, anyways). These can be added to examples
         later if we can simplify the code.
   - [ ] fork repo, adjust it to use fhv performance monitor
+    - [x] convert to compile with g++:
+        - [x] replace the variable name `class`, which is a reserved word in 
+              c++: `sed -i 's/class/benchmarkClass/g'  **/*.c` or the like. 
+              Also, in `wtime.c`, use `gettimeofday(&tv, 0);`
     - [ ] start with BT: identify key part and add an fhv region
+    - [ ] move `make.def` to `make.def.template`
 - [ ] Using these tests, compare our application to intel vTune
 - [ ] explore how well fhv works with other kernels and codebases
   - [ ] consider NAS parallel benchmarks (see above)
