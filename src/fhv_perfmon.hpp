@@ -17,64 +17,13 @@
 #include "architecture.hpp"
 #include "likwid_defines.hpp"
 #include "performance_monitor_defines.hpp"
+#include "types.hpp"
+#include "utils.hpp"
 
 using json = nlohmann::json;
 
 class fhv_perfmon {
   public:
-    // enums for aggregation type and result type
-    enum class aggregation_t { sum, arithmetic_mean, geometric_mean, 
-      saturation };
-    enum class result_t { event, metric };
-
-    // to string functions for those
-    static std::string aggregationTypeToString(
-      const fhv_perfmon::aggregation_t &aggregation_type);
-    static std::string resultTypeToString(
-      const fhv_perfmon::result_t &result_type);
-
-    // ---- TYPES
-
-    // represents a result unique to a thread. "thread" refers to the hardware
-    // thread 
-    struct PerThreadResult {
-      std::string region_name;
-      int thread_num;
-      std::string group_name;
-      fhv_perfmon::result_t result_type;
-      std::string result_name;
-      double result_value;
-
-      bool operator<(const PerThreadResult& other) const;
-      bool matchesForAggregation(const PerThreadResult& other) const;
-      std::string toString(std::string delim = " | ") const;
-    };
-
-    // represents a result aggregated across threads in a per-thread manner
-    struct AggregateResult {
-      std::string region_name;
-      std::string group_name;
-      fhv_perfmon::result_t result_type;
-      std::string result_name;
-      fhv_perfmon::aggregation_t aggregation_type;
-      double result_value;
-
-      bool operator<(const AggregateResult& other) const;
-      std::string toString(std::string delim = " | ") const;
-    };
-
-    typedef
-    std::vector< PerThreadResult >
-    per_thread_results_t;
-
-    typedef 
-    std::vector< AggregateResult >
-    aggregate_results_t;
-
-    // maps region to saturation name to saturation value
-    typedef std::map<std::string, std::map<std::string, double>> 
-      saturation_map_t;
-
     // ------ functions ------ //
     // actual functionality
 
@@ -134,15 +83,15 @@ class fhv_perfmon {
 
     // ------ getters ----- //
 
-    const static aggregate_results_t& get_aggregate_results();
-    const static per_thread_results_t& get_per_thread_results();
+    const static fhv::types::aggregate_results_t& get_aggregate_results();
+    const static fhv::types::per_thread_results_t& get_per_thread_results();
 
   private:
     // ------ functions ------ //
     // helper function to validate data from likwid
     static void validate_and_store_likwid_result(
             int thread_num,
-            fhv_perfmon::result_t result_type,
+            fhv::types::result_t result_type,
             const char * region_name,
             const char * group_name,
             const char * result_name,
@@ -178,8 +127,8 @@ class fhv_perfmon {
     // --- important numbers
     static int num_threads;
 
-    static fhv_perfmon::aggregate_results_t  aggregate_results;
+    static fhv::types::aggregate_results_t  aggregate_results;
 
-    static fhv_perfmon::per_thread_results_t per_thread_results;
+    static fhv::types::per_thread_results_t per_thread_results;
 
 };

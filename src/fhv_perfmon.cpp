@@ -1,83 +1,14 @@
 #include "fhv_perfmon.hpp"
 
 // declarations
-fhv_perfmon::aggregate_results_t
+fhv::types::aggregate_results_t
   fhv_perfmon::aggregate_results;
 
-fhv_perfmon::per_thread_results_t
+fhv::types::per_thread_results_t
   fhv_perfmon::per_thread_results;
 
 int fhv_perfmon::num_threads = -1;
 
-// PerThreadResult function definitions
-bool
-fhv_perfmon::PerThreadResult::operator<(
-  const PerThreadResult& other) const
-{
-  // start by comparing region names
-  if (this->region_name != other.region_name)
-    return this->region_name < other.region_name;
-  else 
-  {
-    // if region names match, order by thread num
-    if (this->thread_num != other.thread_num)
-      return this->thread_num < other.thread_num;
-    else
-    {
-      // if thread nums match, order by group name
-      if(this->group_name != other.group_name)
-        return this->group_name < other.group_name;
-      else
-      {
-        // if group names match, order by result type
-        if(this->result_type != other.result_type)
-          return this->result_type < other.result_type;
-        else {
-          // if result types match, order by result name
-          return this->result_name < other.result_name;
-        }
-      }
-    }
-  }
-}
-
-bool
-fhv_perfmon::PerThreadResult::matchesForAggregation(
-  const PerThreadResult& other) const
-{
-  if(this->region_name == other.region_name
-    && this->group_name == other.group_name
-    && this->result_type == other.result_type
-    && this->result_name == other.result_name)
-    return true;
-  else 
-    return false;
-}
-
-// AggregateResult function definitions
-bool
-fhv_perfmon::AggregateResult::operator<(
-  const AggregateResult& other) const
-{
-  if (this->region_name != other.region_name)
-    return this->region_name < other.region_name;
-  else 
-  {
-    if (this->aggregation_type != other.aggregation_type)
-      return this->aggregation_type < other.aggregation_type;
-    else
-    {
-      if(this->group_name != other.group_name)
-        return this->group_name < other.group_name;
-      else {
-        if(this->result_type != other.result_type)
-          return this->result_type < other.result_type;
-        else 
-          return this->result_name < other.result_name;
-      }
-    }
-  }
-}
 
 // ------ perfmon stuff ------ //
 
@@ -204,74 +135,9 @@ void fhv_perfmon::close(){
   std::sort(aggregate_results.begin(), aggregate_results.end());
 }
 
-std::string fhv_perfmon::aggregationTypeToString(
-  const fhv_perfmon::aggregation_t &aggregation_type)
-{
-  if (aggregation_type == fhv_perfmon::aggregation_t::sum)
-    return "sum";
-  else if (aggregation_type ==
-           fhv_perfmon::aggregation_t::arithmetic_mean)
-    return "arithmetic_mean";
-  else if (aggregation_type ==
-           fhv_perfmon::aggregation_t::geometric_mean)
-    return "geometric_mean";
-  else if (aggregation_type ==
-           fhv_perfmon::aggregation_t::saturation)
-    return "saturation";
-  else
-    return "unknown_aggregation_type";
-}
-
-std::string fhv_perfmon::resultTypeToString(
-  const fhv_perfmon::result_t &result_type)
-{
-  if (result_type == fhv_perfmon::result_t::event)
-    return "event";
-  else if (result_type == fhv_perfmon::result_t::metric)
-    return "metric";
-  else
-    return "unknown_result_type";
-}
-
-std::string fhv_perfmon::PerThreadResult::toString(
-  std::string delim) const 
-{
-  std::string result_t_string = resultTypeToString(this->result_type);
-
-  std::stringstream ss;
-  ss << std::left << "region " << this->region_name << delim
-    << "thread " << std::setw(3) << this->thread_num << delim
-    // << "group " << std::setw(15) << this->group_name << delim
-    // << std::setw(6) << result_t_string << delim
-    << std::setw(40) << this->result_name << delim
-    << std::setprecision(4) << std::fixed << std::right << std::setw(20)
-    << this->result_value
-    << std::endl;
-  return ss.str();
-}
-
-std::string fhv_perfmon::AggregateResult::toString(
-  std::string delim) const
-{
-  std::string result_t_string = resultTypeToString(this->result_type);
-  std::string aggregation_t_string = aggregationTypeToString(
-    this->aggregation_type);
-
-  std::stringstream ss;
-  ss << std::left << "region " << this->region_name << delim
-    // << "group " << std::setw(15) << this->group_name << delim
-    // << std::setw(6) << result_t_string << delim
-    << "aggregation_type " << std::setw(15) << aggregation_t_string << delim
-    << std::setw(40) << this->result_name << delim
-    << std::setprecision(4) << std::fixed << std::right << std::setw(20)
-    << this->result_value
-    << std::endl;
-  return ss.str();
-}
-
 void fhv_perfmon::validate_and_store_likwid_result(
         int thread_num,
-        fhv_perfmon::result_t result_type,
+        fhv::types::result_t result_type,
         const char * region_name,
         const char * group_name,
         const char * result_name,
@@ -293,7 +159,7 @@ void fhv_perfmon::validate_and_store_likwid_result(
   }
   else if(!std::getenv(perfmon_keep_large_values_envvar.c_str())){
 
-    if(result_type == fhv_perfmon::result_t::event &&
+    if(result_type == fhv::types::result_t::event &&
       result_value >= EVENT_VALUE_ERROR_THRESHOLD)
     {
       std::cout << "WARNING: unreasonably high event value detected:"
@@ -312,7 +178,7 @@ void fhv_perfmon::validate_and_store_likwid_result(
       keep_result = false;
     }
 
-    if(result_type == fhv_perfmon::result_t::metric &&
+    if(result_type == fhv::types::result_t::metric &&
       result_value >= METRIC_VALUE_ERROR_THRESHOLD)
     {
       std::cout << "WARNING: unreasonably high metric value detected!"
@@ -328,7 +194,7 @@ void fhv_perfmon::validate_and_store_likwid_result(
   }
 
   // build result object in memory
-  PerThreadResult perThreadResult = {
+  fhv::types::PerThreadResult perThreadResult = {
     .region_name = region_name,
     .thread_num = thread_num,
     .group_name = group_name,
@@ -370,7 +236,7 @@ void fhv_perfmon::load_likwid_data(){
         double event_value = perfmon_getResultOfRegionThread(i, k, t);
 
         validate_and_store_likwid_result(t,
-                                         fhv_perfmon::result_t::event, regionName, groupName,
+                                         fhv::types::result_t::event, regionName, groupName,
                                          event_name, event_value);
       }
 
@@ -379,7 +245,7 @@ void fhv_perfmon::load_likwid_data(){
         double metric_value = perfmon_getMetricOfRegionThread(i, k, t);
 
         validate_and_store_likwid_result(t,
-                                         fhv_perfmon::result_t::metric, regionName, groupName,
+                                         fhv::types::result_t::metric, regionName, groupName,
                                          metric_name, metric_value);
       }
     }
@@ -388,7 +254,7 @@ void fhv_perfmon::load_likwid_data(){
 
 void fhv_perfmon::perform_result_aggregation()
 {
-  std::vector<PerThreadResult> ptr_copy(
+  std::vector<fhv::types::PerThreadResult> ptr_copy(
           fhv_perfmon::get_per_thread_results());
   
   // a stack is used because we add things in ascending position. Therefore, if
@@ -396,26 +262,26 @@ void fhv_perfmon::perform_result_aggregation()
   // later 
   while(ptr_copy.size() > 0)
   {
-    std::stack<per_thread_results_t::iterator> indices_aggregated;
+    std::stack<fhv::types::per_thread_results_t::iterator> indices_aggregated;
 
     // initialize our 3 aggregations to the first thing in the vector
-    AggregateResult current_sum = {
+    fhv::types::AggregateResult current_sum = {
       .region_name = ptr_copy.begin()->region_name,
       .group_name = ptr_copy.begin()->group_name,
       .result_type = ptr_copy.begin()->result_type,
       .result_name = ptr_copy.begin()->result_name,
-      .aggregation_type = fhv_perfmon::aggregation_t::sum,
+      .aggregation_type = fhv::types::aggregation_t::sum,
       .result_value = ptr_copy.begin()->result_value,
     };
 
     // copy the initialized "sum" object into the other two objects we need
-    AggregateResult current_arithmetic_mean = current_sum;
+    fhv::types::AggregateResult current_arithmetic_mean = current_sum;
     current_arithmetic_mean.aggregation_type = 
-      fhv_perfmon::aggregation_t::arithmetic_mean;
+      fhv::types::aggregation_t::arithmetic_mean;
 
-    AggregateResult current_geometric_mean = current_sum;
+    fhv::types::AggregateResult current_geometric_mean = current_sum;
     current_geometric_mean.aggregation_type = 
-      fhv_perfmon::aggregation_t::geometric_mean;
+      fhv::types::aggregation_t::geometric_mean;
 
     indices_aggregated.push(ptr_copy.begin());
 
@@ -477,7 +343,7 @@ void fhv_perfmon::calculate_port_usage_ratios()
     {
       for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
       {
-        for (const PerThreadResult &ptr : fhv_perfmon::per_thread_results)
+        for (const auto &ptr : fhv_perfmon::per_thread_results)
         {
           if(ptr.thread_num == t 
             && ptr.region_name == region_name
@@ -493,11 +359,11 @@ void fhv_perfmon::calculate_port_usage_ratios()
       // next, find ratios and create metrics for them
       for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
       {
-        PerThreadResult port_usage_metric = {
+        fhv::types::PerThreadResult port_usage_metric = {
           .region_name = region_name,
           .thread_num = t,
           .group_name = fhv_performance_monitor_group,
-          .result_type = fhv_perfmon::result_t::metric,
+          .result_type = fhv::types::result_t::metric,
           .result_name = fhv_port_usage_metrics[port_num],
           .result_value = uops_executed_port[port_num] / total_num_port_ops
         };
@@ -520,7 +386,7 @@ void fhv_perfmon::calculate_saturation(){
 
   for (const auto & ar : fhv_perfmon::aggregate_results)
   {
-    if(ar.aggregation_type == fhv_perfmon::aggregation_t::sum)
+    if(ar.aggregation_type == fhv::types::aggregation_t::sum)
     {
       is_saturation_result = false;
 
@@ -537,12 +403,12 @@ void fhv_perfmon::calculate_saturation(){
 
       if (is_saturation_result)
       {
-        AggregateResult new_ar = {
+        fhv::types::AggregateResult new_ar = {
           .region_name = ar.region_name,
           .group_name = fhv_performance_monitor_group,
-          .result_type = fhv_perfmon::result_t::metric,
+          .result_type = fhv::types::result_t::metric,
           .result_name = saturation_result_name,
-          .aggregation_type = fhv_perfmon::aggregation_t::saturation,
+          .aggregation_type = fhv::types::aggregation_t::saturation,
           .result_value = saturation_result_value
         };
         
@@ -612,7 +478,7 @@ void fhv_perfmon::printDetailedResults(){
 
   checkResults();
 
-  for (const PerThreadResult &ptr : fhv_perfmon::per_thread_results)
+  for (const fhv::types::PerThreadResult &ptr : fhv_perfmon::per_thread_results)
   {
     std::cout << ptr.toString();
   }
@@ -625,7 +491,7 @@ void fhv_perfmon::printAggregateResults(){
 
   checkResults();
 
-  for (const AggregateResult &ar : fhv_perfmon::aggregate_results)
+  for (const fhv::types::AggregateResult &ar : fhv_perfmon::aggregate_results)
   {
     std::cout << ar.toString();
   }
@@ -701,17 +567,19 @@ void fhv_perfmon::resultsToJson(std::string param_info_string)
   if(const char* env_p = std::getenv(perfmon_output_envvar.c_str()))
     output_filename = env_p;
 
+  fhv::utils::create_directories_for_file(output_filename);
+
   std::ofstream o(output_filename);
   o << std::setw(4) << results << std::endl;
 }
 
-const fhv_perfmon::aggregate_results_t&
+const fhv::types::aggregate_results_t&
 fhv_perfmon::get_aggregate_results()
 {
 	return aggregate_results;
 }
 
-const fhv_perfmon::per_thread_results_t&
+const fhv::types::per_thread_results_t&
 fhv_perfmon::get_per_thread_results()
 {
   return per_thread_results;

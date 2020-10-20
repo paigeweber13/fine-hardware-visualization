@@ -64,8 +64,8 @@ saturation_diagram::calculate_saturation_colors(
 
     // if we're in the "geometric_mean" part of this region's results, then
     // we'll search for each saturation metric
-    if(region_section.key() == fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation) )
+    if(region_section.key() == fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation) )
     {
       for (const auto &metric: region_section.value().items())
       {
@@ -81,8 +81,8 @@ saturation_diagram::calculate_saturation_colors(
       }
     }
 
-    if(region_section.key() == fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::geometric_mean) )
+    if(region_section.key() == fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::geometric_mean) )
     {
       for (const auto &metric: region_section.value().items())
       {
@@ -470,19 +470,6 @@ void saturation_diagram::cairo_draw_arrow(
   g_object_unref(layout);
 }
 
-void saturation_diagram::create_directories_for_file(std::string file) {
-  size_t pos = 0;
-  while(file.find("/", pos+1) != std::string::npos){
-    pos = file.find("/", pos+1);
-  }
-  std::string dir = file.substr(0, pos);
-
-  if(system(("mkdir -p " + dir).c_str()) != 0)
-    std::cout << "WARN: there was a problem making the directory for "
-              << "color swatches (" << dir << ")." << std::endl
-              << "Swatch creation will likely fail.";
-}
-
 void saturation_diagram::draw_diagram_overview(
   json region_colors,
   rgb_color min_color,
@@ -546,7 +533,7 @@ void saturation_diagram::draw_diagram_overview(
 
   double text_height;
 
-  saturation_diagram::create_directories_for_file(output_filename);
+  fhv::utils::create_directories_for_file(output_filename);
 
   cairo_surface_t *surface = cairo_svg_surface_create(
     output_filename.c_str(),
@@ -618,8 +605,8 @@ void saturation_diagram::draw_diagram_overview(
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
   cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_mem_rw_saturation_metric_name], "RAM", big_label_font,
     label_position::INSIDE);
 
@@ -632,15 +619,15 @@ void saturation_diagram::draw_diagram_overview(
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_arrow_y, ram_l3_arrow_width,
     transfer_arrow_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_mem_r_saturation_metric_name],
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
   cairo_draw_arrow(cr, ram_l3_store_x, ram_l3_arrow_y, ram_l3_arrow_width,
     transfer_arrow_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_mem_w_saturation_metric_name],
     direction::UP, "store", small_label_font, stroke_thickness_thin);
 
@@ -649,8 +636,8 @@ void saturation_diagram::draw_diagram_overview(
   double l3_y = ram_l3_arrow_y + transfer_arrow_height;
   cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height, 
     region_colors
-      [fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+      [fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_l3_rw_saturation_metric_name], "L3 Cache", big_label_font);
 
   // --- Load/store arrows from L3 to L2 cache --- //
@@ -662,15 +649,15 @@ void saturation_diagram::draw_diagram_overview(
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, l3_l2_load_x, l3_l2_arrow_y, l3_l2_arrow_width,
     transfer_arrow_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_l3_r_saturation_metric_name],
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
   cairo_draw_arrow(cr, l3_l2_store_x, l3_l2_arrow_y, l3_l2_arrow_width,
     transfer_arrow_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_l3_w_saturation_metric_name],
     direction::UP, "store", small_label_font, stroke_thickness_thin);
 
@@ -679,8 +666,8 @@ void saturation_diagram::draw_diagram_overview(
   double l2_y = l3_l2_arrow_y + transfer_arrow_height;
   cairo_draw_component(cr, l2_x, l2_y, l2_width, l2_height, 
     region_colors
-      [fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+      [fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_l2_rw_saturation_metric_name], "L2 Cache", big_label_font);
 
   // --- Load/store arrows from L2 to L1 cache --- //
@@ -692,15 +679,15 @@ void saturation_diagram::draw_diagram_overview(
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, l2_l1_load_x, l2_l1_arrow_y, l2_l1_arrow_width,
     transfer_arrow_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_l2_r_saturation_metric_name],
     direction::DOWN, "load", small_label_font, stroke_thickness_thin);
 
   cairo_draw_arrow(cr, l2_l1_store_x, l2_l1_arrow_y, l2_l1_arrow_width,
     transfer_arrow_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_l2_w_saturation_metric_name],
     direction::UP, "store", small_label_font, stroke_thickness_thin);
 
@@ -736,8 +723,8 @@ void saturation_diagram::draw_diagram_overview(
   double single_p_x = in_core_x + text_height;
   double single_p_y = in_core_y;
   cairo_draw_component(cr, single_p_x, single_p_y, flops_width, flops_height, 
-    region_colors[fhv_perfmon::aggregationTypeToString(
-            fhv_perfmon::aggregation_t::saturation)]
+    region_colors[fhv::types::aggregationTypeToString(
+            fhv::types::aggregation_t::saturation)]
       [fhv_flops_dp_saturation_metric_name], 
     "Single-precision FLOP/s", big_label_font, label_position::INSIDE);
 
@@ -746,8 +733,8 @@ void saturation_diagram::draw_diagram_overview(
   double double_p_y = single_p_y;
   cairo_draw_component(cr, double_p_x, double_p_y, flops_width, flops_height, 
     region_colors[
-      fhv_perfmon::aggregationTypeToString(
-              fhv_perfmon::aggregation_t::saturation)]
+      fhv::types::aggregationTypeToString(
+              fhv::types::aggregation_t::saturation)]
       [fhv_flops_sp_saturation_metric_name],
     "Double-precision FLOP/s", big_label_font, label_position::INSIDE);
   
@@ -763,8 +750,8 @@ void saturation_diagram::draw_diagram_overview(
     port_x = in_core_x + text_height + port_num * port_width;
     cairo_draw_component(cr, port_x, port_y, port_width, port_height,
       region_colors
-        [fhv_perfmon::aggregationTypeToString(
-              fhv_perfmon::aggregation_t::geometric_mean)]
+        [fhv::types::aggregationTypeToString(
+              fhv::types::aggregation_t::geometric_mean)]
         [fhv_port_usage_ratio_start + std::to_string(port_num) 
           + fhv_port_usage_ratio_end],
       "Port " + std::to_string(port_num), 
