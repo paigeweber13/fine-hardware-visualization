@@ -56,12 +56,13 @@ EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 HEADERS=$(wildcard $(SRC_DIR)/*.hpp)
 
 SOURCES=$(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/fhv_main.cpp \
-$(SRC_DIR)/saturation_diagram.cpp
+	$(SRC_DIR)/saturation_diagram.cpp $(SRC_DIR)/types.cpp $(SRC_DIR)/utils.cpp
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp $(SRC_DIR)/likwid_defines.hpp $(SRC_DIR)/performance_monitor_defines.hpp
+HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp $(SRC_DIR)/likwid_defines.hpp \
+	$(SRC_DIR)/performance_monitor_defines.hpp $(SRC_DIR)/types.hpp $(SRC_DIR)/utils.hpp
 
 NLOHMANN_JSON_HEADER=$(SRC_DIR)/nlohmann/json.hpp
 
@@ -172,15 +173,18 @@ $(CXX) $(CXXFLAGS) -c $< -o $@
 endef
 
 ## compilation of sources
-$(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp
+$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o): $(SOURCES)
 	$(compile-command)
 
-$(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
-	$(compile-command)
-
-# main file
-$(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
-	$(compile-command)
+#$(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp
+#	$(compile-command)
+#
+#$(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
+#	$(compile-command)
+#
+## main file
+#$(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
+#	$(compile-command)
 
 ## compilation of fhv_perfmon lib
 $(OBJS_SHARED_LIB): $(SOURCES_SHARED_LIB) $(HEADERS) | $(OBJ_DIR)
@@ -189,8 +193,11 @@ define compile-command-shared-lib
 $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
-$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
+$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o): $(SOURCES_SHARED_LIB)
 	$(compile-command-shared-lib)
+
+#$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
+#	$(compile-command-shared-lib)
 
 
 ### LINKING
