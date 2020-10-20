@@ -92,6 +92,40 @@ Hardware Visualization
 - all commits working on NPB-C are on the branch "add-fhv-measuring", which 
   is available here: 
   https://github.com/rileyweber13/NPB3.0-omp-C/tree/add-fhv-measuring
+- got BT to work with FHV measuring. Following are some stats:
+  - class | Time to run (s)
+    ------|----------------
+    S     |   0.36
+    W     |   3.21
+    A     |  46.92
+    B     | 196.61
+    C     | 
+- when compiling for size C, size of compiled program would include code
+  past the 5GiB mark, which is outside the 32-bit addressable memory space.
+  - ```
+    [BT] size --common bt.o
+       text	   data	    bss	    dec	    hex	filename
+     128591	     24	5082349889	5082478504	12ef077a8	bt.o
+    ```
+  - get "relocation truncated to fit" when attempting to link
+  - tried adding `-mcmodel=large` to compile command, to no avail.
+  - tried adding `-march=native`
+  - tried adding `-O0`
+- while creating visualizations for NPB, discovered some problems with file
+  I/O and error handling
+  - made `fhv` automatically create directories if needed when outputting svg
+    diagrams
+  - made `fhv` give error that json was missing when not found instead of
+    letting the error be handled by nlohmann/json, which gives an unclear
+    message
+  - some example commands to test:
+    to create json: `FHV_OUTPUT=data/TEST/bt.W.json LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib bin/bt.W`
+    to create visualization: `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib ~/code/fine-hardware-visualization/build/bin/fhv -v data/TEST/bt.W.json -o data/TEST_SVG/bt.W.svg`
+  - moved some globals from `fhv_perfmon` to `types` and `utils`
+    
+## Questions
+- How do I resolve the "relocation truncated to fit" issue?
+  - do we even need to worry abou the biggest problem class?
 
 # 2020-10-07 through 2020-10-14
 ## Accomplishments

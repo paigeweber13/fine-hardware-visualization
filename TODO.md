@@ -16,6 +16,14 @@
   - [x] Build "performance_monitor.cpp" into a shared library
 - [ ] fix polynomial_expansion to use new build process
 - [ ] make sure convolution pulls header from build dir and not src dir
+- [ ] try to get everything inside fhv namespace
+- [x] makefile add tab after continued lines
+- [ ] test now that types and utils have been created
+  - [ ] test convolution
+  - [ ] test polynomial expansion
+- [ ] update likwid docs
+- [ ] see if I can get clion or sublime intellisense working
+  - [ ] clion works best with cmake... how does sublime work?
 - [ ] Setup NAS parallel benchmarks
   - [x] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples
@@ -26,7 +34,16 @@
               c++: `sed -i 's/class/benchmarkClass/g'  **/*.c` or the like. 
               Also, in `wtime.c`, use `gettimeofday(&tv, 0);`
     - [ ] start with BT: identify key part and add an fhv region
+    - [ ] CG
+    - [ ] EP
+    - [ ] EP
+    - [ ] FT
+    - [ ] IS
+    - [ ] LU
+    - [ ] MG
+    - [ ] SP
     - [ ] move `make.def` to `make.def.template`
+    - [ ] merge `add-fhv-measuring` into master
 - [ ] Using these tests, compare our application to intel vTune
 - [ ] explore how well fhv works with other kernels and codebases
   - [ ] consider NAS parallel benchmarks (see above)
@@ -42,7 +59,10 @@
 
 ## Long-term:
 ### Problems to fix:
-- fix benchmark-likwid-vs-manual and thread_migration 
+- if 'FHV_OUTPUT' refers to a folder that does not exist, fhv fails silently.
+  Add an error message or create the folder if not exists...
+- (If we still want these?) fix benchmark-likwid-vs-manual and 
+  thread_migration 
 - manual benchmark only prints runtime for flops region
   - in other words, runtime_by_tag doesn't seem to work for more than one 
     region
