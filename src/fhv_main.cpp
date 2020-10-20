@@ -139,6 +139,11 @@ void visualize(
 
   // read a JSON file
   std::ifstream i(perfmon_output_filename);
+  if(!i){
+    std::cout << "ERROR: The json specified for visualization does not exist!"
+      << std::endl;
+    return;
+  }
   json j;
   i >> j;
 
