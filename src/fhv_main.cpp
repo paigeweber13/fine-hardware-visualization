@@ -154,7 +154,10 @@ void visualize(
     auto region_colors = saturation_diagram::calculate_saturation_colors(
       region_data, min_color, max_color);
 
-    std::size_t pos = image_output_filename.find(".");  
+    std::size_t pos = 0;
+    while(image_output_filename.find(".", pos+1) != std::string::npos){
+      pos = image_output_filename.find(".", pos+1);
+    }
     std::string ext = image_output_filename.substr(pos);
     std::string this_image_output_filename = 
       image_output_filename.substr(0, pos) + "_" + 
