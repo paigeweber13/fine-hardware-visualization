@@ -122,7 +122,7 @@ $(ADDITIONAL_LINKER_FLAGS)
 #### prefix used to ensure likwid libraries and access daemon are detected and 
 # used at runtime. 
 
-RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(BUILT_LIB_DIR) \
+RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib \
 PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
 
 
