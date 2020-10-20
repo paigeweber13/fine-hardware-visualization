@@ -56,10 +56,10 @@ EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 HEADERS=$(wildcard $(SRC_DIR)/*.hpp)
 
 SOURCES=$(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/fhv_main.cpp \
-	$(SRC_DIR)/saturation_diagram.cpp $(SRC_DIR)/types.cpp $(SRC_DIR)/utils.cpp
+	$(SRC_DIR)/saturation_diagram.cpp
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp
+SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp $(SRC_DIR)/types.cpp $(SRC_DIR)/utils.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp $(SRC_DIR)/likwid_defines.hpp \
 	$(SRC_DIR)/performance_monitor_defines.hpp $(SRC_DIR)/types.hpp $(SRC_DIR)/utils.hpp
@@ -179,12 +179,6 @@ $(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp
 $(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
 	$(compile-command)
 
-$(OBJ_DIR)/types.o: $(SRC_DIR)/types.cpp
-	$(compile-command)
-
-$(OBJ_DIR)/utils.o: $(SRC_DIR)/utils.cpp
-	$(compile-command)
-
 # main file
 $(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
 	$(compile-command)
@@ -197,6 +191,13 @@ $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
 $(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
+	$(compile-command-shared-lib)
+
+
+$(OBJ_DIR)/types.o: $(SRC_DIR)/types.cpp
+	$(compile-command-shared-lib)
+
+$(OBJ_DIR)/utils.o: $(SRC_DIR)/utils.cpp
 	$(compile-command-shared-lib)
 
 
