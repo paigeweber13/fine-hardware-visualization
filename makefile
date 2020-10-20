@@ -173,18 +173,21 @@ $(CXX) $(CXXFLAGS) -c $< -o $@
 endef
 
 ## compilation of sources
-$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o): $(SOURCES)
+$(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp
 	$(compile-command)
 
-#$(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp
-#	$(compile-command)
-#
-#$(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
-#	$(compile-command)
-#
-## main file
-#$(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
-#	$(compile-command)
+$(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
+	$(compile-command)
+
+$(OBJ_DIR)/types.o: $(SRC_DIR)/types.cpp
+	$(compile-command)
+
+$(OBJ_DIR)/utils.o: $(SRC_DIR)/utils.cpp
+	$(compile-command)
+
+# main file
+$(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
+	$(compile-command)
 
 ## compilation of fhv_perfmon lib
 $(OBJS_SHARED_LIB): $(SOURCES_SHARED_LIB) $(HEADERS) | $(OBJ_DIR)
@@ -193,11 +196,8 @@ define compile-command-shared-lib
 $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
-$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o): $(SOURCES_SHARED_LIB)
+$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
 	$(compile-command-shared-lib)
-
-#$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
-#	$(compile-command-shared-lib)
 
 
 ### LINKING
