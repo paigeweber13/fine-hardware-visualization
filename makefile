@@ -67,7 +67,7 @@ HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp $(SRC_
 NLOHMANN_JSON_HEADER=$(SRC_DIR)/nlohmann/json.hpp
 
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s) \
-$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
+	$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
 
 #### perfgroup things
 SYSTEM_PERFGROUPS_DIR=$(LIKWID_PREFIX)/share/likwid/
@@ -109,14 +109,14 @@ PANGOCAIRO_LIB_FLAG=$(shell pkg-config --libs pangocairo)
 OPENMP_LIB_FLAG=-fopenmp
 # combine everything above
 LIBS=$(LIKWID_LIB_FLAG) $(PERFMON_LIB_FLAG) $(BOOST_PO_LIB_FLAG) \
-$(PANGOCAIRO_LIB_FLAG) $(OPENMP_LIB_FLAG)
+	$(PANGOCAIRO_LIB_FLAG) $(OPENMP_LIB_FLAG)
 
 LDFLAGS=$(LIB_DIRS) $(LIBS) $(ADDITIONAL_LINKER_FLAGS)
 # TODO: test if we need -fopenmp during linking
 # LDFLAGS=$(LIB_DIRS) $(LIBS) -fopenmp
 
 LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
-$(ADDITIONAL_LINKER_FLAGS)
+	$(ADDITIONAL_LINKER_FLAGS)
 
 
 
@@ -124,7 +124,7 @@ $(ADDITIONAL_LINKER_FLAGS)
 # used at runtime. 
 
 RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib \
-PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
+	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
 
 
 #### meta-rules: These implement the functionality that users call 
@@ -283,14 +283,14 @@ define test-ld-command
 endef
 
 _tests: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual \
-$(TEST_EXEC_DIR)/thread_migration $(TEST_EXEC_DIR)/likwid_minimal \
-$(TEST_EXEC_DIR)/fhv_minimal
+	$(TEST_EXEC_DIR)/thread_migration $(TEST_EXEC_DIR)/likwid_minimal \
+	$(TEST_EXEC_DIR)/fhv_minimal
 
 _tests-run: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual-run \
-$(TEST_EXEC_DIR)/thread_migration-run $(TEST_EXEC_DIR)/likwid_minimal-run \
-$(TEST_EXEC_DIR)/likwid_minimal-run-with-cli \
-$(TEST_EXEC_DIR)/likwid_minimal-run-port-counter \
-$(TEST_EXEC_DIR)/fhv_minimal-run
+	$(TEST_EXEC_DIR)/thread_migration-run $(TEST_EXEC_DIR)/likwid_minimal-run \
+	$(TEST_EXEC_DIR)/likwid_minimal-run-with-cli \
+	$(TEST_EXEC_DIR)/likwid_minimal-run-port-counter \
+	$(TEST_EXEC_DIR)/fhv_minimal-run
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp | $(TEST_OBJ_DIR)
 	$(compile-command)
