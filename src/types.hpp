@@ -6,7 +6,9 @@
 
 #include <iostream>
 #include <iomanip>
+#include <map>
 #include <string>
+#include <vector>
 
 namespace fhv {
   namespace types {
