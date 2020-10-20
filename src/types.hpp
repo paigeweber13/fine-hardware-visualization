@@ -16,9 +16,9 @@ namespace fhv {
     enum class result_t { event, metric };
 
     // to string functions for those
-    static std::string aggregationTypeToString(
+    std::string aggregationTypeToString(
         const fhv::types::aggregation_t &aggregation_type);
-    static std::string resultTypeToString(
+    std::string resultTypeToString(
         const fhv::types::result_t &result_type);
 
     // ---- TYPES
