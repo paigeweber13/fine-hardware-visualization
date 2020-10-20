@@ -95,6 +95,14 @@ class saturation_diagram {
      * include things like clamping and scaling values that are applied before
      * calculating colors.
      */
+
+    /*
+     * used to create directories. For example, if "foo/bar/x" is supplied, will
+     * create directories "foo/bar". If they already exist, this will do nothing
+     * silently
+     */
+    static void create_directories_for_file(std::string file);
+
     /* ----- LINEAR INTERPOLATION (LERP) ----- 
      * Used to create a gradient from min_color to max_color. This will be used
      * to indicate saturation.

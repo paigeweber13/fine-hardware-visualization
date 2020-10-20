@@ -470,6 +470,19 @@ void saturation_diagram::cairo_draw_arrow(
   g_object_unref(layout);
 }
 
+void saturation_diagram::create_directories_for_file(std::string file) {
+  size_t pos = 0;
+  while(file.find("/", pos+1) != std::string::npos){
+    pos = file.find("/", pos+1);
+  }
+  std::string dir = file.substr(0, pos);
+
+  if(system(("mkdir -p " + dir).c_str()) != 0)
+    std::cout << "WARN: there was a problem making the directory for "
+              << "color swatches (" << dir << ")." << std::endl
+              << "Swatch creation will likely fail.";
+}
+
 void saturation_diagram::draw_diagram_overview(
   json region_colors,
   rgb_color min_color,
@@ -532,6 +545,8 @@ void saturation_diagram::draw_diagram_overview(
   const double core_height = 500;
 
   double text_height;
+
+  saturation_diagram::create_directories_for_file(output_filename);
 
   cairo_surface_t *surface = cairo_svg_surface_create(
     output_filename.c_str(),
