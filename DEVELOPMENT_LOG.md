@@ -122,6 +122,7 @@ Hardware Visualization
     to create json: `FHV_OUTPUT=data/TEST/bt.W.json LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib bin/bt.W`
     to create visualization: `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib ~/code/fine-hardware-visualization/build/bin/fhv -v data/TEST/bt.W.json -o data/TEST_SVG/bt.W.svg`
   - moved some globals from `fhv_perfmon` to `types` and `utils`
+- made some diagrams for bencmark bt! You can see them [here](https://github.com/rileyweber13/NPB3.0-omp-C/tree/add-fhv-measuring/data/bt.A)
     
 ## Questions
 - How do I resolve the "relocation truncated to fit" issue?
