@@ -123,10 +123,40 @@ Hardware Visualization
     to create visualization: `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib ~/code/fine-hardware-visualization/build/bin/fhv -v data/TEST/bt.W.json -o data/TEST_SVG/bt.W.svg`
   - moved some globals from `fhv_perfmon` to `types` and `utils`
 - made some diagrams for bencmark bt! You can see them [here](https://github.com/rileyweber13/NPB3.0-omp-C/tree/add-fhv-measuring/data/bt.A)
+  - tri-diagonal solver
+  - adi_all diagram seems to make sense. 
+    - Port 5 and 6 are integer operations, and it makes sense that we'd see 
+      less of those
+    - makes sense that we wouldn't have double precision floats
+    - "probably about as many flops as memory operations"
+    - most traffic is at RAM level
+  - add also makes sense
+- in general, the DATA seems coherent, just the colors can be hard to read
+- seems like everything is RAM bound
+  - if problem is CPU-bound, it's probably solved
+  - therefore it's not interesting and so everything interesting we view is 
+    RAM-bound
+- color scales: try a few different ones
+  - grayscale: black to white
+  - pick some color scales to demo to Dr. Saule
+  - play around with log scale too
+    - "progession" is an issue
+    - maybe in the case of "add", a linear scale would have been better
+  - Talk to KRS about colors
+- Look at LU next! We expect them to be more CPU bound, as they are dense 
+  linear algebra solvers
+- maybe look at IS to. Lots of random memory accesses is the expectation
     
 ## Questions
 - How do I resolve the "relocation truncated to fit" issue?
   - do we even need to worry abou the biggest problem class?
+- measuring with vTune
+  - good to still continue on laptop? or should I just use laptop for dev and then use chameleon
+    - difference in machines could matter... 
+      - More cores = more L3 cache
+      - teasing out the differences this makes will require careful understanding of how we generate diagram and what the benchmark does
+      - bandwidth to processor speed ration will also change (flop to bandwidth ratio)
+    - add something to JSOn with basic hardware info
 
 # 2020-10-07 through 2020-10-14
 ## Accomplishments

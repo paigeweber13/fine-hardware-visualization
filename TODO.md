@@ -22,8 +22,13 @@
   - [ ] test convolution
   - [ ] test polynomial expansion
 - [ ] update likwid docs
-- [ ] see if I can get clion or sublime intellisense working
+- [ ] development environment
+  - [ ] see if I can get clion or sublime intellisense working
   - [ ] clion works best with cmake... how does sublime work?
+  - [ ] get desktop set up
+- [ ] Improve diagram colors
+  - [ ] talk to KRS about visualization
+  - [ ] create some samples for Erik
 - [ ] Setup NAS parallel benchmarks
   - [x] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples
@@ -34,19 +39,27 @@
               c++: `sed -i 's/class/benchmarkClass/g'  **/*.c` or the like. 
               Also, in `wtime.c`, use `gettimeofday(&tv, 0);`
     - [ ] start with BT: identify key part and add an fhv region
+    - [ ] LU - next priority!
+    - [ ] IS - after LU
     - [ ] CG
     - [ ] EP
     - [ ] EP
     - [ ] FT
-    - [ ] IS
-    - [ ] LU
     - [ ] MG
     - [ ] SP
     - [ ] move `make.def` to `make.def.template`
     - [ ] merge `add-fhv-measuring` into master
 - [ ] Using these tests, compare our application to intel vTune
+    - [ ] BT
+    - [ ] LU
+    - [ ] IS
+    - [ ] CG
+    - [ ] EP
+    - [ ] EP
+    - [ ] FT
+    - [ ] MG
+    - [ ] SP
 - [ ] explore how well fhv works with other kernels and codebases
-  - [ ] consider NAS parallel benchmarks (see above)
   - [ ] Dr. Saule may be able to throw together some software that
         demonstrates stress on more granular things like TLB or instruction
         decoder
