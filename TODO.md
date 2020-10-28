@@ -17,18 +17,24 @@
 - [ ] fix polynomial_expansion to use new build process
 - [ ] make sure convolution pulls header from build dir and not src dir
 - [ ] try to get everything inside fhv namespace
+- [ ] add hardware info to JSON and visualization! 
+  - [ ] arch
+  - [ ] num cores
+  - [ ] num procs 
+  - [ ] num NUMA nodes or something like that?
 - [x] makefile add tab after continued lines
 - [ ] test now that types and utils have been created
   - [ ] test convolution
   - [ ] test polynomial expansion
-- [ ] update likwid docs
+- [x] update likwid docs
 - [ ] development environment
   - [ ] see if I can get clion or sublime intellisense working
   - [ ] clion works best with cmake... how does sublime work?
   - [ ] get desktop set up
 - [ ] Improve diagram colors
-  - [ ] talk to KRS about visualization
-  - [ ] create some samples for Erik
+  - [x] talk to KRS about visualization
+  - [x] create some samples for Erik
+  - [ ] disucss
 - [ ] Setup NAS parallel benchmarks
   - [x] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples
