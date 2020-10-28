@@ -87,6 +87,24 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-10-21 through 2020-10-28
+## Accomplishments
+- gave Tom some feedback on the likwid docs
+- played with visualization
+  - talking with KRS, but we're still in the process of working on it. His 
+    only recommendation so far is to use Color Brewer, which we have.
+
+## Goals for this week
+- spend some time setting up new development desktop
+- little bit of software engineering (should take a day's work max)
+- continue metering NAS parallel benchmarks do vTune or FHV with LU
+
+## Questions
+- Worth it to spend some time with vTune on BT before moving on to LU? Just 
+  go ahead with LU for now?
+- How do I resolve the "relocation truncated to fit" issue?
+  - do we even need to worry abou the biggest problem class?
+
 # 2020-10-14 through 2020-10-21
 ## Accomplishments
 - all commits working on NPB-C are on the branch "add-fhv-measuring", which 
@@ -148,15 +166,13 @@ Hardware Visualization
 - maybe look at IS to. Lots of random memory accesses is the expectation
     
 ## Questions
-- How do I resolve the "relocation truncated to fit" issue?
-  - do we even need to worry abou the biggest problem class?
 - measuring with vTune
   - good to still continue on laptop? or should I just use laptop for dev and then use chameleon
     - difference in machines could matter... 
       - More cores = more L3 cache
       - teasing out the differences this makes will require careful understanding of how we generate diagram and what the benchmark does
       - bandwidth to processor speed ration will also change (flop to bandwidth ratio)
-    - add something to JSOn with basic hardware info
+    - add something to JSON with basic hardware info
 
 # 2020-10-07 through 2020-10-14
 ## Accomplishments
