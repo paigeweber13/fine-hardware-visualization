@@ -6,11 +6,10 @@ cd examples/polynomial_expansion
 make
 cd ../..
 
-OLD_FHV_OUTPUT=$FHV_OUTPUT
-OLD_OMP_SCHEDULE=$OMP_SCHEDULE
-
 MEM_HEAVY_PARAMS="67108864 1 800"
 CPU_HEAVY_PARAMS="67108864 1000 80"
+
+export LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib
 
 echo "running basic polynomial to saturate memory"
 export FHV_OUTPUT="visualizations/polynomial_basic_mem.json"
@@ -61,7 +60,3 @@ bin/fhv -v visualizations/polynomial_basic_mem.json -o visualizations/polynomial
 bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial_basic_cpu_227_74_51_43_140_190.svg -c 227 74 51 43 140 190
 bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem_227_74_51_43_140_190.svg -c 227 74 51 43 140 190
 bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial_block_cpu_227_74_51_43_140_190.svg -c 227 74 51 43 140 190
-
-# cleanup
-export FHV_OUTPUT=$OLD_FHV_OUTPUT
-export OMP_SCHEDULE=$OLD_FHV_OUTPUT
