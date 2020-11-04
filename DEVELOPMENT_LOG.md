@@ -87,6 +87,30 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-10-28 through 2020-11-04
+## Accomplishments
+- worked with KRS on visualizatoin
+  - "So the interpolated plots might seem nice and continuous, but discrete
+    colors will give you better discrimination that users can perceive better."
+  - also recommended "stacked time varying plots that change as the execution
+    progresses" - perhaps something like
+    [this](https://i.stack.imgur.com/81KbD.png), where each color would be a
+    different hardware resource?
+- looked at likwid docs with Tom
+- set up new dev machine
+
+## Goals for this week
+- write discrete color scale
+  - play with log scaling to tune what gets put in each bin
+- test that scale
+  - generate some swatches
+  - generate some diagrams with a few color options
+
+## Questions
+- thoughts on stacked line plot?
+  - how difficult would it be to measure over time?
+- any adjustments to my goals for this week?
+
 # 2020-10-21 through 2020-10-28
 ## Accomplishments
 - gave Tom some feedback on the likwid docs
@@ -101,8 +125,22 @@ Hardware Visualization
 
 ## Questions
 - What are your thoughts on the swatches I created?
+  - "catastrophically bad": 128%2C128%2C128_to_43%2C140%2C190.svg
+  - bad: 128%2C128%2C128_to_43%2C140%2C190.svg
+  - bad: 128%2C128%2C128_to_227%2C74%2C51.svg
+  - grayscale might be easiest
+  - two-color scale might be nice
+  - Next steps: use d3 to help us identify some color schemes.
+    - methods of interpolation?
+    - multipoint interpolation
+    - hue interpolation
+  - discrete color scale
+    - pick a compule color scales
+    - generate saturation diagrams
+    - try linear an dlog scales
 - Worth it to spend some time with vTune on BT before moving on to LU? Just 
   go ahead with LU for now?
+  - just go ahead with 2 more kernels in fhv: LU and IS
 - How do I resolve the "relocation truncated to fit" issue?
   - do we even need to worry abou the biggest problem class?
 
