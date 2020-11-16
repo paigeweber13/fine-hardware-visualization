@@ -98,6 +98,14 @@ What still works:
    section "problems to fix"
 
 # Usage Notes
+ - Customizing which HW threads are used:
+   - To set the number of threads , OMP_NUM_THREADS may be used
+   - On GNU OpenMP, one may explicitly specify which cores should be used with
+     GOMP_CPU_AFFINITY, e.g. `export GOMP_CPU_AFFINITY=0,2,8,1`
+   - For other implementations of OpenMP, see [the OpenMP docs](
+     https://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html)
+   - Another option is [sched_setaffinity](
+     https://linux.die.net/man/2/sched_getaffinity)
  - Region names must not have spaces
  - Chapter 19 of volume 3 of the Intel software developer's manual (page 3605
    in the combined digital version) has hardware counter names. This is useful
