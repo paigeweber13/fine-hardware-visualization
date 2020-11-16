@@ -1,27 +1,26 @@
 # TODO:
 ## Immediate:
-- [x] Finish adjusting diagram to be a detailed overview
-- [x] Add load/store benchmarks
-- [x] Add load/store saturation
-- [x] adjust build chain before adding NAS parallel benchmarks
-  - [x] merge polynomial_expansion into this repo, remove submodule
-  - [x] Empty makefile to start over. 
-  - [x] rename *.h to *.hpp
-  - [x] remove compile commands in convolution/makefile that are not reused
-  - [x] simplify config.mk
-  - [x] test makefile
-  - [x] change how fhv and others are run (LD_LIBRARY_PATH now must include
-        path to libfhv_perfmon.so)
-  - [x] simplify polynomial_expansion/makefile
-  - [x] Build "performance_monitor.cpp" into a shared library
-- [ ] fix polynomial_expansion to use new build process
-- [ ] make sure convolution pulls header from build dir and not src dir
-- [ ] try to get everything inside fhv namespace
 - [ ] add hardware info to JSON and visualization! 
+  - motivation: switching to desktop, this will allow me to track what was
+   generated on laptop and what was generated on desktop
   - [ ] arch
   - [ ] num cores
   - [ ] num procs 
   - [ ] num NUMA nodes or something like that?
+- [ ] Improve diagram colors
+  - [x] talk to KRS about visualization
+  - [x] create some samples for Erik
+  - [x] discuss
+  - [ ] create discrete scale
+  - [ ] add in some color brewer examples
+  - [ ] play with log scale to tune what goes in each bin
+  - [ ] generate swatches
+  - [ ] generate examples with NAS parallel benchmarks
+
+## Mid-term:
+- [ ] fix polynomial_expansion to use new build process
+- [ ] make sure convolution pulls header from build dir and not src dir
+- [ ] try to get everything inside fhv namespace
 - [x] makefile add tab after continued lines
 - [ ] test now that types and utils have been created
   - [ ] test convolution
@@ -31,10 +30,6 @@
   - [ ] see if I can get clion or sublime intellisense working
   - [ ] clion works best with cmake... how does sublime work?
   - [ ] get desktop set up
-- [ ] Improve diagram colors
-  - [x] talk to KRS about visualization
-  - [x] create some samples for Erik
-  - [ ] disucss
 - [ ] Setup NAS parallel benchmarks
   - [x] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples

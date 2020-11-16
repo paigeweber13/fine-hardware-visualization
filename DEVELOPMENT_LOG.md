@@ -87,18 +87,7 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# 2020-10-28 through 2020-11-04
-## Accomplishments
-- worked with KRS on visualizatoin
-  - "So the interpolated plots might seem nice and continuous, but discrete
-    colors will give you better discrimination that users can perceive better."
-  - also recommended "stacked time varying plots that change as the execution
-    progresses" - perhaps something like
-    [this](https://i.stack.imgur.com/81KbD.png), where each color would be a
-    different hardware resource?
-- looked at likwid docs with Tom
-- set up new dev machine
-
+# 2020-11-04 through 2020-11-11
 ## Goals for this week
 - write discrete color scale
   - play with log scaling to tune what gets put in each bin
@@ -106,9 +95,40 @@ Hardware Visualization
   - generate some swatches
   - generate some diagrams with a few color options
 
+# 2020-10-28 through 2020-11-04
+Reminder from Dr. Saule: the big goal is to see how execution changes over
+time, and one of the best examples of problems whose needs change over
+time is graph problems. 
+
+Some examples of irregular graphs are:
+- [wikitalk](https://www.cise.ufl.edu/research/sparse/matrices/SNAP/wiki-Talk.png)
+- [enron emails](https://www.cise.ufl.edu/research/sparse/matrices/SNAP/email-Enron.png)
+- [CIT patents](https://www.cise.ufl.edu/research/sparse/matrices/SNAP/cit-Patents.png)
+
+A more regular example is [this boeing matrix](https://www.cise.ufl.edu/research/sparse/matrices/Boeing/pwtk.png)
+
+All of these examples are from [the SuiteSparse Matrix Collection](https://sparse.tamu.edu/)
+
+## Accomplishments
+- worked with KRS on visualization
+  - "So the interpolated plots might seem nice and continuous, but discrete
+    colors will give you better discrimination that users can perceive better."
+  - also recommended "stacked time varying plots that change as the execution
+    progresses" - perhaps something like
+    [this](https://i.stack.imgur.com/81KbD.png), where each color would be a
+    different hardware resource?
+  - another option is Sankey diagrams
+  - both of these require data as a function of time
+- looked at likwid docs with Tom
+- set up new dev machine
+
 ## Questions
 - thoughts on stacked line plot?
   - how difficult would it be to measure over time?
+    - naive way is to separate computation into several functions and meter
+     them separately.
+    - we will likely want to do something like sampling eventually, but this
+     isn't urgent.
 - any adjustments to my goals for this week?
 
 # 2020-10-21 through 2020-10-28
