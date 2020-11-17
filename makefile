@@ -106,14 +106,14 @@ LIKWID_LIB_FLAG=-llikwid
 PERFMON_LIB_FLAG=-l$(PERFMON_LIB_NAME_SHORT)
 BOOST_PO_LIB_FLAG=-lboost_program_options
 PANGOCAIRO_LIB_FLAG=$(shell pkg-config --libs pangocairo)
+FMT_LIB_FLAG=-lfmt
 OPENMP_LIB_FLAG=-fopenmp
 # combine everything above
 LIBS=$(LIKWID_LIB_FLAG) $(PERFMON_LIB_FLAG) $(BOOST_PO_LIB_FLAG) \
-	$(PANGOCAIRO_LIB_FLAG) $(OPENMP_LIB_FLAG)
+	$(PANGOCAIRO_LIB_FLAG) $(OPENMP_LIB_FLAG) $(FMT_LIB_FLAG)
 
-LDFLAGS=$(LIB_DIRS) $(LIBS) $(ADDITIONAL_LINKER_FLAGS)
 # TODO: test if we need -fopenmp during linking
-# LDFLAGS=$(LIB_DIRS) $(LIBS) -fopenmp
+LDFLAGS=$(LIB_DIRS) $(LIBS) $(ADDITIONAL_LINKER_FLAGS)
 
 LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
 	$(ADDITIONAL_LINKER_FLAGS)
@@ -166,38 +166,38 @@ _debug: LDFLAGS += -Q --help=target
 
 
 ### COMPILATION PROPER
-$(OBJS): $(SOURCES) $(HEADERS) | $(OBJ_DIR)
+#$(OBJS): | $(OBJ_DIR)
 
 define compile-command
 $(CXX) $(CXXFLAGS) -c $< -o $@
 endef
 
 ## compilation of sources
-$(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp
+$(OBJ_DIR)/computation_measurements.o: $(wildcard $(SRC_DIR)/computation_measurements.*)
 	$(compile-command)
 
-$(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp
+$(OBJ_DIR)/saturation_diagram.o: $(wildcard $(SRC_DIR)/saturation_diagram.*)
 	$(compile-command)
 
 # main file
-$(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
+$(OBJ_DIR)/fhv_main.o: $(wildcard $(SRC_DIR)/fhv_main.*)
 	$(compile-command)
 
 ## compilation of fhv_perfmon lib
-$(OBJS_SHARED_LIB): $(SOURCES_SHARED_LIB) $(HEADERS) | $(OBJ_DIR)
+$(OBJS_SHARED_LIB): | $(OBJ_DIR)
 
 define compile-command-shared-lib
 $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
-$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp
+$(OBJ_DIR)/fhv_perfmon.o: $(wildcard $(SRC_DIR)/fhv_perfmon.*)
 	$(compile-command-shared-lib)
 
 
-$(OBJ_DIR)/types.o: $(SRC_DIR)/types.cpp
+$(OBJ_DIR)/types.o: $(wildcard $(SRC_DIR)/types.*)
 	$(compile-command-shared-lib)
 
-$(OBJ_DIR)/utils.o: $(SRC_DIR)/utils.cpp
+$(OBJ_DIR)/utils.o: $(wildcard $(SRC_DIR)/utils.*)
 	$(compile-command-shared-lib)
 
 
