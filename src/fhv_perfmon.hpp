@@ -5,10 +5,10 @@
 #include <iomanip>
 #include <iostream>
 #include <likwid.h>
-#include <map>
 #include <math.h>
 #include <nlohmann/json.hpp>
 #include <omp.h>
+#include <sched.h>
 #include <set>
 #include <sstream>
 #include <stack>
@@ -69,6 +69,8 @@ class fhv_perfmon {
     // consider removing
     // static void printCsvHeader();
     // static void printCsvOutput();
+
+    static void setJsonCpuInfo(json &j);
 
     // resultsToJson
     //  - gets file name from environment variable FHV_OUTPUT. If unset, will

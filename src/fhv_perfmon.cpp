@@ -524,6 +524,51 @@ void fhv_perfmon::printHighlights(){
   }
 }
 
+void fhv_perfmon::setJsonCpuInfo(json &j){
+  topology_init();
+  CpuInfo_t cpu_info = get_cpuInfo();
+  CpuTopology_t cpu_topology = get_cpuTopology();
+
+  numa_init();
+  int num_numa_nodes = likwid_getNumberOfNodes();
+  numa_finalize();
+
+  int num_threads;
+
+#pragma omp parallel
+    num_threads = omp_get_num_threads();
+
+  std::vector<unsigned> affinity(num_threads);
+
+#pragma omp parallel
+    affinity[omp_get_thread_num()] = sched_getcpu();
+
+  std::string affinity_str = "";
+  for(size_t i = 0; i < affinity.size(); i++) {
+    affinity_str += std::to_string(affinity[i]);
+
+    if (i != affinity.size()-1)
+      affinity_str += ",";
+  }
+
+  j[json_info_section][json_processor_section][json_processor_name_key] =
+      std::string(cpu_info->osname) + " (" + cpu_info->short_name + ")";
+  j[json_info_section][json_processor_section][json_processor_num_sockets_key] =
+      cpu_topology->numSockets;
+  j[json_info_section][json_processor_section][json_processor_num_numa_nodes_key] =
+      num_numa_nodes;
+  j[json_info_section][json_processor_section][json_processor_num_hw_threads_key] =
+      cpu_topology->numHWThreads;
+  j[json_info_section][json_processor_section][json_processor_num_threads_in_use_key] =
+      num_threads;
+  j[json_info_section][json_processor_section][json_processor_affinity_key] =
+      affinity_str;
+
+  // this call *must* come at the end of the function, or the pointers in the
+  // structs "cpu_info" and "cpu_topology" will reference null.
+  topology_finalize();
+}
+
 void fhv_perfmon::resultsToJson(std::string param_info_string)
 {
   checkInit();
@@ -533,6 +578,9 @@ void fhv_perfmon::resultsToJson(std::string param_info_string)
   
   // set parameter info string
   results[json_info_section][json_parameter_key] = param_info_string;
+
+  // set system info
+  setJsonCpuInfo(results);
 
   // populate json with per_thread_results
   for (const auto & ptr : fhv_perfmon::per_thread_results)

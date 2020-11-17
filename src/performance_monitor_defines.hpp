@@ -57,6 +57,14 @@ const std::string fhv_port7_usage_ratio = fhv_port_usage_ratio_start
 // JSON keywords
 const std::string json_info_section = "info";
 const std::string json_parameter_key = "parameters";
+const std::string json_processor_section = "processor";
+const std::string json_processor_name_key = "name";
+const std::string json_processor_num_sockets_key = "num_sockets";
+const std::string json_processor_num_numa_nodes_key = "num_numa_nodes";
+const std::string json_processor_num_hw_threads_key = "num_hw_threads";
+const std::string json_processor_num_threads_in_use_key = "num_threads_in_use";
+const std::string json_processor_affinity_key = "affinity";
+
 const std::string json_results_section = "region_results";
 const std::string json_thread_section_base = "thread_";
 

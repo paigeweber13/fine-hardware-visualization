@@ -9,7 +9,7 @@ cd ../..
 MEM_HEAVY_PARAMS="67108864 1 800"
 CPU_HEAVY_PARAMS="67108864 1000 80"
 
-export LD_LIBRARY_PATH="/usr/local/likwid-master/lib"
+export LD_LIBRARY_PATH="/usr/local/likwid-master/lib:/usr/local/fhv/lib"
 
 echo "running basic polynomial to saturate memory"
 export FHV_OUTPUT="visualizations/polynomial_basic_mem.json"
@@ -35,3 +35,4 @@ bin/fhv -v visualizations/polynomial_basic_mem.json -o visualizations/polynomial
 bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial_basic_cpu.svg
 bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem.svg
 bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial_block_cpu.svg
+
