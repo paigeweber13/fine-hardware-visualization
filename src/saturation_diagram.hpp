@@ -2,6 +2,7 @@
 
 #include <cairo.h>
 #include <cairo-svg.h>
+#include <fmt/core.h>
 #include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -74,21 +75,11 @@ class saturation_diagram {
      * Draws an overview of the architecture that displays RAM, cores, and
      * caches 
      */
-    static void draw_diagram_detail(
-      json region_colors,
-      rgb_color min_color,
-      rgb_color max_color,
-      std::string region_name,
-      std::string parameters,
-      std::string output_filename);
-
-    
     static void draw_diagram_overview(
-      json region_colors,
+      json fhv_data,
       rgb_color min_color,
       rgb_color max_color,
       std::string region_name,
-      std::string parameters,
       std::string output_filename);
 
     /* ======== Helper functions: general ======== 

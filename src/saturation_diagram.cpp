@@ -470,15 +470,24 @@ void saturation_diagram::cairo_draw_arrow(
   g_object_unref(layout);
 }
 
+// fhv_data is the data loaded straight from the JSON
 void saturation_diagram::draw_diagram_overview(
-  json region_colors,
+  json fhv_data,
   rgb_color min_color,
   rgb_color max_color,
   std::string region_name,
-  std::string parameters,
   std::string output_filename
 )
 {
+  // --- isolate the data we want --- //
+  auto meta_info = fhv_data[json_info_section];
+  auto proc_info = meta_info[json_processor_section];
+  auto region_data = fhv_data[json_results_section][region_name];
+  auto region_colors = saturation_diagram::calculate_saturation_colors(
+      region_data, min_color, max_color);
+
+
+  // --- initialize cairo --- //
   // variables for cairo
   PangoFontDescription *title_font = pango_font_description_from_string ("Sans 40");
   PangoFontDescription *description_font = pango_font_description_from_string ("Sans 12");
@@ -486,7 +495,6 @@ void saturation_diagram::draw_diagram_overview(
   PangoFontDescription *small_label_font = pango_font_description_from_string ("Sans 25");
 
   // TODO: NO LONGER USED. Will this be used eventually? Remove??
-  
   // TODO: should be in architecture, perhaps derived from likwid's
   // L*_CACHE_GROUPS 
 
@@ -554,15 +562,51 @@ void saturation_diagram::draw_diagram_overview(
   double description_y = title_y + text_height + large_internal_margin;
 
   std::string description;
-  if(parameters.compare("") != 0)
+  // TODO: implicit conversions like the one below are not recommended by
+  //  nlohmann. Instead, use
+  //  `auto parameters = meta_info[json_parameter_key].get<std::string>();`
+
+  // TODO: Disable implicit conversions by defining
+  //  `JSON_USE_IMPLICIT_CONVERSIONS` to 0 in the json header.
+  std::string parameters = meta_info[json_parameter_key];
+  if (!parameters.empty())
     description += parameters + "\n\n";
 
+  description += fmt::format(
+      "Processor:\t\t\t\t\t\t\t\t\t\t{}\n",
+      proc_info[json_processor_name_key].get<std::string>()
+  );
+  description += fmt::format(
+      "Num sockets:\t\t\t\t\t\t\t\t\t{}\n",
+      std::to_string(proc_info[json_processor_num_sockets_key].get<unsigned>())
+  );
+  description += fmt::format(
+      "Num NUMA nodes:\t\t\t\t\t\t\t\t{}\n",
+      std::to_string(
+          proc_info[json_processor_num_numa_nodes_key].get<unsigned>())
+  );
+  description += fmt::format(
+      "Num HW threads:\t\t\t\t\t\t\t\t{}\n",
+      std::to_string(
+          proc_info[json_processor_num_hw_threads_key].get<unsigned>())
+  );
+  description += fmt::format(
+      "Num HW threads in use:\t\t\t\t\t\t\t{}\n",
+      std::to_string(proc_info[json_processor_num_threads_in_use_key]
+                         .get<unsigned>())
+  );
+  description += fmt::format(
+      "Affinity (which threads are being used):\t\t\t\t{}\n",
+      proc_info[json_processor_affinity_key].get<std::string>()
+  );
+  description += "\n";
+
   // l1 cache note
-  description += 
+  description +=
     "Note: L1 cache is currently not measured and therefore will appear "
     "white. This is not an indication of L1 cache saturation.";
 
-  text_height = pango_cairo_draw_text(cr, description_x, description_y, 
+  text_height = pango_cairo_draw_text(cr, description_x, description_y,
     content_width, description, description_font);
 
   // --- draw swatch/legend --- //
@@ -571,7 +615,7 @@ void saturation_diagram::draw_diagram_overview(
   double swatch_x = description_x;
   double swatch_y = description_y + text_height + internal_margin;
   double num_steps = 10;
-  cairo_draw_swatch(cr, min_color, max_color, swatch_x, swatch_y, 
+  cairo_draw_swatch(cr, min_color, max_color, swatch_x, swatch_y,
     swatch_width, swatch_height, num_steps);
 
   double swatch_legend_x = swatch_x;
@@ -579,7 +623,7 @@ void saturation_diagram::draw_diagram_overview(
 
   // not sure how to do this without hard-coding. However, since we are
   // aligning right, it can be very large
-  double single_legend_item_width = 100; 
+  double single_legend_item_width = 100;
 
   double legend_offset = -10;
   double scaled_value;
@@ -590,21 +634,21 @@ void saturation_diagram::draw_diagram_overview(
     value_text << std::setprecision(1) << std::fixed
       << static_cast<double>(i)/num_steps;
     text_height = pango_cairo_draw_text(cr, 
-      swatch_legend_x + legend_offset + scaled_value * content_width, 
+      swatch_legend_x + legend_offset + scaled_value * content_width,
       swatch_legend_y, single_legend_item_width, value_text.str(),
       description_font, PANGO_ALIGN_RIGHT, true);
   }
 
   double swatch_label_x = swatch_x;
-  double swatch_label_y = swatch_legend_y + text_height + small_internal_margin; 
+  double swatch_label_y = swatch_legend_y + text_height + small_internal_margin;
   text_height = pango_cairo_draw_text(cr, swatch_label_x, swatch_label_y, 
-    content_width, "Saturation level (higher is usually better)", 
+    content_width, "Saturation level (higher is usually better)",
     description_font, PANGO_ALIGN_CENTER);
 
   // --- draw RAM --- //
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
-  cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, 
+  cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height,
     region_colors[fhv::types::aggregationTypeToString(
             fhv::types::aggregation_t::saturation)]
       [fhv_mem_rw_saturation_metric_name], "RAM", big_label_font,
@@ -618,7 +662,7 @@ void saturation_diagram::draw_diagram_overview(
 
   // TODO: replace with saturation color
   cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_arrow_y, ram_l3_arrow_width,
-    transfer_arrow_height, 
+    transfer_arrow_height,
     region_colors[fhv::types::aggregationTypeToString(
             fhv::types::aggregation_t::saturation)]
       [fhv_mem_r_saturation_metric_name],
@@ -634,7 +678,7 @@ void saturation_diagram::draw_diagram_overview(
   // --- draw L3 cache --- //
   double l3_x = ram_x;
   double l3_y = ram_l3_arrow_y + transfer_arrow_height;
-  cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height, 
+  cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height,
     region_colors
       [fhv::types::aggregationTypeToString(
             fhv::types::aggregation_t::saturation)]
@@ -769,14 +813,3 @@ void saturation_diagram::draw_diagram_overview(
   cairo_surface_destroy(surface);
 }
 
-void saturation_diagram::draw_diagram_detail(
-  json region_colors,
-  rgb_color min_color,
-  rgb_color max_color,
-  std::string region_name,
-  std::string parameters,
-  std::string output_filename
-)
-{
-  ;
-}

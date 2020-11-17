@@ -36,11 +36,11 @@ debian-based systems), follow the workflow below:
 2. edit `LIKWID_PREFIX` in config.mk in the fhv root directory to match the
    location where likwid was installed in step 1
 3. Install build dependencies for fhv with the command `sudo apt-get install 
-   libboost-program-options-dev libcairo2-dev libpango1.0-dev`
+   libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
 4. In the directory of fhv, run the following commands: 
    - `make`
    - `make perfgroups`
-   - (optional, untested) `make install`
+   - (optional) `make install`
 
 If you'd like more details of what is used and why, read the prerequisites 
 section.
@@ -71,6 +71,8 @@ section.
    include development tools. Pango is available 
    [here](https://pango.gnome.org/Download), or installable on ubuntu with 
    `sudo apt install libpango1.0-dev`
+ - **{fmt}:** available [here](https://fmt.dev/latest/index.html), also
+   installable with `sudo apt install libfmt-dev`
 
 ## Automatically included
  - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included

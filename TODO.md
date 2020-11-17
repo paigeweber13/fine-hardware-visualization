@@ -3,10 +3,13 @@
 - [ ] add hardware info to JSON and visualization! 
   - motivation: switching to desktop, this will allow me to track what was
    generated on laptop and what was generated on desktop
-  - [ ] arch
-  - [ ] num cores
-  - [ ] num procs 
-  - [ ] num NUMA nodes or something like that?
+  - [x] processor name (e.g. "Intel(R) Core(TM) i5-6300U CPU @ 2.40GHz")
+  - [x] arch ("shortname" in likwid topology)
+  - [x] num sockets
+  - [x] num NUMA nodes
+  - [x] num total HW threads
+  - [x] num threads in use
+  - [x] affinity: which threads are being used
 - [ ] Improve diagram colors
   - [x] talk to KRS about visualization
   - [x] create some samples for Erik
@@ -16,6 +19,8 @@
   - [ ] play with log scale to tune what goes in each bin
   - [ ] generate swatches
   - [ ] generate examples with NAS parallel benchmarks
+- [x] makefile is recompiling *everything* when *any* change is made, make it
+      only recompile changed files
 
 ## Mid-term:
 - [ ] fix polynomial_expansion to use new build process
@@ -60,6 +65,8 @@
     - [ ] FT
     - [ ] MG
     - [ ] SP
+- [ ] conda, conda forge
+- [ ] cmake
 - [ ] explore how well fhv works with other kernels and codebases
   - [ ] Dr. Saule may be able to throw together some software that
         demonstrates stress on more granular things like TLB or instruction
@@ -98,6 +105,8 @@
 - cleanup polynomial_expansion:
   - build to separate bin dir
   - adjust scripts to match
+- disable implicit type conversion in JSONs. Do this by defining
+ `JSON_USE_IMPLICIT_CONVERSIONS` to 0 in the json header.
 
 ### Features to add:
 - [ ] implement per-core saturation levels

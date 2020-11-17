@@ -22,7 +22,7 @@ export OMP_SCHEDULE="dynamic,8"
 examples/polynomial_expansion/polynomial_fhv_perfmon $CPU_HEAVY_PARAMS > /dev/null
 
 echo "running optimized polynomial_block to saturate memory"
-export FHV_OUTPUT="visualizations/polynomial_block_mem.json" 
+export FHV_OUTPUT="visualizations/polynomial_block_mem.json"
 export OMP_SCHEDULE="dynamic,8"
 examples/polynomial_expansion/polynomial_block_fhv_perfmon $MEM_HEAVY_PARAMS > /dev/null
 
@@ -31,8 +31,8 @@ export FHV_OUTPUT="visualizations/polynomial_block_cpu.json"
 export OMP_SCHEDULE="dynamic,8"
 examples/polynomial_expansion/polynomial_block_fhv_perfmon $CPU_HEAVY_PARAMS > /dev/null
 
-bin/fhv -v visualizations/polynomial_basic_mem.json -o visualizations/polynomial_basic_mem.svg
-bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial_basic_cpu.svg
-bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem.svg
-bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial_block_cpu.svg
+build/bin/fhv -v visualizations/polynomial_basic_mem.json -o visualizations/polynomial_basic_mem.svg
+build/bin/fhv -v visualizations/polynomial_basic_cpu.json -o visualizations/polynomial_basic_cpu.svg
+build/bin/fhv -v visualizations/polynomial_block_mem.json -o visualizations/polynomial_block_mem.svg
+build/bin/fhv -v visualizations/polynomial_block_cpu.json -o visualizations/polynomial_block_cpu.svg
 

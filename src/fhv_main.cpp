@@ -155,22 +155,18 @@ void visualize(
     region_name = saturation_item.key();
     std::cout << "Creating visualization for region " << region_name 
       << std::endl;
-    json region_data = j[json_results_section][region_name];
-
-    auto region_colors = saturation_diagram::calculate_saturation_colors(
-      region_data, min_color, max_color);
 
     std::size_t pos = 0;
-    while(image_output_filename.find(".", pos+1) != std::string::npos){
-      pos = image_output_filename.find(".", pos+1);
+    while(image_output_filename.find('.', pos+1) != std::string::npos){
+      pos = image_output_filename.find('.', pos+1);
     }
     std::string ext = image_output_filename.substr(pos);
     std::string this_image_output_filename = 
       image_output_filename.substr(0, pos) + "_" + 
       region_name + ext;
 
-    saturation_diagram::draw_diagram_overview(region_colors, min_color,
-      max_color, region_name, params, this_image_output_filename);
+    saturation_diagram::draw_diagram_overview(j, min_color,
+      max_color, region_name, this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
   }
