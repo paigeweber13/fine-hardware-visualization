@@ -53,16 +53,18 @@ TEST_DIR=tests
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 
 #### Files
-HEADERS=$(wildcard $(SRC_DIR)/*.hpp)
+#HEADERS=$(wildcard $(SRC_DIR)/*.hpp)
 
 SOURCES=$(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/fhv_main.cpp \
 	$(SRC_DIR)/saturation_diagram.cpp
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp $(SRC_DIR)/types.cpp $(SRC_DIR)/utils.cpp
+SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp $(SRC_DIR)/types.cpp \
+	$(SRC_DIR)/utils.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp $(SRC_DIR)/likwid_defines.hpp \
-	$(SRC_DIR)/performance_monitor_defines.hpp $(SRC_DIR)/types.hpp $(SRC_DIR)/utils.hpp
+HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp \
+	$(SRC_DIR)/likwid_defines.hpp $(SRC_DIR)/performance_monitor_defines.hpp \
+	$(SRC_DIR)/types.hpp $(SRC_DIR)/utils.hpp
 
 NLOHMANN_JSON_HEADER=$(SRC_DIR)/nlohmann/json.hpp
 
@@ -173,14 +175,14 @@ $(CXX) $(CXXFLAGS) -c $< -o $@
 endef
 
 ## compilation of sources
-$(OBJ_DIR)/computation_measurements.o: $(wildcard $(SRC_DIR)/computation_measurements.*)
+$(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/computation_measurements.hpp
 	$(compile-command)
 
-$(OBJ_DIR)/saturation_diagram.o: $(wildcard $(SRC_DIR)/saturation_diagram.*)
+$(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp $(SRC_DIR)/saturation_diagram.hpp
 	$(compile-command)
 
 # main file
-$(OBJ_DIR)/fhv_main.o: $(wildcard $(SRC_DIR)/fhv_main.*)
+$(OBJ_DIR)/fhv_main.o: $(SRC_DIR)/fhv_main.cpp
 	$(compile-command)
 
 ## compilation of fhv_perfmon lib
@@ -190,14 +192,14 @@ define compile-command-shared-lib
 $(CXX) $(CXXFLAGS_SHARED_LIB) -c $< -o $@
 endef
 
-$(OBJ_DIR)/fhv_perfmon.o: $(wildcard $(SRC_DIR)/fhv_perfmon.*)
+$(OBJ_DIR)/fhv_perfmon.o: $(SRC_DIR)/fhv_perfmon.cpp $(SRC_DIR)/fhv_perfmon.hpp
 	$(compile-command-shared-lib)
 
 
-$(OBJ_DIR)/types.o: $(wildcard $(SRC_DIR)/types.*)
+$(OBJ_DIR)/types.o: $(SRC_DIR)/types.cpp $(SRC_DIR)/types.hpp
 	$(compile-command-shared-lib)
 
-$(OBJ_DIR)/utils.o: $(wildcard $(SRC_DIR)/utils.*)
+$(OBJ_DIR)/utils.o: $(SRC_DIR)/utils.cpp $(SRC_DIR)/utils.hpp
 	$(compile-command-shared-lib)
 
 
