@@ -1,0 +1,22 @@
+SHORT  Execution port utilization tests. Compares UOPS_EXECUTED_*
+
+EVENTSET
+FIXC0 INSTR_RETIRED_ANY
+FIXC1 CPU_CLK_UNHALTED_CORE
+FIXC2 CPU_CLK_UNHALTED_REF
+PMC0  UOPS_EXECUTED_CORE
+PMC1  UOPS_EXECUTED_THREAD
+PMC2  UOPS_ISSUED_ANY
+
+METRICS
+Runtime (RDTSC) [s] time
+Runtime unhalted [s] FIXC1*inverseClock
+Clock [MHz]  1.E-06*(FIXC1/FIXC2)/inverseClock
+CPI  FIXC1/FIXC0
+
+LONG
+Formulas:
+-
+This formula compares the overall execution numbers. This was used during
+development to find a counter that would closely correspond to the sums of
+UOPS_EXECUTED_PORT_PORT*, where * is the port number.
