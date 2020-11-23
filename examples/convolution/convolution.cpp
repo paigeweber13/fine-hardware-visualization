@@ -102,7 +102,11 @@ int main(int argc, char ** argv){
   // fhv_perfmon::printAggregateResults();
 
   fhv_perfmon::printHighlights();
-  fhv_perfmon::resultsToJson();
+
+  std::string parameters = "convolution parameters: image size: " + 
+    std::to_string(m) + " x " + std::to_string(n) + ", kernel size: " + 
+    std::to_string(k) + ", num iterations: " + std::to_string(nbiter);
+  fhv_perfmon::resultsToJson(parameters);
 #endif
 
   destroy_image(input, n);
