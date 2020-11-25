@@ -55,6 +55,11 @@ class saturation_diagram {
       unsigned width,
       unsigned height,
       unsigned num_steps);
+      
+    static void test_discrete_color_scale(
+      std::string color_scale_name,
+      unsigned width,
+      unsigned height);
 
     static rgb_color calculate_single_color(
       const double &value,
@@ -106,6 +111,10 @@ class saturation_diagram {
     static rgb_color color_lerp( 
       const rgb_color &min_color, 
       const rgb_color &max_color, 
+      const double &t);
+
+    static rgb_color discrete_color_scale(
+      const std::string &scale_name,
       const double &t);
 
     /* ----- CLAMP ----- 
@@ -192,6 +201,14 @@ class saturation_diagram {
       unsigned height,
       unsigned num_steps); 
 
+    static void cairo_draw_discrete_swatch(
+      cairo_t *cr,
+      std::string color_scale_name,
+      unsigned x,
+      unsigned y,
+      unsigned width,
+      unsigned height);
+
     /* ---- draw component ----
      *
      * Font size will be adjusted to be approximately 1/3 the height of the
@@ -232,4 +249,70 @@ class saturation_diagram {
       double stroke_width = stroke_thickness_normal);
 
   private:
+};
+
+// COLOR SCALES
+const std::string colorScaleName_RdPu = "RdPu";
+const std::vector<rgb_color> colorScale_RdPu = {
+  rgb_color(255.0/255.0  ,  247.0/255.0  ,  243.0/255.0),
+  rgb_color(253.0/255.0  ,  224.0/255.0  ,  221.0/255.0),
+  rgb_color(252.0/255.0  ,  197.0/255.0  ,  192.0/255.0),
+  rgb_color(250.0/255.0  ,  159.0/255.0  ,  181.0/255.0),
+  rgb_color(247.0/255.0  ,  104.0/255.0  ,  161.0/255.0),
+  rgb_color(221.0/255.0  ,  52.0/255.0  ,  151.0/255.0),
+  rgb_color(174.0/255.0  ,  1.0/255.0  ,  126.0/255.0),
+  rgb_color(122.0/255.0  ,  1.0/255.0  ,  119.0/255.0),
+  rgb_color(73.0/255.0  ,  0.0/255.0  ,  106.0/255.0),
+};
+
+const std::string colorScaleName_YlGnBu = "YlGnBu";
+const std::vector<rgb_color> colorScale_YlGnBu = {
+  rgb_color(255.0/255.0  ,  255.0/255.0  ,  217.0/255.0),
+  rgb_color(237.0/255.0  ,  248.0/255.0  ,  177.0/255.0),
+  rgb_color(199.0/255.0  ,  233.0/255.0  ,  180.0/255.0),
+  rgb_color(127.0/255.0  ,  205.0/255.0  ,  187.0/255.0),
+  rgb_color(65.0/255.0  ,  182.0/255.0  ,  196.0/255.0),
+  rgb_color(29.0/255.0  ,  145.0/255.0  ,  192.0/255.0),
+  rgb_color(34.0/255.0  ,  94.0/255.0  ,  168.0/255.0),
+  rgb_color(37.0/255.0  ,  52.0/255.0  ,  148.0/255.0),
+  rgb_color(8.0/255.0  ,  29.0/255.0  ,  88.0/255.0),
+};
+
+const std::string colorScaleName_PuBu = "PuBu";
+const std::vector<rgb_color> colorScale_PuBu = {
+  rgb_color(255.0/255.0  ,  247.0/255.0  ,  251.0/255.0),
+  rgb_color(236.0/255.0  ,  231.0/255.0  ,  242.0/255.0),
+  rgb_color(208.0/255.0  ,  209.0/255.0  ,  230.0/255.0),
+  rgb_color(166.0/255.0  ,  189.0/255.0  ,  219.0/255.0),
+  rgb_color(116.0/255.0  ,  169.0/255.0  ,  207.0/255.0),
+  rgb_color(54.0/255.0  ,  144.0/255.0  ,  192.0/255.0),
+  rgb_color(5.0/255.0  ,  112.0/255.0  ,  176.0/255.0),
+  rgb_color(4.0/255.0  ,  90.0/255.0  ,  141.0/255.0),
+  rgb_color(2.0/255.0  ,  56.0/255.0  ,  88.0/255.0),
+};
+
+const std::string colorScaleName_YlGn = "YlGn";
+const std::vector<rgb_color> colorScale_YlGn = {
+  rgb_color(255.0/255.0  ,  255.0/255.0  ,  229.0/255.0),
+  rgb_color(247.0/255.0  ,  252.0/255.0  ,  185.0/255.0),
+  rgb_color(217.0/255.0  ,  240.0/255.0  ,  163.0/255.0),
+  rgb_color(173.0/255.0  ,  221.0/255.0  ,  142.0/255.0),
+  rgb_color(120.0/255.0  ,  198.0/255.0  ,  121.0/255.0),
+  rgb_color(65.0/255.0  ,  171.0/255.0  ,  93.0/255.0),
+  rgb_color(35.0/255.0  ,  132.0/255.0  ,  67.0/255.0),
+  rgb_color(0.0/255.0  ,  104.0/255.0  ,  55.0/255.0),
+  rgb_color(0.0/255.0  ,  69.0/255.0  ,  41.0/255.0),
+};
+
+const std::string colorScaleName_Greys = "Greys";
+const std::vector<rgb_color> colorScale_Greys = {
+  rgb_color(255.0/255.0  ,  255.0/255.0  ,  255.0/255.0),
+  rgb_color(240.0/255.0  ,  240.0/255.0  ,  240.0/255.0),
+  rgb_color(217.0/255.0  ,  217.0/255.0  ,  217.0/255.0),
+  rgb_color(189.0/255.0  ,  189.0/255.0  ,  189.0/255.0),
+  rgb_color(150.0/255.0  ,  150.0/255.0  ,  150.0/255.0),
+  rgb_color(115.0/255.0  ,  115.0/255.0  ,  115.0/255.0),
+  rgb_color(82.0/255.0  ,  82.0/255.0  ,  82.0/255.0),
+  rgb_color(37.0/255.0  ,  37.0/255.0  ,  37.0/255.0),
+  rgb_color(0.0/255.0  ,  0.0/255.0  ,  0.0/255.0),
 };

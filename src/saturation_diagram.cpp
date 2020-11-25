@@ -1,5 +1,9 @@
 #include "saturation_diagram.hpp"
 
+/*
+ * Interpolates two colors by a factor t. The smaller the t, the closer the
+ * result is to min_color and vice versa
+ */
 rgb_color 
 saturation_diagram::color_lerp( 
   const rgb_color &min_color, 
@@ -11,6 +15,53 @@ saturation_diagram::color_lerp(
     std::get<1>(min_color) + t * (std::get<1>(max_color) - std::get<1>(min_color)),
     std::get<2>(min_color) + t * (std::get<2>(max_color) - std::get<2>(min_color))
   );
+}
+
+rgb_color
+saturation_diagram::discrete_color_scale(
+  const std::string &scale_name,
+  const double &t)
+{
+  std::vector<rgb_color> scale;
+  const unsigned NUM_BINS = 9;
+  const double INTERVAL_SIZE = 1.0 / static_cast<double>(NUM_BINS);
+
+  if (scale_name.compare(colorScaleName_RdPu) == 0){
+    scale = colorScale_RdPu;
+  }
+  else if (scale_name.compare(colorScaleName_YlGnBu) == 0){
+    scale = colorScale_YlGnBu;
+  }
+  else if (scale_name.compare(colorScaleName_PuBu) == 0){
+    scale = colorScale_PuBu;
+  }
+  else if (scale_name.compare(colorScaleName_YlGn) == 0){
+    scale = colorScale_YlGn;
+  }
+  else if (scale_name.compare(colorScaleName_Greys) == 0){
+    scale = colorScale_Greys;
+  }
+  else {
+    fmt::print(stderr, "discrete_color_scale: Bad colorscale specified!");
+    return rgb_color();
+  }
+
+  // intervals are [min, max) until final bin, which is [min, max]
+  for (unsigned i = 0; i < NUM_BINS - 1; i++){
+    double min = INTERVAL_SIZE * static_cast<double>(i);
+    double max = INTERVAL_SIZE * static_cast<double>(i + 1);
+
+    if (t >= min && t < max) { return scale[i]; }
+  }
+
+  // final bin: closed interval
+  double min = INTERVAL_SIZE * static_cast<double>(NUM_BINS - 1);
+  double max = (INTERVAL_SIZE + 1) * static_cast<double>(NUM_BINS);
+
+  if (t >= min && t <= max) { return scale[NUM_BINS - 1]; }
+
+  fmt::print(stderr, "discrete_color_scale: t is outside the range [0.0, 1.0]");
+  return rgb_color();
 }
 
 template<class T>
@@ -32,15 +83,15 @@ rgb_color saturation_diagram::calculate_single_color(
   const rgb_color &min_color,
   const rgb_color &max_color)
 {
-  double this_saturation = value;
+  double scaled_saturation = value;
   // clamp values to [0.0,1.0]
-  this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+  scaled_saturation = clamp(scaled_saturation, 0.0, 1.0);
   // scale using custom function
-  this_saturation = scale(this_saturation);
+  scaled_saturation = scale(scaled_saturation);
   // clamp again because scale can give negative values for very small input
-  this_saturation = clamp(static_cast<double>(this_saturation), 0.0, 1.0);
+  scaled_saturation = clamp(scaled_saturation, 0.0, 1.0);
 
-  return color_lerp(min_color, max_color, this_saturation);
+  return color_lerp(min_color, max_color, scaled_saturation);
 }
 
 json
@@ -143,6 +194,42 @@ void saturation_diagram::cairo_draw_swatch(
   cairo_restore(cr);
 }
 
+void saturation_diagram::cairo_draw_discrete_swatch(
+  cairo_t *cr,
+  std::string color_scale_name,
+  unsigned x,
+  unsigned y,
+  unsigned width,
+  unsigned height)
+{
+  cairo_save(cr);
+
+  const unsigned NUM_STEPS = 9;
+  unsigned step_size = width/NUM_STEPS;
+
+  for (unsigned i = 0; i < NUM_STEPS; i++){
+    // shape
+    cairo_rectangle(cr, x + i * step_size, y, step_size, height);
+
+    // fill
+    auto color = discrete_color_scale(color_scale_name, 
+      static_cast<double>(i)/static_cast<double>(NUM_STEPS));
+
+    cairo_set_source_rgb(cr, 
+      std::get<0>(color), 
+      std::get<1>(color), 
+      std::get<2>(color)
+      );
+    cairo_fill_preserve(cr);
+
+    // stroke
+    // cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_stroke(cr);
+  }
+
+  cairo_restore(cr);
+}
+
 void saturation_diagram::test_color_lerp(
   rgb_color min_color, 
   rgb_color max_color,
@@ -150,7 +237,7 @@ void saturation_diagram::test_color_lerp(
   unsigned height,
   unsigned num_steps)
 {
-  std::string output_dir = "visualizations/swatches/";
+  std::string output_dir = "visualizations/swatches/interpolated-continuous-scale";
   std::string image_output_filename = output_dir
     + std::to_string(static_cast<unsigned>(round(std::get<0>(min_color) * 255.0))) + ","
     + std::to_string(static_cast<unsigned>(round(std::get<1>(min_color) * 255.0))) + ","
@@ -164,7 +251,7 @@ void saturation_diagram::test_color_lerp(
   if(system(("mkdir -p " + output_dir).c_str()) != 0)
     std::cout << "WARN: there was a problem making the directory for "
       << "color swatches (" << output_dir << ")." << std::endl
-      << "Swatch creation will likely fail.";
+      << "Swatch creation will fail.";
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(
@@ -175,6 +262,38 @@ void saturation_diagram::test_color_lerp(
   cairo_t *cr = cairo_create(surface);
 
   cairo_draw_swatch(cr, min_color, max_color, 0, 0, width, height, num_steps);
+
+  // --- done drawing things, clean up
+
+  // svg file automatically gets written to disk
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
+
+void saturation_diagram::test_discrete_color_scale(
+  std::string color_scale_name,
+  unsigned width,
+  unsigned height)
+{
+  std::string output_dir = "visualizations/swatches/discrete-scale/";
+  std::string image_output_filename = output_dir
+    + color_scale_name
+    + ".svg";
+
+  if(system(("mkdir -p " + output_dir).c_str()) != 0)
+    std::cout << "WARN: there was a problem making the directory for "
+      << "color swatches (" << output_dir << ")." << std::endl
+      << "Swatch creation will fail.";
+
+  // create surface and cairo object
+  cairo_surface_t *surface = cairo_svg_surface_create(
+    image_output_filename.c_str(),
+    width,
+    height
+  );
+  cairo_t *cr = cairo_create(surface);
+
+  cairo_draw_discrete_swatch(cr, color_scale_name, 0, 0, width, height);
 
   // --- done drawing things, clean up
 

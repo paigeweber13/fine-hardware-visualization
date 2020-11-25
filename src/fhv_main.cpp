@@ -28,6 +28,7 @@ namespace po = boost::program_options;
 // ---- default values
 const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
 const std::uint64_t FLOAT_NUM_ITERATIONS =       100000000000;
+const std::string DEFAULT_DISCRETE_SCALE = "RdPu";
 
 // each argument vector has num_iterations, mem_size_kb
 
@@ -197,6 +198,7 @@ int main(int argc, char *argv[])
   std::time_t t = std::time(nullptr);
   std::strftime(time_str, sizeof(time_str), "%Y-%m-%d_%H%M", 
     std::localtime(&t));
+  std::string color_scale_for_discrete;
   std::string image_output_filename = "perfmon_visualization_";
   image_output_filename += time_str;
   image_output_filename += ".svg";
@@ -279,6 +281,12 @@ int main(int argc, char *argv[])
     ("test-color-lerp", 
       "create band of color from least to most to test linear interpolation. "
       "respects colors specified in --colors.")
+    ("test-discrete-color-scale", 
+      po::value<std::string>(&color_scale_for_discrete)
+      ->implicit_value(DEFAULT_DISCRETE_SCALE),
+      "create band of color from least to most to test discrete color scale. "
+      "May be followed by the name of the scale, matching one of those "
+      "specified in saturation_diagram.hpp")
     ;
 
   po::variables_map vm;
@@ -447,6 +455,10 @@ int main(int argc, char *argv[])
       input_colors[4]/255.0,
       input_colors[5]/255.0);
     saturation_diagram::test_color_lerp(min_color, max_color, 1000, 100, 20);
+  }
+  if (vm.count("test-discrete-color-scale"))
+  {
+    saturation_diagram::test_discrete_color_scale(color_scale_for_discrete, 1000, 100);
   }
   if (vm.count("visualize"))
   {
