@@ -1,6 +1,6 @@
 # TODO:
 ## Immediate:
-- [ ] add hardware info to JSON and visualization! 
+- [x] add hardware info to JSON and visualization! 
   - motivation: switching to desktop, this will allow me to track what was
    generated on laptop and what was generated on desktop
   - [x] processor name (e.g. "Intel(R) Core(TM) i5-6300U CPU @ 2.40GHz")
@@ -10,14 +10,15 @@
   - [x] num total HW threads
   - [x] num threads in use
   - [x] affinity: which threads are being used
+  - [x] re-generate diagrams with laptop hardware info
 - [ ] Improve diagram colors
   - [x] talk to KRS about visualization
   - [x] create some samples for Erik
   - [x] discuss
-  - [ ] create discrete scale
-  - [ ] add in some color brewer examples
+  - [x] create discrete scale
+  - [x] add in some color brewer examples
   - [ ] play with log scale to tune what goes in each bin
-  - [ ] generate swatches
+  - [x] generate swatches
   - [ ] generate examples with NAS parallel benchmarks
 - [x] makefile is recompiling *everything* when *any* change is made, make it
       only recompile changed files
@@ -27,44 +28,45 @@
 - [ ] make sure convolution pulls header from build dir and not src dir
 - [ ] try to get everything inside fhv namespace
 - [x] makefile add tab after continued lines
-- [ ] test now that types and utils have been created
-  - [ ] test convolution
-  - [ ] test polynomial expansion
+- [x] test now that types and utils have been created
+  - [x] test convolution
+  - [x] test polynomial expansion
+  - had to make some changes to makefile, otherwise fine
 - [x] update likwid docs
 - [ ] development environment
   - [ ] see if I can get clion or sublime intellisense working
   - [ ] clion works best with cmake... how does sublime work?
-  - [ ] get desktop set up
+  - [x] get desktop set up
 - [ ] Setup NAS parallel benchmarks
   - [x] for now, keep as separate project (we don't depend on anything from
         here except built library, anyways). These can be added to examples
         later if we can simplify the code.
-  - [ ] fork repo, adjust it to use fhv performance monitor
+  - [x] fork repo, adjust it to use fhv performance monitor
     - [x] convert to compile with g++:
         - [x] replace the variable name `class`, which is a reserved word in 
               c++: `sed -i 's/class/benchmarkClass/g'  **/*.c` or the like. 
               Also, in `wtime.c`, use `gettimeofday(&tv, 0);`
-    - [ ] start with BT: identify key part and add an fhv region
-    - [ ] LU - next priority!
-    - [ ] IS - after LU
-    - [ ] CG
-    - [ ] EP
-    - [ ] EP
-    - [ ] FT
-    - [ ] MG
-    - [ ] SP
-    - [ ] move `make.def` to `make.def.template`
-    - [ ] merge `add-fhv-measuring` into master
+  - [x] start with BT: identify key part and add an fhv region
+  - [ ] LU - next priority!
+  - [ ] IS - after LU
+  - [ ] CG
+  - [ ] EP
+  - [ ] EP
+  - [ ] FT
+  - [ ] MG
+  - [ ] SP
+  - [ ] move `make.def` to `make.def.template`
+  - [ ] merge `add-fhv-measuring` into master
 - [ ] Using these tests, compare our application to intel vTune
-    - [ ] BT
-    - [ ] LU
-    - [ ] IS
-    - [ ] CG
-    - [ ] EP
-    - [ ] EP
-    - [ ] FT
-    - [ ] MG
-    - [ ] SP
+  - [ ] BT
+  - [ ] LU
+  - [ ] IS
+  - [ ] CG
+  - [ ] EP
+  - [ ] EP
+  - [ ] FT
+  - [ ] MG
+  - [ ] SP
 - [ ] conda, conda forge
 - [ ] cmake
 - [ ] explore how well fhv works with other kernels and codebases

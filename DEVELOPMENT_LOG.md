@@ -87,6 +87,33 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-11-18 through 2020-12-2
+## Goals
+- [x] write discrete color scale
+- [ ] add discrete color scale to performance visualization
+- [ ] play with log scale to tune what goes into each bin
+- [ ] generate diagrams for BT
+- [ ] instrument LU, IS
+- [ ] generate diagrams for LU, IS
+
+## Accomplishments
+- wrote discrete color scale, and it looks great. For instance, compare [the
+  original interpolated purple-blue
+  scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/0acea0827c9dc5be73279ee05998edb24b38100c/visualizations/swatches/interpolated-continuous-scale/colorbrewer-255%2C247%2C251_to_2%2C56%2C88.svg)
+  to the [new, discrete purple-blue
+  scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/c4e49a8d3c486340139476e9f5419f8cf29bcee4/visualizations/swatches/discrete-scale/PuBu.svg).
+  The new scale is much less muddy and does a better job conveying the different
+  levels.
+- created an [image demonstrating each
+  scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/bca16bf665a8724f49f02aae4fc2d6e833f84fb1/visualizations/swatches/all_discrete_scales.svg).
+  In my opinion, many of these look better than the purple-blue scale. My
+  favorites are the red-purple and yellow-green, which are in the 3rd and 4th
+  rows, respectively.
+- JSONs and SVGs now contain hardware info automatically. This information is
+  gathered when "resultsToJson" is called, which should always happen on the
+  same machine that does the computation, even in cases like clusters that have
+  head nodes and worker nodes.
+
 # 2020-11-04 through 2020-11-11
 ## Goals for this week
 - write discrete color scale
