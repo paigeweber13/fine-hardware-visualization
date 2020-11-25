@@ -57,7 +57,6 @@ class saturation_diagram {
       unsigned num_steps);
       
     static void test_discrete_color_scale(
-      std::string color_scale_name,
       unsigned width,
       unsigned height);
 

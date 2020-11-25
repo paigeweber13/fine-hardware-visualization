@@ -42,7 +42,7 @@ saturation_diagram::discrete_color_scale(
     scale = colorScale_Greys;
   }
   else {
-    fmt::print(stderr, "discrete_color_scale: Bad colorscale specified!");
+    fmt::print(stderr, "discrete_color_scale: Bad colorscale specified!\n");
     return rgb_color();
   }
 
@@ -60,7 +60,7 @@ saturation_diagram::discrete_color_scale(
 
   if (t >= min && t <= max) { return scale[NUM_BINS - 1]; }
 
-  fmt::print(stderr, "discrete_color_scale: t is outside the range [0.0, 1.0]");
+  fmt::print(stderr, "discrete_color_scale: t is outside the range [0.0, 1.0]\n");
   return rgb_color();
 }
 
@@ -271,13 +271,21 @@ void saturation_diagram::test_color_lerp(
 }
 
 void saturation_diagram::test_discrete_color_scale(
-  std::string color_scale_name,
   unsigned width,
   unsigned height)
 {
-  std::string output_dir = "visualizations/swatches/discrete-scale/";
-  std::string image_output_filename = output_dir
-    + color_scale_name
+  const std::vector<std::string> scale_names = {
+    colorScaleName_Greys,
+    colorScaleName_PuBu,
+    colorScaleName_RdPu,
+    colorScaleName_YlGn,
+    colorScaleName_YlGnBu
+  };
+
+  const unsigned margin = height/4;
+  const std::string output_dir = "visualizations/swatches/";
+  const std::string image_output_filename = output_dir 
+    + "all_discrete_scales"
     + ".svg";
 
   if(system(("mkdir -p " + output_dir).c_str()) != 0)
@@ -289,11 +297,15 @@ void saturation_diagram::test_discrete_color_scale(
   cairo_surface_t *surface = cairo_svg_surface_create(
     image_output_filename.c_str(),
     width,
-    height
+    ((height + margin) * scale_names.size()) - margin
   );
   cairo_t *cr = cairo_create(surface);
 
-  cairo_draw_discrete_swatch(cr, color_scale_name, 0, 0, width, height);
+  for (size_t i = 0; i < scale_names.size(); i++){
+    fmt::print("Drawing scale {}\n", scale_names[i]);
+    cairo_draw_discrete_swatch(cr, scale_names[i], 0, (height + margin) * i, 
+      width, height);
+  }
 
   // --- done drawing things, clean up
 

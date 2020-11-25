@@ -198,7 +198,6 @@ int main(int argc, char *argv[])
   std::time_t t = std::time(nullptr);
   std::strftime(time_str, sizeof(time_str), "%Y-%m-%d_%H%M", 
     std::localtime(&t));
-  std::string color_scale_for_discrete;
   std::string image_output_filename = "perfmon_visualization_";
   image_output_filename += time_str;
   image_output_filename += ".svg";
@@ -282,11 +281,7 @@ int main(int argc, char *argv[])
       "create band of color from least to most to test linear interpolation. "
       "respects colors specified in --colors.")
     ("test-discrete-color-scale", 
-      po::value<std::string>(&color_scale_for_discrete)
-      ->implicit_value(DEFAULT_DISCRETE_SCALE),
-      "create band of color from least to most to test discrete color scale. "
-      "May be followed by the name of the scale, matching one of those "
-      "specified in saturation_diagram.hpp")
+      "Create diagram demonstrating each discrete color scale option")
     ;
 
   po::variables_map vm;
@@ -458,7 +453,7 @@ int main(int argc, char *argv[])
   }
   if (vm.count("test-discrete-color-scale"))
   {
-    saturation_diagram::test_discrete_color_scale(color_scale_for_discrete, 1000, 100);
+    saturation_diagram::test_discrete_color_scale(1000, 100);
   }
   if (vm.count("visualize"))
   {
