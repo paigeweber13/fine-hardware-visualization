@@ -19,7 +19,7 @@
   - [x] add in some color brewer examples
   - [ ] play with log scale to tune what goes in each bin
   - [x] generate swatches
-  - [ ] generate examples with NAS parallel benchmarks
+  - [x] generate examples with NAS parallel benchmarks
 - [x] makefile is recompiling *everything* when *any* change is made, make it
       only recompile changed files
 

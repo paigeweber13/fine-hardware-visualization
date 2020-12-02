@@ -90,13 +90,17 @@ Hardware Visualization
 # 2020-11-18 through 2020-12-2
 ## Goals
 - [x] write discrete color scale
-- [ ] add discrete color scale to performance visualization
+- [x] add discrete color scale to performance visualization
 - [ ] play with log scale to tune what goes into each bin
 - [ ] generate diagrams for BT
 - [ ] instrument LU, IS
 - [ ] generate diagrams for LU, IS
 
 ## Accomplishments
+- JSONs and SVGs now contain hardware info automatically. This information is
+  gathered when "resultsToJson" is called, which should always happen on the
+  same machine that does the computation, even in cases like clusters that have
+  head nodes and worker nodes.
 - wrote discrete color scale, and it looks great. For instance, compare [the
   original interpolated purple-blue
   scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/0acea0827c9dc5be73279ee05998edb24b38100c/visualizations/swatches/interpolated-continuous-scale/colorbrewer-255%2C247%2C251_to_2%2C56%2C88.svg)
@@ -109,10 +113,21 @@ Hardware Visualization
   In my opinion, many of these look better than the purple-blue scale. My
   favorites are the red-purple and yellow-green, which are in the 3rd and 4th
   rows, respectively.
-- JSONs and SVGs now contain hardware info automatically. This information is
-  gathered when "resultsToJson" is called, which should always happen on the
-  same machine that does the computation, even in cases like clusters that have
-  head nodes and worker nodes.
+- visualization now uses discrete color scale. You can find a [bunch of
+ examples here](https://github.com/rileyweber13/NPB3.0-omp-C/tree/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A)
+  - to compare each scale, check out these:
+    - [Greys](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_Greys_add.svg)
+    - [PuBu](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_PuBu_add.svg)
+    - [RdPu](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_RdPu_add.svg)
+    - [YlGn](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_YlGn_add.svg)
+    - [YlGnBu](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_YlGnBu_add.svg)
+  - my favorites are "YlGnBu" and "RdPu"
+  
+## Questions
+- Thoughts on color scales? Do you have a favorite we should use for the
+  default? (there's a CLI parameter to select the scale)
+- Thoughts on log scale? I feel like it's decent... 
+  - [Here's a graph of the exact scale we use](https://www.desmos.com/calculator/rgfdtyk7x9)
 
 # 2020-11-04 through 2020-11-11
 ## Goals for this week
