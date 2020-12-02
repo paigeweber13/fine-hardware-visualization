@@ -80,8 +80,7 @@ double saturation_diagram::scale(const double value){
 // ---- calculate saturation colors ----- // 
 rgb_color saturation_diagram::calculate_single_color(
   const double &value,
-  const rgb_color &min_color,
-  const rgb_color &max_color)
+  const std::string &color_scale)
 {
   double scaled_saturation = value;
   // clamp values to [0.0,1.0]
@@ -91,14 +90,13 @@ rgb_color saturation_diagram::calculate_single_color(
   // clamp again because scale can give negative values for very small input
   scaled_saturation = clamp(scaled_saturation, 0.0, 1.0);
 
-  return color_lerp(min_color, max_color, scaled_saturation);
+  return discrete_color_scale(color_scale, scaled_saturation);
 }
 
 json
 saturation_diagram::calculate_saturation_colors(
   const json &region_data,
-  const rgb_color &min_color,
-  const rgb_color &max_color)
+  const std::string &color_scale)
 {
   json saturation_colors;
 
@@ -126,7 +124,7 @@ saturation_diagram::calculate_saturation_colors(
           {
             saturation_colors[region_section.key()][metric.key()] 
               = saturation_diagram::calculate_single_color(metric.value(), 
-              min_color, max_color);
+              color_scale);
           }
         }
       }
@@ -143,7 +141,7 @@ saturation_diagram::calculate_saturation_colors(
           {
             saturation_colors[region_section.key()][metric.key()] 
               = saturation_diagram::calculate_single_color(metric.value(), 
-              min_color, max_color);
+              color_scale);
           }
         }
       }
@@ -604,8 +602,7 @@ void saturation_diagram::cairo_draw_arrow(
 // fhv_data is the data loaded straight from the JSON
 void saturation_diagram::draw_diagram_overview(
   json fhv_data,
-  rgb_color min_color,
-  rgb_color max_color,
+  std::string color_scale,
   std::string region_name,
   std::string output_filename
 )
@@ -615,7 +612,7 @@ void saturation_diagram::draw_diagram_overview(
   auto proc_info = meta_info[json_processor_section];
   auto region_data = fhv_data[json_results_section][region_name];
   auto region_colors = saturation_diagram::calculate_saturation_colors(
-      region_data, min_color, max_color);
+      region_data, color_scale);
 
 
   // --- initialize cairo --- //
@@ -740,14 +737,13 @@ void saturation_diagram::draw_diagram_overview(
   text_height = pango_cairo_draw_text(cr, description_x, description_y,
     content_width, description, description_font);
 
-  // --- draw swatch/legend --- //
-  // TODO : make drawing swatch/legend own function. Add numbers for saturation
-  // as key
+  // --- draw legend --- //
+  // TODO : make drawing legend own function
   double swatch_x = description_x;
   double swatch_y = description_y + text_height + internal_margin;
-  double num_steps = 10;
-  cairo_draw_swatch(cr, min_color, max_color, swatch_x, swatch_y,
-    swatch_width, swatch_height, num_steps);
+  const double num_steps = 9;
+  cairo_draw_discrete_swatch(cr, color_scale, swatch_x, swatch_y,
+    swatch_width, swatch_height);
 
   double swatch_legend_x = swatch_x;
   double swatch_legend_y = swatch_y + swatch_height + small_internal_margin;

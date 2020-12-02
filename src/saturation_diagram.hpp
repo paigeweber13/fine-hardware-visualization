@@ -62,8 +62,7 @@ class saturation_diagram {
 
     static rgb_color calculate_single_color(
       const double &value,
-      const rgb_color &min_color,
-      const rgb_color &max_color);
+      const std::string &color_scale);
 
     /* ---- calculate saturation colors ----- 
      * The return value of this function is intended to be passed to
@@ -72,8 +71,7 @@ class saturation_diagram {
     static json
     calculate_saturation_colors(
       const json &region_data,
-      const rgb_color &min_color,
-      const rgb_color &max_color);
+      const std::string &color_scale);
 
     /* ---- draw diagram ----
      * Draws an overview of the architecture that displays RAM, cores, and
@@ -81,8 +79,7 @@ class saturation_diagram {
      */
     static void draw_diagram_overview(
       json fhv_data,
-      rgb_color min_color,
-      rgb_color max_color,
+      std::string color_scale,
       std::string region_name,
       std::string output_filename);
 

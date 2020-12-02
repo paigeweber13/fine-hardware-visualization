@@ -133,8 +133,7 @@ void print_csv_header()
 void visualize(
   std::string perfmon_output_filename,
   std::string image_output_filename,
-  rgb_color min_color,
-  rgb_color max_color)
+  std::string color_scale)
 {
   // std::string image_output_filename = "perfmon_output.svg";
 
@@ -166,8 +165,8 @@ void visualize(
       image_output_filename.substr(0, pos) + "_" + 
       region_name + ext;
 
-    saturation_diagram::draw_diagram_overview(j, min_color,
-      max_color, region_name, this_image_output_filename);
+    saturation_diagram::draw_diagram_overview(j, color_scale, region_name,
+                                              this_image_output_filename);
     std::cout << "Visualization saved to " << this_image_output_filename 
       << std::endl;
   }
@@ -180,11 +179,12 @@ int main(int argc, char *argv[])
   std::uint64_t dp_flop_num_iterations;
 
   std::vector<std::uint64_t> cache_and_memory_args;
-  // std::tuple<double, double, double, double, double, double> input_colors = {
-  std::vector<double> input_colors = {
+  // std::tuple<double, double, double, double, double, double> input_colors_continuous_scale = {
+  std::vector<double> input_colors_continuous_scale = {
     200, 200, 200,
     43, 140, 190
   };
+  std::string color_scale = "RdPu";
 
   // for use with csv output: keeps a consistent name no matter what vector is
   // used for arguments
@@ -272,16 +272,20 @@ int main(int argc, char *argv[])
       "automatically be appended. If not supplied, a default name with "
       "current date and time will be generated. Has no effect if --visualize"
       "is not supplied.")
-    ("colors,c", 
-      po::value<std::vector<double>>(&input_colors)->multitoken(),
-      "Specify the colors used in the visualization. Six numbers must be "
-      "supplied to indicate RGB values for the min color and max color, in "
-      "that order. Values should be in the range [0:255].")
-    ("test-color-lerp", 
+    ("color-scale,c",
+      po::value<std::string>(&color_scale),
+      "Specify the color scale to be used in the visualization. Must be one of "
+      "'Greys', 'PuBu', 'RdPu', 'YlGn', or 'YlGnBu'")
+    ("test-discrete-color-scale",
+      "Create diagram demonstrating each discrete color scale option.")
+    ("test-color-lerp",
       "create band of color from least to most to test linear interpolation. "
-      "respects colors specified in --colors.")
-    ("test-discrete-color-scale", 
-      "Create diagram demonstrating each discrete color scale option")
+      "respects colors specified in --interpolated-colors.")
+    ("interpolated-colors",
+       po::value<std::vector<double>>(&input_colors_continuous_scale)->multitoken(),
+       "Six numbers must be "
+       "supplied to indicate RGB values for the min color and max color, in "
+       "that order. Values should be in the range [0:255].")
     ;
 
   po::variables_map vm;
@@ -442,13 +446,13 @@ int main(int argc, char *argv[])
   if (vm.count("test-color-lerp"))
   {
     auto min_color = rgb_color(
-      input_colors[0]/255.0,
-      input_colors[1]/255.0,
-      input_colors[2]/255.0);
+        input_colors_continuous_scale[0] / 255.0,
+        input_colors_continuous_scale[1] / 255.0,
+        input_colors_continuous_scale[2] / 255.0);
     auto max_color = rgb_color(
-      input_colors[3]/255.0,
-      input_colors[4]/255.0,
-      input_colors[5]/255.0);
+        input_colors_continuous_scale[3] / 255.0,
+        input_colors_continuous_scale[4] / 255.0,
+        input_colors_continuous_scale[5] / 255.0);
     saturation_diagram::test_color_lerp(min_color, max_color, 1000, 100, 20);
   }
   if (vm.count("test-discrete-color-scale"))
@@ -457,18 +461,9 @@ int main(int argc, char *argv[])
   }
   if (vm.count("visualize"))
   {
-    auto min_color = rgb_color(
-      input_colors[0]/255.0,
-      input_colors[1]/255.0,
-      input_colors[2]/255.0);
-    auto max_color = rgb_color(
-      input_colors[3]/255.0,
-      input_colors[4]/255.0,
-      input_colors[5]/255.0);
-    visualize(perfmon_output_filename, 
+    visualize(perfmon_output_filename,
       image_output_filename, 
-      min_color, 
-      max_color);
+      color_scale);
   }
 
   return 0;
