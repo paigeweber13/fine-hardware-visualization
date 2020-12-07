@@ -275,7 +275,8 @@ int main(int argc, char *argv[])
     ("color-scale,c",
       po::value<std::string>(&color_scale),
       "Specify the color scale to be used in the visualization. Must be one of "
-      "'Greys', 'PuBu', 'RdPu', 'YlGn', or 'YlGnBu'")
+      "'Greys', 'PuBu', 'RdPu', 'YlGn', or 'YlGnBu'.  If no color scale is "
+      "specified, 'RdPu' will be used.")
     ("test-discrete-color-scale",
       "Create diagram demonstrating each discrete color scale option.")
     ("test-color-lerp",
