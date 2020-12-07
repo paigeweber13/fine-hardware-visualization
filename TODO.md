@@ -1,27 +1,26 @@
 # TODO:
 ## Immediate:
-- [x] add hardware info to JSON and visualization! 
-  - motivation: switching to desktop, this will allow me to track what was
-   generated on laptop and what was generated on desktop
-  - [x] processor name (e.g. "Intel(R) Core(TM) i5-6300U CPU @ 2.40GHz")
-  - [x] arch ("shortname" in likwid topology)
-  - [x] num sockets
-  - [x] num NUMA nodes
-  - [x] num total HW threads
-  - [x] num threads in use
-  - [x] affinity: which threads are being used
-  - [x] re-generate diagrams with laptop hardware info
-- [ ] Improve diagram colors
-  - [x] talk to KRS about visualization
-  - [x] create some samples for Erik
-  - [x] discuss
-  - [x] create discrete scale
-  - [x] add in some color brewer examples
-  - [ ] play with log scale to tune what goes in each bin
-  - [x] generate swatches
-  - [x] generate examples with NAS parallel benchmarks
-- [x] makefile is recompiling *everything* when *any* change is made, make it
-      only recompile changed files
+- [ ] double-check legend is representative of how discrete scale works
+- [ ] fix IS
+  - [ ] run diff between my branch and master branch
+- [ ] Instrument IS
+  - [ ] function `rank` does the actual sort
+      - weird how it works. Creates threads beforehand with a `#pragma omp
+        parallel`, and then does the worksharing within `rank()` using `#pragma
+        omp for`
+      - they are trying to avoid re-creating threads every iteration
+  - [ ] `rank` does some verification but it should be fast
+- [ ] Instrument LU
+  - [ ] `ssor` seems to be the really big one
+  - [ ] functions called by ssor: some are expensive, all are important
+    - rhs (called by ssor on line 3087)
+    - jaclt
+    - blts
+  - [ ] just time all of ssor
+    - should be mostly dense linear algebra: so lots of flops and memory runs
+    - not sure if likwid allows nested measuring but try to mesure interior functions
+    - is pintgr important?
+
 
 ## Mid-term:
 - [ ] fix polynomial_expansion to use new build process
