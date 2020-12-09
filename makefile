@@ -89,8 +89,9 @@ PANGOCAIRO_INC_DIRS=$(shell pkg-config --cflags pangocairo)
 INC_DIRS=$(LIKWID_INC_DIR) $(FHV_INC_DIRS) $(PANGOCAIRO_INC_DIRS)
 
 # used as parts of constants below
-CXXFLAGS_BASE=$(INC_DIRS) -std=c++14 -fopenmp -DLIKWID_PERFMON
-CXXFLAGS_DEBUG=$(CXXFLAGS_BASE) -Wall -g 
+#CXXFLAGS_BASE=$(INC_DIRS) -std=c++14 -fopenmp -DLIKWID_PERFMON
+# if desired, also use some debug flags
+CXXFLAGS_BASE=$(INC_DIRS) -std=c++14 -fopenmp -DLIKWID_PERFMON -Wall -g 
 
 # used in actual compilation
 CXXFLAGS=$(CXXFLAGS_BASE) $(ADDITIONAL_COMPILER_FLAGS)
