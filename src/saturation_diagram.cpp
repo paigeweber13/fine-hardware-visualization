@@ -896,7 +896,7 @@ void saturation_diagram::draw_diagram_overview(
   cairo_draw_component(cr, single_p_x, single_p_y, flops_width, flops_height, 
     region_colors[fhv::types::aggregationTypeToString(
             fhv::types::aggregation_t::saturation)]
-      [fhv_flops_dp_saturation_metric_name], 
+      [fhv_flops_sp_saturation_metric_name], 
     "Single-precision FLOP/s", big_label_font, label_position::INSIDE);
 
   // double precision
@@ -906,7 +906,7 @@ void saturation_diagram::draw_diagram_overview(
     region_colors[
       fhv::types::aggregationTypeToString(
               fhv::types::aggregation_t::saturation)]
-      [fhv_flops_sp_saturation_metric_name],
+      [fhv_flops_dp_saturation_metric_name],
     "Double-precision FLOP/s", big_label_font, label_position::INSIDE);
   
   // --- draw ports in core
