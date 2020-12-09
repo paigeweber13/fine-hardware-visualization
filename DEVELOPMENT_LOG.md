@@ -87,6 +87,16 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# 2020-12-09 through 2020-12-16
+## Goals
+- benchmark flops and create diagram
+  - are we misinterpreting the meaning of sums/means and when each should be used?
+- finish metering LU
+- look at IS again, don't spend too much time on it though
+
+## Questions
+- can we go over IS? 
+
 # 2020-12-02 through 2020-12-09
 ## Goals
 - [ ] instrument 
@@ -108,6 +118,14 @@ Hardware Visualization
   - I remember you said mostly dense linear algebra
   - I haven't looked at it yet because I'm trying to work out the kinks of
     measurement
+- notes from meeting on LU:
+  - mostly memory bound
+  - there's some high port usage on ports 0, 1 in all_computation but we don't
+    see that in any of the sub-groups
+  - the matrices get smaller as execution continues: are later groups measuring
+    smaller matrices?
+    - When the benchmark reports flops it multiplies by `itmax`, so we can be
+      fairly sure that each iteration is about the same execution time
 
 # 2020-11-18 through 2020-12-02
 ## Goals

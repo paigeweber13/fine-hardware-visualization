@@ -27,6 +27,7 @@
     - [ ] is there a way we can make the visualization message more friendly?
     - [ ] fix this
 - [ ] add runtime to JSON and diagram
+- [ ] confirm scale on diagram matches up with how it works under the hood
 
 
 ## Mid-term:
