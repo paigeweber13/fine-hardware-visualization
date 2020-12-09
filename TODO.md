@@ -2,7 +2,8 @@
 ## Immediate:
 - [ ] double-check legend is representative of how discrete scale works
 - [ ] fix IS
-  - [ ] run diff between my branch and master branch
+  - [x] run diff between my branch and master branch
+  - [ ] differences are really very minimal: just enough to get it working on C++
 - [ ] Instrument IS
   - [ ] function `rank` does the actual sort
       - weird how it works. Creates threads beforehand with a `#pragma omp
@@ -11,15 +12,21 @@
       - they are trying to avoid re-creating threads every iteration
   - [ ] `rank` does some verification but it should be fast
 - [ ] Instrument LU
-  - [ ] `ssor` seems to be the really big one
-  - [ ] functions called by ssor: some are expensive, all are important
+  - [x] `ssor` seems to be the really big one
+    - time starts on line 3109
+    - time stops on line 3231
+  - [x] functions called by ssor: some are expensive, all are important
     - rhs (called by ssor on line 3087)
     - jaclt
     - blts
-  - [ ] just time all of ssor
+  - [x] just time all of ssor
     - should be mostly dense linear algebra: so lots of flops and memory runs
     - not sure if likwid allows nested measuring but try to mesure interior functions
     - is pintgr important?
+  - [ ] l2norm isn't getting measured for some groups (L2 and L3, notably)
+    - [ ] is there a way we can make the visualization message more friendly?
+    - [ ] fix this
+- [ ] add runtime to JSON and diagram
 
 
 ## Mid-term:

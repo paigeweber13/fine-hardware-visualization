@@ -91,13 +91,23 @@ Hardware Visualization
 ## Goals
 - [ ] instrument 
   - [ ] LU
+    - [ ] almost done! Still need to fix l2norm only measuring some groups
   - [ ] IS
 - [ ] generate diagrams
   - [ ] LU
   - [ ] IS
 
 ## Accomplishments
-- 
+- Instrumented LU
+- Looked at IS
+
+## Questions
+- Once I switched IS to g++, it would only run on CLASS=S
+  - can you try to get it working with c++?
+- can you look at LU and tell me if you think it makes sense?
+  - I remember you said mostly dense linear algebra
+  - I haven't looked at it yet because I'm trying to work out the kinks of
+    measurement
 
 # 2020-11-18 through 2020-12-02
 ## Goals
