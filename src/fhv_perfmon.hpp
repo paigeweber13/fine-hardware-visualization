@@ -50,7 +50,8 @@ class fhv_perfmon {
       std::string event_groups = 
         "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3");
 
-    static void registerRegions(const std::string regions);
+    // if parallel is true, will register regions in a parallel block
+    static void registerRegions(const std::string regions, bool parallel);
 
     static void startRegion(const char * tag);
     static void stopRegion(const char * tag);

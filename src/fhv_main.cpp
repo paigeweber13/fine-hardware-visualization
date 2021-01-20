@@ -56,16 +56,16 @@ void benchmark_flops(precision p, uint64_t num_iter)
   if(p == precision::SINGLE_P){
     #pragma omp parallel
     {
-      likwid_markerStartRegion("flops_sp");
+      fhv_perfmon::startRegion("flops_sp");
       flops_sp(num_iter);
-      likwid_markerStopRegion("flops_sp");
+      fhv_perfmon::stopRegion("flops_sp");
     }
   } else if (p == precision::DOUBLE_P){
     #pragma omp parallel
     {
-      likwid_markerStartRegion("flops_dp");
+      fhv_perfmon::startRegion("flops_dp");
       flops_dp(num_iter);
-      likwid_markerStopRegion("flops_dp");
+      fhv_perfmon::stopRegion("flops_dp");
     }
   }
 }
@@ -90,13 +90,13 @@ void benchmark_all()
   benchmark_flops(precision::DOUBLE_P, FLOAT_NUM_ITERATIONS);
 
   std::cout << "starting L2 cache rw bandwidth benchmark" << std::endl;
-  benchmark_memory_bw("L2", l2_args[0], l2_args[1]);
+  benchmark_memory_bw("L2", l2_args[0], l2_args[2]);
 
   std::cout << "starting L3 cache rw bandwidth benchmark" << std::endl;
-  benchmark_memory_bw("L3", l3_args[0], l3_args[1]);
+  benchmark_memory_bw("L3", l3_args[0], l3_args[2]);
 
   std::cout << "starting RAM rw bandwidth benchmark" << std::endl;
-  benchmark_memory_bw("MEM", ram_args[0], ram_args[1]);
+  benchmark_memory_bw("MEM", ram_args[0], ram_args[2]);
 }
 
 void print_csv_header()
@@ -204,16 +204,6 @@ int main(int argc, char *argv[])
 
   output_format o = output_format::pretty;
 
-  // behavior if no arguments are supplied
-  if (argc < 2)
-  {
-    std::cout << "no options provided, running all benchmarks.\n";
-    std::cout << "alternatively, pass '-h' for more options\n";
-    // sleep a couple seconds?
-    benchmark_all();
-    return 0;
-  }
-
   // behavior with arguments
   po::options_description desc(
     "Benchmarking machine with likwid");
@@ -317,10 +307,12 @@ int main(int argc, char *argv[])
 
   // okay, so we're actually doing things. We will set common likwid envvars
   // here: 
-  setenv("LIKWID_MODE", "1", 1);
-  setenv("LIKWID_FILEPATH", filepath, 1); 
-  setenv("LIKWID_THREADS", "0,1,2,3", 1);
-  setenv("LIKWID_FORCE", "1", 1);
+
+  // should be done by fhv_perfmon::init
+  // setenv("LIKWID_MODE", "1", 1);
+  // setenv("LIKWID_FILEPATH", filepath, 1); 
+  // setenv("LIKWID_THREADS", "0,1,2,3", 1);
+  // setenv("LIKWID_FORCE", "1", 1);
 
   // benchmark things
   if (vm.count("csv-style-output"))
@@ -339,11 +331,22 @@ int main(int argc, char *argv[])
   }
 
   bool benchmark_done = false;
+  std::string benchmark_parameter_info = "";
 
   // This block is where the benchark is ran
   if (vm.count("benchmark-all"))
   {
     benchmark_all();
+
+    benchmark_parameter_info += fmt::format(
+        "All Benchmarks. Params: DP FLOPS: {0:.2e}, SP FLOPS: {0:.2e}, "
+        "L2 iterations: {1:.2e}, L2 size (KiB): {2:.2e}, ",
+        "L3 iterations: {3:.2e}, L3 size (KiB): {4:.2e}, ",
+        "RAM iterations: {5:.2e}, RAM size (KiB): {6:.2e}",
+        FLOAT_NUM_ITERATIONS, static_cast<double>(l2_args[0]), 
+        static_cast<double>(l2_args[2]), static_cast<double>(l3_args[0]),
+        static_cast<double>(l3_args[2]), static_cast<double>(ram_args[0]),
+        static_cast<double>(ram_args[2]));
     benchmark_done = true;
   }
   else if (vm.count("benchmark-cache-and-memory"))
@@ -354,6 +357,21 @@ int main(int argc, char *argv[])
     int num_groups = 4;
     bandwidth_rw("copy_bw", num_groups, cache_and_memory_args[0], 
       cache_and_memory_args[1], cache_and_memory_args[2]);
+
+    benchmark_parameter_info += fmt::format(
+        "Cache/Mem Benchmarks. Params: "
+        "L2 iterations: {:.2e}, L2 measured iterations: {:d}, L2 size (KiB): {:.2e}, ",
+        "L3 iterations: {:.2e}, L3 measured iterations: {:d}, L3 size (KiB): {:.2e}, ",
+        "RAM iterations: {:.2e}, RAM measured iterations: {:d}, RAM size (KiB): {:.2e}",
+        static_cast<double>(l2_args[0]),
+        static_cast<double>(l2_args[1]),
+        static_cast<double>(l2_args[2]),
+        static_cast<double>(l3_args[0]),
+        static_cast<double>(l3_args[1]),
+        static_cast<double>(l3_args[2]),
+        static_cast<double>(ram_args[0]),
+        static_cast<double>(ram_args[1]),
+        static_cast<double>(ram_args[2]));
     benchmark_done = true;
   }
   else if (vm.count("L2"))
@@ -362,6 +380,12 @@ int main(int argc, char *argv[])
     fhv_perfmon::init(region_name, "", "L2");
     int num_groups = 1;
     bandwidth_rw(region_name, num_groups, l2_args[0], l2_args[1], l2_args[2]);
+
+    benchmark_parameter_info += fmt::format(
+        "L2 Benchmark. Params: L2 iterations: {:.2e}, "
+        "L2 measured iterations: {:d}, L2 size (KiB): {:.2e}, ",
+        static_cast<double>(l2_args[0]), l2_args[1],
+        static_cast<double>(l2_args[2]));
     benchmark_done = true;
   }
   else if (vm.count("L3"))
@@ -370,6 +394,13 @@ int main(int argc, char *argv[])
     fhv_perfmon::init(region_name, "", "L3");
     int num_groups = 1;
     bandwidth_rw(region_name, num_groups, l3_args[0], l3_args[1], l3_args[2]);
+
+    benchmark_parameter_info += fmt::format(
+        "L3 Benchmark. Params: L3 iterations: {:.2e}, "
+        "L3 measured iterations: {:d}, L3 size (KiB): {:.2e}, ",
+        static_cast<double>(l3_args[0]),
+        l3_args[1],
+        static_cast<double>(l3_args[2]));
     benchmark_done = true;
   }
   else if (vm.count("mem"))
@@ -378,6 +409,13 @@ int main(int argc, char *argv[])
     fhv_perfmon::init(region_name, "", "MEM");
     int num_groups = 1;
     bandwidth_rw(region_name, num_groups, ram_args[0], ram_args[1], ram_args[2]);
+
+    benchmark_parameter_info += fmt::format(
+        "RAM Benchmark. Params: RAM iterations: {:.2e}, "
+        "RAM measured iterations: {:d}, RAM size (KiB): {:.2e}, ",
+        static_cast<double>(ram_args[0]),
+        ram_args[1],
+        static_cast<double>(ram_args[2]));
     benchmark_done = true;
   }
   else if (vm.count("flops_sp"))
@@ -385,6 +423,10 @@ int main(int argc, char *argv[])
     const char * region_name = "region_flops_sp";
     fhv_perfmon::init(region_name, "", "FLOPS_SP");
     benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
+
+    benchmark_parameter_info += fmt::format(
+        "SP FLOPS Benchmark. Num iterations: {:.2e}, ", 
+        static_cast<double>(sp_flop_num_iterations));
     benchmark_done = true;
   }
   else if (vm.count("flops_dp"))
@@ -392,11 +434,16 @@ int main(int argc, char *argv[])
     const char * region_name = "region_flops_dp";
     fhv_perfmon::init(region_name, "", "FLOPS_DP");
     benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
+
+    benchmark_parameter_info += fmt::format(
+        "DP FLOPS Benchmark. Num iterations: {:.2e}, ", 
+        static_cast<double>(dp_flop_num_iterations));
     benchmark_done = true;
   }
 
   if(benchmark_done){
     fhv_perfmon::close();
+    fhv_perfmon::resultsToJson(benchmark_parameter_info);
 
     if(o == output_format::pretty){
       fhv_perfmon::printHighlights();

@@ -14,7 +14,8 @@ int fhv_perfmon::num_threads = -1;
 
 void
 fhv_perfmon::registerRegions(
-    const std::string regions)
+    const std::string regions,
+    bool parallel)
 {
   if (regions == "")
   {
@@ -37,7 +38,15 @@ fhv_perfmon::registerRegions(
 
     // std::cout << "DEBUG: registering region " + token + " on thread " +
     //                  std::to_string(omp_get_thread_num()) + "\n";
-    likwid_markerRegisterRegion(token.c_str());
+    if(parallel) {
+      #pragma omp parallel
+      {
+        likwid_markerRegisterRegion(token.c_str());
+      }
+    }
+    else {
+      likwid_markerRegisterRegion(token.c_str());
+    }
     start_pos = end_pos + delimiter.length();
   } while (end_pos != std::string::npos);
 }
@@ -94,13 +103,13 @@ void fhv_perfmon::init(std::string parallel_regions,
    * a parallel block for initialization and a parallel block for execution.
    */
   if(sequential_regions != "")
-    registerRegions(sequential_regions);
+    registerRegions(sequential_regions, false);
   
   if(parallel_regions != "")
   {
     #pragma omp parallel
     {
-      registerRegions(parallel_regions);
+      registerRegions(parallel_regions, true);
     }
   }
 }
