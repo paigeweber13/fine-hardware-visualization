@@ -87,9 +87,19 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# New Year! 2021-01-20 through 2021-01-
+## Goals
+- benchmark flops and create diagram of flops benchmark performance
+  - are we misinterpreting the meaning of sums/means and when each should be used?
+- finish metering LU
+- look at IS again, don't spend too much time on it though
+
+## Accomplishments
+- 
+
 # 2020-12-09 through 2020-12-16
 ## Goals
-- benchmark flops and create diagram
+- benchmark flops and create diagram of flops benchmark performance
   - are we misinterpreting the meaning of sums/means and when each should be used?
 - finish metering LU
 - look at IS again, don't spend too much time on it though
