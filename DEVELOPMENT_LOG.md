@@ -95,7 +95,22 @@ Hardware Visualization
 - look at IS again, don't spend too much time on it though
 
 ## Accomplishments
-- 
+- Added parameter string to benchmarks
+- Metered flops benchmarks (see `tests/data/benchmark_flops_*.json`)
+
+## Questions
+- Feeling like I don't have much of a direction: what's the vision for this
+  semester?
+  - I know the next few steps, but I want to have something in mind that I'm
+    working towards
+- Codebase feels really messy, in general things feel unstable.
+  - First time I tried to run the flops benchmark and meter it, got "WARN:
+    Skipping region region_flops_sp-0 for evaluation." Which seems to just *keep
+    coming back*. I thought we had this all worked out after I spent a month
+    working with Tom to figure out stability issues.
+  - Any recommendations?
+
+## Accomplishments
 
 # 2020-12-09 through 2020-12-16
 ## Goals

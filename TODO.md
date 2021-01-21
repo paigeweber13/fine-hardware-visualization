@@ -1,6 +1,10 @@
 # TODO:
 ## Immediate:
+- [ ] meter flpos benchmarks
+  - [ ] make "visualize" function gracefully handle null values so we can 
+        visualize incomplete data
 - [ ] double-check legend is representative of how discrete scale works
+- [ ] finish metering LU
 - [ ] fix IS
   - [x] run diff between my branch and master branch
   - [ ] differences are really very minimal: just enough to get it working on C++
