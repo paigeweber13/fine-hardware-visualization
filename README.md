@@ -79,10 +79,27 @@ section.
    in ./lib
 
 # Running
-**warning:** in an effort to reduce workload until I get a minimal proof of
-concept, I've stopped maintaining basically everything in this repository
-(benchmarks, tests are notable examples). So many of the tests (`make tests`)
-don't work right now.
+Before running anything, make sure you have access to the MSRs
+(model-specific-registers). These are used for the hardware counters. You can do
+this by running `sudo modprobe msr`. Also, if you have installed `fhv` (this
+software) or `likwid` to a non-standard directory, you should run run the
+following commands in your terminal before using this software:
+
+```bash
+# note: change path to match your installation directory
+$ export PATH=$PATH:/path/to/fhv/bin:/path/to/likwid/bin
+$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/fhv/lib:/path/to/likwid/lib
+```
+
+## Warnings, Disclaimers
+This software has only been tested on the Intel Skylake processor. It is
+currently highly experimental as I continue to work on a proof of concept (poc).
+It should  not be used in any production-critical system. See `LICENSE` for full
+licesne information and disclaimers.
+
+In an effort to reduce workload until I get a minimal poc, I've stopped
+maintaining basically everything in this repository (benchmarks, tests are
+notable examples). So many of the tests (`make tests`) don't work right now.
 
 What still works:
  - minimal example of likwid: `make build/bin/tests/likwid-minimal-run`
@@ -114,7 +131,8 @@ What still works:
    if you want to create custom performance groups
 
 # Goals:
-"I think we have a shot at doing something other people don't do" - Dr. Saule.
+"I think we have a shot at doing something other people don't do" 
+- Dr. Saule.
 
 So far it seems that nothing is designed to automatically identify and
 visualize the architecture by socket and within the core. Additionally, most 
