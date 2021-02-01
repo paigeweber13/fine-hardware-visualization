@@ -132,7 +132,7 @@ LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
 # used at runtime. 
 
 RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib:$$LD_LIBRARY_PATH \
-	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
+	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$(FHV_PERFMON_PREFIX)/bin:$$PATH"
 
 
 #### meta-rules: These implement the functionality that users call 
