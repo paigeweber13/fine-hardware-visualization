@@ -26,8 +26,8 @@ namespace po = boost::program_options;
 #define BYTES_TO_GBYTES 1e-9
 
 // ---- default values
-const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 1000000000;
-const std::uint64_t FLOAT_NUM_ITERATIONS =       100000000000;
+const std::uint64_t FLOAT_NUM_ITERATIONS_SHORT = 100000000;
+const std::uint64_t FLOAT_NUM_ITERATIONS =       10000000000;
 const std::string DEFAULT_DISCRETE_SCALE = "RdPu";
 
 // each argument vector has num_iterations, mem_size_kb
@@ -56,16 +56,26 @@ void benchmark_flops(precision p, uint64_t num_iter)
   if(p == precision::SINGLE_P){
     #pragma omp parallel
     {
-      fhv_perfmon::startRegion("flops_sp");
-      flops_sp(num_iter);
-      fhv_perfmon::stopRegion("flops_sp");
+      for(size_t i = 0; i < 7; i++)
+      {
+        fhv_perfmon::startRegion("flops_sp");
+        flops_sp(num_iter);
+        fhv_perfmon::stopRegion("flops_sp");
+        #pragma omp barrier
+        fhv_perfmon::nextGroup();
+      }
     }
   } else if (p == precision::DOUBLE_P){
     #pragma omp parallel
     {
-      fhv_perfmon::startRegion("flops_dp");
-      flops_dp(num_iter);
-      fhv_perfmon::stopRegion("flops_dp");
+      for(size_t i = 0; i < 7; i++)
+      {
+        fhv_perfmon::startRegion("flops_dp");
+        flops_dp(num_iter);
+        fhv_perfmon::stopRegion("flops_dp");
+        #pragma omp barrier
+        fhv_perfmon::nextGroup();
+      }
     }
   }
 }
@@ -421,7 +431,7 @@ int main(int argc, char *argv[])
   else if (vm.count("flops_sp"))
   {
     const char * region_name = "region_flops_sp";
-    fhv_perfmon::init(region_name, "", "FLOPS_SP");
+    fhv_perfmon::init(region_name);
     benchmark_flops(precision::SINGLE_P, sp_flop_num_iterations);
 
     benchmark_parameter_info += fmt::format(
@@ -432,7 +442,7 @@ int main(int argc, char *argv[])
   else if (vm.count("flops_dp"))
   {
     const char * region_name = "region_flops_dp";
-    fhv_perfmon::init(region_name, "", "FLOPS_DP");
+    fhv_perfmon::init(region_name);
     benchmark_flops(precision::DOUBLE_P, dp_flop_num_iterations);
 
     benchmark_parameter_info += fmt::format(
