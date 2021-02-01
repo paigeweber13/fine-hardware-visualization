@@ -97,12 +97,24 @@ Hardware Visualization
 ## Accomplishments
 - Added parameter string to benchmarks
 - Metered flops benchmarks (see `tests/data/benchmark_flops_*.json`)
+- Investigated current state of how we calculate things:
+  - port usage is a geometric mean
+  - everything else is a 'saturation' which is calculated in
+    'fhv_perfmon::calculate_saturation' and uses the 'sum' of flops and 
+    bandwidth measures
+- made visualization work even if there is data missing
+- re-ran flops benchmarks while measuring all groups needed for a good diagram
 
 ## Questions
+- What does the measurement of the flops benchmark tell you? to mee it seems
+  as we expect, with ports 0 and 1 highly saturated.
 - Feeling like I don't have much of a direction: what's the vision for this
   semester?
   - I know the next few steps, but I want to have something in mind that I'm
     working towards
+  - Apply to graph problems?
+- How much do you want me to worry about making this code readable and well
+  documented for whoever comes after me? 
 - Codebase feels really messy, in general things feel unstable.
   - First time I tried to run the flops benchmark and meter it, got "WARN:
     Skipping region region_flops_sp-0 for evaluation." Which seems to just *keep
@@ -391,6 +403,8 @@ All of these examples are from [the SuiteSparse Matrix Collection](https://spars
   - 90% are in fortran
   - [found a C port](https://github.com/benchmark-subsetting/NPB3.0-omp-C) that
     seems to be pretty good
+    - Dr. Saule knows the person who wrote this: it's a student of the person 
+      who taught Dr. Saule computer architecture
 - began changing makefile to produce shared library for easy inclusion at
   compile time (for measuring nas parallel benchmarks)
 - finished converting build chain to produce and use a shared library
