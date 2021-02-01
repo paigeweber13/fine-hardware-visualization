@@ -38,6 +38,7 @@ enum class direction {
 // TODO: should anything else be here?
 const double stroke_thickness_normal = 10.0;
 const double stroke_thickness_thin = 5.0;
+const rgb_color WHITE(1.0, 1.0, 1.0);
 
 class saturation_diagram {
   public:

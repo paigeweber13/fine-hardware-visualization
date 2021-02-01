@@ -111,13 +111,19 @@ saturation_diagram::calculate_saturation_colors(
 
     // for now, we're just doing an overview to keep things simple
 
-    // if we're in the "geometric_mean" part of this region's results, then
-    // we'll search for each saturation metric
+
+    // First, find all saturation metrics. These are primarily what we use to 
+    // visualize.
     if(region_section.key() == fhv::types::aggregationTypeToString(
             fhv::types::aggregation_t::saturation) )
     {
       for (const auto &metric: region_section.value().items())
       {
+        if(region_section.value()[metric.key()].is_null()) {
+          // skip this metric if it's null!
+          continue;
+        }
+
         for (const auto &saturation_metric : fhv_saturation_metric_names)
         {
           if (metric.key() == saturation_metric)
@@ -130,15 +136,25 @@ saturation_diagram::calculate_saturation_colors(
       }
     }
 
+
+    // next, look for 'fhv_other_diagram_metrics' in the 'geometric_mean' 
+    // section
     if(region_section.key() == fhv::types::aggregationTypeToString(
             fhv::types::aggregation_t::geometric_mean) )
     {
       for (const auto &metric: region_section.value().items())
       {
+        if(region_section.value()[metric.key()].is_null()) {
+          // skip this metric if it's null!
+          continue;
+        }
+
         for (const auto &other_diagram_metric : fhv_other_diagram_metrics)
         {
           if (metric.key() == other_diagram_metric)
           {
+            // core dump indicated that this is the line where things go wrong
+            // if we have limited profiling info.
             saturation_colors[region_section.key()][metric.key()] 
               = saturation_diagram::calculate_single_color(metric.value(), 
               color_scale);
@@ -775,11 +791,15 @@ void saturation_diagram::draw_diagram_overview(
   // --- draw RAM --- //
   double ram_x = margin_x;
   double ram_y = swatch_label_y + text_height + internal_margin;
-  cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height,
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_mem_rw_saturation_metric_name], "RAM", big_label_font,
-    label_position::INSIDE);
+  auto ram_color = WHITE;
+  auto ram_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)]
+      [fhv_mem_rw_saturation_metric_name];
+  if (!ram_color_json.is_null()) { ram_color = ram_color_json; }
+
+  cairo_draw_component(cr, ram_x, ram_y, ram_width, ram_height, ram_color, 
+    "RAM", big_label_font, label_position::INSIDE);
+
 
   // --- Load/store arrows from RAM to L3 cache --- //
   double ram_l3_load_x = ram_x + ram_width/5.0;
@@ -787,29 +807,36 @@ void saturation_diagram::draw_diagram_overview(
   double ram_l3_arrow_y = ram_y + ram_height;
   double ram_l3_arrow_width = ram_width / 5.0;
 
-  // TODO: replace with saturation color
+  auto ram_load_color = WHITE;
+  auto ram_load_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_mem_r_saturation_metric_name];
+  if (!ram_load_color_json.is_null()) { ram_load_color = ram_load_color_json; }
+
   cairo_draw_arrow(cr, ram_l3_load_x, ram_l3_arrow_y, ram_l3_arrow_width,
-    transfer_arrow_height,
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_mem_r_saturation_metric_name],
-    direction::DOWN, "load", small_label_font, stroke_thickness_thin);
+    transfer_arrow_height, ram_load_color, direction::DOWN, "load", 
+    small_label_font, stroke_thickness_thin);
+
+  auto ram_store_color = WHITE;
+  auto ram_store_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_mem_w_saturation_metric_name];
+  if (!ram_store_color_json.is_null()) { 
+    ram_store_color = ram_store_color_json; 
+  }
 
   cairo_draw_arrow(cr, ram_l3_store_x, ram_l3_arrow_y, ram_l3_arrow_width,
-    transfer_arrow_height, 
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_mem_w_saturation_metric_name],
-    direction::UP, "store", small_label_font, stroke_thickness_thin);
+    transfer_arrow_height, ram_store_color, direction::UP, "store", 
+    small_label_font, stroke_thickness_thin);
 
   // --- draw L3 cache --- //
   double l3_x = ram_x;
   double l3_y = ram_l3_arrow_y + transfer_arrow_height;
+  auto l3_color = WHITE;
+  auto l3_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_l3_rw_saturation_metric_name];
+  if (!l3_color_json.is_null()) { l3_color = l3_color_json; }
+
   cairo_draw_component(cr, l3_x, l3_y, l3_width, l3_height,
-    region_colors
-      [fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_l3_rw_saturation_metric_name], "L3 Cache", big_label_font);
+      l3_color, "L3 Cache", big_label_font);
 
   // --- Load/store arrows from L3 to L2 cache --- //
   double l3_l2_load_x = ram_l3_load_x;
@@ -817,29 +844,34 @@ void saturation_diagram::draw_diagram_overview(
   double l3_l2_arrow_y = l3_y + l3_height;
   double l3_l2_arrow_width = l3_width / 5.0;
 
-  // TODO: replace with saturation color
+  auto l3_load_color = WHITE;
+  auto l3_load_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_l3_r_saturation_metric_name];
+  if (!l3_load_color_json.is_null()) { l3_load_color = l3_load_color_json; }
+
   cairo_draw_arrow(cr, l3_l2_load_x, l3_l2_arrow_y, l3_l2_arrow_width,
-    transfer_arrow_height, 
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_l3_r_saturation_metric_name],
-    direction::DOWN, "load", small_label_font, stroke_thickness_thin);
+    transfer_arrow_height, l3_load_color, direction::DOWN, "load", 
+    small_label_font, stroke_thickness_thin);
+
+  auto l3_store_color = WHITE;
+  auto l3_store_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_l3_w_saturation_metric_name];
+  if (!l3_store_color_json.is_null()) { l3_store_color = l3_store_color_json; }
 
   cairo_draw_arrow(cr, l3_l2_store_x, l3_l2_arrow_y, l3_l2_arrow_width,
-    transfer_arrow_height, 
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_l3_w_saturation_metric_name],
-    direction::UP, "store", small_label_font, stroke_thickness_thin);
+    transfer_arrow_height, l3_store_color, direction::UP, "store", 
+    small_label_font, stroke_thickness_thin);
 
   // --- draw L2 cache --- //
   double l2_x = l3_x;
   double l2_y = l3_l2_arrow_y + transfer_arrow_height;
-  cairo_draw_component(cr, l2_x, l2_y, l2_width, l2_height, 
-    region_colors
-      [fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_l2_rw_saturation_metric_name], "L2 Cache", big_label_font);
+  auto l2_color = WHITE;
+  auto l2_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_l2_rw_saturation_metric_name];
+  if (!l2_color_json.is_null()) { l2_color = l2_color_json; }
+
+  cairo_draw_component(cr, l2_x, l2_y, l2_width, l2_height, l2_color,
+    "L2 Cache", big_label_font);
 
   // --- Load/store arrows from L2 to L1 cache --- //
   double l2_l1_load_x = l3_l2_load_x;
@@ -847,20 +879,21 @@ void saturation_diagram::draw_diagram_overview(
   double l2_l1_arrow_y = l2_y + l2_height;
   double l2_l1_arrow_width = l2_width / 5.0;
 
-  // TODO: replace with saturation color
+  auto l2_load_color = WHITE;
+  auto l2_load_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_l2_r_saturation_metric_name];
+  if (!l2_load_color_json.is_null()) { l2_load_color = l2_load_color_json; }
   cairo_draw_arrow(cr, l2_l1_load_x, l2_l1_arrow_y, l2_l1_arrow_width,
-    transfer_arrow_height, 
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_l2_r_saturation_metric_name],
-    direction::DOWN, "load", small_label_font, stroke_thickness_thin);
+    transfer_arrow_height, l2_load_color, direction::DOWN, "load", 
+    small_label_font, stroke_thickness_thin);
 
+  auto l2_store_color = WHITE;
+  auto l2_store_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)][fhv_l2_w_saturation_metric_name];
+  if (!l2_store_color_json.is_null()) { l2_store_color = l2_store_color_json; }
   cairo_draw_arrow(cr, l2_l1_store_x, l2_l1_arrow_y, l2_l1_arrow_width,
-    transfer_arrow_height, 
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_l2_w_saturation_metric_name],
-    direction::UP, "store", small_label_font, stroke_thickness_thin);
+    transfer_arrow_height, l2_store_color, direction::UP, "store", 
+    small_label_font, stroke_thickness_thin);
 
   // --- draw L1 cache --- //
   double l1_x = l2_x; 
@@ -893,21 +926,28 @@ void saturation_diagram::draw_diagram_overview(
   // single precision
   double single_p_x = in_core_x + text_height;
   double single_p_y = in_core_y;
+  auto flops_sp_color = WHITE;
+  auto flops_sp_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)]
+      [fhv_flops_sp_saturation_metric_name];
+  if(!flops_sp_color_json.is_null()) { flops_sp_color = flops_sp_color_json; }
+
   cairo_draw_component(cr, single_p_x, single_p_y, flops_width, flops_height, 
-    region_colors[fhv::types::aggregationTypeToString(
-            fhv::types::aggregation_t::saturation)]
-      [fhv_flops_sp_saturation_metric_name], 
-    "Single-precision FLOP/s", big_label_font, label_position::INSIDE);
+    flops_sp_color, "Single-precision FLOP/s", big_label_font, 
+      label_position::INSIDE);
 
   // double precision
   double double_p_x = single_p_x + flops_width;
   double double_p_y = single_p_y;
+  auto flops_dp_color = WHITE;
+  auto flops_dp_color_json = region_colors[fhv::types::aggregationTypeToString(
+    fhv::types::aggregation_t::saturation)]
+      [fhv_flops_dp_saturation_metric_name];
+  if(!flops_dp_color_json.is_null()) { flops_dp_color = flops_dp_color_json; }
+
   cairo_draw_component(cr, double_p_x, double_p_y, flops_width, flops_height, 
-    region_colors[
-      fhv::types::aggregationTypeToString(
-              fhv::types::aggregation_t::saturation)]
-      [fhv_flops_dp_saturation_metric_name],
-    "Double-precision FLOP/s", big_label_font, label_position::INSIDE);
+    flops_dp_color, "Double-precision FLOP/s", big_label_font, 
+    label_position::INSIDE);
   
   // --- draw ports in core
   double port_width = (in_core_width - text_height) * 
@@ -919,14 +959,16 @@ void saturation_diagram::draw_diagram_overview(
   for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
   {
     port_x = in_core_x + text_height + port_num * port_width;
+
+    auto port_color = WHITE;
+    auto port_color_json = region_colors[fhv::types::aggregationTypeToString(
+      fhv::types::aggregation_t::geometric_mean)] [fhv_port_usage_ratio_start 
+        + std::to_string(port_num) + fhv_port_usage_ratio_end];
+    if(!port_color_json.is_null()) { port_color = port_color_json; }
+
     cairo_draw_component(cr, port_x, port_y, port_width, port_height,
-      region_colors
-        [fhv::types::aggregationTypeToString(
-              fhv::types::aggregation_t::geometric_mean)]
-        [fhv_port_usage_ratio_start + std::to_string(port_num) 
-          + fhv_port_usage_ratio_end],
-      "Port " + std::to_string(port_num), 
-      small_label_font, label_position::INSIDE, stroke_thickness_thin);
+      port_color, "Port " + std::to_string(port_num), small_label_font, 
+      label_position::INSIDE, stroke_thickness_thin);
   }
 
   // --- done drawing things, clean up
