@@ -45,6 +45,9 @@ debug: _debug
 # `export $(make exports)`
 exports: _exports
 
+# same as above, but points to local build dir, not install dir
+devexports: _devexports
+
 ###### END OF rules intended for CLI use
 
 
@@ -134,6 +137,8 @@ LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
 RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib:$$LD_LIBRARY_PATH \
 	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$(FHV_PERFMON_PREFIX)/bin:$$PATH"
 
+RUN_CMD_PREFIX_DEV=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(BUILD_DIR)/lib:$$LD_LIBRARY_PATH \
+	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$(BUILD_DIR)/bin:$$PATH"
 
 #### meta-rules: These implement the functionality that users call 
 
@@ -162,6 +167,9 @@ _clean:
 
 _exports:
 	@echo $(RUN_CMD_PREFIX)
+
+_devexports:
+	@echo $(RUN_CMD_PREFIX_DEV)
 
 #### utility rules
 # TODO: what do we want this rule to do?
