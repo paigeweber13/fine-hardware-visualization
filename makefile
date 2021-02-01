@@ -40,6 +40,11 @@ clean: _clean
 # this rule shows some of the makefile variables
 debug: _debug
 
+# this rule prints 'LD_LIBRARY_PATH' and 'PATH' wht the locations
+# where fhv is included. Intended to be used as follows:
+# `export $(make exports)`
+exports: _exports
+
 ###### END OF rules intended for CLI use
 
 
@@ -126,7 +131,7 @@ LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
 #### prefix used to ensure likwid libraries and access daemon are detected and 
 # used at runtime. 
 
-RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib \
+RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib:$$LD_LIBRARY_PATH \
 	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
 
 
@@ -154,6 +159,9 @@ _perfgroups: $(PERFGROUPS_DIRS)
 
 _clean:
 	rm -rf $(wildcard $(BUILD_DIR)/*)
+
+_exports:
+	@echo $(RUN_CMD_PREFIX)
 
 #### utility rules
 # TODO: what do we want this rule to do?
