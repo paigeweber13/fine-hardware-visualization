@@ -387,8 +387,8 @@ int main(int argc, char *argv[])
   else if (vm.count("L2"))
   {
     const char * region_name = "region_l2";
-    fhv_perfmon::init(region_name, "", "L2");
-    int num_groups = 1;
+    fhv_perfmon::init(region_name);
+    int num_groups = 7;
     bandwidth_rw(region_name, num_groups, l2_args[0], l2_args[1], l2_args[2]);
 
     benchmark_parameter_info += fmt::format(
@@ -401,8 +401,8 @@ int main(int argc, char *argv[])
   else if (vm.count("L3"))
   {
     const char * region_name = "region_l3";
-    fhv_perfmon::init(region_name, "", "L3");
-    int num_groups = 1;
+    fhv_perfmon::init(region_name);
+    int num_groups = 7;
     bandwidth_rw(region_name, num_groups, l3_args[0], l3_args[1], l3_args[2]);
 
     benchmark_parameter_info += fmt::format(
@@ -416,8 +416,8 @@ int main(int argc, char *argv[])
   else if (vm.count("mem"))
   {
     const char * region_name = "region_mem";
-    fhv_perfmon::init(region_name, "", "MEM");
-    int num_groups = 1;
+    fhv_perfmon::init(region_name);
+    int num_groups = 7;
     bandwidth_rw(region_name, num_groups, ram_args[0], ram_args[1], ram_args[2]);
 
     benchmark_parameter_info += fmt::format(
