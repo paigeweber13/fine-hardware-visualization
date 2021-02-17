@@ -93,7 +93,9 @@ Hardware Visualization
 ## Goals
 
 - benchmark flops and create diagram of flops benchmark performance
-  - are we misinterpreting the meaning of sums/means and when each should be used?
+  - are we misinterpreting the meaning of sums/means and when each should be
+    used?
+- benchmark what I have for mem/cache
 - finish metering LU
 - look at IS again, don't spend too much time on it though
 
@@ -101,11 +103,12 @@ Hardware Visualization
 
 - Added parameter string to benchmarks
 - Metered flops benchmarks (see `tests/data/benchmark_flops_*.json`)
+  - also metered cache/mem
 - Investigated current state of how we calculate things:
   - port usage is a geometric mean
   - everything else is a 'saturation' which is calculated in
     'fhv_perfmon::calculate_saturation' and uses the 'sum' of flops and
-    bandwidth measures
+    bandwidth measures divided by the sum of the associated benchmark measures
 - made visualization work even if there is data missing
 - re-ran flops benchmarks while measuring all groups needed for a good diagram
 - over the break, learned a lot about C++ build systems and TDD
@@ -113,6 +116,7 @@ Hardware Visualization
     WAY easier than make
   - also TDD is amazing and I'd like to start adding features through TDD (but
     I won't go back and add tests for existing code unless you ask)
+- added 'make exports' and 'make devexports' rules to makefile for convenience
 
 ## Questions
 
@@ -125,10 +129,11 @@ Hardware Visualization
   - Apply to graph problems?
 - How much do you want me to worry about making this code readable and well
   documented for whoever comes after me?
+  - is testing important for whomever comes later?
 - Codebase feels really messy, in general things feel unstable.
   - First time I tried to run the flops benchmark and meter it, got "WARN:
-    Skipping region region_flops_sp-0 for evaluation." Which seems to just _keep
-    coming back_. I thought we had this all worked out after I spent a month
+    Skipping region region*flops_sp-0 for evaluation." Which seems to just *keep
+    coming back*. I thought we had this all worked out after I spent a month
     working with Tom to figure out stability issues.
   - Any recommendations?
 
