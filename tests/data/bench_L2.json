@@ -1,0 +1,142 @@
+{
+    "info": {
+        "parameters": "L2 Benchmark. Params: L2 iterations: 3.00e+06, L2 measured iterations: 1, L2 size (KiB): 1.00e+02, ",
+        "processor": {
+            "affinity": "0,1,2,3",
+            "name": "Intel(R) Core(TM) i5-6300U CPU @ 2.40GHz (skylake)",
+            "num_hw_threads": 4,
+            "num_numa_nodes": 1,
+            "num_sockets": 1,
+            "num_threads_in_use": 4
+        }
+    },
+    "region_results": {
+        "region_l2": {
+            "arithmetic_mean": {
+                "DP [MFLOP/s]": 1.6917700666146498,
+                "Memory bandwidth [MBytes/s]": 9410.606468088989,
+                "Memory data volume [GBytes]": 5.8576e-05,
+                "Memory evict bandwidth [MBytes/s]": 287.8961825801603,
+                "Memory evict data volume [GBytes]": 1.792e-06,
+                "Memory load bandwidth [MBytes/s]": 9122.710285508829,
+                "Memory load data volume [GBytes]": 5.6784e-05,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            },
+            "geometric_mean": {
+                "DP [MFLOP/s]": 1.620127405242209,
+                "Memory bandwidth [MBytes/s]": 0.0,
+                "Memory data volume [GBytes]": 0.0,
+                "Memory evict bandwidth [MBytes/s]": 0.0,
+                "Memory evict data volume [GBytes]": 0.0,
+                "Memory load bandwidth [MBytes/s]": 0.0,
+                "Memory load data volume [GBytes]": 0.0,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            },
+            "saturation": {
+                "Saturation FLOPS DP": 7.388959328574201e-05,
+                "Saturation Memory read bandwidth": 1.5514319982218228,
+                "Saturation Memory read/write bandwidth": 1.554946691377958,
+                "Saturation Memory write bandwidth": 0.09469593841994595
+            },
+            "sum": {
+                "DP [MFLOP/s]": 6.767080266458599,
+                "Memory bandwidth [MBytes/s]": 37642.425872355954,
+                "Memory data volume [GBytes]": 0.000234304,
+                "Memory evict bandwidth [MBytes/s]": 1151.5847303206413,
+                "Memory evict data volume [GBytes]": 7.168e-06,
+                "Memory load bandwidth [MBytes/s]": 36490.841142035315,
+                "Memory load data volume [GBytes]": 0.000227136,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            },
+            "thread_0": {
+                "DP [MFLOP/s]": 2.5705016301800026,
+                "Memory bandwidth [MBytes/s]": 37642.425872355954,
+                "Memory data volume [GBytes]": 0.000234304,
+                "Memory evict bandwidth [MBytes/s]": 1151.5847303206413,
+                "Memory evict data volume [GBytes]": 7.168e-06,
+                "Memory load bandwidth [MBytes/s]": 36490.841142035315,
+                "Memory load data volume [GBytes]": 0.000227136,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            },
+            "thread_1": {
+                "DP [MFLOP/s]": 1.4490312320569179,
+                "Memory bandwidth [MBytes/s]": 0.0,
+                "Memory data volume [GBytes]": 0.0,
+                "Memory evict bandwidth [MBytes/s]": 0.0,
+                "Memory evict data volume [GBytes]": 0.0,
+                "Memory load bandwidth [MBytes/s]": 0.0,
+                "Memory load data volume [GBytes]": 0.0,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            },
+            "thread_2": {
+                "DP [MFLOP/s]": 1.1799819020275777,
+                "Memory bandwidth [MBytes/s]": 0.0,
+                "Memory data volume [GBytes]": 0.0,
+                "Memory evict bandwidth [MBytes/s]": 0.0,
+                "Memory evict data volume [GBytes]": 0.0,
+                "Memory load bandwidth [MBytes/s]": 0.0,
+                "Memory load data volume [GBytes]": 0.0,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            },
+            "thread_3": {
+                "DP [MFLOP/s]": 1.567565502194102,
+                "Memory bandwidth [MBytes/s]": 0.0,
+                "Memory data volume [GBytes]": 0.0,
+                "Memory evict bandwidth [MBytes/s]": 0.0,
+                "Memory evict data volume [GBytes]": 0.0,
+                "Memory load bandwidth [MBytes/s]": 0.0,
+                "Memory load data volume [GBytes]": 0.0,
+                "Port0 usage ratio": null,
+                "Port1 usage ratio": null,
+                "Port2 usage ratio": null,
+                "Port3 usage ratio": null,
+                "Port4 usage ratio": null,
+                "Port5 usage ratio": null,
+                "Port6 usage ratio": null,
+                "Port7 usage ratio": null
+            }
+        }
+    }
+}
