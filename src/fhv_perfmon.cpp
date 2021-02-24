@@ -342,14 +342,20 @@ void fhv_perfmon::calculate_port_usage_ratios()
   // instead of using this vector, we could iterate through per_thread_results
   // again. The vector makes things easy, though
   std::vector<double> uops_executed_port(NUM_PORTS_IN_CORE);
-  double total_num_port_ops = 0;
+  double total_num_port_ops;
 
-  // first, sum all UOPS_DISPATCHED_PORT_PORT* on a per-thread, per-region
-  // basis
+  // everything is done on a per-thread, per-region basis
   for (int t = 0; t < fhv_perfmon::num_threads; t++)
   {
     for (const auto &region_name : regions)
     {
+      // reset counters for this (thread, region) pair
+      for (size_t i = 0; i < uops_executed_port.size(); i++) {
+        uops_executed_port[i] = 0;
+      }
+      total_num_port_ops = 0;
+
+      // first, sum all UOPS_DISPATCHED_PORT_PORT*
       for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
       {
         for (const auto &ptr : fhv_perfmon::per_thread_results)
