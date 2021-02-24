@@ -88,6 +88,68 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
+# Plan for remainder of Riley's time (through June 2021)
+
+## By April 14 - Confirm soundness of tool
+
+- Micro-benchmarks (ex. a benchmark designed to maximize flops)
+  - memory benchmark does not saturate BW. Consider instrumenting likwid
+    benchmark or [stream benchmark](https://www.cs.virginia.edu/stream/)
+    with our tool.
+- Application benchmarks (LU, IS, BT)
+  - currently only BT works fine
+  - Consider N-body, LU
+  - integrate into this repo: "examples" folder
+- Ideally: these are confirmed across more than one architecture. But it's
+  fine if we limit ourselvs to intel architectures.
+- For each benchmark and architecture, have a markdown file or
+  something that walks the user through what they should expect. For
+  example...
+  - This one program we have uses x and should be bottlenecked by FMAs
+  - so we expect some memory bandwidth but mostly flops, with ports 0 and 1
+    saturated
+  - here's the picture we expect
+  - I'm envisioning one markdown file per benchmark, and then in each
+    markdown file we mention some of the differences we expect across
+    architectures
+
+## By May 1 (but start now) - How does the next person to work on this pick it up and move forward?
+
+- Make it so they can reproduce my results
+- Write some documentation for them
+  - about the tool itself
+    - because we sample, it's possible there are artifacts from that. For
+      example, if you only measure flops when flops are heavily used and
+      then only measure bw when bw is loaded, your program will appear more
+      saturated than it actually is.
+  - about performance counters in general, what's challenging about them
+    - Hardware: we only have n performance counters
+    - Software: if you want to measure bandwidth, you don't have ajust a
+      "bandwidth" counter, this has to be interpreted
+- documentation:
+  - for high-level things, text files are fine
+  - for tool-level things, comment on functions. Consider doxygen?
+  - Plan some next steps for them
+
+## By May 12 - use this tool to gain insight on one real application
+
+- hopefully a graph problem
+- consider 'page rank' or
+  ['sdkd'](https://webpages.uncc.edu/~esaule/public-website/papers/icpp17-SPHTD.pdf)
+
+## By June 30 - Deploy v1.0.0
+
+- name the tool: "Global Picture"? "fhv"?
+- "global picture" is what Dr. Saule called it on the NSF grant
+
+# 2021-02-24 through 2021-03-03
+
+## Goals
+
+- documentation is on back burner
+- demonstrating soundness, repeatibility: goal is to finish within 4-6 weeks
+- after that, testing tool on new programs
+
 # 2021-02-17 through 2021-02-24
 
 ## Goals
@@ -95,9 +157,8 @@ Hardware Visualization
 - [x] Further investigate why port usage seems low
 - [x] if we can't accurately predict theoretical benchmarks, is an experiential
       benchmark adequate?
-  - [x] revisit Kerncraft: do they generate an estimate for expected 
-        performance?
-        - they don't. They require you to add theoretical values.
+  - [x] revisit Kerncraft: do they generate an estimate for expected
+        performance? - they don't. They require you to add theoretical values.
 - [ ] Learn about LU NPB
 - [ ] Look at what groups are available for different intel architectures
 - [ ] Do you think unit testing should be part of the plan to pass this off?
@@ -107,11 +168,11 @@ Hardware Visualization
 
 - The way I measure port usage is definitely wrong
   - summed to about 0.5 in the 2 cases I checked
-- Port usage was low because I was forgetting to re-initialize the counters to
-  0 between (thread, region) pairs. See 
-  `src/fhv_perfmon.cpp:calculate_saturation()`
+  - FIXED: Port usage was low because I was forgetting to re-initialize the
+    counters to 0 between (thread, region) pairs. See
+    `src/fhv_perfmon.cpp:calculate_saturation()`
 - Some findings about kerncraft:
-  - you have to input number of flops per cycle and other performance metrics 
+  - you have to input number of flops per cycle and other performance metrics
     like that
   - I used [this machine file](https://github.com/RRZE-HPC/kerncraft/blob/master/examples/machine-files/SkylakeSP_Gold-5122.yml)
     as a starting place and began to adapt it to my machine
@@ -122,6 +183,18 @@ Hardware Visualization
 - At what point should I start documenting everything? Should I begin to add
   documentation to a couple functions every week? Or wait til we're closer to
   the end of my time?
+  - documentation of tool itself, usage
+  - explain how performance counters work, what's challenging about them
+    - Hardware: we only have n performance counters
+    - Software: if you want to measure bandwidth, you don't have ajust a
+      "bandwidth" counter, this has to be interpreted
+      - because we sample, it's possible there are artifacts from that. For
+        example, if you only measure flops when flops are heavily used and
+        then only measure bw when bw is loaded, your program will appear more
+        saturated than it actually is.
+- documentation:
+  - for high-level things, text files are fine
+  - for tool-level things, comment on functions. Consider doxygen?
 
 # New Year! 2021-01-20 through 2021-01-02-17
 
