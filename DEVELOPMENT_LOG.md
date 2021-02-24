@@ -88,7 +88,42 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# New Year! 2021-01-20 through 2021-01-
+# 2021-02-17 through 2021-02-24
+
+## Goals
+
+- [x] Further investigate why port usage seems low
+- [x] if we can't accurately predict theoretical benchmarks, is an experiential
+      benchmark adequate?
+  - [x] revisit Kerncraft: do they generate an estimate for expected 
+        performance?
+        - they don't. They require you to add theoretical values.
+- [ ] Learn about LU NPB
+- [ ] Look at what groups are available for different intel architectures
+- [ ] Do you think unit testing should be part of the plan to pass this off?
+  - [ ] Honestly, I'm not even sure we know what results to expect yet
+
+## Accomplishments
+
+- The way I measure port usage is definitely wrong
+  - summed to about 0.5 in the 2 cases I checked
+- Port usage was low because I was forgetting to re-initialize the counters to
+  0 between (thread, region) pairs. See 
+  `src/fhv_perfmon.cpp:calculate_saturation()`
+- Some findings about kerncraft:
+  - you have to input number of flops per cycle and other performance metrics 
+    like that
+  - I used [this machine file](https://github.com/RRZE-HPC/kerncraft/blob/master/examples/machine-files/SkylakeSP_Gold-5122.yml)
+    as a starting place and began to adapt it to my machine
+
+## Questions
+
+- Can we set a time map together
+- At what point should I start documenting everything? Should I begin to add
+  documentation to a couple functions every week? Or wait til we're closer to
+  the end of my time?
+
+# New Year! 2021-01-20 through 2021-01-02-17
 
 ## Goals
 
@@ -133,11 +168,9 @@ Hardware Visualization
 - Codebase feels really messy, in general things feel unstable.
   - First time I tried to run the flops benchmark and meter it, got "WARN:
     Skipping region region*flops_sp-0 for evaluation." Which seems to just *keep
-    coming back*. I thought we had this all worked out after I spent a month
+    coming back\*. I thought we had this all worked out after I spent a month
     working with Tom to figure out stability issues.
   - Any recommendations?
-
-## Accomplishments
 
 # 2020-12-09 through 2020-12-16
 
