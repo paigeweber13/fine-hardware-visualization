@@ -29,6 +29,16 @@ const unsigned NUMA_DOMAINS [1][4] = {{0, 1, 2, 3}};
 
 // ---- Benchmark ---- //
 // -- computation --
+
+// Theoretical maxima
+/* 
+ * SP Flops - 76 GFlop/s per core, 304 GFlop/s total
+ *
+ * DP Flops - 38 GFlop/s per core, 152 GFlop/s total
+ *
+ * Is the discrepancy from how intel tends to scale frequency based on 
+ * instruction 
+ */
 const float EXPERIENTIAL_SP_RATE_MFLOPS = 183598.031250; // ~184 GFlop/s
 const float EXPERIENTIAL_DP_RATE_MFLOPS = 91583.672;     // ~92  GFlop/s
 
