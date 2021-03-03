@@ -135,7 +135,7 @@ Hardware Visualization
 
 - hopefully a graph problem
 - consider 'page rank' or
-  ['sdkd'](https://webpages.uncc.edu/~esaule/public-website/papers/icpp17-SPHTD.pdf)
+  ['space-time kernel density (stkd)'](https://webpages.uncc.edu/~esaule/public-website/papers/icpp17-SPHTD.pdf)
 
 ## By June 30 - Deploy v1.0.0
 
@@ -144,11 +144,29 @@ Hardware Visualization
 
 # 2021-02-24 through 2021-03-03
 
+## Accomplishments
+
+- Skimmed your paper on kernel density
+- downloaded stream code and began to read it
+  - stream benchmark gives fastest bw values for very small sizes, this is to be expected right? Because it will all fit in L1?
+- looked at what likwid groups are available
+- fiddled with kerncraft
+
+## Questions
+
+- What's a focused goal or two I can have for this week? Felt pretty purposeless this last week, like I was just filling time
+
 ## Goals
 
 - documentation is on back burner
 - demonstrating soundness, repeatibility: goal is to finish within 4-6 weeks
 - after that, testing tool on new programs
+
+For this week:
+
+- [ ] better BW benchmark
+- [ ] choose next application benchmark: LU? N-body?
+- [ ] look at what likwid groups are available for other architectures
 
 # 2021-02-17 through 2021-02-24
 
