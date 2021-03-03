@@ -142,6 +142,43 @@ Hardware Visualization
 - name the tool: "Global Picture"? "fhv"?
 - "global picture" is what Dr. Saule called it on the NSF grant
 
+# 2021-03-03 through 2021-03-03
+
+## Accomplishments
+
+## Questions
+
+- spend some time talking about difference in architecture: Dr. Saule was curious about this
+
+## Goals
+
+- [ ] decide what microbenchmarks we're gonna use
+- [ ] confirm results with FHV/global picture tool
+- [ ] double-confirm with a second microbenchmark suite?
+- [ ] Confirm still ahve access to chameleon cloud
+
+### Some more detail on those goals:
+
+- look at what benchmark we're gonna do
+  - BW - STREAM
+  - Latencies
+    - TLB
+  - basic vector flops - FMA and such, with single/double precision
+  - integer arithmetic
+- Confirm
+  - make sure they run the way we expect (use another tool, not FHV)
+  - then confirm results with FHV
+- STREAM
+  - scale - copy with a fixed integer multiply
+  - copy is copy
+  - (NO READ BW)
+  - add is vector add
+  - Triad: FMA
+- Look at likwid benchmarks
+- Experiment, then come to Dr. Saule with results
+  - have a report for next week
+- Low priority: compare with second microbenchmark suite?
+
 # 2021-02-24 through 2021-03-03
 
 ## Accomplishments
@@ -155,6 +192,7 @@ Hardware Visualization
 ## Questions
 
 - What's a focused goal or two I can have for this week? Felt pretty purposeless this last week, like I was just filling time
+- would it be useful to create a graph with stream
 
 ## Goals
 
