@@ -142,13 +142,83 @@ Hardware Visualization
 - name the tool: "Global Picture"? "fhv"?
 - "global picture" is what Dr. Saule called it on the NSF grant
 
-# 2021-03-03 through 2021-03-03
+# 2021-03-10 through 2021-03-17
+
+## Goals
+
+- [ ] Investigate stream/alternatives
+  - [ ] is stream vectorizing?
+  - [ ] is stream using good OMP schedule?
+  - [ ] What about LIKWID benchmarks?
+- [ ] look at flops_sp and flops_dp benchmarks, are they adequate?
+- [ ] Measure a microbenchmark for BW using FHV, compare results with
+      benchmark's results
+- [ ] generate `svg`s before and after each drop in band width when we move
+      from L1 to L2 and such
+- [ ] for whatever benchmark we use, consider generating x/y chart of parameter
+      size and bandwidth
+- [ ] ensure I still have access to chameleon cloud
+
+### If time permits:
+
+- investigate a latency benchmark
+- Consider how latency is affected by TLB:
+  - if you access [TLB SIZE] of contiguous memory while measuring latency,
+    you'll get a good low value
+  - but if you artificially scatter teh same size's worth of data across
+    memory, you'll get a much higher latecny value because of walking the TLB
+- investigate an integer arithmetic benchmark
+- double-confirm computer bandwidth as given by benchmark by using another
+  benchmark program
 
 ## Accomplishments
 
+### Investigated STREAM
+
+- STREAM issues a warning when trying to measure sizes that will fit in L1
+  cache:
+  ```
+  Your clock granularity/precision appears to be 1 microseconds.
+  Each test below will take on the order of 3 microseconds.
+     (= 3 clock ticks)
+  Increase the size of the arrays if this shows that
+  you are not getting at least 20 clock ticks per test.
+  ```
+
 ## Questions
 
-- spend some time talking about difference in architecture: Dr. Saule was curious about this
+- been struggling, only reason I got anything done this week is I had a flash
+  of energy on Tuesday and worked all day
+- spend some time talking about difference in architecture: Dr. Saule was
+  curious about this
+
+## Notes from meeting
+
+# 2021-03-03 through 2021-03-10
+
+## Notes from meeting
+
+- STREAM benchmark
+  - need to play to get compiler to vectorize
+  - need to play with omp scheduling
+  - you _CAN_ use it for cache sizes
+- getting a benchmark to determine saturation
+  - anything reasonable is probably good, as long as we're not like off by 50% we should be good
+  - I could spend months just trying to drill down into why I'm not getting the data I expect
+
+## Accomplishments
+
+- investigated STREAM
+  - some PRs on a github mirror
+  - doesn't seem to be suitable for measuring cache bandwidth?
+    - the `stream.c` file insists on making the amount of memory allocated at
+      least 4x the size of the largest cache.
+    - I want to compare this to the likwid microbenchmarks
+
+## Questions
+
+- spend some time talking about difference in architecture: Dr. Saule was
+  curious about this
 
 ## Goals
 
@@ -164,6 +234,7 @@ Hardware Visualization
   - Latencies
     - TLB
   - basic vector flops - FMA and such, with single/double precision
+    - can probably use hand-written. Consider likwid benchmarks
   - integer arithmetic
 - Confirm
   - make sure they run the way we expect (use another tool, not FHV)
