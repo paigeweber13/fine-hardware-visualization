@@ -12,21 +12,21 @@ BW_TESTS=("Read/write bandwidth" "Read bandwidth" "Write bandwidth")
 BW_LIKWID_TEST_NAME=(copy_avx load_avx store_avx)
 
 # must correspond to size of arrays below
-BW_NUM_LEVELS=3
+BW_NUM_LEVELS=4
 
 # sizes should comfortably fit inside the cache/memory they are meant for
 # (typically, this means they should be half the size of that system)
-BW_LIKWID_GROUP=( L2          L3         MEM     FLOPS_DP   FLOPS_SP)
-       BW_SIZES=( 100kB       2MB        2GB     10kB       10kB    )
+BW_LIKWID_GROUP=( L1           L2           L3         MEM   )
+       BW_SIZES=( 10kB         100kB        2MB        512MB )
 
        # 20 minutes or more each
-#      BW_ITERS=( 2500000000  100000000  1000    3000000000 3000000000) 
-                                                                       
-       # about 15 seconds each                                         
-       BW_ITERS=( 25000000    1000000    100     40000000   40000000) 
-                                                                       
-       # less than 3 seconds each                                      
-#      BW_ITERS=( 2000000     100000     5       10000000   10000000) 
+#      BW_ITERS=( 25000000000  2500000000   100000000  2000  )
+ 
+       # about 15 seconds each
+       BW_ITERS=( 400000000    20000000     500000     250   )
+ 
+       # less than 3 seconds each
+#      BW_ITERS=( 20000000     2000000      500000     50    )
 
 ## flops
 FLOPS_NUM_TESTS=2
@@ -59,10 +59,17 @@ run_likwid_bench_test () {
   
     SECONDS=0
   
-    $LIKWID_PATH/bin/likwid-perfctr -C S0:0-$(( $NUM_CORES - 1 )) \
-        -g $3 -m -M 1 $LIKWID_PATH/bin/likwid-bench \
-        -t $2 -i $5 -w S0:$4:$NUM_CORES \
-      | grep -B 1 -A 20 -E "Metric.*Sum"
+    # Measurement with likwid
+
+    # for compatibility, this is not enabled by default. No architecture
+    # currently has an L1 group, and many architectures do not have a MEM group
+    #$LIKWID_PATH/bin/likwid-perfctr -C S0:0-$(( $NUM_CORES - 1 )) \
+    #    -g $3 -m -M 1 $LIKWID_PATH/bin/likwid-bench \
+    #    -t $2 -i $5 -w S0:$4:$NUM_CORES \
+    #    | grep -B 1 -A 20 -E "Metric.*Sum" # comment this last line if you don't want to exclude benchmark info
+  
+    # Measurement with likwid-bench internal tracking
+    $LIKWID_PATH/bin/likwid-bench -t $2 -i $5 -w S0:$4:$NUM_CORES
   
     # time
     echo "$(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"\
@@ -70,11 +77,6 @@ run_likwid_bench_test () {
 }
 
 #### Bandwidth
-
-# WARNING: currently likwid-perfctr is reporting unreasonably high values
-# (around 1.8e19) for the bandwidth benchmark for RAM. These results should
-# be discarded.
-
 for test_num in $(seq 0 $(($BW_NUM_TESTS - 1)) ); do
   for level in $(seq 0 $(($BW_NUM_LEVELS-1)) ); do
     run_likwid_bench_test "${BW_TESTS[$test_num]}" \
