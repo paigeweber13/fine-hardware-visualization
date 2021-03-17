@@ -142,6 +142,15 @@ Hardware Visualization
 - name the tool: "Global Picture"? "fhv"?
 - "global picture" is what Dr. Saule called it on the NSF grant
 
+# 2021-03-17 through 2021-03-24
+
+## Goals
+- [ ] meter likwid benchmarks with our tool
+
+## Accomplishments
+
+## Questions
+
 # 2021-03-10 through 2021-03-17
 
 ## Goals
