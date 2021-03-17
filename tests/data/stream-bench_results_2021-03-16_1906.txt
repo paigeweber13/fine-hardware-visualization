@@ -1,0 +1,85 @@
+Running with short output, pass '-v' as first parameter to enable higher verbosity.
+==========================================================
+  Compiling and running stream benchmark with the
+  following parameters:
+    num iter:            250000
+    array size (items):  2000
+    array size (bytes): ~15625
+==========================================================
+compiling with command "gcc -O2 -fopenmp -DNTIMES=250000     -DSTREAM_ARRAY_SIZE=2000 stream.c     -o stream_c.2000"
+running with command "./stream_c.2000"
+Runtime: 0:02.13
+-------------------------------------------------------------
+Function    Best Rate MB/s  Avg time     Min time     Max time
+Copy:           33554.4     0.000002     0.000001     0.008100
+Scale:          33554.4     0.000002     0.000001     0.003412
+Add:            50331.6     0.000002     0.000001     0.008892
+Triad:          25165.8     0.000002     0.000002     0.001030
+-------------------------------------------------------------
+Solution Validates: avg error less than 1.000000e-13 on all three arrays
+-------------------------------------------------------------
+
+
+==========================================================
+  Compiling and running stream benchmark with the
+  following parameters:
+    num iter:            250000
+    array size (items):  10000
+    array size (bytes): ~78125
+==========================================================
+compiling with command "gcc -O2 -fopenmp -DNTIMES=250000     -DSTREAM_ARRAY_SIZE=10000 stream.c     -o stream_c.10000"
+running with command "./stream_c.10000"
+Runtime: 0:04.70
+-------------------------------------------------------------
+Function    Best Rate MB/s  Avg time     Min time     Max time
+Copy:           55924.1     0.000004     0.000003     0.005389
+Scale:          55924.1     0.000004     0.000003     0.015714
+Add:            83886.1     0.000004     0.000003     0.001315
+Triad:          40265.3     0.000007     0.000006     0.001419
+-------------------------------------------------------------
+Solution Validates: avg error less than 1.000000e-13 on all three arrays
+-------------------------------------------------------------
+
+
+==========================================================
+  Compiling and running stream benchmark with the
+  following parameters:
+    num iter:            22000
+    array size (items):  200000
+    array size (bytes): ~1562500
+==========================================================
+compiling with command "gcc -O2 -fopenmp -DNTIMES=22000     -DSTREAM_ARRAY_SIZE=200000 stream.c     -o stream_c.200000"
+running with command "./stream_c.200000"
+Runtime: 0:13.78
+-------------------------------------------------------------
+Function    Best Rate MB/s  Avg time     Min time     Max time
+Copy:           31068.9     0.000115     0.000103     0.001309
+Scale:          27335.6     0.000130     0.000117     0.002128
+Add:            26351.6     0.000205     0.000182     0.002477
+Triad:          30596.7     0.000175     0.000157     0.021701
+-------------------------------------------------------------
+Solution Validates: avg error less than 1.000000e-13 on all three arrays
+-------------------------------------------------------------
+
+
+==========================================================
+  Compiling and running stream benchmark with the
+  following parameters:
+    num iter:            300
+    array size (items):  10000000
+    array size (bytes): ~78125000
+==========================================================
+compiling with command "gcc -O2 -fopenmp -DNTIMES=300     -DSTREAM_ARRAY_SIZE=10000000 stream.c     -o stream_c.10000000"
+running with command "./stream_c.10000000"
+Runtime: 0:14.30
+-------------------------------------------------------------
+Function    Best Rate MB/s  Avg time     Min time     Max time
+Copy:           16003.1     0.010075     0.009998     0.012545
+Scale:          15918.8     0.010122     0.010051     0.012626
+Add:            17851.9     0.013531     0.013444     0.016075
+Triad:          17837.3     0.013562     0.013455     0.016088
+-------------------------------------------------------------
+Solution Validates: avg error less than 1.000000e-13 on all three arrays
+-------------------------------------------------------------
+
+
