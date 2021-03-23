@@ -19,6 +19,7 @@ perfmon_lib: _perfmon_lib
 
 # this rule copies built things to FHV_PERFMON_PREFIX specified in config.mk
 install: _install
+uninstall: _uninstall
 
 # these rules make and run tests
 tests: _tests
@@ -70,11 +71,12 @@ OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp $(SRC_DIR)/types.cpp \
 	$(SRC_DIR)/utils.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-HEADERS_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.hpp $(SRC_DIR)/architecture.hpp \
-	$(SRC_DIR)/likwid_defines.hpp $(SRC_DIR)/performance_monitor_defines.hpp \
-	$(SRC_DIR)/types.hpp $(SRC_DIR)/utils.hpp
+HEADERS_SHARED_LIB_SHORT=fhv_perfmon.hpp architecture.hpp likwid_defines.hpp \
+	performance_monitor_defines.hpp types.hpp utils.hpp
+HEADERS_SHARED_LIB=$(addprefix $(SRC_DIR)/, $(HEADERS_SHARED_LIB_SHORT))
 
-NLOHMANN_JSON_HEADER=$(SRC_DIR)/nlohmann/json.hpp
+NLOHMANN_JSON_HEADER_SHORT=nlohmann/json.hpp
+NLOHMANN_JSON_HEADER=$(SRC_DIR)/$(NLOHMANN_JSON_HEADER_SHORT)
 
 ASM=$(SOURCES:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s) \
 	$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(ASM_DIR)/%.s)
@@ -144,11 +146,17 @@ RUN_CMD_PREFIX_DEV=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(BUILD_DIR)/lib:$$LD_LI
 
 _build: $(EXEC) $(PERFMON_LIB)
 
-_install: $(EXEC) $(PERFMON_LIB) $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)
+_install: $(EXEC) $(PERFMON_LIB) $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX) perfgroups
 	@cp $(EXEC) $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME)
 	@cp $(PERFMON_LIB) $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME)
 	@cp $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)/include/
 	@cp $(NLOHMANN_JSON_HEADER) $(FHV_PERFMON_PREFIX)/include/nlohmann/
+
+_uninstall:
+	@rm -f $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME)
+	@rm -f $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME)
+	@rm -f $(addprefix $(FHV_PERFMON_PREFIX)/include/, $(HEADERS_SHARED_LIB_SHORT))
+	@rm -f $(FHV_PERFMON_PREFIX)/include/$(NLOHMANN_JSON_HEADER_SHORT)
 
 _build-examples: 
 	@cd examples/polynomial_expansion; make;
@@ -180,6 +188,9 @@ _debug:
 	@echo "objs (shared lib):    $(OBJS_SHARED_LIB)";
 	@echo "exec:                 $(EXEC)";
 	@echo "asm:                  $(ASM)"; 
+	@echo "compile command:      $(compile-command)"; 
+	@echo "ldflags:              $(LDFLAGS)"; 
+	@echo "ld flags, shared lib: $(LDFLAGS_SHARED_LIB)"; 
 _debug: LDFLAGS += -Q --help=target
 # debug: clean build
 
@@ -289,11 +300,6 @@ sudo cp $(wildcard $@/*) $(SYSTEM_PERFGROUPS_DIR)$@/
 endef
 
 $(PERFGROUPS_DIRS):
-	@echo sudo permission needed to copy to system directory. This will override
-	@echo previously-copied groups but not groups shipped with likwid. The full
-	@echo command to be issued is printed below:
-	@echo
-	@echo "$(copy-perfgroups-command)"
 	@$(copy-perfgroups-command)
 
 ### Test rules
@@ -301,15 +307,23 @@ define test-ld-command
 	$(CXX) $^ $(LDFLAGS) -o $@
 endef
 
-_tests: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual \
-	$(TEST_EXEC_DIR)/thread_migration $(TEST_EXEC_DIR)/likwid_minimal \
-	$(TEST_EXEC_DIR)/fhv_minimal
+_tests: $(PERFMON_LIB)
+	@cd examples/minimal
+	@make all
 
-_tests-run: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual-run \
-	$(TEST_EXEC_DIR)/thread_migration-run $(TEST_EXEC_DIR)/likwid_minimal-run \
-	$(TEST_EXEC_DIR)/likwid_minimal-run-with-cli \
-	$(TEST_EXEC_DIR)/likwid_minimal-run-port-counter \
-	$(TEST_EXEC_DIR)/fhv_minimal-run
+_tests-run: _tests
+	@cd examples/minimal
+	@make run
+
+# _tests: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual \
+# 	$(TEST_EXEC_DIR)/thread_migration $(TEST_EXEC_DIR)/likwid_minimal \
+# 	$(TEST_EXEC_DIR)/fhv_minimal
+
+# _tests-run: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual-run \
+# 	$(TEST_EXEC_DIR)/thread_migration-run $(TEST_EXEC_DIR)/likwid_minimal-run \
+# 	$(TEST_EXEC_DIR)/likwid_minimal-run-with-cli \
+# 	$(TEST_EXEC_DIR)/likwid_minimal-run-port-counter \
+# 	$(TEST_EXEC_DIR)/fhv_minimal-run
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp | $(TEST_OBJ_DIR)
 	$(compile-command)

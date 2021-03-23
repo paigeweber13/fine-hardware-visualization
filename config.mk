@@ -9,14 +9,16 @@ CXX=g++
 # because manual installs allow for newer versions of likwid, which allow
 # likwid to be used without sudo permission
 
-LIKWID_PREFIX=/usr/local/likwid-master
-# LIKWID_PREFIX=/usr/local/likwid-v4.3.4
-# LIKWID_PREFIX=/usr/local
+LIKWID_PREFIX=/usr/local
+#LIKWID_PREFIX=/usr/local/likwid-master
+#LIKWID_PREFIX=/usr/local/likwid-v4.3.4
 
 # this is where "make install" will install the fhv_perfmon library and
 # the "fhv" executable. Examples will use this directory to load the
 # performance monitor
-FHV_PERFMON_PREFIX=/usr/local/fhv
+
+FHV_PERFMON_PREFIX=/usr/local
+#FHV_PERFMON_PREFIX=/usr/local/fhv
 
 #### Directories
 BUILD_DIR=./build
