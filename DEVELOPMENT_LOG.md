@@ -9,6 +9,7 @@ Hardware Visualization
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
   - [Goals](#goals)
   - [Accomplishments](#accomplishments)
+  - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
   - [Questions](#questions)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
@@ -220,6 +221,13 @@ Hardware Visualization
 - spent about 3 hours with likwid-bench trying to see if we could just insert
   fhv measuring. I don't think it's feasible, instead I'll write a separate
   framework to wrap the assembly.
+- the reason you were getting lower flops than expected last week is because
+  `peakflops_avx` does NOT use fma. You have to run `peakflops_avx_fma` for
+  that.
+
+## Notable changes from this week:
+- `./examples/minimal/`
+- `./tests/microbenchmarks/`
 
 ## Discoveries about likwid-benchmark
 
