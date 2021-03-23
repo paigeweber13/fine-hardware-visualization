@@ -207,6 +207,13 @@ Hardware Visualization
 ## Goals
 
 - [ ] meter likwid benchmarks with our tool
+  - [ ] add likwid as a submodule to `./tests/microbenchmarks/likwid`
+  - [ ] create own makefile that will rely on likwid's makefile to produce
+        assembly
+  - [ ] write own code that will meter assembly, both manually (simple
+        runtime, then calculate flops) and with fhv
+- [ ] fix likwid_minimal with cli
+- [ ] figure out what likwid_api_minimal is for?
 
 ## Accomplishments
 
