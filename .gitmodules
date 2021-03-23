@@ -1,0 +1,3 @@
+[submodule "tests/microbenchmarks/likwid"]
+	path = tests/microbenchmarks/likwid
+	url = https://github.com/RRZE-HPC/likwid.git
