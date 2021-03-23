@@ -148,6 +148,43 @@ Hardware Visualization
 - [ ] meter likwid benchmarks with our tool
 
 ## Accomplishments
+- spent about 3 hours with likwid-bench trying to see if we could just insert
+  fhv measuring. I don't think it's feasible, instead I'll write a separate
+  framework to wrap the assembly.
+
+## Discoveries about likwid-benchmark
+- unless otherwise specified, all paths assume the likwid repository as root
+- make generates `./bench/GCC/testcases.h`, which has the names of the test
+  cases and the kernels used in the switch statment found in
+  `./bench/src/bench.c`
+- each architecture has its own folder within `./bench`. These contain
+  hand-written `.ptt` files which define the benchmarks.
+- Assembly is generated from these `.ptt` files, ~~but I believe it's only for
+  inspection. I don't believed they somehow linked it into C code.~~ (I later
+  discovered that the assembly is converted into object files with `as`, the
+  GNU assembler. This is aboslutely bonkers.)
+- The makefile at `./bench/makefile` has rules which create `.pas` files from
+  `.ptt`, and then `.o` files from the `.pas` files. These rules are at line
+  123 and 128 at the time of writing.
+  - The `.pas` files are generated with a perl script located at
+    `./perl/generatePas.pl`
+  - `.pas` is the extension for pascal files, but the content does not seem to
+    be in the pascal language? I'm not sure, I have only looked at a couple of
+    samples of pascal before.
+  - This is definitely not pascal. The file `./perl/AsmGen.pl` begins with a
+    comment that describes itself as "Parser for internal high level assembly
+    syntax". Therefore, `.pas` is almost certainly an internal assembly syntax
+  - To convert the `.pas` files into object files, the makefile first uses the
+    perl script `./perl/AsmGen.pl` to generate assembly.
+  - Then, the program `as` (the GNU assembler) is used to produce object files
+    from this assembly code.
+- `./bench/src/bench.c` defines and uses the macro `MEASURE()`. Whatever
+  they're measuring is probably what we want to measure.
+- `./bench/src/bench.c` contains a function `runTest()` which actually runs the
+  test. This is run on multiple threads. Notice that it uses `likwid_pinThread`
+  to pin threads and then outputs information about the thread it's running on.
+- this function, `runTest()` is run by `./bench/src/threads.c:threads_create`,
+  which uses `pthread_create` to run it
 
 ## Questions
 
