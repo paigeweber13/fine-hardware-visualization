@@ -21,10 +21,6 @@ perfmon_lib: _perfmon_lib
 install: _install
 uninstall: _uninstall
 
-# these rules make and run tests
-tests: _tests
-tests-run: _tests-run
-
 # these rules make examples
 build-examples: _build-examples
 
@@ -56,7 +52,6 @@ devexports: _devexports
 
 #### Directories 
 SRC_DIR=src
-TEST_DIR=tests
 
 #### exec
 EXEC=$(EXEC_DIR)/$(EXEC_NAME)
@@ -250,12 +245,6 @@ endef
 $(ASM_DIR)/%.s: $(SRC_DIR)/%.cpp 
 	$(asm-command)
 
-$(ASM_DIR)/%.s: $(TEST_DIR)/%.cpp
-	$(asm-command)
-
-$(ASM_DIR)/%.s: $(TEST_DIR)/%.c
-	$(asm-command)
-
 ### rules to create directories
 define mkdir-command
 mkdir -p $@
@@ -267,13 +256,7 @@ $(BUILT_LIB_DIR):
 $(EXEC_DIR):
 	$(mkdir-command)
 
-$(TEST_EXEC_DIR):
-	$(mkdir-command)
-
 $(OBJ_DIR):
-	$(mkdir-command)
-
-$(TEST_OBJ_DIR):
 	$(mkdir-command)
 
 $(ASM_DIR):
@@ -301,68 +284,3 @@ endef
 
 $(PERFGROUPS_DIRS):
 	@$(copy-perfgroups-command)
-
-### Test rules
-define test-ld-command
-	$(CXX) $^ $(LDFLAGS) -o $@
-endef
-
-_tests: $(PERFMON_LIB)
-	@cd examples/minimal
-	@make all
-
-_tests-run: _tests
-	@cd examples/minimal
-	@make run
-
-# _tests: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual \
-# 	$(TEST_EXEC_DIR)/thread_migration $(TEST_EXEC_DIR)/likwid_minimal \
-# 	$(TEST_EXEC_DIR)/fhv_minimal
-
-# _tests-run: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual-run \
-# 	$(TEST_EXEC_DIR)/thread_migration-run $(TEST_EXEC_DIR)/likwid_minimal-run \
-# 	$(TEST_EXEC_DIR)/likwid_minimal-run-with-cli \
-# 	$(TEST_EXEC_DIR)/likwid_minimal-run-port-counter \
-# 	$(TEST_EXEC_DIR)/fhv_minimal-run
-
-$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp | $(TEST_OBJ_DIR)
-	$(compile-command)
-
-$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.c | $(TEST_OBJ_DIR)
-	$(compile-command)
-
-$(TEST_EXEC_DIR)/benchmark-likwid-vs-manual: $(TEST_OBJ_DIR)/benchmark-likwid-vs-manual.o | $(TEST_EXEC_DIR)
-	$(test-ld-command)
-
-$(TEST_EXEC_DIR)/benchmark-likwid-vs-manual-run: $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual
-	$(RUN_CMD_PREFIX) $(TEST_EXEC_DIR)/benchmark-likwid-vs-manual
-
-$(TEST_EXEC_DIR)/thread_migration: $(TEST_OBJ_DIR)/thread_migration.o | $(TEST_EXEC_DIR)
-	$(test-ld-command)
-
-$(TEST_EXEC_DIR)/thread_migration-run: $(PERFMON_LIB) $(TEST_EXEC_DIR)
-	$(RUN_CMD_PREFIX) $(TEST_EXEC_DIR)/thread_migration 0; \
-	# $(TEST_EXEC_DIR)/thread_migration 1; \
-	$(TEST_EXEC_DIR)/thread_migration 2;
-
-$(TEST_EXEC_DIR)/likwid_minimal: $(TEST_DIR)/likwid_minimal.c | $(TEST_EXEC_DIR)
-	gcc tests/likwid_minimal.c -I$(LIKWID_PREFIX)/include -L$(LIKWID_PREFIX)/lib -march=native -mtune=native -fopenmp -llikwid -o $@
-
-$(TEST_EXEC_DIR)/likwid_minimal-run: $(TEST_EXEC_DIR)/likwid_minimal
-	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib $(TEST_EXEC_DIR)/likwid_minimal
-
-$(TEST_EXEC_DIR)/likwid_minimal-run-with-cli: $(TEST_EXEC_DIR)/likwid_minimal
-	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
-	# commented out 
-	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g MEM -g L2 -g L3 -g FLOPS_SP -g FLOPS_DP -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -M 1 -m $(TEST_EXEC_DIR)/likwid_minimal
-
-$(TEST_EXEC_DIR)/likwid_minimal-run-port-counter: $(TEST_EXEC_DIR)/likwid_minimal
-	# if this rule is to be used, the setenv stuff in likwid_minimal.c should be
-	# commented out 
-	LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib $(LIKWID_PREFIX)/bin/likwid-perfctr -C S0:0-3 -g PORT_USAGE1 -g PORT_USAGE2 -g PORT_USAGE3 -g PORT_USAGE_TEST -M 1 -m $(TEST_EXEC_DIR)/likwid_minimal
-
-$(TEST_EXEC_DIR)/fhv_minimal: $(TEST_OBJ_DIR)/fhv_minimal.o | $(TEST_EXEC_DIR)
-	$(test-ld-command)
-
-$(TEST_EXEC_DIR)/fhv_minimal-run: $(PERFMON_LIB) $(TEST_EXEC_DIR)/fhv_minimal 
-	$(RUN_CMD_PREFIX) $(TEST_EXEC_DIR)/fhv_minimal
