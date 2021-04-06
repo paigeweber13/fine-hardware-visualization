@@ -1,8 +1,10 @@
 // third-party imports
-#include <iostream>
+// #include <stdio.h>
+// #include <stdlib.h>
 
 // first-party imports
 #include <fhv_perfmon.hpp>
+// #include <testcases.h>
 
 /* 
  * struct for test case data. Described in likwid/bench/includes/test_types.h.
@@ -49,8 +51,25 @@
  *
  */
 
-int main(int argc, char** argv) {
-  std::cout << "Hello, World!" << std::endl;
+typedef unsigned long long ull;
 
-  return 0;
+#define EXECUTE(func) func;
+
+extern "C" void peakflops_avx_fma(ull, double*);
+
+int main(int argc, char** argv) {
+
+  // c
+
+  // const ull n = 1024;
+  // double *array = (double*)malloc(n * sizeof(double));
+  // peakflops_avx_fma(n, array);
+  // free(array);
+
+  // c++
+
+  const ull n = 8192;
+  double *array = new double[n];
+  peakflops_avx_fma(n, array);
+  delete[] array;
 }
