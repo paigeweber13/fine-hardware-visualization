@@ -9,95 +9,99 @@ Hardware Visualization
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
   - [Goals](#goals)
   - [Accomplishments](#accomplishments)
+  - [Notes from meeting](#notes-from-meeting)
   - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
   - [Questions](#questions)
+- [2021-03-24 through 2021-04-07](#2021-03-24-through-2021-04-07)
+  - [Accomplishments](#accomplishments-1)
+  - [Questions](#questions-1)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
   - [Goals](#goals-1)
     - [If time permits:](#if-time-permits)
-  - [Accomplishments](#accomplishments-1)
-    - [Investigated STREAM](#investigated-stream)
-  - [Questions](#questions-1)
-  - [Notes from meeting](#notes-from-meeting)
-- [2021-03-03 through 2021-03-10](#2021-03-03-through-2021-03-10)
-  - [Notes from meeting](#notes-from-meeting-1)
   - [Accomplishments](#accomplishments-2)
+    - [Investigated STREAM](#investigated-stream)
   - [Questions](#questions-2)
+  - [Notes from meeting](#notes-from-meeting-1)
+- [2021-03-03 through 2021-03-10](#2021-03-03-through-2021-03-10)
+  - [Notes from meeting](#notes-from-meeting-2)
+  - [Accomplishments](#accomplishments-3)
+  - [Questions](#questions-3)
   - [Goals](#goals-2)
     - [Some more detail on those goals:](#some-more-detail-on-those-goals)
 - [2021-02-24 through 2021-03-03](#2021-02-24-through-2021-03-03)
-  - [Accomplishments](#accomplishments-3)
-  - [Questions](#questions-3)
+  - [Accomplishments](#accomplishments-4)
+  - [Questions](#questions-4)
   - [Goals](#goals-3)
 - [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
   - [Goals](#goals-4)
-  - [Accomplishments](#accomplishments-4)
-  - [Questions](#questions-4)
-- [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
-  - [Goals](#goals-5)
   - [Accomplishments](#accomplishments-5)
   - [Questions](#questions-5)
+- [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
+  - [Goals](#goals-5)
+  - [Accomplishments](#accomplishments-6)
+  - [Questions](#questions-6)
 - [2020-12-09 through 2020-12-16](#2020-12-09-through-2020-12-16)
   - [Goals](#goals-6)
-  - [Questions](#questions-6)
+  - [Questions](#questions-7)
 - [2020-12-02 through 2020-12-09](#2020-12-02-through-2020-12-09)
   - [Goals](#goals-7)
-  - [Accomplishments](#accomplishments-6)
-  - [Questions](#questions-7)
-- [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
-  - [Goals](#goals-8)
   - [Accomplishments](#accomplishments-7)
   - [Questions](#questions-8)
+- [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
+  - [Goals](#goals-8)
+  - [Accomplishments](#accomplishments-8)
+  - [Questions](#questions-9)
 - [2020-11-04 through 2020-11-11](#2020-11-04-through-2020-11-11)
   - [Goals for this week](#goals-for-this-week)
 - [2020-10-28 through 2020-11-04](#2020-10-28-through-2020-11-04)
-  - [Accomplishments](#accomplishments-8)
-  - [Questions](#questions-9)
-- [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
   - [Accomplishments](#accomplishments-9)
-  - [Goals for this week](#goals-for-this-week-1)
   - [Questions](#questions-10)
-- [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
+- [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
   - [Accomplishments](#accomplishments-10)
+  - [Goals for this week](#goals-for-this-week-1)
   - [Questions](#questions-11)
-- [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
+- [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
   - [Accomplishments](#accomplishments-11)
   - [Questions](#questions-12)
-- [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
+- [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
   - [Accomplishments](#accomplishments-12)
-- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
   - [Questions](#questions-13)
+- [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
   - [Accomplishments](#accomplishments-13)
-- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
   - [Questions](#questions-14)
   - [Accomplishments](#accomplishments-14)
+- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+  - [Questions](#questions-15)
+  - [Accomplishments](#accomplishments-15)
     - [Intel TMA method](#intel-tma-method)
     - [Intel vTune](#intel-vtune)
     - [General](#general)
   - [Next steps](#next-steps)
 - [Biggest questions, main points](#biggest-questions-main-points)
 - [2020-07-28 through 2020-08-11](#2020-07-28-through-2020-08-11)
-  - [Questions](#questions-15)
-  - [Accomplishments](#accomplishments-15)
-- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions-16)
   - [Accomplishments](#accomplishments-16)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
+  - [Questions](#questions-17)
   - [Accomplishments](#accomplishments-17)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Accomplishments](#accomplishments-18)
   - [Next steps](#next-steps-1)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
-  - [Questions](#questions-17)
-  - [Accomplishments](#accomplishments-18)
-- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-18)
   - [Accomplishments](#accomplishments-19)
-- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-19)
   - [Accomplishments](#accomplishments-20)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-20)
   - [Accomplishments](#accomplishments-21)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-21)
+  - [Accomplishments](#accomplishments-22)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -208,9 +212,10 @@ Hardware Visualization
 ## Goals
 
 - [ ] meter likwid benchmarks with our tool
-  - [ ] add likwid as a submodule to `./tests/microbenchmarks/likwid`
-  - [ ] create own makefile that will rely on likwid's makefile to produce
+  - [x] add likwid as a submodule to `./tests/microbenchmarks/likwid`
+  - [x] create own makefile that will rely on likwid's makefile to produce
         assembly
+  - [ ] run likwid benchmarks from own code
   - [ ] write own code that will meter assembly, both manually (simple
         runtime, then calculate flops) and with fhv
 - [ ] fix likwid_minimal with cli
@@ -224,8 +229,24 @@ Hardware Visualization
 - the reason you were getting lower flops than expected last week is because
   `peakflops_avx` does NOT use fma. You have to run `peakflops_avx_fma` for
   that.
+- cleaned out old tests
+
+## Notes from meeting
+- Ok to use OpenMP?
+  - yes
+  - use a barrier
+  - time from the barrier to the outside of the section
+- STREAMs in switch statements are parameters
+  - have multiple because you will not always have exactly one input and one
+    output
+  - STREAM_2 is for a fucntion with 2 parameters
+  - testcase.h has all the test definitions using the `TestCase` struct
+- daxpy: double vector add (as + y)
+- if you initialize a struct with `{}` any parameters you leave off get
+  initialized to zero
 
 ## Notable changes from this week:
+
 - `./examples/minimal/`
 - `./tests/microbenchmarks/`
 
@@ -245,15 +266,15 @@ Hardware Visualization
   `.ptt`, and then `.o` files from the `.pas` files. These rules are at line
   123 and 128 at the time of writing.
   - The `.pas` files are generated with a perl script located at
-    `./perl/generatePas.pl`
+    `./bench/perl/generatePas.pl`
   - `.pas` is the extension for pascal files, but the content does not seem to
     be in the pascal language? I'm not sure, I have only looked at a couple of
     samples of pascal before.
-  - This is definitely not pascal. The file `./perl/AsmGen.pl` begins with a
-    comment that describes itself as "Parser for internal high level assembly
-    syntax". Therefore, `.pas` is almost certainly an internal assembly syntax
+  - This is definitely not pascal. The file `./bench/perl/AsmGen.pl` begins
+    with a comment that describes itself as "Parser for internal high level
+    assembly syntax". The grammar for this syntax is described in the variable `$main::grammar` found in the file `./bench/perl/AsmGen.pl`
   - To convert the `.pas` files into object files, the makefile first uses the
-    perl script `./perl/AsmGen.pl` to generate assembly.
+    perl script `./bench/perl/AsmGen.pl` to generate assembly.
   - Then, the program `as` (the GNU assembler) is used to produce object files
     from this assembly code.
 - `./bench/src/bench.c` defines and uses the macro `MEASURE()`. Whatever
@@ -265,6 +286,17 @@ Hardware Visualization
   which uses `pthread_create` to run it
 
 ## Questions
+
+# 2021-03-24 through 2021-04-07
+
+## Accomplishments
+- called assembly code from C++!
+  - needed `extern "C" void <funcname>()`, why was "C" necessary?
+  - with size above ~10,000 doubles, I get a segfault. Why?
+- manually timed peakflops_sp_avx_fma
+
+## Questions
+- why the limit on array size?
 
 # 2021-03-10 through 2021-03-17
 
