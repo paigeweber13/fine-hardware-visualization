@@ -11,10 +11,8 @@ FHV_PREFIX=/usr/local
 ### for building this example
 CXX_FLAGS=-I$(FHV_PREFIX)/include -I$(LIKWID_SRC_ROOT)/GCC \
 	-I$(LIKWID_SRC_ROOT)/includes -std=c++14 -fopenmp -Wall -g 
-# CXX_FLAGS=-I$(FHV_PREFIX)/include -I$(LIKWID_SRC_ROOT)/GCC \
-# 	-I$(LIKWID_SRC_ROOT)/includes -fopenmp -Wall -g 
 CXX_COMMAND=$(CXX) $(CXX_FLAGS) -c $< -o $@
-LD_FLAGS=-L$(FHV_PREFIX)/lib -lfhv_perfmon
+LD_FLAGS=-L$(FHV_PREFIX)/lib -lfhv_perfmon -fopenmp
 
 OBJS=$(SRCS:%.cpp=$(BUILD_DIR)/%.o)
 EXEC=$(BUILD_DIR)/microbenchmarks
