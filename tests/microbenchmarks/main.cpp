@@ -139,34 +139,45 @@ void peakflops_fhv(ull num_i, ull n, float* array) {
 }
 
 int main(int argc, char** argv) {
-  // if (argc < 3) {
-  //   std::cout << "Usage: " << argv[0] << " measurement_type array_n num_iter" 
-  //     << std::endl;
-  //   std::cout << "       " << "measurement_type must be one of 'none', "
-  //     << "'manual', manual_parallel', 'fhv', or 'fhv_parallel'."
-  //     << std::endl;
-  //   return 0;
-  // }
+  // measurement types
+  const std::string MT_NONE = "none";
+  const std::string MT_MANUAL = "manual";
+  const std::string MT_MANUAL_PARALLEL = "manual_parallel";
+  const std::string MT_FHV = "fhv";
+  const std::string MT_FHV_PARALLEL = "fhv_parallel";
 
-  const ull max_n = 1000000001;
-  ull num_i;
-  float *array = (float*)aligned_alloc(64, max_n * sizeof(float));
+  if (argc < 3) {
+    std::cout << "Usage: " << argv[0] << " measurement_type array_n num_iter" 
+      << std::endl;
+    std::cout << "       " << "measurement_type must be one of 'none', "
+      << "'manual', manual_parallel', 'fhv', or 'fhv_parallel'."
+      << std::endl;
+    return 0;
+  }
 
-  num_i = 100000000;
-  for (ull n = 100; n < max_n; n *= 10) {
+  std::string measurement_type = argv[1];
+  ull n = std::stoull(argv[2], NULL);
+  ull num_i = std::stoull(argv[3], NULL);
+
+  float *array = (float*)aligned_alloc(64, n * sizeof(float));
+
+  if (measurement_type == MT_NONE) {
+    for (ull i = 0; i < num_i; i++) {
+      peakflops_sp_avx_fma(n, array);
+    }
+  }
+  else if (measurement_type == MT_MANUAL) {
     peakflops_manual(num_i, n, array);
-    num_i /= 10;
   }
-
-  num_i = 100000000;
-  for (ull n = 100; n < max_n; n *= 10) {
+  else if (measurement_type == MT_MANUAL_PARALLEL) {
     peakflops_manual_parallel(num_i, n, array);
-    num_i /= 10;
   }
-
-  num_i = 100000000;
-  ull n = 100;
-  peakflops_fhv(num_i, n, array);
+  else if (measurement_type == MT_FHV) {
+    peakflops_fhv(num_i, n, array);
+  }
+  else if (measurement_type == MT_FHV_PARALLEL) {
+    // peakflops_fhv_parallel(num_i, n, array);
+  }
 
   free(array);
 }
