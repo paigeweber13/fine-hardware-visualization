@@ -202,16 +202,8 @@ int main(int argc, char *argv[])
   // std::uint64_t num_memory_iter = 0;
   // std::uint64_t memory_size_kb = 0;
 
-  std::string perfmon_output_filename;
-
-  char time_str[20];
-  std::time_t t = std::time(nullptr);
-  std::strftime(time_str, sizeof(time_str), "%Y-%m-%d_%H%M", 
-    std::localtime(&t));
-  std::string image_output_filename = "perfmon_visualization_";
-  image_output_filename += time_str;
-  image_output_filename += ".svg";
-
+  std::vector<std::string> perfmon_output_filenames;
+  std::string image_output_filename;
   output_format o = output_format::pretty;
 
   // behavior with arguments
@@ -262,16 +254,19 @@ int main(int argc, char *argv[])
     ("print-perfmon-csv-header", "print header of csv that perfmon uses "
       "internally. This corresponds with fhv_perfmon::printCsvOutput "
       "and provides details about saturation of CPU/memory and port usage.")
-    ("visualize,v", po::value<std::string>(&perfmon_output_filename), "create "
-                    "a visualization from data output to json during program " 
-                    "instrumentation. Argument should be relative path to "
-                    "aforementioned json.")
+    ("visualize,v", 
+      po::value<std::vector<std::string>>(&perfmon_output_filenames)->
+        multitoken(), 
+        "create a visualization from data output to json during program "
+        "instrumentation. Argument should be relative path to aforementioned "
+        "json. More than one file may be supplied, in which case "
+        "visualizations will be created for each. If more than one file is "
+        "specified, the '--visualization-output' flag will be ignored.")
     ("visualization-output,o", 
       po::value<std::string>(&image_output_filename), 
       "Path where visualization should be output to. Region name will "
-      "automatically be appended. If not supplied, a default name with "
-      "current date and time will be generated. Has no effect if --visualize"
-      "is not supplied.")
+      "automatically be appended. If not supplied, the input filename will "
+      "be used to generate a default filename.")
     ("color-scale,c",
       po::value<std::string>(&color_scale),
       "Specify the color scale to be used in the visualization. Must be one of "
@@ -323,6 +318,7 @@ int main(int argc, char *argv[])
   // setenv("LIKWID_FILEPATH", filepath, 1); 
   // setenv("LIKWID_THREADS", "0,1,2,3", 1);
   // setenv("LIKWID_FORCE", "1", 1);
+
 
   // benchmark things
   if (vm.count("csv-style-output"))
@@ -519,9 +515,26 @@ int main(int argc, char *argv[])
   }
   if (vm.count("visualize"))
   {
-    visualize(perfmon_output_filename,
-      image_output_filename, 
-      color_scale);
+    // give default visualization output name if none provided
+    if (perfmon_output_filenames.size() == 0){
+      std::cout << "ERROR: no input files specified to visualize. Plese "
+        << "include at least one json output by fhv_perfmon as an argument to "
+        << "'--visualize'."
+        << std::endl;
+    }
+    else if (image_output_filename != "" && perfmon_output_filenames.size() == 1) {
+      visualize(perfmon_output_filenames[0], image_output_filename, 
+        color_scale);
+    }
+    else {
+      for (auto filename : perfmon_output_filenames) {
+        image_output_filename = filename;
+        image_output_filename.erase(image_output_filename.length() - 5);
+        image_output_filename += ".svg";
+
+        visualize(filename, image_output_filename, color_scale);
+      }
+    }
   }
 
   return 0;
