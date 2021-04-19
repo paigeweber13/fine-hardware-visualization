@@ -6,102 +6,106 @@ Hardware Visualization
   - [By May 1 (but start now) - How does the next person to work on this pick it up and move forward?](#by-may-1-but-start-now---how-does-the-next-person-to-work-on-this-pick-it-up-and-move-forward)
   - [By May 12 - use this tool to gain insight on one real application](#by-may-12---use-this-tool-to-gain-insight-on-one-real-application)
   - [By June 30 - Deploy v1.0.0](#by-june-30---deploy-v100)
+- [Notes per week](#notes-per-week)
+- [2021-04-07 through 2021-04-21](#2021-04-07-through-2021-04-21)
+  - [Accomplishments](#accomplishments)
+  - [TODO:](#todo)
+- [2021-03-24 through 2021-04-07](#2021-03-24-through-2021-04-07)
+  - [Accomplishments](#accomplishments-1)
+  - [Notes from Meeting](#notes-from-meeting)
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
   - [Goals](#goals)
-  - [Accomplishments](#accomplishments)
-  - [Notes from meeting](#notes-from-meeting)
+  - [Accomplishments](#accomplishments-2)
+  - [Notes from meeting](#notes-from-meeting-1)
   - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
   - [Questions](#questions)
-- [2021-03-24 through 2021-04-07](#2021-03-24-through-2021-04-07)
-  - [Accomplishments](#accomplishments-1)
-  - [Questions](#questions-1)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
   - [Goals](#goals-1)
     - [If time permits:](#if-time-permits)
-  - [Accomplishments](#accomplishments-2)
-    - [Investigated STREAM](#investigated-stream)
-  - [Questions](#questions-2)
-  - [Notes from meeting](#notes-from-meeting-1)
-- [2021-03-03 through 2021-03-10](#2021-03-03-through-2021-03-10)
-  - [Notes from meeting](#notes-from-meeting-2)
   - [Accomplishments](#accomplishments-3)
-  - [Questions](#questions-3)
+    - [Investigated STREAM](#investigated-stream)
+  - [Questions](#questions-1)
+  - [Notes from meeting](#notes-from-meeting-2)
+- [2021-03-03 through 2021-03-10](#2021-03-03-through-2021-03-10)
+  - [Notes from meeting](#notes-from-meeting-3)
+  - [Accomplishments](#accomplishments-4)
+  - [Questions](#questions-2)
   - [Goals](#goals-2)
     - [Some more detail on those goals:](#some-more-detail-on-those-goals)
 - [2021-02-24 through 2021-03-03](#2021-02-24-through-2021-03-03)
-  - [Accomplishments](#accomplishments-4)
-  - [Questions](#questions-4)
+  - [Accomplishments](#accomplishments-5)
+  - [Questions](#questions-3)
   - [Goals](#goals-3)
 - [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
   - [Goals](#goals-4)
-  - [Accomplishments](#accomplishments-5)
-  - [Questions](#questions-5)
+  - [Accomplishments](#accomplishments-6)
+  - [Questions](#questions-4)
 - [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
   - [Goals](#goals-5)
-  - [Accomplishments](#accomplishments-6)
-  - [Questions](#questions-6)
+  - [Accomplishments](#accomplishments-7)
+  - [Questions](#questions-5)
 - [2020-12-09 through 2020-12-16](#2020-12-09-through-2020-12-16)
   - [Goals](#goals-6)
-  - [Questions](#questions-7)
+  - [Questions](#questions-6)
 - [2020-12-02 through 2020-12-09](#2020-12-02-through-2020-12-09)
   - [Goals](#goals-7)
-  - [Accomplishments](#accomplishments-7)
-  - [Questions](#questions-8)
+  - [Accomplishments](#accomplishments-8)
+  - [Questions](#questions-7)
 - [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
   - [Goals](#goals-8)
-  - [Accomplishments](#accomplishments-8)
-  - [Questions](#questions-9)
+  - [Accomplishments](#accomplishments-9)
+  - [Questions](#questions-8)
 - [2020-11-04 through 2020-11-11](#2020-11-04-through-2020-11-11)
   - [Goals for this week](#goals-for-this-week)
 - [2020-10-28 through 2020-11-04](#2020-10-28-through-2020-11-04)
-  - [Accomplishments](#accomplishments-9)
-  - [Questions](#questions-10)
-- [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
   - [Accomplishments](#accomplishments-10)
-  - [Goals for this week](#goals-for-this-week-1)
-  - [Questions](#questions-11)
-- [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
+  - [Questions](#questions-9)
+- [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
   - [Accomplishments](#accomplishments-11)
-  - [Questions](#questions-12)
-- [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
+  - [Goals for this week](#goals-for-this-week-1)
+  - [Questions](#questions-10)
+- [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
   - [Accomplishments](#accomplishments-12)
-  - [Questions](#questions-13)
-- [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
+  - [Questions](#questions-11)
+- [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
   - [Accomplishments](#accomplishments-13)
-- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
-  - [Questions](#questions-14)
+  - [Questions](#questions-12)
+- [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
   - [Accomplishments](#accomplishments-14)
-- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
-  - [Questions](#questions-15)
+- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
+  - [Questions](#questions-13)
   - [Accomplishments](#accomplishments-15)
+- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+  - [Questions](#questions-14)
+  - [Accomplishments](#accomplishments-16)
     - [Intel TMA method](#intel-tma-method)
     - [Intel vTune](#intel-vtune)
     - [General](#general)
   - [Next steps](#next-steps)
 - [Biggest questions, main points](#biggest-questions-main-points)
 - [2020-07-28 through 2020-08-11](#2020-07-28-through-2020-08-11)
-  - [Questions](#questions-16)
-  - [Accomplishments](#accomplishments-16)
-- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
-  - [Questions](#questions-17)
+  - [Questions](#questions-15)
   - [Accomplishments](#accomplishments-17)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
+  - [Questions](#questions-16)
   - [Accomplishments](#accomplishments-18)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Accomplishments](#accomplishments-19)
   - [Next steps](#next-steps-1)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
-  - [Questions](#questions-18)
-  - [Accomplishments](#accomplishments-19)
-- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
-  - [Questions](#questions-19)
+  - [Questions](#questions-17)
   - [Accomplishments](#accomplishments-20)
-- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
-  - [Questions](#questions-20)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
+  - [Questions](#questions-18)
   - [Accomplishments](#accomplishments-21)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
-  - [Questions](#questions-21)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
+  - [Questions](#questions-19)
   - [Accomplishments](#accomplishments-22)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-20)
+  - [Accomplishments](#accomplishments-23)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -207,6 +211,42 @@ Hardware Visualization
 - name the tool: "Global Picture"? "fhv"?
 - "global picture" is what Dr. Saule called it on the NSF grant
 
+# Notes per week
+Following are my notes for each week of development.
+
+# 2021-04-07 through 2021-04-21
+## Accomplishments
+- fhv now accepts multiple files for input to visualization
+  - easy to visualize many jsons at once
+- microbenchmark "peakflops_sp_avx_fma" is measured manually and with fhv
+
+## TODO:
+- give likwid a .gitignore, create pull request
+- add parallel fhv measuring to peakflops_sp_avx_fma
+- add other microbenchmarks
+- analyze results: is our tool telling us what we expect?
+
+# 2021-03-24 through 2021-04-07
+
+## Accomplishments
+- called assembly code from C++!
+  - needed `extern "C" void <funcname>()`, why was "C" necessary?
+  - with size above ~10,000 doubles, I get a segfault. Why?
+- manually timed peakflops_sp_avx_fma
+
+## Notes from Meeting
+- why the limit on array size?
+- why "extern "C" void ..."
+  - C convention only tracks function name in table of symbols
+  - C++ also tracks types of inputs and outputs
+- use "objdump" to view symbol table
+- SEGFAULT
+  - peakflops code *may* be pushing things to stack
+  - allocation may not work? but that seems less likely. you could try it with
+    malloc though.
+  - values may need to be a multiple of something special, like 64?
+
+
 # 2021-03-17 through 2021-03-24
 
 ## Goals
@@ -286,17 +326,6 @@ Hardware Visualization
   which uses `pthread_create` to run it
 
 ## Questions
-
-# 2021-03-24 through 2021-04-07
-
-## Accomplishments
-- called assembly code from C++!
-  - needed `extern "C" void <funcname>()`, why was "C" necessary?
-  - with size above ~10,000 doubles, I get a segfault. Why?
-- manually timed peakflops_sp_avx_fma
-
-## Questions
-- why the limit on array size?
 
 # 2021-03-10 through 2021-03-17
 
