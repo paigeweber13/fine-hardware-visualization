@@ -67,6 +67,23 @@ static const TestCase kernels[NUMKERNELS] = {
     "load, optimized for AVX FMAs", 1, 0, -1, 32, 19, 18},
 };
 
+void peakflops_manual(ull num_i, ull n, float* array, bool parallel=false) {
+  auto kernel = kernels[peakflops_sp_avx_fma_kernel];
+
+  auto start = std::chrono::steady_clock::now();
+  for (ull i = 0; i < num_i; i++) {
+    peakflops_sp_avx_fma(n, array);
+  }
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> duration = end-start;
+
+  double flops = (double)num_i * (double)n * (double)kernel.flops / 
+    duration.count();
+
+  std::cout << "Size: " << n << ", Duration (s): " << duration.count()
+    << " FLOP/s: " << flops << std::endl;
+}
+
 void peakflops_manual_parallel(ull num_i, ull n, float* array) {
   auto kernel = kernels[peakflops_sp_avx_fma_kernel];
 
@@ -94,23 +111,6 @@ void peakflops_manual_parallel(ull num_i, ull n, float* array) {
     << " FLOP/s: " << flops << std::endl;
 }
 
-void peakflops_manual(ull num_i, ull n, float* array, bool parallel=false) {
-  auto kernel = kernels[peakflops_sp_avx_fma_kernel];
-
-  auto start = std::chrono::steady_clock::now();
-  for (ull i = 0; i < num_i; i++) {
-    peakflops_sp_avx_fma(n, array);
-  }
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> duration = end-start;
-
-  double flops = (double)num_i * (double)n * (double)kernel.flops / 
-    duration.count();
-
-  std::cout << "Size: " << n << ", Duration (s): " << duration.count()
-    << " FLOP/s: " << flops << std::endl;
-}
-
 void peakflops_fhv(ull num_i, ull n, float* array) {
 
   fhv_perfmon::init("", "peakflops_sp_avx_fma");
@@ -126,6 +126,36 @@ void peakflops_fhv(ull num_i, ull n, float* array) {
     fhv_perfmon::startRegion("peakflops_sp_avx_fma");
     peakflops_sp_avx_fma(n, array);
     fhv_perfmon::stopRegion("peakflops_sp_avx_fma");
+    fhv_perfmon::nextGroup();
+  }
+
+  fhv_perfmon::close();
+  fhv_perfmon::printAggregateResults();
+  const unsigned BYTES_PER_FLOAT = 4;
+  std::string paramString = "array n: " + std::to_string(n) + 
+    " array size bytes: " + std::to_string(n * BYTES_PER_FLOAT) +
+    " num iterations: " + std::to_string(num_i);
+  fhv_perfmon::resultsToJson(paramString);
+}
+
+void peakflops_fhv_parallel(ull num_i, ull n, float* array) {
+
+  fhv_perfmon::init("peakflops_sp_avx_fma");
+
+  if (num_i < 10) {
+    std::cout << "ERROR: in peakflops_fhv_parallel: num_i must be >= 10"
+      << std::endl;
+    return;
+  }
+  num_i /= 10;
+
+  for (ull i = 0; i < 10; i++) {
+    #pragma omp parallel 
+    {
+      fhv_perfmon::startRegion("peakflops_sp_avx_fma");
+      peakflops_sp_avx_fma(n, array);
+      fhv_perfmon::stopRegion("peakflops_sp_avx_fma");
+    }
     fhv_perfmon::nextGroup();
   }
 
@@ -176,9 +206,8 @@ int main(int argc, char** argv) {
     peakflops_fhv(num_i, n, array);
   }
   else if (measurement_type == MT_FHV_PARALLEL) {
-    // peakflops_fhv_parallel(num_i, n, array);
+    peakflops_fhv_parallel(num_i, n, array);
   }
 
   free(array);
 }
-

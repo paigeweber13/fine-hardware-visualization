@@ -1,8 +1,8 @@
-Size: 100, Duration (s): 1.70753 FLOP/s: 7.02772e+11
-Size: 1000, Duration (s): 1.62703 FLOP/s: 7.37542e+11
-Size: 10000, Duration (s): 1.62415 FLOP/s: 7.3885e+11
-Size: 100000, Duration (s): 1.62687 FLOP/s: 7.37614e+11
-Size: 1000000, Duration (s): 1.62413 FLOP/s: 7.38856e+11
-Size: 10000000, Duration (s): 1.63462 FLOP/s: 7.34116e+11
-Size: 100000000, Duration (s): 1.73207 FLOP/s: 6.92813e+11
-Size: 1000000000, Duration (s): 2.71871 FLOP/s: 4.41386e+11
+Size: 100, Duration (s): 1.70899 FLOP/s: 7.02169e+11
+Size: 1000, Duration (s): 1.62746 FLOP/s: 7.37347e+11
+Size: 10000, Duration (s): 1.62415 FLOP/s: 7.38849e+11
+Size: 100000, Duration (s): 1.62385 FLOP/s: 7.38982e+11
+Size: 1000000, Duration (s): 1.62462 FLOP/s: 7.38636e+11
+Size: 10000000, Duration (s): 1.63468 FLOP/s: 7.34087e+11
+Size: 100000000, Duration (s): 1.72993 FLOP/s: 6.93669e+11
+Size: 1000000000, Duration (s): 2.69527 FLOP/s: 4.45225e+11
