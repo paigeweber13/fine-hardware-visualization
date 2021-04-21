@@ -22,6 +22,9 @@ const std::string likwid_group_port3 = "PORT_USAGE3";
 const std::string sp_scalar_flops_event_name = "FP_ARITH_INST_RETIRED_SCALAR_SINGLE";
 const std::string sp_avx_128_flops_event_name = "FP_ARITH_INST_RETIRED_128B_PACKED_SINGLE";
 const std::string sp_avx_256_flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE";
+const std::string dp_scalar_flops_event_name = "FP_ARITH_INST_RETIRED_SCALAR_DOUBLE";
+const std::string dp_avx_128_flops_event_name = "FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE";
+const std::string dp_avx_256_flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE";
 
 // flop rates
 const std::string mflops_metric_name = "SP [MFLOP/s]";

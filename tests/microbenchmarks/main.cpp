@@ -39,17 +39,21 @@
 
 typedef unsigned long long ull;
 
+struct flopsResult
+{
+  ull numFlops;
+  double megaFlopsRate;
+};
+
+const std::string FHV_REGION_PEAKFLOPS = "peakflops_sp_avx_fma";
+const std::string FHV_REGION_PEAKFLOPS_PARALLEL = 
+  "peakflops_sp_avx_fma_parallel";
+
+const unsigned BYTES_PER_SP_FLOAT = 4;
+
 // Kernels we're interested in, taken from likwid/bench/GCC/testcases.h
-
-extern "C" void copy_avx();
-extern "C" void load_avx();
-extern "C" void store_avx();
-extern "C" void peakflops_avx_fma(ull, double*);
-extern "C" void peakflops_sp_avx_fma(ull, float*);
-
-#define NUMKERNELS 5
-
-#define peakflops_sp_avx_fma_kernel 4
+const size_t NUMKERNELS = 5;
+const size_t peakflops_sp_avx_fma_kernel = 4;
 
 static const TestCase kernels[NUMKERNELS] = {
   {(char*)"copy_avx" , STREAM_2, DOUBLE, 16, NULL, 0, 16, 
@@ -67,6 +71,13 @@ static const TestCase kernels[NUMKERNELS] = {
     "load, optimized for AVX FMAs", 1, 0, -1, 32, 19, 18},
 };
 
+extern "C" void copy_avx();
+extern "C" void load_avx();
+extern "C" void store_avx();
+extern "C" void peakflops_avx_fma(ull, double*);
+extern "C" void peakflops_sp_avx_fma(ull, float*);
+
+/*
 void peakflops_manual(ull num_i, ull n, float* array, bool parallel=false) {
   auto kernel = kernels[peakflops_sp_avx_fma_kernel];
 
@@ -83,8 +94,11 @@ void peakflops_manual(ull num_i, ull n, float* array, bool parallel=false) {
   std::cout << "Size: " << n << ", Duration (s): " << duration.count()
     << " FLOP/s: " << flops << std::endl;
 }
+*/
 
-void peakflops_manual_parallel(ull num_i, ull n, float* array) {
+flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
+  const double FLOPS_TO_MFLOPS = 1e-6;
+
   auto kernel = kernels[peakflops_sp_avx_fma_kernel];
 
   unsigned num_procs;
@@ -104,16 +118,16 @@ void peakflops_manual_parallel(ull num_i, ull n, float* array) {
   auto end = std::chrono::steady_clock::now();
   std::chrono::duration<double> duration = end-start;
 
-  double flops = (double)num_procs * (double)num_i * (double)n * 
-    (double)kernel.flops / duration.count();
+  ull numFlops = (ull)num_procs * num_i * n * (ull)kernel.flops;
+  double megaFlopsRate = (double)numFlops * FLOPS_TO_MFLOPS / duration.count();
 
-  std::cout << "Size: " << n << ", Duration (s): " << duration.count()
-    << " FLOP/s: " << flops << std::endl;
+  return flopsResult{numFlops, megaFlopsRate};
 }
 
+/*
 void peakflops_fhv(ull num_i, ull n, float* array) {
 
-  fhv_perfmon::init("", "peakflops_sp_avx_fma");
+  fhv_perfmon::init("", FHV_REGION_PEAKFLOPS);
 
   if (num_i < 10) {
     std::cout << "ERROR: in peakflops_fhv: num_i must be >= 10"
@@ -123,9 +137,9 @@ void peakflops_fhv(ull num_i, ull n, float* array) {
   num_i /= 10;
 
   for (ull i = 0; i < 10; i++) {
-    fhv_perfmon::startRegion("peakflops_sp_avx_fma");
+    fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS);
     peakflops_sp_avx_fma(n, array);
-    fhv_perfmon::stopRegion("peakflops_sp_avx_fma");
+    fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS);
     fhv_perfmon::nextGroup();
   }
 
@@ -137,77 +151,107 @@ void peakflops_fhv(ull num_i, ull n, float* array) {
     " num iterations: " + std::to_string(num_i);
   fhv_perfmon::resultsToJson(paramString);
 }
+*/
 
-void peakflops_fhv_parallel(ull num_i, ull n, float* array) {
+flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
+    bool output_to_json=true) {
+  const ull FLOPS_PER_AVX_OP = 8;
 
-  fhv_perfmon::init("peakflops_sp_avx_fma");
+  fhv_perfmon::init(FHV_REGION_PEAKFLOPS_PARALLEL);
 
   if (num_i < 10) {
     std::cout << "ERROR: in peakflops_fhv_parallel: num_i must be >= 10"
       << std::endl;
-    return;
+    return flopsResult{};
   }
   num_i /= 10;
 
   for (ull i = 0; i < 10; i++) {
     #pragma omp parallel 
     {
-      fhv_perfmon::startRegion("peakflops_sp_avx_fma");
+      fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS_PARALLEL.c_str());
       peakflops_sp_avx_fma(n, array);
-      fhv_perfmon::stopRegion("peakflops_sp_avx_fma");
+      fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS_PARALLEL.c_str());
     }
     fhv_perfmon::nextGroup();
   }
 
   fhv_perfmon::close();
-  fhv_perfmon::printAggregateResults();
-  const unsigned BYTES_PER_FLOAT = 4;
-  std::string paramString = "array n: " + std::to_string(n) + 
-    " array size bytes: " + std::to_string(n * BYTES_PER_FLOAT) +
-    " num iterations: " + std::to_string(num_i);
-  fhv_perfmon::resultsToJson(paramString);
+
+  if (output_to_json) {
+    std::string paramString = "array n: " + std::to_string(n) + 
+      " array size bytes: " + std::to_string(n * BYTES_PER_SP_FLOAT) +
+      " num iterations: " + std::to_string(num_i);
+    fhv_perfmon::resultsToJson(paramString);
+  }
+
+  auto results = fhv_perfmon::get_aggregate_results();
+  ull numFlops = 0;
+  double megaFlopsRate = 0;
+
+  for (const auto &result : results) {
+    if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
+      && result.aggregation_type == fhv::types::aggregation_t::sum
+      && result.result_name == sp_avx_256_flops_event_name){
+        numFlops = result.result_value * FLOPS_PER_AVX_OP;
+    }
+    else if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
+      && result.aggregation_type == fhv::types::aggregation_t::sum
+      && result.result_name == mflops_metric_name){
+        megaFlopsRate = result.result_value;
+    }
+
+    // if we've already found things, don't keep looking
+    if (numFlops != 0 && megaFlopsRate != 0) break;
+  }
+
+  return flopsResult{numFlops, megaFlopsRate};
 }
 
 int main(int argc, char** argv) {
   // measurement types
-  const std::string MT_NONE = "none";
-  const std::string MT_MANUAL = "manual";
-  const std::string MT_MANUAL_PARALLEL = "manual_parallel";
-  const std::string MT_FHV = "fhv";
-  const std::string MT_FHV_PARALLEL = "fhv_parallel";
-
   if (argc < 3) {
-    std::cout << "Usage: " << argv[0] << " measurement_type array_n num_iter" 
+    std::cout << "Usage: " << argv[0] << " array_n num_iter" 
       << std::endl;
-    std::cout << "       " << "measurement_type must be one of 'none', "
-      << "'manual', manual_parallel', 'fhv', or 'fhv_parallel'."
+    std::cout << "  program will print out a comparison between manual "
+      << "benchmark results and fhv results in CSV format. The format is "
+      << "described below:"
+      << std::endl;
+    std::cout << "  array_n,array_size_bytes,num_i,"
+      << "manual_reported_num_flops,fhv_reported_num_flops,"
+      << "manual_reported_Mflop_rate,fhv_reported_Mflop_rate,"
+      << "num_flops_percent_diff,Mflop_rate_percent_diff"
       << std::endl;
     return 0;
   }
 
-  std::string measurement_type = argv[1];
-  ull n = std::stoull(argv[2], NULL);
-  ull num_i = std::stoull(argv[3], NULL);
+  ull n = std::stoull(argv[1], NULL);
+  ull num_i = std::stoull(argv[2], NULL);
 
   float *array = (float*)aligned_alloc(64, n * sizeof(float));
 
-  if (measurement_type == MT_NONE) {
-    for (ull i = 0; i < num_i; i++) {
-      peakflops_sp_avx_fma(n, array);
-    }
-  }
-  else if (measurement_type == MT_MANUAL) {
-    peakflops_manual(num_i, n, array);
-  }
-  else if (measurement_type == MT_MANUAL_PARALLEL) {
-    peakflops_manual_parallel(num_i, n, array);
-  }
-  else if (measurement_type == MT_FHV) {
-    peakflops_fhv(num_i, n, array);
-  }
-  else if (measurement_type == MT_FHV_PARALLEL) {
-    peakflops_fhv_parallel(num_i, n, array);
-  }
+  auto resultManual = peakflops_manual_parallel(num_i, n, array);
+  auto resultFhv = peakflops_fhv_parallel(num_i, n, array);
+
+  ull diffNumFlops = resultManual.numFlops < resultFhv.numFlops 
+    ? resultFhv.numFlops - resultManual.numFlops 
+    : resultManual.numFlops - resultFhv.numFlops;
+  double diffFlopsRate = resultManual.megaFlopsRate - resultFhv.megaFlopsRate 
+    ? resultFhv.megaFlopsRate - resultManual.megaFlopsRate 
+    : resultManual.megaFlopsRate - resultFhv.megaFlopsRate;
+
+  // array_n,array_size_bytes,
+  std::cout 
+    << n << ","
+    << n * BYTES_PER_SP_FLOAT << ","
+    << num_i << ","
+    << resultManual.numFlops << ","
+    << resultFhv.numFlops << ","
+    << resultManual.megaFlopsRate << ","
+    << resultFhv.megaFlopsRate << ","
+    << (double)diffNumFlops / (double)resultManual.numFlops * 100 << ","
+    << diffFlopsRate / resultManual.megaFlopsRate * 100 << ","
+    << std::endl;
 
   free(array);
 }
