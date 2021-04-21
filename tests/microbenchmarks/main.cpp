@@ -111,9 +111,11 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
   }
 
   auto start = std::chrono::steady_clock::now();
-  #pragma omp parallel for
-  for (ull i = 0; i < num_i; i++) {
-    peakflops_sp_avx_fma(n, array);
+  #pragma omp parallel
+  {
+    for (ull i = 0; i < num_i; i++) {
+      peakflops_sp_avx_fma(n, array);
+    }
   }
   auto end = std::chrono::steady_clock::now();
   std::chrono::duration<double> duration = end-start;
@@ -124,38 +126,11 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
   return flopsResult{numFlops, megaFlopsRate};
 }
 
-/*
-void peakflops_fhv(ull num_i, ull n, float* array) {
-
-  fhv_perfmon::init("", FHV_REGION_PEAKFLOPS);
-
-  if (num_i < 10) {
-    std::cout << "ERROR: in peakflops_fhv: num_i must be >= 10"
-      << std::endl;
-    return;
-  }
-  num_i /= 10;
-
-  for (ull i = 0; i < 10; i++) {
-    fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS);
-    peakflops_sp_avx_fma(n, array);
-    fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS);
-    fhv_perfmon::nextGroup();
-  }
-
-  fhv_perfmon::close();
-  fhv_perfmon::printAggregateResults();
-  const unsigned BYTES_PER_FLOAT = 4;
-  std::string paramString = "array n: " + std::to_string(n) + 
-    " array size bytes: " + std::to_string(n * BYTES_PER_FLOAT) +
-    " num iterations: " + std::to_string(num_i);
-  fhv_perfmon::resultsToJson(paramString);
-}
-*/
-
 flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
     bool output_to_json=true) {
   const ull FLOPS_PER_AVX_OP = 8;
+  const ull FLOPS_PER_FMA_OP = 2;
+  const ull NUM_GROUPS_FOR_FHV_VISUALIZATION = 7;
 
   fhv_perfmon::init(FHV_REGION_PEAKFLOPS_PARALLEL);
 
@@ -164,13 +139,15 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
       << std::endl;
     return flopsResult{};
   }
-  num_i /= 10;
+  num_i /= NUM_GROUPS_FOR_FHV_VISUALIZATION;
 
-  for (ull i = 0; i < 10; i++) {
+  for (ull i = 0; i < NUM_GROUPS_FOR_FHV_VISUALIZATION; i++) {
     #pragma omp parallel 
     {
       fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS_PARALLEL.c_str());
-      peakflops_sp_avx_fma(n, array);
+      for (ull i = 0; i < num_i; i++) {
+        peakflops_sp_avx_fma(n, array);
+      }
       fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS_PARALLEL.c_str());
     }
     fhv_perfmon::nextGroup();
@@ -193,7 +170,10 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
     if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
       && result.result_name == sp_avx_256_flops_event_name){
-        numFlops = result.result_value * FLOPS_PER_AVX_OP;
+        // TODO: does sp_avx_256_flops_event_name count all vector op?
+        //       is there a counter for only FMA ops? Is it bad to assume
+        //       that all vector ops will be FMA ops?
+        numFlops = result.result_value * FLOPS_PER_AVX_OP * FLOPS_PER_FMA_OP;
     }
     else if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
@@ -232,6 +212,8 @@ int main(int argc, char** argv) {
 
   auto resultManual = peakflops_manual_parallel(num_i, n, array);
   auto resultFhv = peakflops_fhv_parallel(num_i, n, array);
+
+  // TODO: change percentages to numbers [0-1]
 
   ull diffNumFlops = resultManual.numFlops < resultFhv.numFlops 
     ? resultFhv.numFlops - resultManual.numFlops 
