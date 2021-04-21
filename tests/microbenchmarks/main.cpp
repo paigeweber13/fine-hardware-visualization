@@ -77,25 +77,6 @@ extern "C" void store_avx();
 extern "C" void peakflops_avx_fma(ull, double*);
 extern "C" void peakflops_sp_avx_fma(ull, float*);
 
-/*
-void peakflops_manual(ull num_i, ull n, float* array, bool parallel=false) {
-  auto kernel = kernels[peakflops_sp_avx_fma_kernel];
-
-  auto start = std::chrono::steady_clock::now();
-  for (ull i = 0; i < num_i; i++) {
-    peakflops_sp_avx_fma(n, array);
-  }
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> duration = end-start;
-
-  double flops = (double)num_i * (double)n * (double)kernel.flops / 
-    duration.count();
-
-  std::cout << "Size: " << n << ", Duration (s): " << duration.count()
-    << " FLOP/s: " << flops << std::endl;
-}
-*/
-
 flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
   const double FLOPS_TO_MFLOPS = 1e-6;
 
@@ -110,6 +91,8 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
     }
   }
 
+  // this method of timing waits until all threads join before timing is
+  // stopped. Have each thread track its own flop rate and then sum them
   auto start = std::chrono::steady_clock::now();
   #pragma omp parallel
   {
@@ -174,6 +157,8 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
         //       is there a counter for only FMA ops? Is it bad to assume
         //       that all vector ops will be FMA ops?
         numFlops = result.result_value * FLOPS_PER_AVX_OP * FLOPS_PER_FMA_OP;
+
+        // TODO: this value is too small by a factor of 4
     }
     else if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
@@ -187,6 +172,16 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
 
   return flopsResult{numFlops, megaFlopsRate};
 }
+
+
+/*
+TODO: FHV numFlops is off by a factor of 4. Is vmovaps counted as a floating 
+      point operation??
+
+some experiments:
+- convert peakflops assembly to only use "vmovaps"
+- double the number of adds and see if the error halves
+ */
 
 int main(int argc, char** argv) {
   // measurement types
