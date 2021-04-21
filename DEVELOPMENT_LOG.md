@@ -219,12 +219,15 @@ Following are my notes for each week of development.
 - fhv now accepts multiple files for input to visualization
   - easy to visualize many jsons at once
 - microbenchmark "peakflops_sp_avx_fma" is measured manually and with fhv
+- discovered that our tool does not do well with single core performance:
+  - port usage seems completely incorrect
 
 ## TODO:
-- give likwid a .gitignore, create pull request
-- add parallel fhv measuring to peakflops_sp_avx_fma
-- add other microbenchmarks
-- analyze results: is our tool telling us what we expect?
+- [ ] give likwid a .gitignore, create pull request
+- [x] add parallel fhv measuring to peakflops_sp_avx_fma
+- [ ] analyze results: is our tool telling us what we expect?
+  - [ ] figure out why fhv and manual results are so different
+- [ ] add other microbenchmarks
 
 # 2021-03-24 through 2021-04-07
 
