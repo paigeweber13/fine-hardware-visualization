@@ -215,6 +215,15 @@ Hardware Visualization
 Following are my notes for each week of development.
 
 # 2021-04-07 through 2021-04-21
+## Questions:
+- Should we re-prioritize? I see we're behind on our goals
+  - IMO microbenchmarks are most important
+  - I can start documentation?
+- Getting dramatically different results in FHV and in manual measurement
+  - some notable files:
+  - summary: https://github.com/paigeweber13/fine-hardware-visualization/blob/master/tests/microbenchmarks/comparison-results.csv
+  - more detail: https://github.com/paigeweber13/fine-hardware-visualization/blob/master/tests/microbenchmarks/data/peakflops_sp_avx_fma_fhv_parallel_1000000000_10.json
+
 ## Accomplishments
 - fhv now accepts multiple files for input to visualization
   - easy to visualize many jsons at once
