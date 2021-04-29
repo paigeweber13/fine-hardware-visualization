@@ -1,13 +1,10 @@
 // third-party imports
 #include <chrono>
 #include <iostream>
-// #include <stdlib.h>
-// #include <stdio.h>
 
 // first-party imports
 #include <fhv_perfmon.hpp>
 #include <test_types.h>
-// #include <testcases.h>
 
 /* 
  * struct for test case data. Described in likwid/bench/includes/test_types.h.
@@ -39,6 +36,12 @@
 
 typedef unsigned long long ull;
 
+extern "C" void copy_avx();
+extern "C" void load_avx();
+extern "C" void store_avx();
+extern "C" void peakflops_avx_fma(ull, double*);
+extern "C" void peakflops_sp_avx_fma(ull, float*);
+
 struct flopsResult
 {
   ull numFlops;
@@ -48,6 +51,8 @@ struct flopsResult
 const std::string FHV_REGION_PEAKFLOPS = "peakflops_sp_avx_fma";
 const std::string FHV_REGION_PEAKFLOPS_PARALLEL = 
   "peakflops_sp_avx_fma_parallel";
+
+const std::string TEST_NAME_PEAKFLOPS_DP = "peakflops_dp";
 
 const unsigned BYTES_PER_SP_FLOAT = 4;
 
@@ -70,12 +75,6 @@ static const TestCase kernels[NUMKERNELS] = {
     (char*)"Single-precision multiplications and additions with a single "
     "load, optimized for AVX FMAs", 1, 0, -1, 32, 19, 18},
 };
-
-extern "C" void copy_avx();
-extern "C" void load_avx();
-extern "C" void store_avx();
-extern "C" void peakflops_avx_fma(ull, double*);
-extern "C" void peakflops_sp_avx_fma(ull, float*);
 
 flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
   const double FLOPS_TO_MFLOPS = 1e-6;
@@ -193,19 +192,23 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
 }
 
 
-int main(int argc, char** argv) {
+int peakflops_dp_test(int argc, char** argv) {
   // measurement types
-  if (argc < 3) {
-    std::cout << "Usage: " << argv[0] << " array_n num_iter" 
+  if (argc < 4) {
+    std::cout << "Usage: " << argv[0] << " " << TEST_NAME_PEAKFLOPS_DP 
+      << " [array_n] [num_iter]" 
+      << std::endl
       << std::endl;
-    std::cout << "  program will print out a comparison between manual "
-      << "benchmark results and fhv results in CSV format. The format is "
-      << "described below:"
+    std::cout << "program will output detailed information for each test to "
+      << "the 'data/' directory. Program will also print out a comparison "
+      << "between manual benchmark results and fhv results in CSV format. "
+      << "The format is described below:"
       << std::endl;
     std::cout << "  array_n,array_size_bytes,num_i,"
       << "manual_reported_num_flops,fhv_reported_num_flops,"
       << "manual_reported_Mflop_rate,fhv_reported_Mflop_rate,"
       << "num_flops_diff_factor,Mflop_rate_diff_factor"
+      << std::endl
       << std::endl;
     return 0;
   }
@@ -216,7 +219,7 @@ int main(int argc, char** argv) {
   if (num_i < 1000) {
     std::cout << "WARNING: num_i should be above 1000 to mininmize error "
       << "between fhv and manual reporting. Fhv reporting must run a "
-      << "multiple of seven times, so if num_i is small the error from "
+      << "multiple of seven times, so if num_i is small, the error from "
       << "integer division will be high."
       << std::endl;
   }
@@ -247,4 +250,29 @@ int main(int argc, char** argv) {
     << std::endl;
 
   free(array);
+
+  return 0;
+}
+
+void deleteElement(char** arr, size_t n, size_t element_i) {
+  for (size_t i = element_i; i < n - 1; i++) {
+    arr[i] = arr[i+1];
+  }
+}
+
+int main(int argc, char** argv) {
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " [test_type] [args...]" 
+      << "where 'test_type' is one of "
+      << TEST_NAME_PEAKFLOPS_DP
+      << " and args are the arguments used by the test. Run this command "
+      << " without specifying 'args' for more specific help."
+      << std::endl;
+    return 1;
+  }
+
+  if (argv[1] == TEST_NAME_PEAKFLOPS_DP) {
+    deleteElement(argv, argc, 1);
+    return peakflops_dp_test(argc, argv);
+  }
 }

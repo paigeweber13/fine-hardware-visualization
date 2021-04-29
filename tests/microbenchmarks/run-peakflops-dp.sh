@@ -23,7 +23,7 @@ while [ $n -lt $max_n ]; do
   fi
 
   export FHV_OUTPUT="data/peakflops_sp_avx_fma_$(echo $n)_$(echo $num_i).json"
-  ./bin/microbenchmarks $n $num_i
+  ./bin/microbenchmarks peakflops_dp $n $num_i
 
   ((n *= 10))
   ((num_i /= 10))
