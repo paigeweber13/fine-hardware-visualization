@@ -3,6 +3,7 @@
 #include <iostream>
 
 // first-party imports
+#include <likwid_defines.hpp>
 #include <fhv_perfmon.hpp>
 #include <test_types.h>
 
@@ -48,17 +49,21 @@ struct flopsResult
   double megaFlopsRate;
 };
 
-const std::string FHV_REGION_PEAKFLOPS = "peakflops_sp_avx_fma";
-const std::string FHV_REGION_PEAKFLOPS_PARALLEL = 
+const std::string FHV_REGION_PEAKFLOPS_SP_PARALLEL = 
   "peakflops_sp_avx_fma_parallel";
+const std::string FHV_REGION_PEAKFLOPS_DP_PARALLEL = 
+  "peakflops_dp_avx_fma_parallel";
 
+const std::string TEST_NAME_PEAKFLOPS_SP = "peakflops_sp";
 const std::string TEST_NAME_PEAKFLOPS_DP = "peakflops_dp";
 
 const unsigned BYTES_PER_SP_FLOAT = 4;
+const unsigned BYTES_PER_DP_FLOAT = 8;
 
 // Kernels we're interested in, taken from likwid/bench/GCC/testcases.h
 const size_t NUMKERNELS = 5;
 const size_t peakflops_sp_avx_fma_kernel = 4;
+const size_t peakflops_dp_avx_fma_kernel = 3;
 
 static const TestCase kernels[NUMKERNELS] = {
   {(char*)"copy_avx" , STREAM_2, DOUBLE, 16, NULL, 0, 16, 
@@ -76,7 +81,9 @@ static const TestCase kernels[NUMKERNELS] = {
     "load, optimized for AVX FMAs", 1, 0, -1, 32, 19, 18},
 };
 
-flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
+
+// ------------ PEAKFLOPS SINGLE-PRECISION ------------ //
+flopsResult peakflops_sp_manual_parallel(ull num_i, ull n, float* array) {
   const double FLOPS_TO_MFLOPS = 1e-6;
 
   auto kernel = kernels[peakflops_sp_avx_fma_kernel];
@@ -124,7 +131,7 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
   return flopsResult{numFlops, megaFlopsRate};
 }
 
-flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
+flopsResult peakflops_sp_fhv_parallel(ull num_i, ull n, float* array,
     bool output_to_json=true) {
   const ull FLOPS_PER_AVX_OP = 8;
 
@@ -135,10 +142,10 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
   // "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3"
   const ull NUM_GROUPS_FOR_FHV_VISUALIZATION = 7;
 
-  fhv_perfmon::init(FHV_REGION_PEAKFLOPS_PARALLEL);
+  fhv_perfmon::init(FHV_REGION_PEAKFLOPS_SP_PARALLEL);
 
   if (num_i < NUM_GROUPS_FOR_FHV_VISUALIZATION) {
-    std::cout << "ERROR: in peakflops_fhv_parallel: num_i must be >= "
+    std::cout << "ERROR: in peakflops_sp_fhv_parallel: num_i must be >= "
       << NUM_GROUPS_FOR_FHV_VISUALIZATION
       << std::endl;
     return flopsResult{};
@@ -148,11 +155,11 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
   for (ull i = 0; i < NUM_GROUPS_FOR_FHV_VISUALIZATION; i++) {
     #pragma omp parallel 
     {
-      fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS_PARALLEL.c_str());
+      fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS_SP_PARALLEL.c_str());
       for (ull i = 0; i < num_i; i++) {
         peakflops_sp_avx_fma(n, array);
       }
-      fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS_PARALLEL.c_str());
+      fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS_SP_PARALLEL.c_str());
     }
     fhv_perfmon::nextGroup();
   }
@@ -172,15 +179,15 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
   double megaFlopsRate = 0;
 
   for (const auto &result : results) {
-    if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
+    if (result.region_name == FHV_REGION_PEAKFLOPS_SP_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
       && result.result_name == sp_avx_256_flops_event_name){
         numFlops = result.result_value * NUM_GROUPS_FOR_FHV_VISUALIZATION * FLOPS_PER_AVX_OP;
 
     }
-    else if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
+    else if (result.region_name == FHV_REGION_PEAKFLOPS_SP_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
-      && result.result_name == mflops_metric_name){
+      && result.result_name == mflops_sp_metric_name){
         megaFlopsRate = result.result_value;
     }
 
@@ -191,6 +198,184 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
   return flopsResult{numFlops, megaFlopsRate};
 }
 
+int peakflops_sp_test(int argc, char** argv) {
+  // measurement types
+  if (argc < 4) {
+    std::cout << "Usage: " << argv[0] << " " << TEST_NAME_PEAKFLOPS_SP 
+      << " [array_n] [num_iter]" 
+      << std::endl
+      << std::endl;
+    std::cout << "program will output detailed information for each test to "
+      << "the 'data/' directory. Program will also print out a comparison "
+      << "between manual benchmark results and fhv results in CSV format. "
+      << "The format is described below:"
+      << std::endl;
+    std::cout << "  array_n,array_size_bytes,num_i,"
+      << "manual_reported_num_flops,fhv_reported_num_flops,"
+      << "manual_reported_Mflop_rate,fhv_reported_Mflop_rate,"
+      << "num_flops_diff_factor,Mflop_rate_diff_factor"
+      << std::endl
+      << std::endl;
+    return 0;
+  }
+
+  ull n = std::stoull(argv[1], NULL);
+  ull num_i = std::stoull(argv[2], NULL);
+
+  if (num_i < 1000) {
+    std::cout << "WARNING: num_i should be above 1000 to mininmize error "
+      << "between fhv and manual reporting. Fhv reporting must run a "
+      << "multiple of seven times, so if num_i is small, the error from "
+      << "integer division will be high."
+      << std::endl;
+  }
+
+  float *array = (float*)aligned_alloc(64, n * sizeof(float));
+
+  auto resultManual = peakflops_sp_manual_parallel(num_i, n, array);
+  auto resultFhv = peakflops_sp_fhv_parallel(num_i, n, array);
+
+  ull diffNumFlops = resultManual.numFlops < resultFhv.numFlops 
+    ? resultFhv.numFlops - resultManual.numFlops 
+    : resultManual.numFlops - resultFhv.numFlops;
+  double diffFlopsRate = resultManual.megaFlopsRate - resultFhv.megaFlopsRate 
+    ? resultFhv.megaFlopsRate - resultManual.megaFlopsRate 
+    : resultManual.megaFlopsRate - resultFhv.megaFlopsRate;
+
+  // array_n,array_size_bytes,
+  std::cout 
+    << n << ","
+    << n * BYTES_PER_SP_FLOAT << ","
+    << num_i << ","
+    << resultManual.numFlops << ","
+    << resultFhv.numFlops << ","
+    << resultManual.megaFlopsRate << ","
+    << resultFhv.megaFlopsRate << ","
+    << (double)diffNumFlops / (double)resultManual.numFlops << ","
+    << diffFlopsRate / resultManual.megaFlopsRate << ","
+    << std::endl;
+
+  free(array);
+
+  return 0;
+}
+
+
+// ------------ PEAKFLOPS DOUBLE-PRECISION ------------ //
+flopsResult peakflops_dp_manual_parallel(ull num_i, ull n, double* array) {
+  const double FLOPS_TO_MFLOPS = 1e-6;
+
+  auto kernel = kernels[peakflops_dp_avx_fma_kernel];
+
+  unsigned num_procs = 1;
+  #pragma omp parallel
+  {
+    #pragma omp single
+    {
+      num_procs = omp_get_num_threads();
+    }
+  }
+
+  ull * numFlopsPerThread = new ull[num_procs];
+  double * megaFlopsRatePerThread = new double[num_procs];
+
+  // this method of timing waits until all threads join before timing is
+  // stopped. Have each thread track its own flop rate and then sum them
+  #pragma omp parallel
+  {
+    auto start = std::chrono::steady_clock::now();
+    for (ull i = 0; i < num_i; i++) {
+      peakflops_avx_fma(n, array);
+    }
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> duration = end-start;
+
+    auto me = omp_get_thread_num();
+    numFlopsPerThread[me] = num_i * n * (ull)kernel.flops;
+    megaFlopsRatePerThread[me] = (double)numFlopsPerThread[me] * 
+      FLOPS_TO_MFLOPS / duration.count();
+  }
+
+  ull numFlops = 0;
+  double megaFlopsRate = 0;
+
+  for (unsigned i = 0; i < num_procs; i++){
+    numFlops += numFlopsPerThread[i];
+    megaFlopsRate += megaFlopsRatePerThread[i];
+  }
+
+  delete[] numFlopsPerThread;
+  delete[] megaFlopsRatePerThread;
+
+  return flopsResult{numFlops, megaFlopsRate};
+}
+
+flopsResult peakflops_dp_fhv_parallel(ull num_i, ull n, double* array,
+    bool output_to_json=true) {
+  const ull FLOPS_PER_AVX_OP = 4;
+
+  // unused: remove
+  // const ull FLOPS_PER_FMA_OP = 2;
+
+  // groups measured by default (all are necessary to create visualization):
+  // "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3"
+  const ull NUM_GROUPS_FOR_FHV_VISUALIZATION = 7;
+
+  fhv_perfmon::init(FHV_REGION_PEAKFLOPS_DP_PARALLEL);
+
+  if (num_i < NUM_GROUPS_FOR_FHV_VISUALIZATION) {
+    std::cout << "ERROR: in peakflops_fhv_parallel: num_i must be >= "
+      << NUM_GROUPS_FOR_FHV_VISUALIZATION
+      << std::endl;
+    return flopsResult{};
+  }
+  num_i /= NUM_GROUPS_FOR_FHV_VISUALIZATION;
+
+  for (ull i = 0; i < NUM_GROUPS_FOR_FHV_VISUALIZATION; i++) {
+    #pragma omp parallel 
+    {
+      fhv_perfmon::startRegion(FHV_REGION_PEAKFLOPS_DP_PARALLEL.c_str());
+      for (ull i = 0; i < num_i; i++) {
+        peakflops_avx_fma(n, array);
+      }
+      fhv_perfmon::stopRegion(FHV_REGION_PEAKFLOPS_DP_PARALLEL.c_str());
+    }
+    fhv_perfmon::nextGroup();
+  }
+
+  fhv_perfmon::close();
+  // fhv_perfmon::printAggregateResults();
+
+  if (output_to_json) {
+    std::string paramString = "array n: " + std::to_string(n) + 
+      " array size bytes: " + std::to_string(n * BYTES_PER_DP_FLOAT) +
+      " num iterations: " + std::to_string(num_i);
+    fhv_perfmon::resultsToJson(paramString);
+  }
+
+  auto results = fhv_perfmon::get_aggregate_results();
+  ull numFlops = 0;
+  double megaFlopsRate = 0;
+
+  for (const auto &result : results) {
+    if (result.region_name == FHV_REGION_PEAKFLOPS_DP_PARALLEL
+      && result.aggregation_type == fhv::types::aggregation_t::sum
+      && result.result_name == dp_avx_256_flops_event_name){
+        numFlops = result.result_value * NUM_GROUPS_FOR_FHV_VISUALIZATION * FLOPS_PER_AVX_OP;
+
+    }
+    else if (result.region_name == FHV_REGION_PEAKFLOPS_DP_PARALLEL
+      && result.aggregation_type == fhv::types::aggregation_t::sum
+      && result.result_name == mflops_dp_metric_name){
+        megaFlopsRate = result.result_value;
+    }
+
+    // if we've already found things, don't keep looking
+    if (numFlops != 0 && megaFlopsRate != 0) break;
+  }
+
+  return flopsResult{numFlops, megaFlopsRate};
+}
 
 int peakflops_dp_test(int argc, char** argv) {
   // measurement types
@@ -224,10 +409,10 @@ int peakflops_dp_test(int argc, char** argv) {
       << std::endl;
   }
 
-  float *array = (float*)aligned_alloc(64, n * sizeof(float));
+  double *array = (double*)aligned_alloc(64, n * sizeof(double));
 
-  auto resultManual = peakflops_manual_parallel(num_i, n, array);
-  auto resultFhv = peakflops_fhv_parallel(num_i, n, array);
+  auto resultManual = peakflops_dp_manual_parallel(num_i, n, array);
+  auto resultFhv = peakflops_dp_fhv_parallel(num_i, n, array);
 
   ull diffNumFlops = resultManual.numFlops < resultFhv.numFlops 
     ? resultFhv.numFlops - resultManual.numFlops 
@@ -239,7 +424,7 @@ int peakflops_dp_test(int argc, char** argv) {
   // array_n,array_size_bytes,
   std::cout 
     << n << ","
-    << n * BYTES_PER_SP_FLOAT << ","
+    << n * BYTES_PER_DP_FLOAT << ","
     << num_i << ","
     << resultManual.numFlops << ","
     << resultFhv.numFlops << ","
@@ -254,24 +439,31 @@ int peakflops_dp_test(int argc, char** argv) {
   return 0;
 }
 
+
 void deleteElement(char** arr, size_t n, size_t element_i) {
   for (size_t i = element_i; i < n - 1; i++) {
     arr[i] = arr[i+1];
   }
 }
 
+
 int main(int argc, char** argv) {
   if (argc < 2) {
     std::cout << "Usage: " << argv[0] << " [test_type] [args...]" 
       << "where 'test_type' is one of "
       << TEST_NAME_PEAKFLOPS_DP
+      << TEST_NAME_PEAKFLOPS_SP
       << " and args are the arguments used by the test. Run this command "
       << " without specifying 'args' for more specific help."
       << std::endl;
     return 1;
   }
 
-  if (argv[1] == TEST_NAME_PEAKFLOPS_DP) {
+  if (argv[1] == TEST_NAME_PEAKFLOPS_SP) {
+    deleteElement(argv, argc, 1);
+    return peakflops_sp_test(argc, argv);
+  }
+  else if (argv[1] == TEST_NAME_PEAKFLOPS_DP) {
     deleteElement(argv, argc, 1);
     return peakflops_dp_test(argc, argv);
   }
