@@ -35,16 +35,17 @@ $(BUILD_DIR):
 
 ### for compiling likwid's microbenchmarks
 LIKWID_SRC_ROOT=./likwid/bench
-LIKWID_BENCHMARK_ROOT=$(LIKWID_SRC_ROOT)/GCC
+LIKWID_BENCHMARK_ROOT=GCC
+BENCHMARK_ROOT=$(LIKWID_SRC_ROOT)/$(LIKWID_BENCHMARK_ROOT)
 BENCHMARKS=peakflops_avx_fma peakflops_sp_avx_fma copy_avx load_avx store_avx
-BENCHMARK_OBJS=$(addsuffix .o,$(addprefix $(LIKWID_BENCHMARK_ROOT)/, $(BENCHMARKS)))
-BENCHMARK_COMPILE_COMMAND=cd $(LIKWID_SRC_ROOT) && make $@
+LIKWID_BENCHMARK_OBJS=$(addsuffix .o,$(addprefix $(LIKWID_BENCHMARK_ROOT)/, $(BENCHMARKS)))
+BENCHMARK_OBJS=$(addsuffix .o,$(addprefix $(BENCHMARK_ROOT)/, $(BENCHMARKS)))
 
 # this rule will also create GCC/testcases.h
 benchmarks: $(BENCHMARK_OBJS)
 
-$(LIKWID_BENCHMARK_ROOT)/peakflops_avx_fma.o:
-	$(BENCHMARK_COMPILE_COMMAND)
+$(BENCHMARK_OBJS):
+	cd $(LIKWID_SRC_ROOT) && make $(LIKWID_BENCHMARK_OBJS)
 
 
 clean:
