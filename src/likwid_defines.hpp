@@ -28,6 +28,7 @@ const std::string dp_avx_256_flops_event_name = "FP_ARITH_INST_RETIRED_256B_PACK
 
 // flop rates
 const std::string mflops_metric_name = "SP [MFLOP/s]";
+const std::string mflops_sp_metric_name = mflops_metric_name;
 const std::string mflops_dp_metric_name = "DP [MFLOP/s]";
 
 // port usage

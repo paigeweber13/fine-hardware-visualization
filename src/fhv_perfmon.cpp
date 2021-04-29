@@ -19,7 +19,7 @@ fhv_perfmon::registerRegions(
 {
   if (regions == "")
   {
-    std::cout << "WARNING: No regions supplied! Doing nothing." << std::endl;
+    std::cerr << "WARNING: No regions supplied! Doing nothing." << std::endl;
     return;
   }
 
@@ -155,13 +155,13 @@ void fhv_perfmon::validate_and_store_likwid_result(
   bool keep_result = true;
 
   if(isnan(result_value)){
-    std::cout << "ERROR: likwid returned a NAN result value, which MAY "
+    std::cerr << "ERROR: likwid returned a NAN result value, which MAY "
       << "indicate that something went wrong." << std::endl;
 
     keep_result = false;
   }
   else if(result_value < 0){
-    std::cout << "ERROR: likwid returned a negative result value, indicating "
+    std::cerr << "ERROR: likwid returned a negative result value, indicating "
       << "that something went wrong." << std::endl;
 
     keep_result = false;
@@ -171,17 +171,17 @@ void fhv_perfmon::validate_and_store_likwid_result(
     if(result_type == fhv::types::result_t::event &&
       result_value >= EVENT_VALUE_ERROR_THRESHOLD)
     {
-      std::cout << "WARNING: unreasonably high event value detected:"
+      std::cerr << "WARNING: unreasonably high event value detected."
         << std::endl;
 
-      std::cout << std::endl
+      std::cerr
         << "This event will be discarded. We will try to detect all "
         << "metrics associated with this event, but do not guarantee to "
-        << "catch all of them." << std::endl
+        << "catch all of them."
         << std::endl
         << "To disable detection and removal of 'unreasonably' high "
         << "values, set the environment variable '" 
-        << perfmon_keep_large_values_envvar << "'." << std::endl
+        << perfmon_keep_large_values_envvar << "'."
         << std::endl;
 
       keep_result = false;
@@ -190,14 +190,13 @@ void fhv_perfmon::validate_and_store_likwid_result(
     if(result_type == fhv::types::result_t::metric &&
       result_value >= METRIC_VALUE_ERROR_THRESHOLD)
     {
-      std::cout << "WARNING: unreasonably high metric value detected!"
+      std::cerr << "WARNING: unreasonably high metric value detected!"
         << std::endl;
-
-      std::cout << std::endl
+      std::cerr
         << "This metric will be discarded. To disable detection and "
         << "removal of 'unreasonably' high values, set the environment "
         << "variable '" << perfmon_keep_large_values_envvar << "'." 
-        << std::endl << std::endl;
+        << std::endl
       keep_result = false;
     }
   }
@@ -217,9 +216,9 @@ void fhv_perfmon::validate_and_store_likwid_result(
   }
   else
   {
-    std::cout << "The erroneous result is printed below:" << std::endl
+    std::cerr << "The erroneous result is printed below:" << std::endl
       << perThreadResult.toString();
-    std::cout << std::endl;
+    std::cerr << std::endl;
   }
 }
 
@@ -451,7 +450,7 @@ void fhv_perfmon::checkInit()
     something_went_wrong = true;
   }
 
-  if(something_went_wrong) std::cout << error_str;
+  if(something_went_wrong) std::cerr << error_str;
 }
 
 void fhv_perfmon::checkResults(){
@@ -481,8 +480,8 @@ void fhv_perfmon::checkResults(){
 
   if (something_went_wrong) 
   {
-    std::cout << error_str;
-    std::cout << error_more_info;
+    std::cerr << error_str;
+    std::cerr << error_more_info;
   }
 }
 

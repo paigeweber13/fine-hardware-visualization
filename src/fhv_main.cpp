@@ -150,7 +150,7 @@ void visualize(
   // read a JSON file
   std::ifstream i(perfmon_output_filename);
   if(!i){
-    std::cout << "ERROR: The json specified for visualization does not exist!"
+    std::cerr << "ERROR: The json specified for visualization does not exist!"
       << std::endl;
     return;
   }
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
   }
   catch (po::error &e)
   {
-    cerr << "ERROR: " << e.what() << endl
+    std::cerr << "ERROR: " << e.what() << endl
          << endl
          << desc << endl;
     return 1;
@@ -517,7 +517,7 @@ int main(int argc, char *argv[])
   {
     // give default visualization output name if none provided
     if (perfmon_output_filenames.size() == 0){
-      std::cout << "ERROR: no input files specified to visualize. Plese "
+      std::cerr << "ERROR: no input files specified to visualize. Plese "
         << "include at least one json output by fhv_perfmon as an argument to "
         << "'--visualize'."
         << std::endl;
