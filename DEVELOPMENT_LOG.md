@@ -223,17 +223,28 @@ Following are my notes for each week of development.
 - figure out the discrepancies between fhv and manual measurement
 
 ## Accomplishments
-- update on discrepancies:
-  - did me being on call make a difference? YES! went down to like 1%
-    difference after we got off call
-  - does 'vmovaps' count as a float?
-  - does counting each thread individually make a difference?
 - number of flops: 
   - was not considering that flops are counted only one in seven iterations, so
     we must multiply final value by 7
   - "FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE" counts both the multiply and 
     add part of FMA, so you should NOT multiply that value by 2
-  - these two factors brought difference down to under 1%
+  - these two factors brought difference down to under 0.25% in all cases 
+    except the first and last iteration
+  - last iteration is still 30% error for number of flops, which is bad
+  - but this is probably because the fhv version only runs 7 times, whereas the
+    manual version runs 10 times. That would explain it.
+- update on other discrepancies:
+  - did me being on call make a difference? YES! flop rate difference went down
+    to about 1%
+  - does 'vmovaps' count as a float?
+    - no! at least not the floats we care about. See results:
+    - Counter value for FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE:
+          with 15 vmovaps, 1  vfmadd: 148571400.0000 
+          with 1  vmovaps, 1  vfmadd: 148571400.0000
+          with 1  vmovaps, 15 vfmadd: 2228570800.0000
+          with 15 vmovaps, 15 vfmadd: 2228570800.0000
+  - does counting each thread individually make a difference?
+    - this reduced the error but did not eliminate it
 
 # 2021-04-07 through 2021-04-21
 ## Questions:

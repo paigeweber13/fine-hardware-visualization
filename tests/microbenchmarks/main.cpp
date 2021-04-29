@@ -82,7 +82,7 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
 
   auto kernel = kernels[peakflops_sp_avx_fma_kernel];
 
-  unsigned num_procs;
+  unsigned num_procs = 1;
   #pragma omp parallel
   {
     #pragma omp single
@@ -91,20 +91,36 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
     }
   }
 
+  ull * numFlopsPerThread = new ull[num_procs];
+  double * megaFlopsRatePerThread = new double[num_procs];
+
   // this method of timing waits until all threads join before timing is
   // stopped. Have each thread track its own flop rate and then sum them
-  auto start = std::chrono::steady_clock::now();
   #pragma omp parallel
   {
+    auto start = std::chrono::steady_clock::now();
     for (ull i = 0; i < num_i; i++) {
       peakflops_sp_avx_fma(n, array);
     }
-  }
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> duration = end-start;
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> duration = end-start;
 
-  ull numFlops = (ull)num_procs * num_i * n * (ull)kernel.flops;
-  double megaFlopsRate = (double)numFlops * FLOPS_TO_MFLOPS / duration.count();
+    auto me = omp_get_thread_num();
+    numFlopsPerThread[me] = num_i * n * (ull)kernel.flops;
+    megaFlopsRatePerThread[me] = (double)numFlopsPerThread[me] * 
+      FLOPS_TO_MFLOPS / duration.count();
+  }
+
+  ull numFlops = 0;
+  double megaFlopsRate = 0;
+
+  for (unsigned i = 0; i < num_procs; i++){
+    numFlops += numFlopsPerThread[i];
+    megaFlopsRate += megaFlopsRatePerThread[i];
+  }
+
+  delete[] numFlopsPerThread;
+  delete[] megaFlopsRatePerThread;
 
   return flopsResult{numFlops, megaFlopsRate};
 }
@@ -143,6 +159,7 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
   }
 
   fhv_perfmon::close();
+  // fhv_perfmon::printAggregateResults();
 
   if (output_to_json) {
     std::string paramString = "array n: " + std::to_string(n) + 
@@ -159,17 +176,6 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
     if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
       && result.result_name == sp_avx_256_flops_event_name){
-        // TODO: does sp_avx_256_flops_event_name count all vector op?
-        //       is there a counter for only FMA ops? Is it bad to assume
-        //       that all vector ops will be FMA ops?
-
-        // TODO: this value is too small by a factor of 4. I have 4 threads. Is
-        //       this related? I don't think it should be because I'm using the
-        //       aggregation type "sum", which is supposed to sum across
-        //       threads. Perhaps it isn't working though?
-
-        // It's actually probably because we don't measure flops every
-        // iteration
         numFlops = result.result_value * NUM_GROUPS_FOR_FHV_VISUALIZATION * FLOPS_PER_AVX_OP;
 
     }
@@ -186,15 +192,6 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
   return flopsResult{numFlops, megaFlopsRate};
 }
 
-
-/*
-TODO: FHV numFlops is off by a factor of 4. Is vmovaps counted as a floating 
-      point operation??
-
-some experiments:
-- convert peakflops assembly to only use "vmovaps"
-- double the number of adds and see if the error halves
- */
 
 int main(int argc, char** argv) {
   // measurement types
