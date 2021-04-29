@@ -213,6 +213,14 @@ int main(int argc, char** argv) {
   ull n = std::stoull(argv[1], NULL);
   ull num_i = std::stoull(argv[2], NULL);
 
+  if (num_i < 1000) {
+    std::cout << "WARNING: num_i should be above 1000 to mininmize error "
+      << "between fhv and manual reporting. Fhv reporting must run a "
+      << "multiple of seven times, so if num_i is small the error from "
+      << "integer division will be high."
+      << std::endl;
+  }
+
   float *array = (float*)aligned_alloc(64, n * sizeof(float));
 
   auto resultManual = peakflops_manual_parallel(num_i, n, array);

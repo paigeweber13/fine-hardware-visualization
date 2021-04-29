@@ -233,6 +233,8 @@ Following are my notes for each week of development.
   - last iteration is still 30% error for number of flops, which is bad
   - but this is probably because the fhv version only runs 7 times, whereas the
     manual version runs 10 times. That would explain it.
+  - after fixing this problem, error was under 1% about half the time, and the
+    other half of the time it was around 5%
 - update on other discrepancies:
   - did me being on call make a difference? YES! flop rate difference went down
     to about 1%
