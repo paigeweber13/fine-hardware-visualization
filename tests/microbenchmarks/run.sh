@@ -10,7 +10,7 @@ fi
 echo "array_n,array_size_bytes,num_i,"\
      "manual_reported_num_flops,fhv_reported_num_flops,"\
      "manual_reported_Mflop_rate,fhv_reported_Mflop_rate,"\
-     "num_flops_percent_diff,Mflop_rate_percent_diff"
+     "num_flops_diff_factor,Mflop_rate_diff_factor"
 
 max_n=1000000001
 

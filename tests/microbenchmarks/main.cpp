@@ -63,10 +63,10 @@ static const TestCase kernels[NUMKERNELS] = {
     (char*)"Double-precision load, optimized for AVX", 1, 0, -1, 16, 7, 6},
   {(char*)"store_avx" , STREAM_1, DOUBLE, 16, NULL, 0, 8, 
     (char*)"Double-precision store, optimized for AVX", 0, 1, -1, 20, 7, 10},
-  {(char*)"peakflops_avx_fma" , STREAM_1, DOUBLE, 4, NULL, 30, 8,
+  {(char*)"peakflops_avx_fma" , STREAM_1, DOUBLE, 4, NULL, 30 /*flops*/, 8,
     (char*)"Double-precision multiplications and additions with a single "
     "load, optimized for AVX FMAs", 1, 0, -1, 32, 19, 18},
-  {(char*)"peakflops_sp_avx_fma" , STREAM_1, SINGLE, 8, NULL, 30, 4,
+  {(char*)"peakflops_sp_avx_fma" , STREAM_1, SINGLE, 8, NULL, 30 /*flops*/, 4,
     (char*)"Single-precision multiplications and additions with a single "
     "load, optimized for AVX FMAs", 1, 0, -1, 32, 19, 18},
 };
@@ -112,13 +112,19 @@ flopsResult peakflops_manual_parallel(ull num_i, ull n, float* array) {
 flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
     bool output_to_json=true) {
   const ull FLOPS_PER_AVX_OP = 8;
-  const ull FLOPS_PER_FMA_OP = 2;
+
+  // unused: remove
+  // const ull FLOPS_PER_FMA_OP = 2;
+
+  // groups measured by default (all are necessary to create visualization):
+  // "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3"
   const ull NUM_GROUPS_FOR_FHV_VISUALIZATION = 7;
 
   fhv_perfmon::init(FHV_REGION_PEAKFLOPS_PARALLEL);
 
-  if (num_i < 10) {
-    std::cout << "ERROR: in peakflops_fhv_parallel: num_i must be >= 10"
+  if (num_i < NUM_GROUPS_FOR_FHV_VISUALIZATION) {
+    std::cout << "ERROR: in peakflops_fhv_parallel: num_i must be >= "
+      << NUM_GROUPS_FOR_FHV_VISUALIZATION
       << std::endl;
     return flopsResult{};
   }
@@ -156,9 +162,16 @@ flopsResult peakflops_fhv_parallel(ull num_i, ull n, float* array,
         // TODO: does sp_avx_256_flops_event_name count all vector op?
         //       is there a counter for only FMA ops? Is it bad to assume
         //       that all vector ops will be FMA ops?
-        numFlops = result.result_value * FLOPS_PER_AVX_OP * FLOPS_PER_FMA_OP;
 
-        // TODO: this value is too small by a factor of 4
+        // TODO: this value is too small by a factor of 4. I have 4 threads. Is
+        //       this related? I don't think it should be because I'm using the
+        //       aggregation type "sum", which is supposed to sum across
+        //       threads. Perhaps it isn't working though?
+
+        // It's actually probably because we don't measure flops every
+        // iteration
+        numFlops = result.result_value * NUM_GROUPS_FOR_FHV_VISUALIZATION * FLOPS_PER_AVX_OP;
+
     }
     else if (result.region_name == FHV_REGION_PEAKFLOPS_PARALLEL
       && result.aggregation_type == fhv::types::aggregation_t::sum
@@ -195,7 +208,7 @@ int main(int argc, char** argv) {
     std::cout << "  array_n,array_size_bytes,num_i,"
       << "manual_reported_num_flops,fhv_reported_num_flops,"
       << "manual_reported_Mflop_rate,fhv_reported_Mflop_rate,"
-      << "num_flops_percent_diff,Mflop_rate_percent_diff"
+      << "num_flops_diff_factor,Mflop_rate_diff_factor"
       << std::endl;
     return 0;
   }
@@ -207,8 +220,6 @@ int main(int argc, char** argv) {
 
   auto resultManual = peakflops_manual_parallel(num_i, n, array);
   auto resultFhv = peakflops_fhv_parallel(num_i, n, array);
-
-  // TODO: change percentages to numbers [0-1]
 
   ull diffNumFlops = resultManual.numFlops < resultFhv.numFlops 
     ? resultFhv.numFlops - resultManual.numFlops 
@@ -226,8 +237,8 @@ int main(int argc, char** argv) {
     << resultFhv.numFlops << ","
     << resultManual.megaFlopsRate << ","
     << resultFhv.megaFlopsRate << ","
-    << (double)diffNumFlops / (double)resultManual.numFlops * 100 << ","
-    << diffFlopsRate / resultManual.megaFlopsRate * 100 << ","
+    << (double)diffNumFlops / (double)resultManual.numFlops << ","
+    << diffFlopsRate / resultManual.megaFlopsRate << ","
     << std::endl;
 
   free(array);
