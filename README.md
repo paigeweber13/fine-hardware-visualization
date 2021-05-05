@@ -1,21 +1,31 @@
 # Fine Hardware Visualization (FHV)
-This software is designed to present the user with a visualization of their 
-computer architecture and indicate what parts of that
-architecture are most loaded to identify bottlenecks in high-performance
-applications.
+This software is designed to present the user with a visualization of their
+computer architecture and indicate what parts of that architecture are most
+loaded to identify bottlenecks in high-performance applications.
 
-This software is in the early stages of development and should not yet be
-assumed to be stable or correct. However, we encourage you to try to build it
-and run some of the examples! Feedback is welcome via email. My email address
-may be found [in my github profile](https://github.com/rileyweber13).
+This information can be used both to help programmers understand how to
+optimize their code and to teach students how their code maps to their
+architecture.
 
-- [Fine Hardware Visualization](#fine-hardware-visualization)
-- [Prerequisites](#prerequisites)
-  - [Compiled from source](#compiled-from-source)
-  - [Installed via package manager](#installed-via-package-manager)
-  - [Automatically included](#automatically-included)
-- [Running](#running)
-- [Usage Notes](#usage-notes)
+
+# Warnings, Disclaimers
+This software is in the early stages of development. We are reasonably
+confident that this tool reports measurements within 1% of actual values (see
+`tests/microbenchmarks`) but please be aware that some errors are expected in
+such early stages of development. Furthermore, the usage and API are not
+stable, future updates my break code which uses this tool. This software has
+only been tested on the Intel Skylake processor. It should not be used in any
+production-critical system. See `LICENSE` for full licesne information and
+disclaimers.
+
+We encourage you to try to build it and run the tests or examples! Feedback and
+bug reports are welcome via email. My email address may be found [in my github
+profile](https://github.com/paigeweber13).
+
+
+- [Fine Hardware Visualization (FHV)](#fine-hardware-visualization-fhv)
+- [Warnings, Disclaimers](#warnings-disclaimers)
+- [Installation and Usage](#installation-and-usage)
 - [Goals:](#goals)
 - [Architecture of Program](#architecture-of-program)
 - [Ownership and licensing](#ownership-and-licensing)
@@ -29,106 +39,8 @@ may be found [in my github profile](https://github.com/rileyweber13).
   - [Others:](#others)
     - [Works by Martin Schultz:](#works-by-martin-schultz)
 
-# Installation
-In summary, to install all dependencies on ubuntu (should work with all 
-debian-based systems), follow the workflow below:
-1. compile likwid from source: see [here](https://github.com/RRZE-HPC/likwid)
-2. edit `LIKWID_PREFIX` in config.mk in the fhv root directory to match the
-   location where likwid was installed in step 1
-3. Install build dependencies for fhv with the command `sudo apt-get install 
-   libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
-4. In the directory of fhv, run the following commands: 
-   - `make`
-   - `make perfgroups`
-   - (optional) `make install`
-
-If you'd like more details of what is used and why, read the prerequisites 
-section.
-
-# Dependencies
-## Compiled from source
- - **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
-   for memory counters and is confirmed to use `likwid-accessD` without root
-   permissions. If this version is available with your package manager, use
-   that. Otherwise, build it from source. Instructions to do this are available
-   [here](https://github.com/RRZE-HPC/likwid). Be sure to change
-   `LIKWID_PREFIX` in this repository's makefile to match wherever likwid is 
-   installed
- - additional perfgroups not included with likwid. These can be installed by
-   running `make perfgroups` in the root directory.
-
-## Installed via package manager
- - **boost/program_options:** available on [the boost
-   website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
-   install libboost-program-options-dev` on debian-based distributions. The
-   makefile assumes boost program options is already in a directory included by
-   gcc.
- - **cairo:** available [here](https://www.cairographics.org/), also
-   installable with `sudo apt install libcairo2-dev` The makefile uses
-   `pkg-config` to ensure cairo is automatically found and included.
- - **pango:** pango is used for text rendering in conjunction with cairo.
-   The pangocairo interface comes preinstalled with cairo, but this does not
-   include development tools. Pango is available 
-   [here](https://pango.gnome.org/Download), or installable on ubuntu with 
-   `sudo apt install libpango1.0-dev`
- - **{fmt}:** available [here](https://fmt.dev/latest/index.html), also
-   installable with `sudo apt install libfmt-dev`
-
-## Automatically included
- - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
-   in ./lib
-
-# Running
-Before running anything, make sure you have access to the MSRs
-(model-specific-registers). These are used for the hardware counters. You can do
-this by running `sudo modprobe msr`. Also, if you have installed `fhv` (this
-software) or `likwid` to a non-standard directory, you should run run the
-following commands in your terminal before using this software:
-
-```bash
-# note: change path to match your installation directory
-$ export PATH=$PATH:/path/to/fhv/bin:/path/to/likwid/bin
-$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/fhv/lib:/path/to/likwid/lib
-```
-
-## Warnings, Disclaimers
-This software has only been tested on the Intel Skylake processor. It is
-currently highly experimental as I continue to work on a proof of concept (poc).
-It should  not be used in any production-critical system. See `LICENSE` for full
-licesne information and disclaimers.
-
-In an effort to reduce workload until I get a minimal poc, I've stopped
-maintaining basically everything in this repository (benchmarks, tests are
-notable examples). So many of the tests (`make tests`) don't work right now.
-
-What still works:
- - minimal example of likwid: `make build/bin/tests/likwid-minimal-run`
- - minimal example of the fhv performance monitor: `make 
-   build/bin/tests/fhv-minimal-run`
- - convolution: 
-   - `cd examples/convolution`
-   - `make bin/convolution-likwid-cli-run`
-   - `make bin/convolution-fhv-perfmon-run`
- - fhv benchmarks *seem* to be working but haven't been rigorously tested:
-   run `make` and then
-   `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:./build/lib build/bin/fhv -s 10000`
-   or similar. Note that sometimes has problems with "stopping non-started 
-   region", seems to be when you run benchmark-all. This is noted in the 
-   section "problems to fix"
-
-# Usage Notes
- - Customizing which HW threads are used:
-   - To set the number of threads , OMP_NUM_THREADS may be used
-   - On GNU OpenMP, one may explicitly specify which cores should be used with
-     GOMP_CPU_AFFINITY, e.g. `export GOMP_CPU_AFFINITY=0,2,8,1`
-   - For other implementations of OpenMP, see [the OpenMP docs](
-     https://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html)
-   - Another option is [sched_setaffinity](
-     https://linux.die.net/man/2/sched_getaffinity)
- - Region names must not have spaces
- - Chapter 19 of volume 3 of the Intel software developer's manual (page 3605
-   in the combined digital version) has hardware counter names. This is useful
-   if you want to create custom performance groups
+# Installation and Usage
+Please see the [documentation](docs/installation-and-usage.md)
 
 # Goals:
 "I think we have a shot at doing something other people don't do" 
@@ -155,10 +67,9 @@ We want all programmers to
 # Architecture of Program
  - [ ] Identify hardware architecture
  - [ ] Identify peak FLOP/s, memory bandwidth, latency etc.
-   - [ ] there are lots of benchmarks that could help us with this. See:
-     - [ ] `likwid_bench_auto` script included with kerncraft
-     - [ ] `likwid-bench` utility included with likwid
-     - [ ] [NAS parallel benchmarks](https://www.nas.nasa.gov/publications/npb.html)
+   - [ ] currently, the `benchmark.sh` script does this, but the user must
+         manually copy values to `src/architecture.hpp`. In the future I would
+         like this process to be automated.
  - [x] Measure what actual utilization of memory/processor is
  - [x] Compare actual utilization with peak on an piece-by-piece basis
  - [x] Visualize that
@@ -167,8 +78,9 @@ We want all programmers to
 
 # Ownership and licensing
  - nlohmann/json is included with this repository under the MIT license. See
-   `lib/nlohmann/json.hpp` for full license
- - this repository is licensed under GNU GPL v3 (see `LICENSE`)
+   `lib/nlohmann/json.hpp` for full license.
+ - likwid source code is included (as a submodule in `tests/microbenchmarks/likwid`) under the GNUGPL licesne. See `tests/microbenchmarks/likwid/COPYING`.
+ - this repository is licensed under GNU GPL v3 (see `LICENSE`).
 
 # How to improve likwid stability:
  - you MUST pin threads
