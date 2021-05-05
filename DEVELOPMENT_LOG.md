@@ -7,8 +7,11 @@ Hardware Visualization
   - [By May 12 - use this tool to gain insight on one real application](#by-may-12---use-this-tool-to-gain-insight-on-one-real-application)
   - [By June 30 - Deploy v1.0.0](#by-june-30---deploy-v100)
 - [Notes per week](#notes-per-week)
-- [2021-04-21 through 2021-04-30](#2021-04-21-through-2021-04-30)
+- [2021-04-30 through 2021-05-07](#2021-04-30-through-2021-05-07)
   - [Goals](#goals)
+    - [Other notes on goals](#other-notes-on-goals)
+- [2021-04-21 through 2021-04-30](#2021-04-21-through-2021-04-30)
+  - [Goals](#goals-1)
   - [Accomplishments](#accomplishments)
 - [2021-04-07 through 2021-04-21](#2021-04-07-through-2021-04-21)
   - [Questions:](#questions)
@@ -18,14 +21,14 @@ Hardware Visualization
   - [Accomplishments](#accomplishments-2)
   - [Notes from Meeting](#notes-from-meeting)
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
-  - [Goals](#goals-1)
+  - [Goals](#goals-2)
   - [Accomplishments](#accomplishments-3)
   - [Notes from meeting](#notes-from-meeting-1)
   - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
   - [Questions](#questions-1)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
-  - [Goals](#goals-2)
+  - [Goals](#goals-3)
     - [If time permits:](#if-time-permits)
   - [Accomplishments](#accomplishments-4)
     - [Investigated STREAM](#investigated-stream)
@@ -35,29 +38,29 @@ Hardware Visualization
   - [Notes from meeting](#notes-from-meeting-3)
   - [Accomplishments](#accomplishments-5)
   - [Questions](#questions-3)
-  - [Goals](#goals-3)
+  - [Goals](#goals-4)
     - [Some more detail on those goals:](#some-more-detail-on-those-goals)
 - [2021-02-24 through 2021-03-03](#2021-02-24-through-2021-03-03)
   - [Accomplishments](#accomplishments-6)
   - [Questions](#questions-4)
-  - [Goals](#goals-4)
-- [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
   - [Goals](#goals-5)
+- [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
+  - [Goals](#goals-6)
   - [Accomplishments](#accomplishments-7)
   - [Questions](#questions-5)
 - [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
-  - [Goals](#goals-6)
+  - [Goals](#goals-7)
   - [Accomplishments](#accomplishments-8)
   - [Questions](#questions-6)
 - [2020-12-09 through 2020-12-16](#2020-12-09-through-2020-12-16)
-  - [Goals](#goals-7)
+  - [Goals](#goals-8)
   - [Questions](#questions-7)
 - [2020-12-02 through 2020-12-09](#2020-12-02-through-2020-12-09)
-  - [Goals](#goals-8)
+  - [Goals](#goals-9)
   - [Accomplishments](#accomplishments-9)
   - [Questions](#questions-8)
 - [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
-  - [Goals](#goals-9)
+  - [Goals](#goals-10)
   - [Accomplishments](#accomplishments-10)
   - [Questions](#questions-9)
 - [2020-11-04 through 2020-11-11](#2020-11-04-through-2020-11-11)
@@ -217,6 +220,35 @@ Hardware Visualization
 
 # Notes per week
 Following are my notes for each week of development.
+
+# 2021-04-30 through 2021-05-07
+## Goals
+- document the usage
+  - and then let Erik know
+- get it working on broadwell
+- document benchmark process
+- add bandwidth benchmark comparison
+
+### Other notes on goals
+- we are behind
+  - start documentation
+  - priority: finish verifying validity of tool
+  - one real application? Or another architecture?
+    - erik: "real live application" is probably more important, but
+      demonstrating real-world applicability will probably require us to use a
+      different architecture
+    - the other architecture should probably be broadwell: this is Erik's
+      machine
+- documentation:
+  - documentation on how to do it, give it to Erik to see how someone who is
+    less familiar with the code can handle usage
+  - install tool
+  - integrate to application
+  - how to configure results
+  - how to inerpret results
+- benchmark for setup
+  - I'd like to automate benchmark process, but that's less important for now.
+  - Document how to benchmark and where to put the results (architecture.hpp)
 
 # 2021-04-21 through 2021-04-30
 ## Goals
