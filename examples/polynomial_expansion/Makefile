@@ -1,4 +1,4 @@
-include ../../config.mk
+FHV_PERFMON_PREFIX=/usr/local
 
 FHV_INC_FLAG=-I$(FHV_PERFMON_PREFIX)/include
 FHV_LIB_DIR=$(FHV_PERFMON_PREFIX)/lib

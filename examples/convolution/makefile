@@ -1,4 +1,4 @@
-include ../../config.mk
+FHV_PERFMON_PREFIX=/usr/local
 
 # Variables
 FHV_INC_FLAG=-I$(FHV_PERFMON_PREFIX)/include
