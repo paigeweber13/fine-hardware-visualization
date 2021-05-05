@@ -7,11 +7,12 @@ debian-based systems), follow the workflow below:
 3. Install build dependencies for fhv with the command `sudo apt-get install 
    libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
 4. In the directory of fhv, run the following commands: 
+   - TODO: figure out what git submodule commands are needed
    - `make`
    - `make perfgroups`
-   - (optional) `make install`
+   - `sudo make install`
 
-If you'd like more details of what is used and why, read the prerequisites 
+If you'd like more details of what is used and why, read the "Dependencies"
 section.
 
 # Dependencies
@@ -48,11 +49,20 @@ section.
    in ./lib
 
 # Running
-Before running anything, make sure you have access to the MSRs
-(model-specific-registers). These are used for the hardware counters. You can do
-this by running `sudo modprobe msr`. Also, if you have installed `fhv` (this
-software) or `likwid` to a non-standard directory, you should run run the
-following commands in your terminal before using this software:
+Before running anything, make sure you have access to the model specific
+registers (MSRs). These provide hardware counters, which are necessary for FHV
+to work. If you have root permissions, you can do this by running `sudo
+modprobe msr`. On a cluster, you might have to do something like `module load
+msr`. If you need more help, contact the IT support for your cluster and ask
+them if it's possible to get access to model specific registers (aka hardware
+counters).
+
+## Configuring Environment Variables
+Note: if you installed FHV with `make && sudo make install` WITHOUT modifying `config.mk` or `makefile`, you may skip this section.
+
+If you have installed `fhv` (this software) or `likwid` to a non-standard
+directory, you should run run the following commands in your terminal before
+using this software:
 
 ```bash
 # note: change path to match your installation directory
@@ -60,25 +70,15 @@ $ export PATH=$PATH:/path/to/fhv/bin:/path/to/likwid/bin
 $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/fhv/lib:/path/to/likwid/lib
 ```
 
+Furthermore, note that the makefiles for the tests and examples expect you to
+have installed fhv to the default directory. If you have installed fhv to a
+different directory, be sure to edit the respective makefiles to match.
 
-In an effort to reduce workload until I get a minimal poc, I've stopped
-maintaining basically everything in this repository (benchmarks, tests are
-notable examples). So many of the tests (`make tests`) don't work right now.
+## Tests
+TODO: add tests info
 
-What still works:
- - minimal example of likwid: `make build/bin/tests/likwid-minimal-run`
- - minimal example of the fhv performance monitor: `make 
-   build/bin/tests/fhv-minimal-run`
- - convolution: 
-   - `cd examples/convolution`
-   - `make bin/convolution-likwid-cli-run`
-   - `make bin/convolution-fhv-perfmon-run`
- - fhv benchmarks *seem* to be working but haven't been rigorously tested:
-   run `make` and then
-   `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:./build/lib build/bin/fhv -s 10000`
-   or similar. Note that sometimes has problems with "stopping non-started 
-   region", seems to be when you run benchmark-all. This is noted in the 
-   section "problems to fix"
+## Examples
+TODO: add examples info
 
 # Usage Notes
  - Customizing which HW threads are used:
