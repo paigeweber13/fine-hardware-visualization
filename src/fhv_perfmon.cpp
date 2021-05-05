@@ -196,7 +196,7 @@ void fhv_perfmon::validate_and_store_likwid_result(
         << "This metric will be discarded. To disable detection and "
         << "removal of 'unreasonably' high values, set the environment "
         << "variable '" << perfmon_keep_large_values_envvar << "'." 
-        << std::endl
+        << std::endl;
       keep_result = false;
     }
   }
