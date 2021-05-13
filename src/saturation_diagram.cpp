@@ -262,10 +262,8 @@ void saturation_diagram::test_color_lerp(
     + std::to_string(static_cast<unsigned>(round(std::get<2>(max_color) * 255.0)))
     + ".svg";
 
-  if(system(("mkdir -p " + output_dir).c_str()) != 0)
-    std::cout << "WARN: there was a problem making the directory for "
-      << "color swatches (" << output_dir << ")." << std::endl
-      << "Swatch creation will fail.";
+  int rc = fhv::utils::create_directories_for_file(image_output_filename);
+  if (rc != 0) std::cerr << "WARN: Swatch creation will fail.";
 
   // create surface and cairo object
   cairo_surface_t *surface = cairo_svg_surface_create(

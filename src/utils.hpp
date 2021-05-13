@@ -14,6 +14,6 @@ namespace fhv {
      * create directories "foo/bar". If they already exist, this will do nothing
      * silently
      */
-    void create_directories_for_file(std::string file);
+    int create_directories_for_file(std::string file);
   };
 };
