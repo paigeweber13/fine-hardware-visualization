@@ -80,6 +80,107 @@ TODO: add tests info
 ## Examples
 TODO: add examples info
 
+# Measuring Your Code (API Usage)
+In `examples/minimal` you will find a minimal example that does a good job
+indicating how to use the API. The next section outlines the basic usage, and
+that is followed by full instructions, detaiils, and "gotchas".
+
+## Basic Usage
+
+There are 9 things you will need to do to measure and visualize your code's
+performance.
+
+1. Before any computation is done, call `fhv_perfmon::init()` exactly once, on
+   only one thread.
+2. Surround the code you want to measure with a loop that runs at least seven
+   times, and in each iteration call `fhv_perfmon::startRegion(<region
+   name>);`, then the code you want to measure, then
+   `fhv_perfmon::stopRegion(<region name>);`. This can be done in either
+   parallel or sequential blocks. `<region name>` is a user-specified string
+   that identifies a region of code.
+3. After calling `stopRegion` but before the end of the loop, call
+   `fhv_perfmon::nextGroup();` to tell fhv to start measuring the next group of
+   performance counters.
+4. After all computation is done, call `fhv_perfmon::close()` exactly once, on
+   only one thread.
+5. Optionally print the results to `stdout` by calling
+   `fhv_perfmon::printHighlights();`. 
+6. Finally, call `fhv_perfmon::resultsToJson();` to write the results to disk.
+   By default this will create a file named `perfmon_output.json` in the same
+   directory where you ran your code.
+7. Compile your code with the flag `-lfhv_perfmon` included after all input
+   files.
+8. Run your code.
+9. To visualize your code, run `fhv -v perfmon_output.json`. This will produce
+   a file named `perfmon_output_<region name>.svg` in the same directory.
+
+These steps are summarized below in pseudo-code:
+
+```c++
+int main() {
+  const int NUM_FHV_GROUPS = 7;
+  const char* MY_REGION = "my_region";
+  fhv_perfmon::init(MY_REGION);
+
+#pragma omp parallel
+  {
+    for (int j = 0; j < NUM_FHV_GROUPS; j++)
+    {
+      fhv_perfmon::startRegion(MY_REGION);
+      myCodeToMeasure(someParam1, someParam2);
+      fhv_perfmon::stopRegion(MY_REGION);
+      fhv_perfmon::nextGroup();
+    }
+  }
+
+  fhv_perfmon::close();
+
+  fhv_perfmon::printHighlights();
+  fhv_perfmon::resultsToJson();
+}
+```
+
+## Init
+
+`fhv_perfmon::init()` must be called once, on one thread. This does all the set
+up work required to measure your code. It automatically selects seven likwid
+groups necessary to produce a visualization of your code performance. 
+
+For more control over initialization, you may provide some optional parameters.
+First, you may optionally specify the region names that you will later use to
+measure code (for more on regions, see [the measuring section
+below](##measuring)). Specifying region names ahead of time is recommended,
+because it eliminates potential overhead that would occur at the first call to
+`fhv::startRegion()` for each group. If you do not specify region names ahead
+of time, regions will be initialized on the first call to `fhv::startRegion()`. 
+
+If you would like to manually specify groups, notice that `fhv::init()` has two
+different parameters for setting groups. The first is `parallel_regions` and
+the second is `sequential_regions`. As you might imagine, use the first to
+specify regions that will run in parallel (they will be initialized for each
+thread) and use the second to specify regions that will run in a sequential
+block. Each of these parameters takes a string with a comma-separated list of regions.
+
+If you'd like to manually select the groups that likwid will measure, use the
+third optional parameter to `fhv::init()`. This parameter accepts a string with
+a list of likwid groups, deliniated with the pipe symbol (`|`). For example,
+`"FLOPS_SP|CYCLE_ACTIVITY|UOPS_EXEC"` is a valid list of groups. To find what
+groups are supported on your system, run `likwid-perfctr -a`.
+
+## Measuring
+
+To identify which parts of your code should be measured, surround the code with
+calls to `fhv_perfmon::startRegion(<region name>);` and
+`fhv_perfmon::stopRegion(<region name>);`. This can be done in either parallel
+or sequential blocks. `<region name>` is a user-specified string that
+identifies a region of code. These may be optionally be specified ahead of time
+in `fhv_perfmon::init`, as indicated above.
+
+In most cases you will measure more than one group, and to do that you will
+need to run your code in a loop and switch groups each iteration. To do this,
+call `fhv_perfmon::nextGroup();` *after* stopping your region.
+
+
 # Usage Notes
  - Customizing which HW threads are used:
    - To set the number of threads , OMP_NUM_THREADS may be used
