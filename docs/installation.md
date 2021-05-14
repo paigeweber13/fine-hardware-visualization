@@ -1,8 +1,32 @@
+- [Preparation](#preparation)
 - [Installation](#installation)
 - [Dependencies](#dependencies)
   - [Compiled from source](#compiled-from-source)
   - [Installed via package manager](#installed-via-package-manager)
   - [Automatically included](#automatically-included)
+
+# Preparation
+
+Note: I would like this process to be automatic (and for these values to come
+from a config file at runtime) but for now this solution will do.
+
+Before installing fhv, you need to measure your computer's maximum possible
+performance and make fhv aware of those values. These values will be used later
+by fhv to give you an idea of how well other programs perform. For instance,
+FHV might indicate that you are currently using 50% of available bandwidth.
+
+To benchmark performance, run the script `benchmark.sh` in the root of this
+repository. Then, open `src/architecture.hpp` and update the values in the
+section "Absolutely Necessary Values" to match the benchmark output.
+
+For instance, to populate the variable `EXPERIENTIAL_RW_BW_L2`, read the
+benchmark output to find the section `L2`. Then look for the test `copy_avx`
+(because `copy_avx` test R/W bandwidth). Finally, in that section find where
+the benchmark prints `MByte/s`. This is the bandwidth value that you should put
+for `EXPERIENTIAL_RW_BW_L2`.
+
+For the flop rates, look for `MFlops/s`.
+
 
 # Installation
 
