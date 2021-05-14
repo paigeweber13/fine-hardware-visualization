@@ -1,12 +1,37 @@
+- [Installation](#installation)
+- [Dependencies](#dependencies)
+  - [Compiled from source](#compiled-from-source)
+  - [Installed via package manager](#installed-via-package-manager)
+  - [Automatically included](#automatically-included)
+- [Running](#running)
+  - [Configuring Environment Variables](#configuring-environment-variables)
+  - [Tests](#tests)
+  - [Examples](#examples)
+- [Key Terms](#key-terms)
+- [Measuring Your Code (API Usage)](#measuring-your-code-api-usage)
+  - [Basic Usage](#basic-usage)
+  - [Init](#init)
+  - [Measuring](#measuring)
+  - [Group Switching](#group-switching)
+  - [Finalizing](#finalizing)
+  - [Output Results](#output-results)
+    - [`printDetailedResults()`](#printdetailedresults)
+    - [`printAggregateResults();`](#printaggregateresults)
+    - [`printHighlights();`](#printhighlights)
+    - [`resultsToJson(param_string);`](#resultstojsonparam_string)
+- [Advanced Usage and notes](#advanced-usage-and-notes)
+  - [Thread Affinity](#thread-affinity)
+
 # Installation
-In summary, to install all dependencies on ubuntu (should work with all 
+
+In summary, to install all dependencies on ubuntu (should work with all
 debian-based systems), follow the workflow below:
+
 1. compile likwid from source: see [here](https://github.com/RRZE-HPC/likwid)
 2. edit `LIKWID_PREFIX` in config.mk in the fhv root directory to match the
    location where likwid was installed in step 1
-3. Install build dependencies for fhv with the command `sudo apt-get install 
-   libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
-4. In the directory of fhv, run the following commands: 
+3. Install build dependencies for fhv with the command `sudo apt-get install libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
+4. In the directory of fhv, run the following commands:
    - TODO: figure out what git submodule commands are needed
    - `make`
    - `make perfgroups`
@@ -16,48 +41,54 @@ If you'd like more details of what is used and why, read the "Dependencies"
 section.
 
 # Dependencies
+
 ## Compiled from source
- - **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
-   for memory counters and is confirmed to use `likwid-accessD` without root
-   permissions. If this version is available with your package manager, use
-   that. Otherwise, build it from source. Instructions to do this are available
-   [here](https://github.com/RRZE-HPC/likwid). Be sure to change
-   `LIKWID_PREFIX` in this repository's makefile to match wherever likwid is 
-   installed
- - additional perfgroups not included with likwid. These can be installed by
-   running `make perfgroups` in the root directory.
+
+- **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
+  for memory counters and is confirmed to use `likwid-accessD` without root
+  permissions. If this version is available with your package manager, use
+  that. Otherwise, build it from source. Instructions to do this are available
+  [here](https://github.com/RRZE-HPC/likwid). Be sure to change
+  `LIKWID_PREFIX` in this repository's makefile to match wherever likwid is
+  installed
+- additional perfgroups not included with likwid. These can be installed by
+  running `make perfgroups` in the root directory.
 
 ## Installed via package manager
- - **boost/program_options:** available on [the boost
-   website](https://www.boost.org/). Also installable on ubuntu with `sudo apt
-   install libboost-program-options-dev` on debian-based distributions. The
-   makefile assumes boost program options is already in a directory included by
-   gcc.
- - **cairo:** available [here](https://www.cairographics.org/), also
-   installable with `sudo apt install libcairo2-dev` The makefile uses
-   `pkg-config` to ensure cairo is automatically found and included.
- - **pango:** pango is used for text rendering in conjunction with cairo.
-   The pangocairo interface comes preinstalled with cairo, but this does not
-   include development tools. Pango is available 
-   [here](https://pango.gnome.org/Download), or installable on ubuntu with 
-   `sudo apt install libpango1.0-dev`
- - **{fmt}:** available [here](https://fmt.dev/latest/index.html), also
-   installable with `sudo apt install libfmt-dev`
+
+- **boost/program_options:** available on [the boost
+  website](https://www.boost.org/). Also installable on ubuntu with `sudo apt install libboost-program-options-dev` on debian-based distributions. The
+  makefile assumes boost program options is already in a directory included by
+  gcc.
+- **cairo:** available [here](https://www.cairographics.org/), also
+  installable with `sudo apt install libcairo2-dev` The makefile uses
+  `pkg-config` to ensure cairo is automatically found and included.
+- **pango:** pango is used for text rendering in conjunction with cairo.
+  The pangocairo interface comes preinstalled with cairo, but this does not
+  include development tools. Pango is available
+  [here](https://pango.gnome.org/Download), or installable on ubuntu with
+  `sudo apt install libpango1.0-dev`
+- **{fmt}:** available [here](https://fmt.dev/latest/index.html), also
+  installable with `sudo apt install libfmt-dev`
 
 ## Automatically included
- - **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
-   in ./lib
+
+- **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
+  in ./lib
 
 # Running
+
 Before running anything, make sure you have access to the model specific
 registers (MSRs). These provide hardware counters, which are necessary for FHV
-to work. If you have root permissions, you can do this by running `sudo
-modprobe msr`. On a cluster, you might have to do something like `module load
-msr`. If you need more help, contact the IT support for your cluster and ask
+to work. If you have root permissions, you can do this by running `sudo modprobe msr`. On a cluster, you might have to do something like `module load msr`. If you need more help, contact the IT support for your cluster and ask
 them if it's possible to get access to model specific registers (aka hardware
 counters).
 
+If you don't do this, you will get many errors, most notably "Perfmon module
+not properly initialized"
+
 ## Configuring Environment Variables
+
 Note: if you installed FHV with `make && sudo make install` WITHOUT modifying `config.mk` or `makefile`, you may skip this section.
 
 If you have installed `fhv` (this software) or `likwid` to a non-standard
@@ -75,15 +106,33 @@ have installed fhv to the default directory. If you have installed fhv to a
 different directory, be sure to edit the respective makefiles to match.
 
 ## Tests
+
+Don't forget to run `sudo modprobe msr` before running any code that uses
+likwid or fhv!
+
 TODO: add tests info
 
 ## Examples
+
+don't forget to run `sudo modprobe msr` before running any code that uses
+likwid or fhv!
+
 TODO: add examples info
 
+# Key Terms
+
+- **FHV**: this software, fine-hardware-visualization
+- **Region**: a user-defined section of code that will be measured by fhv.
+- **Group**: aka likwid performance group: a list of hardware counters and
+  metrics that will be measured by likwid.
+
 # Measuring Your Code (API Usage)
+
 In `examples/minimal` you will find a minimal example that does a good job
-indicating how to use the API. The next section outlines the basic usage, and
-that is followed by full instructions, detaiils, and "gotchas".
+indicating how to use the API. The first section outlines the basic usage and after that there is full instructions, details, and "gotchas".
+
+As a reminder, don't forget to run `sudo modprobe msr` before running any code
+that uses likwid or fhv!
 
 ## Basic Usage
 
@@ -93,8 +142,7 @@ performance.
 1. Before any computation is done, call `fhv_perfmon::init()` exactly once, on
    only one thread.
 2. Surround the code you want to measure with a loop that runs at least seven
-   times, and in each iteration call `fhv_perfmon::startRegion(<region
-   name>);`, then the code you want to measure, then
+   times, and in each iteration call `fhv_perfmon::startRegion(<region name>);`, then the code you want to measure, then
    `fhv_perfmon::stopRegion(<region name>);`. This can be done in either
    parallel or sequential blocks. `<region name>` is a user-specified string
    that identifies a region of code.
@@ -104,7 +152,7 @@ performance.
 4. After all computation is done, call `fhv_perfmon::close()` exactly once, on
    only one thread.
 5. Optionally print the results to `stdout` by calling
-   `fhv_perfmon::printHighlights();`. 
+   `fhv_perfmon::printHighlights();`.
 6. Finally, call `fhv_perfmon::resultsToJson();` to write the results to disk.
    By default this will create a file named `perfmon_output.json` in the same
    directory where you ran your code.
@@ -122,15 +170,15 @@ int main() {
   const char* MY_REGION = "my_region";
   fhv_perfmon::init(MY_REGION);
 
-#pragma omp parallel
+  for (int j = 0; j < NUM_FHV_GROUPS; j++)
   {
-    for (int j = 0; j < NUM_FHV_GROUPS; j++)
+    #pragma omp parallel
     {
       fhv_perfmon::startRegion(MY_REGION);
       myCodeToMeasure(someParam1, someParam2);
       fhv_perfmon::stopRegion(MY_REGION);
-      fhv_perfmon::nextGroup();
     }
+    fhv_perfmon::nextGroup();
   }
 
   fhv_perfmon::close();
@@ -144,15 +192,16 @@ int main() {
 
 `fhv_perfmon::init()` must be called once, on one thread. This does all the set
 up work required to measure your code. It automatically selects seven likwid
-groups necessary to produce a visualization of your code performance. 
+groups necessary to produce a visualization of your code performance.
 
 For more control over initialization, you may provide some optional parameters.
 First, you may optionally specify the region names that you will later use to
-measure code (for more on regions, see [the measuring section
-below](##measuring)). Specifying region names ahead of time is recommended,
-because it eliminates potential overhead that would occur at the first call to
-`fhv::startRegion()` for each group. If you do not specify region names ahead
-of time, regions will be initialized on the first call to `fhv::startRegion()`. 
+measure code (for how regions are used to measure code, see [the measuring
+section below](#measuring)). Specifying region names ahead of time is
+recommended, because it eliminates potential overhead that would occur at the
+first call to `fhv::startRegion()` for each group. If you do not specify region
+names ahead of time, regions will be initialized on the first call to
+`fhv::startRegion()`.
 
 If you would like to manually specify groups, notice that `fhv::init()` has two
 different parameters for setting groups. The first is `parallel_regions` and
@@ -174,23 +223,104 @@ calls to `fhv_perfmon::startRegion(<region name>);` and
 `fhv_perfmon::stopRegion(<region name>);`. This can be done in either parallel
 or sequential blocks. `<region name>` is a user-specified string that
 identifies a region of code. These may be optionally be specified ahead of time
-in `fhv_perfmon::init`, as indicated above.
+in `fhv_perfmon::init`, as indicated in the [init section above](#init).
 
 In most cases you will measure more than one group, and to do that you will
 need to run your code in a loop and switch groups each iteration. To do this,
-call `fhv_perfmon::nextGroup();` *after* stopping your region.
+call `fhv_perfmon::nextGroup();` _after_ stopping your region.
 
+## Group Switching
 
-# Usage Notes
- - Customizing which HW threads are used:
-   - To set the number of threads , OMP_NUM_THREADS may be used
-   - On GNU OpenMP, one may explicitly specify which cores should be used with
-     GOMP_CPU_AFFINITY, e.g. `export GOMP_CPU_AFFINITY=0,2,8,1`
-   - For other implementations of OpenMP, see [the OpenMP docs](
-     https://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html)
-   - Another option is [sched_setaffinity](
-     https://linux.die.net/man/2/sched_getaffinity)
- - Region names must not have spaces
- - Chapter 19 of volume 3 of the Intel software developer's manual (page 3605
-   in the combined digital version) has hardware counter names. This is useful
-   if you want to create custom performance groups
+Because there are only a limited number of counters available in the hardware,
+performance counters are separated into "groups". In order to measure different
+parts of the architecture, like memory and in-core operations, different groups
+must be measured. Most of the time you'll want to measure more than one group.
+Measuring all groups specified by the default `init` routine is required for
+diagram generation.
+
+In practice, this is often done by wrapping the code you want to measure in a
+loop that runs `n` times (where `n` is the number of groups being measured) and
+switching groups at the end of every iteration.
+
+Lidwid group switching _must_ be done by exactly one thread, and all regions
+must be stopped before switching. `fhv_perfmon::nextGroup()` will enforce this
+with `#pragma omp barrier` and `#pragma omp single`, so keep that in mind. In
+practice, an openMP parallel block often only contains the calls to start the
+region, run the important code, and stop the region. While not strictly
+necessary, this usage is recommended to make clear that synchronization will
+necessarily occur every iteration. This is demonstrated in the [basic usage
+section](#basic-usage).
+
+## Finalizing
+
+After all calls to init, startRegion, stopRegion, and nextGroup, you _must_
+call `fhv_perfmon::close()` exactly once, on exactly one thread. Only after
+closing fhv_perfmon may you output results.
+
+`fhv_perfmon::close()` does five things: it finalizes likwid, which makes the
+likwid results available. Next, it loads the data from likwid, calculates port
+usage ratios, aggregates results, and calculates saturation. After this you are
+ready to output data.
+
+## Output Results
+
+There are four functions available for producing output.
+
+### `printDetailedResults()`
+
+This will print every event and metric gathered by fhv on a per-core basis.
+This provides the highest level of detail available and is mostly useful if you
+are using a custom group or debugging fhv.
+
+### `printAggregateResults();`
+
+This will print aggregate data about every event and metric. FHV will produce a
+mean and sum across cores for every event and metric. These provide a good
+overview of general performance.
+
+### `printHighlights();`
+
+This function highlights a couple dozen frequently used metrics and only prints
+those. This function avoids highly granulated data like
+`UOPS_DISPATCHED_PORT_PORT_5` (which isn't very useful on its own) and includes
+things like bandwidth and MFlop/s. This is the function I use the most.
+
+### `resultsToJson(param_string);`
+
+This function saves gathered data to disk in json format, enabling the creation
+of a visualization. It takes one parameter, an optional user-defined parameter
+string designed to store data about what kind of computation was done.
+
+For instance, in a convolution kernel you might want your parameter string to
+be `"n=100000, k=9, schedule=dynamic"` so that anyone viewing the diagram later
+will have some information on what kind of convolution was done. This
+information will be useful while trying to determine if the reported
+performance matches what you expect.
+
+# Advanced Usage and notes
+
+Region names must not have spaces.
+
+Chapter 19 of volume 3 of the Intel software developer's manual (page 3605 in
+the combined digital version) has hardware counter names. This is useful if you
+want to create custom performance groups.
+
+## Thread Affinity
+
+To set the number of threads, OMP_NUM_THREADS may be used. For example, if you
+are running `examples/minimal` and you only wanted to use 2 threads, you could
+issue the command `OMP_NUM_THREADS=2 ./fhv_minimal`.
+
+On GNU OpenMP, one may explicitly specify which cores should be used with
+GOMP_CPU_AFFINITY, e.g. `GOMP_CPU_AFFINITY=0,2,8,1 ./fhv_minimal`
+
+Note that because these are both environment variables, you may preserve this
+configuration across runs by `export`ing them: e.g. `export GOMP_CPU_AFFINITY=0,2,8,1 && ./fhv_minimal`
+
+Another option for setting explicity thread affinity that will work with any
+posix-compliant C/C++ compiler is
+[sched_setaffinity](https://linux.die.net/man/2/sched_getaffinity)
+
+For additional ways to control thread affinity (many of which work regardless
+of implementation), see [the OpenMP
+docs](https://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html)
