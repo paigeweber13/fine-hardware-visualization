@@ -21,6 +21,9 @@
 
 # The Basics
 
+Unless otherwise specified, don't skip this section. It contains fundamental
+information about using FHV.
+
 ## Model-Specific Registers (MSRs)
 
 Before running anything, make sure you have access to the model specific
