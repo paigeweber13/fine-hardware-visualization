@@ -9,6 +9,9 @@
 
 typedef long long int lli;
 
+
+// "do_copy" and "do_flops" are the functions we will measure later
+
 void do_copy(double *arr, double *copy_arr, lli n, lli num_copies) {
   for (lli iter = 0; iter < num_copies; iter++) {
     for (lli i = 0; i < n; i++) {
@@ -42,10 +45,23 @@ int main()
   double arr[n];
   double copy_arr[n];
 
+  // ------------------------- INIT ------------------------- //
+
+  // "init" must be called exactly once, on exactly one thread
+
   // optional: specify regions ahead of time. This is recommended, as it
   // removes the risk of overhead on the first call to `startRegion`
+
   // fhv_perfmon::init((REGION_FLOPS + "," + REGION_COPY).c_str());
+
+
+  // if you use the init line above, comment out the line below. Each program
+  // may have only one call to init.
+
   fhv_perfmon::init();
+
+
+  // ------------------------- RUN/MEASURE CODE ------------------------- //
 
 #pragma omp parallel
   {
@@ -61,6 +77,8 @@ int main()
       do_copy(arr, copy_arr, n, NUM_COPIES);
       fhv_perfmon::stopRegion(REGION_COPY.c_str());
 
+      // nextGroup need not be called outside the parallel region, because it
+      // contains a barrier and an OpenMP 'single' block.
       fhv_perfmon::nextGroup();
     }
   }
@@ -69,10 +87,23 @@ int main()
   printf("final random part of copy_arr: %f\n", 
          copy_arr[( (lli) c ) % n]);
 
+
+  // ------------------------- CLOSE ------------------------- //
+
+  // "close" must be called exactly once, on exactly one thread
   fhv_perfmon::close();
+
+
+  // ------------------------- OUTPUT RESULTS ------------------------- //
+
+  // If you want more detailed results to be printed to stdout, uncomment one
+  // or both of the following lines:
 
   // fhv_perfmon::printDetailedResults();
   // fhv_perfmon::printAggregateResults();
+
   fhv_perfmon::printHighlights();
+
+  // saves performance data to disk, to be used for visualizations later.
   fhv_perfmon::resultsToJson();
 }
