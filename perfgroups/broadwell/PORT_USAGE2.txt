@@ -1,0 +1,27 @@
+SHORT  Execution port utilization, part 2: ports 3-5
+
+EVENTSET
+FIXC0 INSTR_RETIRED_ANY
+FIXC1 CPU_CLK_UNHALTED_CORE
+FIXC2 CPU_CLK_UNHALTED_REF
+PMC0  UOPS_EXECUTED_THREAD
+PMC1  UOPS_DISPATCHED_PORT_PORT_3
+PMC2  UOPS_DISPATCHED_PORT_PORT_4
+PMC3  UOPS_DISPATCHED_PORT_PORT_5
+
+METRICS
+Runtime (RDTSC) [s] time
+Runtime unhalted [s] FIXC1*inverseClock
+Clock [MHz]  1.E-06*(FIXC1/FIXC2)/inverseClock
+CPI  FIXC1/FIXC0
+
+-
+This group measures the execution port utilization in a CPU core. This group is
+designed to be run over the same region with all other PORT_USAGE* groups. By
+splitting the port usage calculations into multiple groups, port usage is able
+to be calculated with hyperthreading enabled.
+
+Ratios of a given port's usage to the total usage of all ports must be
+calculated by software that processes results, for instance by summing the uops
+dispatched across all ports and then dividing each UOPS_DISPATCHED_PORT_PORT_*
+by that sum.
