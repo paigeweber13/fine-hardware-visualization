@@ -1,9 +1,5 @@
-- [Installation](#installation)
-- [Dependencies](#dependencies)
-  - [Compiled from source](#compiled-from-source)
-  - [Installed via package manager](#installed-via-package-manager)
-  - [Automatically included](#automatically-included)
-- [Running](#running)
+- [The Basics](#the-basics)
+  - [Model-Specific Registers (MSRs)](#model-specific-registers-msrs)
   - [Configuring Environment Variables](#configuring-environment-variables)
   - [Tests](#tests)
   - [Examples](#examples)
@@ -19,68 +15,19 @@
     - [`printAggregateResults();`](#printaggregateresults)
     - [`printHighlights();`](#printhighlights)
     - [`resultsToJson(param_string);`](#resultstojsonparam_string)
+- [Create a Visualization](#create-a-visualization)
 - [Advanced Usage and notes](#advanced-usage-and-notes)
   - [Thread Affinity](#thread-affinity)
 
-# Installation
+# The Basics
 
-In summary, to install all dependencies on ubuntu (should work with all
-debian-based systems), follow the workflow below:
-
-1. compile likwid from source: see [here](https://github.com/RRZE-HPC/likwid)
-2. edit `LIKWID_PREFIX` in config.mk in the fhv root directory to match the
-   location where likwid was installed in step 1
-3. Install build dependencies for fhv with the command `sudo apt-get install libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
-4. In the directory of fhv, run the following commands:
-   - TODO: figure out what git submodule commands are needed
-   - `make`
-   - `make perfgroups`
-   - `sudo make install`
-
-If you'd like more details of what is used and why, read the "Dependencies"
-section.
-
-# Dependencies
-
-## Compiled from source
-
-- **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
-  for memory counters and is confirmed to use `likwid-accessD` without root
-  permissions. If this version is available with your package manager, use
-  that. Otherwise, build it from source. Instructions to do this are available
-  [here](https://github.com/RRZE-HPC/likwid). Be sure to change
-  `LIKWID_PREFIX` in this repository's makefile to match wherever likwid is
-  installed
-- additional perfgroups not included with likwid. These can be installed by
-  running `make perfgroups` in the root directory.
-
-## Installed via package manager
-
-- **boost/program_options:** available on [the boost
-  website](https://www.boost.org/). Also installable on ubuntu with `sudo apt install libboost-program-options-dev` on debian-based distributions. The
-  makefile assumes boost program options is already in a directory included by
-  gcc.
-- **cairo:** available [here](https://www.cairographics.org/), also
-  installable with `sudo apt install libcairo2-dev` The makefile uses
-  `pkg-config` to ensure cairo is automatically found and included.
-- **pango:** pango is used for text rendering in conjunction with cairo.
-  The pangocairo interface comes preinstalled with cairo, but this does not
-  include development tools. Pango is available
-  [here](https://pango.gnome.org/Download), or installable on ubuntu with
-  `sudo apt install libpango1.0-dev`
-- **{fmt}:** available [here](https://fmt.dev/latest/index.html), also
-  installable with `sudo apt install libfmt-dev`
-
-## Automatically included
-
-- **[nlohmann/json](https://github.com/nlohmann/json):** header-only, included
-  in ./lib
-
-# Running
+## Model-Specific Registers (MSRs)
 
 Before running anything, make sure you have access to the model specific
 registers (MSRs). These provide hardware counters, which are necessary for FHV
-to work. If you have root permissions, you can do this by running `sudo modprobe msr`. On a cluster, you might have to do something like `module load msr`. If you need more help, contact the IT support for your cluster and ask
+to work. If you have root permissions, you can do this by running `sudo
+modprobe msr`. On a cluster, you might have to do something like `module load
+msr`. If you need more help, contact the IT support for your cluster and ask
 them if it's possible to get access to model specific registers (aka hardware
 counters).
 
@@ -89,7 +36,8 @@ not properly initialized"
 
 ## Configuring Environment Variables
 
-Note: if you installed FHV with `make && sudo make install` WITHOUT modifying `config.mk` or `makefile`, you may skip this section.
+Note: if you installed FHV with `make && sudo make install` WITHOUT modifying
+`config.mk` or `makefile`, you may skip this section.
 
 If you have installed `fhv` (this software) or `likwid` to a non-standard
 directory, you should run run the following commands in your terminal before
@@ -129,7 +77,8 @@ TODO: add examples info
 # Measuring Your Code (API Usage)
 
 In `examples/minimal` you will find a minimal example that does a good job
-indicating how to use the API. The first section outlines the basic usage and after that there is full instructions, details, and "gotchas".
+indicating how to use the API. The first section outlines the basic usage and
+after that there is full instructions, details, and "gotchas".
 
 As a reminder, don't forget to run `sudo modprobe msr` before running any code
 that uses likwid or fhv!
@@ -142,7 +91,8 @@ performance.
 1. Before any computation is done, call `fhv_perfmon::init()` exactly once, on
    only one thread.
 2. Surround the code you want to measure with a loop that runs at least seven
-   times, and in each iteration call `fhv_perfmon::startRegion(<region name>);`, then the code you want to measure, then
+   times, and in each iteration call `fhv_perfmon::startRegion(<region
+   name>);`, then the code you want to measure, then
    `fhv_perfmon::stopRegion(<region name>);`. This can be done in either
    parallel or sequential blocks. `<region name>` is a user-specified string
    that identifies a region of code.
@@ -208,7 +158,8 @@ different parameters for setting groups. The first is `parallel_regions` and
 the second is `sequential_regions`. As you might imagine, use the first to
 specify regions that will run in parallel (they will be initialized for each
 thread) and use the second to specify regions that will run in a sequential
-block. Each of these parameters takes a string with a comma-separated list of regions.
+block. Each of these parameters takes a string with a comma-separated list of
+regions.
 
 If you'd like to manually select the groups that likwid will measure, use the
 third optional parameter to `fhv::init()`. This parameter accepts a string with
@@ -297,6 +248,17 @@ will have some information on what kind of convolution was done. This
 information will be useful while trying to determine if the reported
 performance matches what you expect.
 
+To control where this function stores the json, use the environment variable
+`FHV_OUTPUT`. For instance, if you're running the program `convolution`, you
+could issue the command `FHV_OUTPUT=convolution.json ./convolution`.
+
+# Create a Visualization
+
+To create a visualization, you must first measure some code and generate a json
+by calling [resultsToJson](#resultstojsonparam_string). After that, simply run
+`fhv -v ./path/to/perfmon_output.json`. An `.svg` diagram will be created in
+the same directory as the json.
+
 # Advanced Usage and notes
 
 Region names must not have spaces.
@@ -315,7 +277,8 @@ On GNU OpenMP, one may explicitly specify which cores should be used with
 GOMP_CPU_AFFINITY, e.g. `GOMP_CPU_AFFINITY=0,2,8,1 ./fhv_minimal`
 
 Note that because these are both environment variables, you may preserve this
-configuration across runs by `export`ing them: e.g. `export GOMP_CPU_AFFINITY=0,2,8,1 && ./fhv_minimal`
+configuration across runs by `export`ing them: e.g. `export
+GOMP_CPU_AFFINITY=0,2,8,1 && ./fhv_minimal`
 
 Another option for setting explicity thread affinity that will work with any
 posix-compliant C/C++ compiler is
