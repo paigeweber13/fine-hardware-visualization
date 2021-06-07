@@ -45,10 +45,11 @@ class fhv_perfmon {
     // OMP_NUM_THREADS is respected. Currently, threads will be assigned
     // sequentially from the first.
     // 
+    static void init(std::string parallel_regions,
+      std::string sequential_regions,
+      std::string event_groups);
     static void init(std::string parallel_regions = "",
-      std::string sequential_regions = "",
-      std::string event_groups = 
-        "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3");
+        std::string sequential_regions = "");
 
     // if parallel is true, will register regions in a parallel block
     static void registerRegions(const std::string regions, bool parallel);

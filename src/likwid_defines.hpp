@@ -59,3 +59,9 @@ const std::string ram_load_data_volume_name = "Memory load data volume [GBytes]"
 
 // other memory/cache stuff
 const std::string load_to_store_ratio_metric_name = "Load to store ratio";
+
+// topology information
+const uint32_t CPUFAMILY_SKYLAKE1 = 0x4EU;
+const uint32_t CPUFAMILY_SKYLAKE2 = 0x5EU;
+const uint32_t CPUFAMILY_SKYLAKEX = 0x55U;
+
