@@ -1,0 +1,21 @@
+{
+  "architecture": {
+    "num_ports_in_core": 8
+  },
+  "benchmark_results": {
+    "sp_rate_mflops": 183598.03125,
+    "dp_rate_mflops": 91583.672,
+    "r_bw_l1 ": 0.0,
+    "r_bw_l2 ": 172162.1187,
+    "r_bw_l3 ": 94259.5077,
+    "r_bw_ram": 23520.7488,
+    "w_bw_l1 ": 0.0,
+    "w_bw_l2 ": 109407.8277,
+    "w_bw_l3 ": 63675.2813,
+    "w_bw_ram": 12160.8669,
+    "rw_bw_l1 ": 0.0,
+    "rw_bw_l2 ": 214060.9152,
+    "rw_bw_l3 ": 127028.1843,
+    "rw_bw_ram": 24208.177734
+  }
+}

@@ -59,15 +59,15 @@ EXEC=$(EXEC_DIR)/$(EXEC_NAME)
 #### Files
 #HEADERS=$(wildcard $(SRC_DIR)/*.hpp)
 
-SOURCES=$(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/fhv_main.cpp \
-	$(SRC_DIR)/saturation_diagram.cpp
+SOURCES=$(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/config.cpp \
+	$(SRC_DIR)/fhv_main.cpp $(SRC_DIR)/saturation_diagram.cpp
 OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 SOURCES_SHARED_LIB=$(SRC_DIR)/fhv_perfmon.cpp $(SRC_DIR)/types.cpp \
 	$(SRC_DIR)/utils.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-HEADERS_SHARED_LIB_SHORT=fhv_perfmon.hpp architecture.hpp likwid_defines.hpp \
-	performance_monitor_defines.hpp types.hpp utils.hpp
+HEADERS_SHARED_LIB_SHORT=fhv_perfmon.hpp architecture.hpp config.hpp \
+	likwid_defines.hpp performance_monitor_defines.hpp types.hpp utils.hpp
 HEADERS_SHARED_LIB=$(addprefix $(SRC_DIR)/, $(HEADERS_SHARED_LIB_SHORT))
 
 NLOHMANN_JSON_HEADER_SHORT=nlohmann/json.hpp
@@ -83,6 +83,11 @@ PERFGROUPS_DIRS=$(shell find $(wildcard $(PERFGROUPS_ROOT_DIR_NAME)/*) -type d)
 
 #### perfmon lib
 PERFMON_LIB=$(BUILT_LIB_DIR)/$(PERFMON_LIB_NAME)
+
+#### config files
+CONFIG_TEMPLATE=config-template.json
+CONFIG_LOCATION_DEV=./config
+CONFIG_LOCATION_SYSTEM=/etc/fhv
 
 
 #### Flags for compilation proper
@@ -133,8 +138,8 @@ LDFLAGS_SHARED_LIB=$(LIKWID_LIB_DIR) $(LIKWID_LIB_FLAG) -shared \
 RUN_CMD_PREFIX=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(FHV_PERFMON_PREFIX)/lib:$$LD_LIBRARY_PATH \
 	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$(FHV_PERFMON_PREFIX)/bin:$$PATH"
 
-RUN_CMD_PREFIX_DEV=LD_LIBRARY_PATH=$(LIKWID_PREFIX)/lib:$(BUILD_DIR)/lib:$$LD_LIBRARY_PATH \
-	PATH="$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$(BUILD_DIR)/bin:$$PATH"
+RUN_CMD_PREFIX_DEV=LD_LIBRARY_PATH=$(BUILD_DIR)/lib:$(LIKWID_PREFIX)/lib:$$LD_LIBRARY_PATH \
+	PATH="$(BUILD_DIR)/bin:$(LIKWID_PREFIX)/sbin:$(LIKWID_PREFIX)/bin:$$PATH"
 
 #### meta-rules: These implement the functionality that users call 
 
@@ -145,6 +150,8 @@ _install: $(EXEC) $(PERFMON_LIB) $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX) per
 	@cp $(PERFMON_LIB) $(FHV_PERFMON_PREFIX)/lib/$(PERFMON_LIB_NAME)
 	@cp $(HEADERS_SHARED_LIB) $(FHV_PERFMON_PREFIX)/include/
 	@cp $(NLOHMANN_JSON_HEADER) $(FHV_PERFMON_PREFIX)/include/nlohmann/
+	@mkdir -p $(CONFIG_LOCATION_SYSTEM)
+	@cp $(CONFIG_LOCATION_DEV)/$(CONFIG_TEMPLATE) $(CONFIG_LOCATION_SYSTEM)/
 
 _uninstall:
 	@rm -f $(FHV_PERFMON_PREFIX)/bin/$(EXEC_NAME)
@@ -198,6 +205,9 @@ endef
 
 ## compilation of sources
 $(OBJ_DIR)/computation_measurements.o: $(SRC_DIR)/computation_measurements.cpp $(SRC_DIR)/computation_measurements.hpp
+	$(compile-command)
+
+$(OBJ_DIR)/config.o: $(SRC_DIR)/config.cpp $(SRC_DIR)/config.hpp
 	$(compile-command)
 
 $(OBJ_DIR)/saturation_diagram.o: $(SRC_DIR)/saturation_diagram.cpp $(SRC_DIR)/saturation_diagram.hpp
