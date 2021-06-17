@@ -13,7 +13,6 @@
 #include <string>
 #include <type_traits>
 
-#include "architecture.hpp"
 #include "likwid_defines.hpp"
 // needed for "aggregationTypeToString"
 #include "fhv_perfmon.hpp"

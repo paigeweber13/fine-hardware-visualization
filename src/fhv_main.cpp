@@ -11,9 +11,7 @@
 #include <nlohmann/json.hpp>
 #include <omp.h>
 
-// #include "architecture.hpp"
 #include "computation_measurements.hpp"
-//#include "fhv_perfmon.hpp"
 #include "types.hpp"
 #include "performance_monitor_defines.hpp"
 #include "saturation_diagram.hpp"

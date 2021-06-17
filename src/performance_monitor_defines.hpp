@@ -1,6 +1,5 @@
 #pragma once
 
-#include "architecture.hpp"
 #include <likwid.h>
 #include <string>
 #include <vector>
@@ -134,20 +133,6 @@ const std::vector<std::string> fhv_saturation_metric_names = {
   fhv_mem_rw_saturation_metric_name,
   fhv_mem_w_saturation_metric_name,
   fhv_mem_r_saturation_metric_name,
-};
-
-const std::vector<double> fhv_saturation_reference_rates = {
-  EXPERIENTIAL_SP_RATE_MFLOPS,
-  EXPERIENTIAL_DP_RATE_MFLOPS,
-  EXPERIENTIAL_RW_BW_L2,
-  EXPERIENTIAL_W_BW_L2,
-  EXPERIENTIAL_R_BW_L2,
-  EXPERIENTIAL_RW_BW_L3,
-  EXPERIENTIAL_W_BW_L3,
-  EXPERIENTIAL_R_BW_L3,
-  EXPERIENTIAL_RW_BW_RAM,
-  EXPERIENTIAL_W_BW_RAM,
-  EXPERIENTIAL_R_BW_RAM,
 };
 
 const std::vector<std::string> fhv_other_diagram_metrics = {

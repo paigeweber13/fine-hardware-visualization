@@ -66,7 +66,7 @@ OBJS=$(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 SOURCES_SHARED_LIB=$(SRC_DIR)/config.cpp $(SRC_DIR)/fhv_perfmon.cpp \
 	$(SRC_DIR)/types.cpp $(SRC_DIR)/utils.cpp
 OBJS_SHARED_LIB=$(SOURCES_SHARED_LIB:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-HEADERS_SHARED_LIB_SHORT=fhv_perfmon.hpp architecture.hpp config.hpp \
+HEADERS_SHARED_LIB_SHORT=fhv_perfmon.hpp config.hpp \
 	likwid_defines.hpp performance_monitor_defines.hpp types.hpp utils.hpp
 HEADERS_SHARED_LIB=$(addprefix $(SRC_DIR)/, $(HEADERS_SHARED_LIB_SHORT))
 

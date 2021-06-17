@@ -355,8 +355,7 @@ void fhv_perfmon::calculate_port_usage_ratios()
   checkInit();
   
   auto machineStats = fhv::config::loadMachineStats();
-  const auto NUM_PORTS_IN_CORE = machineStats.architecture.num_ports_in_core;
-  if (NUM_PORTS_IN_CORE == 0) {
+  if (machineStats.architecture.num_ports_in_core == 0) {
     std::cerr << "ERROR: calculate_port_usage_ratios: no machine stats "
       << "provided. Quitting." 
       << std::endl;
@@ -370,7 +369,7 @@ void fhv_perfmon::calculate_port_usage_ratios()
 
   // instead of using this vector, we could iterate through per_thread_results
   // again. The vector makes things easy, though
-  std::vector<double> uops_executed_port(NUM_PORTS_IN_CORE);
+  std::vector<double> uops_executed_port(machineStats.architecture.num_ports_in_core);
   double total_num_port_ops;
 
   // everything is done on a per-thread, per-region basis
@@ -385,7 +384,7 @@ void fhv_perfmon::calculate_port_usage_ratios()
       total_num_port_ops = 0;
 
       // first, sum all UOPS_DISPATCHED_PORT_PORT*
-      for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+      for (size_t port_num = 0; port_num < machineStats.architecture.num_ports_in_core; port_num++)
       {
         for (const auto &ptr : fhv_perfmon::per_thread_results)
         {
@@ -401,7 +400,7 @@ void fhv_perfmon::calculate_port_usage_ratios()
       }
 
       // next, find ratios and create metrics for them
-      for (size_t port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+      for (size_t port_num = 0; port_num < machineStats.architecture.num_ports_in_core; port_num++)
       {
         fhv::types::PerThreadResult port_usage_metric = {
           .region_name = region_name,
@@ -427,6 +426,30 @@ void fhv_perfmon::calculate_saturation(){
   bool is_saturation_result;
   std::string saturation_result_name;
   double saturation_result_value;
+
+  // load experiential maximum from machineStats file:
+  auto machineStats = fhv::config::loadMachineStats();
+  if (machineStats.benchmarkResults.mflops_dp == 0.0) {
+    std::cerr << "ERROR: calculate_saturation: no machine stats provided. " 
+      << "Aborting." << std::endl;
+    return;
+  }
+
+  // the order of items in this array must exactly match the order of names in
+  // fhv_saturation_metric_names 
+  const std::vector<double> fhv_saturation_reference_rates = {
+    machineStats.benchmarkResults.mflops_sp,
+    machineStats.benchmarkResults.mflops_dp,
+    machineStats.benchmarkResults.bw_rw_l2,
+    machineStats.benchmarkResults.bw_w_l2,
+    machineStats.benchmarkResults.bw_r_l2,
+    machineStats.benchmarkResults.bw_rw_l3,
+    machineStats.benchmarkResults.bw_w_l3,
+    machineStats.benchmarkResults.bw_r_l3,
+    machineStats.benchmarkResults.bw_rw_ram,
+    machineStats.benchmarkResults.bw_w_ram,
+    machineStats.benchmarkResults.bw_r_ram,
+  };
 
   for (const auto & ar : fhv_perfmon::aggregate_results)
   {

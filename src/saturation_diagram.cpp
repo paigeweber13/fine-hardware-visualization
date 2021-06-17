@@ -949,21 +949,20 @@ void saturation_diagram::draw_diagram_overview(
   
   // --- draw ports in core
   auto machineStats = fhv::config::loadMachineStats();
-  const auto NUM_PORTS_IN_CORE = machineStats.architecture.num_ports_in_core;
-  if (NUM_PORTS_IN_CORE == 0) {
-    std::cerr << "ERROR: calculate_port_usage_ratios: no machine stats "
+  if (machineStats.architecture.num_ports_in_core == 0) {
+    std::cerr << "ERROR: draw_diagram_overview: no machine stats "
       << "provided. Quitting." 
       << std::endl;
       return;
   }
 
   double port_width = (in_core_width - text_height) * 
-    (1.0/static_cast<double>(NUM_PORTS_IN_CORE));
+    (1.0/static_cast<double>(machineStats.architecture.num_ports_in_core));
   double port_height = in_core_height - flops_height;
   double port_y = in_core_y + flops_height;
   double port_x;
 
-  for (unsigned port_num = 0; port_num < NUM_PORTS_IN_CORE; port_num++)
+  for (unsigned port_num = 0; port_num < machineStats.architecture.num_ports_in_core; port_num++)
   {
     port_x = in_core_x + text_height + port_num * port_width;
 
