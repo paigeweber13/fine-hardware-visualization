@@ -15,6 +15,7 @@
 #include <string>
 
 #include "architecture.hpp"
+#include "config.hpp"
 #include "likwid_defines.hpp"
 #include "performance_monitor_defines.hpp"
 #include "types.hpp"

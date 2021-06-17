@@ -5,7 +5,7 @@
 // values are for an Intel i5-6300U
 
 // ---- Architecture information ---- //
-const unsigned NUM_PORTS_IN_CORE = 8;
+// const unsigned NUM_PORTS_IN_CORE = 8;
 
 // ---- Benchmark results ---- //
 // -- computation --

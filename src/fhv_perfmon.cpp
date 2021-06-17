@@ -353,6 +353,15 @@ void fhv_perfmon::perform_result_aggregation()
 void fhv_perfmon::calculate_port_usage_ratios()
 {
   checkInit();
+  
+  auto machineStats = fhv::config::loadMachineStats();
+  const auto NUM_PORTS_IN_CORE = machineStats.architecture.num_ports_in_core;
+  if (NUM_PORTS_IN_CORE == 0) {
+    std::cerr << "ERROR: calculate_port_usage_ratios: no machine stats "
+      << "provided. Quitting." 
+      << std::endl;
+      return;
+  }
 
   // create list of regions
   std::set<std::string> regions;
