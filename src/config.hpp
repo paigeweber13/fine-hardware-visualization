@@ -11,11 +11,12 @@ using json = nlohmann::json;
 
 namespace fhv {
   namespace config {
-    const std::string configFileName_template = "config-template.json";
-    const std::string configFileName = "config.json";
-    const std::string configFileLocation_system = "/etc/fhv";
-    const std::string configFileLocation_userPostfix = ".config/fhv";
+    const std::string machineStatsFileName_template = 
+      "machine-stats-template.json";
+    const std::string machineStatsFileName = "machine-stats.json";
+    const std::string machineStatsFileLocation_system = "/etc/fhv";
+    const std::string machineStatsFileLocation_userPostfix = ".config/fhv";
 
-    json loadConfig();
+    json loadMachineStats();
   }
 }

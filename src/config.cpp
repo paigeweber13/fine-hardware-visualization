@@ -1,28 +1,28 @@
 #include "config.hpp"
 
-json fhv::config::loadConfig() {
+json fhv::config::loadMachineStats() {
   std::ifstream i;
 
   std::string homedir(getenv("HOME"));
-  i.open(
-    homedir + "/" + configFileLocation_userPostfix + "/" + configFileName);
+  i.open(homedir + "/" + machineStatsFileLocation_userPostfix + "/" 
+    + machineStatsFileName);
 
   if(!i){
-    i.open(configFileLocation_system + "/" + configFileName);
+    i.open(machineStatsFileLocation_system + "/" + machineStatsFileName);
 
     if (!i) {
-      std::cerr << "ERROR: no config file exists! Please copy "
-        << "\"" << configFileLocation_system << "/" 
-        << configFileName_template << "\" "
-        << "to \"" << configFileLocation_system << "/"
-        << configFileName << "\". "
+      std::cerr << "ERROR: no machine stats file exists! Please copy "
+        << "\"" << machineStatsFileLocation_system << "/" 
+        << machineStatsFileName_template << "\" "
+        << "to \"" << machineStatsFileLocation_system << "/"
+        << machineStatsFileName << "\". "
         << "Then, fill out the file with your machine's performance. "
         << "If you do not have permissions necessary to write "
-        << "to \"" << configFileLocation_system << "/"
-        << configFileName << "\", "
-        << "you may instead create a config file at "
-        << "to \"" << homedir << "/" << configFileLocation_userPostfix << "/"
-        << configFileName << "\". "
+        << "to \"" << machineStatsFileLocation_system << "/"
+        << machineStatsFileName << "\", "
+        << "you may instead create a machineStats file at "
+        << "to \"" << homedir << "/" << machineStatsFileLocation_userPostfix 
+        << "/" << machineStatsFileName << "\". "
         << "For more information, see \"docs/installation.md\"."
         << std::endl;
       return json();
