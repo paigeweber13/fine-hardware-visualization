@@ -2,8 +2,11 @@ CXX=g++
 # CXX=gcc
 
 # for use by this example
-SRCS=main.cpp
-BUILD_DIR=bin
+SRC_DIR=src
+SRC_NAMES=main.cpp
+SRCS=$(addprefix $(SRC_DIR)/, $(SRC_NAMES))
+BIN_DIR=build/bin
+OBJ_DIR=build/obj
 
 FHV_PREFIX=/usr/local
 
@@ -14,23 +17,28 @@ CXX_FLAGS=-I$(FHV_PREFIX)/include -I$(LIKWID_SRC_ROOT)/GCC \
 CXX_COMMAND=$(CXX) $(CXX_FLAGS) -c $< -o $@
 LD_FLAGS=-L$(FHV_PREFIX)/lib -lfhv_perfmon -fopenmp
 
-OBJS=$(SRCS:%.cpp=$(BUILD_DIR)/%.o)
-EXEC=$(BUILD_DIR)/microbenchmarks
+OBJS=$(SRC_NAMES:%.cpp=$(OBJ_DIR)/%.o)
+EXEC=$(BIN_DIR)/microbenchmarks
 
 # rules for building this example
 all: benchmarks $(EXEC)
 
-$(EXEC): $(OBJS) $(BENCHMARK_OBJS)
+$(EXEC): $(OBJS) $(BENCHMARK_OBJS) | $(BIN_DIR)
 	$(CXX) $(OBJS) $(BENCHMARK_OBJS) $(LD_FLAGS) -o $@
 
-$(BUILD_DIR)/%.o: ./%.cpp ./%.hpp | $(BUILD_DIR)
+$(OBJ_DIR)/%.o: ./$(SRC_DIR)/%.cpp ./$(SRC_DIR)/%.hpp | $(OBJ_DIR)
 	$(CXX_COMMAND)
 
-$(BUILD_DIR)/%.o: ./%.cpp | $(BUILD_DIR)
+$(OBJ_DIR)/%.o: ./$(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	$(CXX_COMMAND)
 
-$(BUILD_DIR):
-	@mkdir -p $(BUILD_DIR)
+MKDIR_COMMAND=mkdir -p $@
+
+$(OBJ_DIR):
+	$(MKDIR_COMMAND)
+
+$(BIN_DIR):
+	$(MKDIR_COMMAND)
 
 
 ### for compiling likwid's microbenchmarks
