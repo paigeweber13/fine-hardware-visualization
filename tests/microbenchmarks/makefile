@@ -3,7 +3,7 @@ CXX=g++
 
 # for use by this example
 SRC_DIR=src
-SRC_NAMES=main.cpp
+SRC_NAMES=main.cpp peakflops_sp_avx_fma.cpp
 SRCS=$(addprefix $(SRC_DIR)/, $(SRC_NAMES))
 BIN_DIR=build/bin
 OBJ_DIR=build/obj
