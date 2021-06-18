@@ -236,14 +236,18 @@ Following are my notes for each week of development.
 - [x] let's improve usability: 
   - [x] config file for architecture info
 - [ ] finish microbenchmarks (bandwidth!)
+  - [x] move sp benchmark to own file
+  - [ ] move dp benchmark to own file
+  - [ ] create L2 bw benchmark
   - [ ] update benchmark script automatically populates config file
 
 ## Questions
 - transfer ownership of repository? Or just give you admin rights to my repo?
 - can you test on broadwell, or should I reserve time on chameleon cloud?
-- one of our goals was demoing this application on one real-world program. I
-  wrote code to demo this with convolution and polynomial expansion last summer
-  and fall, are these adequate?
+- one of our goals was demonstrating the soundness of this application with
+  some applications that are well-understood. I wrote code to demo this with
+  convolution and polynomial expansion last summer and fall, are these
+  adequate?
 
 ## My thoughts on next steps
 - Confirming soundness of tool:
