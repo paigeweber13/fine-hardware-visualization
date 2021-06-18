@@ -1,31 +1,9 @@
-- [Preparation](#preparation)
 - [Installation](#installation)
+- [Preparation](#preparation)
 - [Dependencies](#dependencies)
   - [Compiled from source](#compiled-from-source)
   - [Installed via package manager](#installed-via-package-manager)
   - [Automatically included](#automatically-included)
-
-# Preparation
-
-Note: I would like this process to be automatic (and for these values to come
-from a config file at runtime) but for now this solution will do.
-
-Before installing fhv, you need to measure your computer's maximum possible
-performance and make fhv aware of those values. These values will be used later
-by fhv to give you an idea of how well other programs perform. For instance,
-FHV might indicate that you are currently using 50% of available bandwidth.
-
-To benchmark performance, run the script `benchmark.sh` in the root of this
-repository. Then, open `src/architecture.hpp` and update the values in the
-section "Absolutely Necessary Values" to match the benchmark output.
-
-For instance, to populate the variable `EXPERIENTIAL_RW_BW_L2`, read the
-benchmark output to find the section `L2`. Then look for the test `copy_avx`
-(because `copy_avx` test R/W bandwidth). Finally, in that section find where
-the benchmark prints `MByte/s`. This is the bandwidth value that you should put
-for `EXPERIENTIAL_RW_BW_L2`.
-
-For the flop rates, look for `MFlops/s`.
 
 
 # Installation
@@ -49,6 +27,45 @@ FHV. Skip to the `docs/usage.md` document to learn how to use FHV.
 
 If you'd like more details of what is used and why, read the "Dependencies"
 section.
+
+# Preparation
+
+*Note: I would like this process to be automatic, but for now this solution
+will do.*
+
+Before using FHV, you *must* gather some information about your machine. You
+need to know how many execution ports per core your architecture has and you
+will need to benchmark your processor and gather some key metrics.
+
+These values will later be used as a reference by fhv to give you an idea of
+how well other programs perform. For instance, if you indicate your computer
+can read data from RAM with a maximum throughput of 20 GB/s, but your program
+only shows 10 GB/s of performance, FHV would indicate that you are currently
+using 50% of available bandwidth.
+
+The "machine stats" file that contains these values must be named
+`machine-stats.json` and may be stored in either `/etc/fhv` or `~/.config/fhv`.
+In the case that there is a machine stats file in both directories, the one in
+`~/.config/fhv` will be used; this allows users to have full control over
+baseline data even when they do not have permissions to write to `/etc`. The
+format of the machine stats file is described in a template copied to
+`/etc/fhv/machine-stats-template.json` upon calling `make install`. This
+template can also be found in the source code at
+`./machine-stats/machine-stats-template.json`. Begin by copying this file to
+one of the supported locations and renaming it to `machine-stats.json`.
+
+To benchmark performance, run the script `benchmark.sh` in the root of this
+repository. Then, open `machine-stats.json` and update the values in the
+section "benchmark-results" to match the benchmark output.
+
+For instance, to populate the variable `EXPERIENTIAL_RW_BW_L2`, read the
+benchmark output to find the section `L2`. Then look for the test `copy_avx`
+(because `copy_avx` test R/W bandwidth). Finally, in that section find where
+the benchmark prints `MByte/s`. This is the bandwidth value that you should put
+for `EXPERIENTIAL_RW_BW_L2`.
+
+For the flop rates, look for `MFlops/s`.
+
 
 # Dependencies
 

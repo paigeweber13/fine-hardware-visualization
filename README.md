@@ -67,9 +67,10 @@ We want all programmers to
 # Architecture of Program
  - [ ] Identify hardware architecture
  - [ ] Identify peak FLOP/s, memory bandwidth, latency etc.
-   - [ ] currently, the `benchmark.sh` script does this, but the user must
-         manually copy values to `src/architecture.hpp`. In the future I would
-         like this process to be automated.
+   - [ ] currently, the `benchmark.sh` script will accomplish the benchmark,
+         but the user must manually copy values to a config file (see
+         `docs/installation.md`). In the future I would like this process to be
+         automated.
  - [x] Measure what actual utilization of memory/processor is
  - [x] Compare actual utilization with peak on an piece-by-piece basis
  - [x] Visualize that
