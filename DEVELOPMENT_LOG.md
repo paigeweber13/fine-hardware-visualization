@@ -7,112 +7,116 @@ Hardware Visualization
   - [By May 12 - use this tool to gain insight on one real application](#by-may-12---use-this-tool-to-gain-insight-on-one-real-application)
   - [By June 30 - Deploy v1.0.0](#by-june-30---deploy-v100)
 - [Notes per week](#notes-per-week)
+- [2021-06-10 through 2021-06-17](#2021-06-10-through-2021-06-17)
+  - [Accomplishments:](#accomplishments)
+  - [Questions](#questions)
+  - [My thoughts on next steps](#my-thoughts-on-next-steps)
 - [2021-04-30 through 2021-05-07](#2021-04-30-through-2021-05-07)
   - [Goals](#goals)
     - [Other notes on goals](#other-notes-on-goals)
 - [2021-04-21 through 2021-04-30](#2021-04-21-through-2021-04-30)
   - [Goals](#goals-1)
-  - [Accomplishments](#accomplishments)
-- [2021-04-07 through 2021-04-21](#2021-04-07-through-2021-04-21)
-  - [Questions:](#questions)
   - [Accomplishments](#accomplishments-1)
+- [2021-04-07 through 2021-04-21](#2021-04-07-through-2021-04-21)
+  - [Questions:](#questions-1)
+  - [Accomplishments](#accomplishments-2)
   - [TODO:](#todo)
 - [2021-03-24 through 2021-04-07](#2021-03-24-through-2021-04-07)
-  - [Accomplishments](#accomplishments-2)
+  - [Accomplishments](#accomplishments-3)
   - [Notes from Meeting](#notes-from-meeting)
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
   - [Goals](#goals-2)
-  - [Accomplishments](#accomplishments-3)
+  - [Accomplishments](#accomplishments-4)
   - [Notes from meeting](#notes-from-meeting-1)
   - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
-  - [Questions](#questions-1)
+  - [Questions](#questions-2)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
   - [Goals](#goals-3)
     - [If time permits:](#if-time-permits)
-  - [Accomplishments](#accomplishments-4)
+  - [Accomplishments](#accomplishments-5)
     - [Investigated STREAM](#investigated-stream)
-  - [Questions](#questions-2)
+  - [Questions](#questions-3)
   - [Notes from meeting](#notes-from-meeting-2)
 - [2021-03-03 through 2021-03-10](#2021-03-03-through-2021-03-10)
   - [Notes from meeting](#notes-from-meeting-3)
-  - [Accomplishments](#accomplishments-5)
-  - [Questions](#questions-3)
+  - [Accomplishments](#accomplishments-6)
+  - [Questions](#questions-4)
   - [Goals](#goals-4)
     - [Some more detail on those goals:](#some-more-detail-on-those-goals)
 - [2021-02-24 through 2021-03-03](#2021-02-24-through-2021-03-03)
-  - [Accomplishments](#accomplishments-6)
-  - [Questions](#questions-4)
+  - [Accomplishments](#accomplishments-7)
+  - [Questions](#questions-5)
   - [Goals](#goals-5)
 - [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
   - [Goals](#goals-6)
-  - [Accomplishments](#accomplishments-7)
-  - [Questions](#questions-5)
-- [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
-  - [Goals](#goals-7)
   - [Accomplishments](#accomplishments-8)
   - [Questions](#questions-6)
+- [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
+  - [Goals](#goals-7)
+  - [Accomplishments](#accomplishments-9)
+  - [Questions](#questions-7)
 - [2020-12-09 through 2020-12-16](#2020-12-09-through-2020-12-16)
   - [Goals](#goals-8)
-  - [Questions](#questions-7)
+  - [Questions](#questions-8)
 - [2020-12-02 through 2020-12-09](#2020-12-02-through-2020-12-09)
   - [Goals](#goals-9)
-  - [Accomplishments](#accomplishments-9)
-  - [Questions](#questions-8)
-- [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
-  - [Goals](#goals-10)
   - [Accomplishments](#accomplishments-10)
   - [Questions](#questions-9)
+- [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
+  - [Goals](#goals-10)
+  - [Accomplishments](#accomplishments-11)
+  - [Questions](#questions-10)
 - [2020-11-04 through 2020-11-11](#2020-11-04-through-2020-11-11)
   - [Goals for this week](#goals-for-this-week)
 - [2020-10-28 through 2020-11-04](#2020-10-28-through-2020-11-04)
-  - [Accomplishments](#accomplishments-11)
-  - [Questions](#questions-10)
-- [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
   - [Accomplishments](#accomplishments-12)
-  - [Goals for this week](#goals-for-this-week-1)
   - [Questions](#questions-11)
-- [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
+- [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
   - [Accomplishments](#accomplishments-13)
+  - [Goals for this week](#goals-for-this-week-1)
   - [Questions](#questions-12)
-- [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
+- [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
   - [Accomplishments](#accomplishments-14)
   - [Questions](#questions-13)
-- [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
+- [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
   - [Accomplishments](#accomplishments-15)
-- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
   - [Questions](#questions-14)
+- [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
   - [Accomplishments](#accomplishments-16)
-- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+- [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
   - [Questions](#questions-15)
   - [Accomplishments](#accomplishments-17)
+- [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
+  - [Questions](#questions-16)
+  - [Accomplishments](#accomplishments-18)
     - [Intel TMA method](#intel-tma-method)
     - [Intel vTune](#intel-vtune)
     - [General](#general)
   - [Next steps](#next-steps)
 - [Biggest questions, main points](#biggest-questions-main-points)
 - [2020-07-28 through 2020-08-11](#2020-07-28-through-2020-08-11)
-  - [Questions](#questions-16)
-  - [Accomplishments](#accomplishments-18)
-- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions-17)
   - [Accomplishments](#accomplishments-19)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+- [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
+  - [Questions](#questions-18)
   - [Accomplishments](#accomplishments-20)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Accomplishments](#accomplishments-21)
   - [Next steps](#next-steps-1)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
-  - [Questions](#questions-18)
-  - [Accomplishments](#accomplishments-21)
-- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-19)
   - [Accomplishments](#accomplishments-22)
-- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
+- [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-20)
   - [Accomplishments](#accomplishments-23)
-- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+- [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-21)
   - [Accomplishments](#accomplishments-24)
+- [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
+  - [Questions](#questions-22)
+  - [Accomplishments](#accomplishments-25)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -220,6 +224,40 @@ Hardware Visualization
 
 # Notes per week
 Following are my notes for each week of development.
+
+# 2021-06-10 through 2021-06-17
+
+## Accomplishments:
+- Wrote a lot of documentation
+  - see new `./docs` folder. 
+  - `installation` and `usage` are the most complete
+  - next I'd like to write `interpreting-results`, as that seems important.
+- should work on broadwell (though untested!)
+- [x] let's improve usability: 
+  - [x] config file for architecture info
+- [ ] finish microbenchmarks (bandwidth!)
+  - [ ] update benchmark script automatically populates config file
+
+## Questions
+- transfer ownership of repository? Or just give you admin rights to my repo?
+- can you test on broadwell, or should I reserve time on chameleon cloud?
+- one of our goals was demoing this application on one real-world program. I
+  wrote code to demo this with convolution and polynomial expansion last summer
+  and fall, are these adequate?
+
+## My thoughts on next steps
+- Confirming soundness of tool:
+  - test on another architecture
+  - write some documentation about what to expect
+  - should I finish microbenchmarks for memory and cache? 
+  - how should we approach application benchmarks?
+- documentation/usability/make it easy on the next person
+  - interpreting results
+  - I'd like to make the benchmark process automatic. This won't be hard after
+    finishing microbenchmarks, but it will still take a day or two that could
+    be spent on other things.
+- gain insight into one real application
+  - I don't think we're ready, let's address the points above first
 
 # 2021-04-30 through 2021-05-07
 ## Goals
