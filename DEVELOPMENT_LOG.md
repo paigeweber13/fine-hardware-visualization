@@ -7,15 +7,18 @@ Hardware Visualization
   - [By May 12 - use this tool to gain insight on one real application](#by-may-12---use-this-tool-to-gain-insight-on-one-real-application)
   - [By June 30 - Deploy v1.0.0](#by-june-30---deploy-v100)
 - [Notes per week](#notes-per-week)
+- [2021-06-18 through 2021-06-24](#2021-06-18-through-2021-06-24)
+  - [Goals:](#goals)
+  - [Would be nice, but lower priority](#would-be-nice-but-lower-priority)
 - [2021-06-10 through 2021-06-17](#2021-06-10-through-2021-06-17)
   - [Accomplishments:](#accomplishments)
   - [Questions](#questions)
   - [My thoughts on next steps](#my-thoughts-on-next-steps)
 - [2021-04-30 through 2021-05-07](#2021-04-30-through-2021-05-07)
-  - [Goals](#goals)
+  - [Goals](#goals-1)
     - [Other notes on goals](#other-notes-on-goals)
 - [2021-04-21 through 2021-04-30](#2021-04-21-through-2021-04-30)
-  - [Goals](#goals-1)
+  - [Goals](#goals-2)
   - [Accomplishments](#accomplishments-1)
 - [2021-04-07 through 2021-04-21](#2021-04-07-through-2021-04-21)
   - [Questions:](#questions-1)
@@ -25,14 +28,14 @@ Hardware Visualization
   - [Accomplishments](#accomplishments-3)
   - [Notes from Meeting](#notes-from-meeting)
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
-  - [Goals](#goals-2)
+  - [Goals](#goals-3)
   - [Accomplishments](#accomplishments-4)
   - [Notes from meeting](#notes-from-meeting-1)
   - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
   - [Questions](#questions-2)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
-  - [Goals](#goals-3)
+  - [Goals](#goals-4)
     - [If time permits:](#if-time-permits)
   - [Accomplishments](#accomplishments-5)
     - [Investigated STREAM](#investigated-stream)
@@ -42,29 +45,29 @@ Hardware Visualization
   - [Notes from meeting](#notes-from-meeting-3)
   - [Accomplishments](#accomplishments-6)
   - [Questions](#questions-4)
-  - [Goals](#goals-4)
+  - [Goals](#goals-5)
     - [Some more detail on those goals:](#some-more-detail-on-those-goals)
 - [2021-02-24 through 2021-03-03](#2021-02-24-through-2021-03-03)
   - [Accomplishments](#accomplishments-7)
   - [Questions](#questions-5)
-  - [Goals](#goals-5)
-- [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
   - [Goals](#goals-6)
+- [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
+  - [Goals](#goals-7)
   - [Accomplishments](#accomplishments-8)
   - [Questions](#questions-6)
 - [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
-  - [Goals](#goals-7)
+  - [Goals](#goals-8)
   - [Accomplishments](#accomplishments-9)
   - [Questions](#questions-7)
 - [2020-12-09 through 2020-12-16](#2020-12-09-through-2020-12-16)
-  - [Goals](#goals-8)
+  - [Goals](#goals-9)
   - [Questions](#questions-8)
 - [2020-12-02 through 2020-12-09](#2020-12-02-through-2020-12-09)
-  - [Goals](#goals-9)
+  - [Goals](#goals-10)
   - [Accomplishments](#accomplishments-10)
   - [Questions](#questions-9)
 - [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
-  - [Goals](#goals-10)
+  - [Goals](#goals-11)
   - [Accomplishments](#accomplishments-11)
   - [Questions](#questions-10)
 - [2020-11-04 through 2020-11-11](#2020-11-04-through-2020-11-11)
@@ -225,6 +228,20 @@ Hardware Visualization
 # Notes per week
 Following are my notes for each week of development.
 
+# 2021-06-18 through 2021-06-24
+
+## Goals:
+- [ ] bandwidth microbenchmarks
+- [ ] document convolution/polynomial expansion
+- [ ] document "interpreting results"
+- [ ] include instructions on reproducing results for
+  - [ ] microbenchmarks
+  - [ ] application benchmarks
+
+## Would be nice, but lower priority
+- demo on a real-world application
+- automatic benchmark
+
 # 2021-06-10 through 2021-06-17
 
 ## Accomplishments:
@@ -243,11 +260,17 @@ Following are my notes for each week of development.
 
 ## Questions
 - transfer ownership of repository? Or just give you admin rights to my repo?
+  - Not sure yet.... We'll come back to that next week
 - can you test on broadwell, or should I reserve time on chameleon cloud?
+  - Dr. Saule has set aside time next week to try to get things working.
 - one of our goals was demonstrating the soundness of this application with
   some applications that are well-understood. I wrote code to demo this with
   convolution and polynomial expansion last summer and fall, are these
   adequate?
+  - good start for application benchmarks
+  - with both these applications they will move from compute bound to memory
+    bound depending on parameters
+  - write documentation on this
 
 ## My thoughts on next steps
 - Confirming soundness of tool:
