@@ -11,13 +11,25 @@
 In summary, to install all dependencies on ubuntu (should work with all
 debian-based systems), follow the workflow below:
 
-1. compile likwid from source: see [here](https://github.com/RRZE-HPC/likwid)
+1. Compile likwid v5.1.1 from source. An overview of the process is given here,
+   but see [the likwid repository](https://github.com/RRZE-HPC/likwid) for full
+   instructions.
+   1. Clone the repo: `git clone https://github.com/RRZE-HPC/likwid.git`
+   2. Change to the likwid directory: `cd likwid`
+   3. Checkout the tag for version 5.1.1: `git checkout v5.1.1`
+   4. Build likwid: `make`
+   5. Install likwid: `sudo make install`
+   6. OPTIONAL: if you don't `make install` likwid, you will need to prepend
+      any command which uses fhv with `LD_LIBRARY_PATH=/path/to/likwid/lib;
+      PATH=/path/to/likwid/bin; <your command here>`
 2. edit `LIKWID_PREFIX` in config.mk in the fhv root directory to match the
-   location where likwid was installed in step 1
+   location where likwid was installed in step 1. Use `which likwid-perfctr`
+   for hints if you're not sure where it was installed.
 3. Install build dependencies for fhv with the command `sudo apt-get install
    libboost-program-options-dev libcairo2-dev libpango1.0-dev libfmt-dev`
 4. In the directory of fhv, run the following commands:
-   - TODO: figure out what git submodule commands are needed
+   - `git submodule init && git submodule update --recursive` - this will get
+     the likwid code, which is a submodule to this repository.
    - `make`
    - `make perfgroups`
    - `sudo make install`
