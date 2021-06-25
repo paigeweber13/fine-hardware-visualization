@@ -62,7 +62,9 @@ if [ $(( $BW_SIZE_L3_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L3_NUMBER=1; fi
 BW_SIZE_L3_SUFFIX=$(echo $CACHE_SIZE_L3 | sed 's/[0-9]\+//')
 BW_SIZE_L3=$BW_SIZE_L3_NUMBER$BW_SIZE_L3_SUFFIX
 
-BW_SIZE_MEM=512MB
+# set ram test to use 100x the size of L3 cache
+BW_SIZE_MEM=$(( 100* $(echo $CACHE_SIZE_L3 | sed 's/[a-zA-Z]\+//') ))
+BW_SIZE_MEM=$BW_SIZE_MEM$BW_SIZE_L3_SUFFIX
 
 
 # sizes should comfortably fit inside the cache/memory they are meant for
@@ -73,6 +75,9 @@ BW_LIKWID_GROUP=( L1           L2           L3          MEM   )
        # 20 minutes or more each
 #      BW_ITERS=( 25000000000  2500000000   100000000  2000  )
  
+       # about 1 minute each
+#      BW_ITERS=( 1600000000   80000000     2000000    1000   )
+
        # about 15 seconds each
        BW_ITERS=( 400000000    20000000     500000     250   )
  
