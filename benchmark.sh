@@ -64,9 +64,6 @@ BW_SIZE_L3=$BW_SIZE_L3_NUMBER$BW_SIZE_L3_SUFFIX
 
 BW_SIZE_MEM=512MB
 
-echo "bw size L1: \"$BW_SIZE_L1\""
-echo "bw size L2: \"$BW_SIZE_L2\""
-echo "bw size L3: \"$BW_SIZE_L3\""
 
 # sizes should comfortably fit inside the cache/memory they are meant for
 # (typically, this means they should be half the size of that system)
@@ -130,12 +127,16 @@ run_likwid_bench_test () {
       " elapsed."
 }
 
+# TODO: should just use sed to isolate values and create the machine-stats json
+
 #### Bandwidth
 for test_num in $(seq 0 $(($BW_NUM_TESTS - 1)) ); do
   for level in $(seq 0 $(($BW_NUM_LEVELS-1)) ); do
     run_likwid_bench_test "${BW_TESTS[$test_num]}" \
       "${BW_LIKWID_TEST_NAME[$test_num]}" "${BW_LIKWID_GROUP[$level]}" \
-      "${BW_SIZES[$level]}" "${BW_ITERS[$level]}"
+      "${BW_SIZES[$level]}" "${BW_ITERS[$level]}" \
+      | grep -E 'Test|MByte/s|elapsed'
+    echo
   done
 done
 
@@ -143,6 +144,8 @@ done
 for test_num in $(seq 0 $(($FLOPS_NUM_TESTS - 1)) ); do
   run_likwid_bench_test "${FLOPS_TESTS[$test_num]}" \
     "${FLOPS_LIKWID_TEST_NAME[$test_num]}" "${FLOPS_LIKWID_GROUP[$test_num]}" \
-    "${FLOPS_SIZES[$test_num]}" "${FLOPS_ITERS[$test_num]}"
+    "${FLOPS_SIZES[$test_num]}" "${FLOPS_ITERS[$test_num]}" \
+      | grep -E 'Test|MFlop/s|elapsed'
+  echo
 done
 
