@@ -39,7 +39,7 @@ BW_SIZE_L1_NUMBER=$(echo $CACHE_SIZE_L1 | sed 's/[a-zA-Z]\+//')
 BW_SIZE_L1_NUMBER=$(( $BW_SIZE_L1_NUMBER * $BW_CACHE_PORTION))
 
 # check to make sure our integer division did not result in 0
-if [ $(( $BW_SIZE_L1_NUMBER == 0 )) ]; then BW_SIZE_L1_NUMBER=1; fi
+if [ $(( $BW_SIZE_L1_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L1_NUMBER=1; fi
 
 # get just the suffix from the cache size string
 BW_SIZE_L1_SUFFIX=$(echo $CACHE_SIZE_L1 | sed 's/[0-9]\+//')
@@ -51,18 +51,22 @@ BW_SIZE_L1=$BW_SIZE_L1_NUMBER$BW_SIZE_L1_SUFFIX
 CACHE_SIZE_L2=$(echo "$TOPO_STRING" | grep 'Level:,2' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
 BW_SIZE_L2_NUMBER=$(echo $CACHE_SIZE_L2 | sed 's/[a-zA-Z]\+//')
 BW_SIZE_L2_NUMBER=$(( $BW_SIZE_L2_NUMBER * $BW_CACHE_PORTION))
-if [ $(( $BW_SIZE_L2_NUMBER == 0 )) ]; then BW_SIZE_L2_NUMBER=1; fi
+if [ $(( $BW_SIZE_L2_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L2_NUMBER=1; fi
 BW_SIZE_L2_SUFFIX=$(echo $CACHE_SIZE_L2 | sed 's/[0-9]\+//')
 BW_SIZE_L2=$BW_SIZE_L2_NUMBER$BW_SIZE_L2_SUFFIX
 
 CACHE_SIZE_L3=$(echo "$TOPO_STRING" | grep 'Level:,3' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
 BW_SIZE_L3_NUMBER=$(echo $CACHE_SIZE_L3 | sed 's/[a-zA-Z]\+//')
 BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION))
-if [ $(( $BW_SIZE_L3_NUMBER == 0 )) ]; then BW_SIZE_L3_NUMBER=1; fi
+if [ $(( $BW_SIZE_L3_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L3_NUMBER=1; fi
 BW_SIZE_L3_SUFFIX=$(echo $CACHE_SIZE_L3 | sed 's/[0-9]\+//')
 BW_SIZE_L3=$BW_SIZE_L3_NUMBER$BW_SIZE_L3_SUFFIX
 
 BW_SIZE_MEM=512MB
+
+echo "bw size L1: \"$BW_SIZE_L1\""
+echo "bw size L2: \"$BW_SIZE_L2\""
+echo "bw size L3: \"$BW_SIZE_L3\""
 
 # sizes should comfortably fit inside the cache/memory they are meant for
 # (typically, this means they should be half the size of that system)
