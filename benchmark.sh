@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # config
-LIKWID_PATH=/usr/local/likwid-master
-NUM_CORES=4
+LIKWID_PATH=/usr/local
+NUM_CORES=$(nproc)
 export LD_LIBRARY_PATH=$LIKWID_PATH/lib:$LD_LIBRARY_PATH
 
 ### variable definitions
@@ -76,10 +76,10 @@ BW_LIKWID_GROUP=( L1           L2           L3          MEM   )
 #      BW_ITERS=( 25000000000  2500000000   100000000  2000  )
  
        # about 1 minute each
-#      BW_ITERS=( 1600000000   80000000     2000000    1000   )
+       BW_ITERS=( 2400000000   240000000    5000000    2500   )
 
        # about 15 seconds each
-       BW_ITERS=( 400000000    20000000     500000     250   )
+#      BW_ITERS=( 600000000    60000000     1300000    700   )
  
        # less than 3 seconds each
 #      BW_ITERS=( 20000000     2000000      500000     50    )
@@ -96,9 +96,12 @@ FLOPS_LIKWID_GROUP=( FLOPS_DP   FLOPS_SP)
 
        # 20 minutes or more each
 #      FLOPS_ITERS=( 3000000000 3000000000) 
-                                                                       
+                                                                             
+       # about 1 minute each                                         
+       FLOPS_ITERS=( 130000000   130000000) 
+
        # about 15 seconds each                                         
-       FLOPS_ITERS=( 40000000   40000000) 
+#      FLOPS_ITERS=( 40000000   40000000) 
                                                                        
        # less than 3 seconds each                                      
 #      FLOPS_ITERS=( 3000000   3000000) 
