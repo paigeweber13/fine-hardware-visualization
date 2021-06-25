@@ -9,6 +9,8 @@ Hardware Visualization
 - [Notes per week](#notes-per-week)
 - [2021-06-18 through 2021-06-24](#2021-06-18-through-2021-06-24)
   - [Goals:](#goals)
+    - [Priority](#priority)
+    - [Other](#other)
   - [Accomplishments:](#accomplishments)
   - [Would be nice, but lower priority](#would-be-nice-but-lower-priority)
 - [2021-06-10 through 2021-06-17](#2021-06-10-through-2021-06-17)
@@ -232,9 +234,13 @@ Following are my notes for each week of development.
 # 2021-06-18 through 2021-06-24
 
 ## Goals:
+### Priority
 - [ ] "UOPS_EXECUTED..." rather than "UOPS_DISPATCHED"
   - [ ] check likwid to see what is most commonly used
+- [ ] documentation on how to add different architectures
 - [ ] bandwidth microbenchmarks
+
+### Other
 - [ ] document convolution/polynomial expansion
 - [ ] document "interpreting results"
 - [ ] include instructions on reproducing results for
@@ -244,20 +250,24 @@ Following are my notes for each week of development.
   - [x] mention that if you don't do `make install` make sure to run `make
     perfgroups`
   - [x] mention in the documentation to check out a specific tag (v5.1.1)
-  - [ ] how to add different architectures
   - [ ] using likwid-perfctr cli to explore counters
   - [ ] "interpreting results": mention what saturation is and how values are
     calculated
-  - saturation: observed performance / expected maximum from benchmark
+    - saturation: observed performance / expected maximum from benchmark
 - [ ] change error to warning on vectorization ratio
 - [ ] tell people to use `benchmark.sh | tee benchmark-output.log`
 - [x] cache sizes in `benchmark.sh` are hard-coded. Try to get them
   automatically (likwid-topology | grep ...)
 - [ ] re-enable RAM on BroadwellEP
+- [ ] demo on real-world app
+- [ ] automate benchmark
 
 ## Accomplishments:
-
-
+- dramatically improved benchmark
+- unfortunately, likwid does seem to have a 50/50 split of whether it uses
+  UOPS_DISPATCHED* or UOPS_EXECUTED*.... what's worse, skylake has DISPATCHED but not EXECUTED and broadwell has EXECUTED but not DISPATCHED
+  - this will have to be handled on a per-architecture basis
+  - remember to include documentation on adding an architecture
 
 ## Would be nice, but lower priority
 - demo on a real-world application
