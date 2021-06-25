@@ -82,6 +82,11 @@ int main (int argc, char* argv[]) {
   int degree = atoi(argv[2]);
   int nbiter = atoi(argv[3]);
 
+  if (n%64 != 0) {
+    std::cerr<<"n must be multiple of 64\n";
+    return -1;
+  }
+  
   float* array = new float[n];
   float* poly = new float[degree+1];
   for (int i=0; i<n; ++i)
