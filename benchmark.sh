@@ -38,14 +38,30 @@ BW_SIZE_L1_NUMBER=$(echo $CACHE_SIZE_L1 | sed 's/[a-zA-Z]\+//')
 # multiply that value by the ratio we specified earlier
 BW_SIZE_L1_NUMBER=$(( $BW_SIZE_L1_NUMBER * $BW_CACHE_PORTION))
 
+# check to make sure our integer division did not result in 0
+if [ $(( $BW_SIZE_L1_NUMBER == 0 )) ]; then BW_SIZE_L1_NUMBER=1; fi
+
 # get just the suffix from the cache size string
 BW_SIZE_L1_SUFFIX=$(echo $CACHE_SIZE_L1 | sed 's/[0-9]\+//')
 
 # combine the number and suffix to get the full string likwid expects
 BW_SIZE_L1=$BW_SIZE_L1_NUMBER$BW_SIZE_L1_SUFFIX
 
-BW_SIZE_L2=100kB
-BW_SIZE_L3=2MB
+# repeat that process for all cache levels
+CACHE_SIZE_L2=$(echo "$TOPO_STRING" | grep 'Level:,2' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
+BW_SIZE_L2_NUMBER=$(echo $CACHE_SIZE_L2 | sed 's/[a-zA-Z]\+//')
+BW_SIZE_L2_NUMBER=$(( $BW_SIZE_L2_NUMBER * $BW_CACHE_PORTION))
+if [ $(( $BW_SIZE_L2_NUMBER == 0 )) ]; then BW_SIZE_L2_NUMBER=1; fi
+BW_SIZE_L2_SUFFIX=$(echo $CACHE_SIZE_L2 | sed 's/[0-9]\+//')
+BW_SIZE_L2=$BW_SIZE_L2_NUMBER$BW_SIZE_L2_SUFFIX
+
+CACHE_SIZE_L3=$(echo "$TOPO_STRING" | grep 'Level:,3' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
+BW_SIZE_L3_NUMBER=$(echo $CACHE_SIZE_L3 | sed 's/[a-zA-Z]\+//')
+BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION))
+if [ $(( $BW_SIZE_L3_NUMBER == 0 )) ]; then BW_SIZE_L3_NUMBER=1; fi
+BW_SIZE_L3_SUFFIX=$(echo $CACHE_SIZE_L3 | sed 's/[0-9]\+//')
+BW_SIZE_L3=$BW_SIZE_L3_NUMBER$BW_SIZE_L3_SUFFIX
+
 BW_SIZE_MEM=512MB
 
 # sizes should comfortably fit inside the cache/memory they are meant for
