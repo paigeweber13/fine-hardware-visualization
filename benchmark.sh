@@ -14,10 +14,44 @@ BW_LIKWID_TEST_NAME=(copy_avx load_avx store_avx)
 # must correspond to size of arrays below
 BW_NUM_LEVELS=4
 
+# portion of cache size test should take up
+BW_CACHE_PORTION="1/4"
+
+
+# --- CACHE AND BW TEST SIZES --- #
+# these commands use likwid-topology to get information on the current system
+# and automatically set appropriate test sizes
+
+# get output of likwid-topology command
+TOPO_STRING=$(likwid-topology -c -O)
+
+# parse L1 cache size from likwid-topology output. First grep for 'Level:,1'
+# string and print that line and the line after. Then, grep for 'Size' to
+# isolate the line with the size on it. Finally, use 'sed' to capture just the
+# number and suffix (i.e. suffix == 'kB' or 'MB') and replace the entire output
+# with just the number+suffix
+CACHE_SIZE_L1=$(echo "$TOPO_STRING" | grep 'Level:,1' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
+
+# get just the number from the cache size string
+BW_SIZE_L1_NUMBER=$(echo $CACHE_SIZE_L1 | sed 's/[a-zA-Z]\+//')
+
+# multiply that value by the ratio we specified earlier
+BW_SIZE_L1_NUMBER=$(( $BW_SIZE_L1_NUMBER * $BW_CACHE_PORTION))
+
+# get just the suffix from the cache size string
+BW_SIZE_L1_SUFFIX=$(echo $CACHE_SIZE_L1 | sed 's/[0-9]\+//')
+
+# combine the number and suffix to get the full string likwid expects
+BW_SIZE_L1=$BW_SIZE_L1_NUMBER$BW_SIZE_L1_SUFFIX
+
+BW_SIZE_L2=100kB
+BW_SIZE_L3=2MB
+BW_SIZE_MEM=512MB
+
 # sizes should comfortably fit inside the cache/memory they are meant for
 # (typically, this means they should be half the size of that system)
-BW_LIKWID_GROUP=( L1           L2           L3         MEM   )
-       BW_SIZES=( 10kB         100kB        2MB        512MB )
+BW_LIKWID_GROUP=( L1           L2           L3          MEM   )
+       BW_SIZES=( $BW_SIZE_L1  $BW_SIZE_L2  $BW_SIZE_L3 $BW_SIZE_MEM )
 
        # 20 minutes or more each
 #      BW_ITERS=( 25000000000  2500000000   100000000  2000  )
