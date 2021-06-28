@@ -35,8 +35,12 @@ CACHE_SIZE_L1=$(echo "$TOPO_STRING" | grep 'Level:,1' -A 1 | grep 'Size' | sed '
 # get just the number from the cache size string
 BW_SIZE_L1_NUMBER=$(echo $CACHE_SIZE_L1 | sed 's/[a-zA-Z]\+//')
 
-# multiply that value by the ratio we specified earlier
-BW_SIZE_L1_NUMBER=$(( $BW_SIZE_L1_NUMBER * $BW_CACHE_PORTION))
+# multiply that value by the ratio we specified earlier and the number of
+# cores. The work on the array is split across the cores, so each core will
+# only work on size/num_cores data. So if you specify 8kiB and you have 8
+# cores, each core will only work on 1 kiB. Therefore we will multiply all
+# values by the number of cores.
+BW_SIZE_L1_NUMBER=$(( $BW_SIZE_L1_NUMBER * $BW_CACHE_PORTION * $NUM_CORES))
 
 # check to make sure our integer division did not result in 0
 if [ $(( $BW_SIZE_L1_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L1_NUMBER=1; fi
@@ -50,14 +54,14 @@ BW_SIZE_L1=$BW_SIZE_L1_NUMBER$BW_SIZE_L1_SUFFIX
 # repeat that process for all cache levels
 CACHE_SIZE_L2=$(echo "$TOPO_STRING" | grep 'Level:,2' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),\+/\1\2/')
 BW_SIZE_L2_NUMBER=$(echo $CACHE_SIZE_L2 | sed 's/[a-zA-Z]\+//')
-BW_SIZE_L2_NUMBER=$(( $BW_SIZE_L2_NUMBER * $BW_CACHE_PORTION))
+BW_SIZE_L2_NUMBER=$(( $BW_SIZE_L2_NUMBER * $BW_CACHE_PORTION * $NUM_CORES))
 if [ $(( $BW_SIZE_L2_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L2_NUMBER=1; fi
 BW_SIZE_L2_SUFFIX=$(echo $CACHE_SIZE_L2 | sed 's/[0-9]\+//')
 BW_SIZE_L2=$BW_SIZE_L2_NUMBER$BW_SIZE_L2_SUFFIX
 
 CACHE_SIZE_L3=$(echo "$TOPO_STRING" | grep 'Level:,3' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),\+/\1\2/')
 BW_SIZE_L3_NUMBER=$(echo $CACHE_SIZE_L3 | sed 's/[a-zA-Z]\+//')
-BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION))
+BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION * $NUM_CORES))
 if [ $(( $BW_SIZE_L3_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L3_NUMBER=1; fi
 BW_SIZE_L3_SUFFIX=$(echo $CACHE_SIZE_L3 | sed 's/[0-9]\+//')
 BW_SIZE_L3=$BW_SIZE_L3_NUMBER$BW_SIZE_L3_SUFFIX
@@ -79,10 +83,10 @@ BW_LIKWID_GROUP=( L1           L2           L3          MEM   )
 #      BW_ITERS=( 2400000000   240000000    5000000    2500   )
 
        # about 15 seconds each
-#      BW_ITERS=( 600000000    60000000     1300000    700   )
+       BW_ITERS=( 600000000    60000000     1300000    700   )
  
        # less than 3 seconds each
-       BW_ITERS=( 20000000     2000000      500000     50    )
+#      BW_ITERS=( 20000000     2000000      500000     50    )
 
 ## flops
 FLOPS_NUM_TESTS=2
@@ -98,10 +102,10 @@ FLOPS_LIKWID_GROUP=( FLOPS_DP   FLOPS_SP)
 #      FLOPS_ITERS=( 3000000000 3000000000) 
                                                                              
        # about 1 minute each                                         
-       FLOPS_ITERS=( 130000000   130000000) 
+#      FLOPS_ITERS=( 130000000   130000000) 
 
        # about 15 seconds each                                         
-#      FLOPS_ITERS=( 40000000   40000000) 
+       FLOPS_ITERS=( 40000000   40000000) 
                                                                        
        # less than 3 seconds each                                      
 #      FLOPS_ITERS=( 3000000   3000000) 
@@ -127,7 +131,7 @@ run_likwid_bench_test () {
     # Measurement with likwid-bench internal tracking
     echo "Running command '$LIKWID_PATH/bin/likwid-bench -t $2 -i $5 -w S0:$4:$NUM_CORES'"
     $LIKWID_PATH/bin/likwid-bench -t $2 -i $5 -w S0:$4:$NUM_CORES \
-      | grep -E 'Test|MByte/s|MFlop/s|elapsed'
+      | grep -E 'Test|MByte/s|MFlops/s|elapsed'
   
     # time
     echo "$(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"\
