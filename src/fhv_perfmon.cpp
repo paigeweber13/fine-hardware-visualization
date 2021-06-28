@@ -51,23 +51,29 @@ fhv_perfmon::registerRegions(
   } while (end_pos != std::string::npos);
 }
 
-void fhv_perfmon::init(std::string parallel_regions, std::string sequential_regions)
+void fhv_perfmon::init(std::string parallel_regions, 
+  std::string sequential_regions)
 {
   const std::string EVENT_GROUPS_DEFAULT =
     "FLOPS_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3";
-  const std::string EVENT_GROUPS_SKYLAKE =
-    "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3";
+  const std::string EVENT_GROUPS_MEM =
+    "FLOPS_DP|FLOPS_SP|MEM|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3";
   std::string event_groups = EVENT_GROUPS_DEFAULT;
 
   topology_init();
   auto cpuinfo = get_cpuInfo();
-  if (cpuinfo->model == CPUFAMILY_SKYLAKE1 ||
-      cpuinfo->model == CPUFAMILY_SKYLAKE2 ||
-      cpuinfo->model == CPUFAMILY_SKYLAKEX)
-  {
-    event_groups = EVENT_GROUPS_SKYLAKE;
+  for (size_t i = 0; i < NUM_ARCH_MEM_COUNTER; i++) {
+    if (cpuinfo->model == ARCH_WITH_MEM_COUNTER[i])
+    {
+      event_groups = EVENT_GROUPS_MEM;
+    }
   }
   topology_finalize();
+
+  if (event_groups == EVENT_GROUPS_DEFAULT) {
+    fmt::print(stderr, "WARN: your architecture does not seem to support "
+      "hardware counters for memory (RAM). RAM will not be measured.\n");
+  }
 
   init(parallel_regions, sequential_regions, event_groups);
 }

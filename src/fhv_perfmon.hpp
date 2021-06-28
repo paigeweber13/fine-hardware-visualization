@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <fmt/core.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
