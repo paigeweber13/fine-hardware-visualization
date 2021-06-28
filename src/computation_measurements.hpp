@@ -1,3 +1,19 @@
+/*
+ * NOTE: THIS FILE HAS BEEN DEPRECATED
+ * 
+ * It was leftover from when fhv was also intended to run the benchmark to get
+ * baseline performance. Since then that functionality has moved to the
+ * `benchmark.sh` script, which is much more stable and consistent, as it
+ * relies on the very well-written likwid-bench tool
+ * 
+ * This code is included for reference only, as it can give maintainers an idea
+ * of how one might try to go about saturating FLOP/S
+ * 
+ * Note that the bandwidth benchmark was never very good and often gave results
+ * that were off by as much as a factor of two.
+ * 
+ */
+
 #pragma once
 
 #include <algorithm>
@@ -34,3 +50,9 @@ double bandwidth_rw(const char *tag, std::uint64_t num_groups,
                     std::uint64_t num_iterations_per_group,
                     std::uint64_t num_iterations_to_measure,
                     std::uint64_t size_kib);
+
+void benchmark_flops(precision p, uint64_t num_iter);
+void benchmark_memory_bw(std::string memory_type, uint64_t num_iterations,
+                         uint64_t mem_size_kb);
+void benchmark_all();
+void print_csv_header();
