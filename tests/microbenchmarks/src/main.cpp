@@ -194,7 +194,7 @@ flopsResult peakflops_dp_fhv_parallel(ull num_i, ull n, double* array,
   // const ull FLOPS_PER_FMA_OP = 2;
 
   // groups measured by default (all are necessary to create visualization):
-  // "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3"
+  // "MEM_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2"
   const ull NUM_GROUPS_FOR_FHV_VISUALIZATION = 7;
 
   fhv_perfmon::init(FHV_REGION_PEAKFLOPS_DP_PARALLEL);

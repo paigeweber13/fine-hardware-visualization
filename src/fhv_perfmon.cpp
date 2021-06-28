@@ -55,9 +55,9 @@ void fhv_perfmon::init(std::string parallel_regions,
   std::string sequential_regions)
 {
   const std::string EVENT_GROUPS_DEFAULT =
-    "FLOPS_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3";
+    "FLOPS_DP|FLOPS_SP|L3|L2|PORT_USAGE1|PORT_USAGE2";
   const std::string EVENT_GROUPS_MEM =
-    "FLOPS_DP|FLOPS_SP|MEM|L3|L2|PORT_USAGE1|PORT_USAGE2|PORT_USAGE3";
+    "FLOPS_DP|FLOPS_SP|MEM|L3|L2|PORT_USAGE1|PORT_USAGE2";
   std::string event_groups = EVENT_GROUPS_DEFAULT;
 
   topology_init();

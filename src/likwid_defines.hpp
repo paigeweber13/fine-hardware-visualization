@@ -16,7 +16,6 @@ const std::string likwid_group_l3 = "L3";
 const std::string likwid_group_mem = "MEM";
 const std::string likwid_group_port1 = "PORT_USAGE1";
 const std::string likwid_group_port2 = "PORT_USAGE2";
-const std::string likwid_group_port3 = "PORT_USAGE3";
 
 // number of flops
 const std::string sp_scalar_flops_event_name = "FP_ARITH_INST_RETIRED_SCALAR_SINGLE";
