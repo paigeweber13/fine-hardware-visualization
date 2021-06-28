@@ -7,95 +7,97 @@ Hardware Visualization
   - [By May 12 - use this tool to gain insight on one real application](#by-may-12---use-this-tool-to-gain-insight-on-one-real-application)
   - [By June 30 - Deploy v1.0.0](#by-june-30---deploy-v100)
 - [Notes per week](#notes-per-week)
-- [2021-06-18 through 2021-06-24](#2021-06-18-through-2021-06-24)
-  - [Goals:](#goals)
-    - [Priority](#priority)
-    - [Other](#other)
+- [Goals through end of Paige's time:](#goals-through-end-of-paiges-time)
+  - [Priority](#priority)
+  - [Other](#other)
+- [2021-06-24 through 2021-07-01](#2021-06-24-through-2021-07-01)
   - [Accomplishments:](#accomplishments)
+- [2021-06-18 through 2021-06-24](#2021-06-18-through-2021-06-24)
+  - [Accomplishments:](#accomplishments-1)
   - [Would be nice, but lower priority](#would-be-nice-but-lower-priority)
 - [2021-06-10 through 2021-06-17](#2021-06-10-through-2021-06-17)
-  - [Accomplishments:](#accomplishments-1)
+  - [Accomplishments:](#accomplishments-2)
   - [Questions](#questions)
   - [My thoughts on next steps](#my-thoughts-on-next-steps)
 - [2021-04-30 through 2021-05-07](#2021-04-30-through-2021-05-07)
-  - [Goals](#goals-1)
+  - [Goals](#goals)
     - [Other notes on goals](#other-notes-on-goals)
 - [2021-04-21 through 2021-04-30](#2021-04-21-through-2021-04-30)
-  - [Goals](#goals-2)
-  - [Accomplishments](#accomplishments-2)
+  - [Goals](#goals-1)
+  - [Accomplishments](#accomplishments-3)
 - [2021-04-07 through 2021-04-21](#2021-04-07-through-2021-04-21)
   - [Questions:](#questions-1)
-  - [Accomplishments](#accomplishments-3)
+  - [Accomplishments](#accomplishments-4)
   - [TODO:](#todo)
 - [2021-03-24 through 2021-04-07](#2021-03-24-through-2021-04-07)
-  - [Accomplishments](#accomplishments-4)
+  - [Accomplishments](#accomplishments-5)
   - [Notes from Meeting](#notes-from-meeting)
 - [2021-03-17 through 2021-03-24](#2021-03-17-through-2021-03-24)
-  - [Goals](#goals-3)
-  - [Accomplishments](#accomplishments-5)
+  - [Goals](#goals-2)
+  - [Accomplishments](#accomplishments-6)
   - [Notes from meeting](#notes-from-meeting-1)
   - [Notable changes from this week:](#notable-changes-from-this-week)
   - [Discoveries about likwid-benchmark](#discoveries-about-likwid-benchmark)
   - [Questions](#questions-2)
 - [2021-03-10 through 2021-03-17](#2021-03-10-through-2021-03-17)
-  - [Goals](#goals-4)
+  - [Goals](#goals-3)
     - [If time permits:](#if-time-permits)
-  - [Accomplishments](#accomplishments-6)
+  - [Accomplishments](#accomplishments-7)
     - [Investigated STREAM](#investigated-stream)
   - [Questions](#questions-3)
   - [Notes from meeting](#notes-from-meeting-2)
 - [2021-03-03 through 2021-03-10](#2021-03-03-through-2021-03-10)
   - [Notes from meeting](#notes-from-meeting-3)
-  - [Accomplishments](#accomplishments-7)
+  - [Accomplishments](#accomplishments-8)
   - [Questions](#questions-4)
-  - [Goals](#goals-5)
+  - [Goals](#goals-4)
     - [Some more detail on those goals:](#some-more-detail-on-those-goals)
 - [2021-02-24 through 2021-03-03](#2021-02-24-through-2021-03-03)
-  - [Accomplishments](#accomplishments-8)
-  - [Questions](#questions-5)
-  - [Goals](#goals-6)
-- [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
-  - [Goals](#goals-7)
   - [Accomplishments](#accomplishments-9)
+  - [Questions](#questions-5)
+  - [Goals](#goals-5)
+- [2021-02-17 through 2021-02-24](#2021-02-17-through-2021-02-24)
+  - [Goals](#goals-6)
+  - [Accomplishments](#accomplishments-10)
   - [Questions](#questions-6)
 - [New Year! 2021-01-20 through 2021-01-02-17](#new-year-2021-01-20-through-2021-01-02-17)
-  - [Goals](#goals-8)
-  - [Accomplishments](#accomplishments-10)
+  - [Goals](#goals-7)
+  - [Accomplishments](#accomplishments-11)
   - [Questions](#questions-7)
 - [2020-12-09 through 2020-12-16](#2020-12-09-through-2020-12-16)
-  - [Goals](#goals-9)
+  - [Goals](#goals-8)
   - [Questions](#questions-8)
 - [2020-12-02 through 2020-12-09](#2020-12-02-through-2020-12-09)
-  - [Goals](#goals-10)
-  - [Accomplishments](#accomplishments-11)
+  - [Goals](#goals-9)
+  - [Accomplishments](#accomplishments-12)
   - [Questions](#questions-9)
 - [2020-11-18 through 2020-12-02](#2020-11-18-through-2020-12-02)
-  - [Goals](#goals-11)
-  - [Accomplishments](#accomplishments-12)
+  - [Goals](#goals-10)
+  - [Accomplishments](#accomplishments-13)
   - [Questions](#questions-10)
 - [2020-11-04 through 2020-11-11](#2020-11-04-through-2020-11-11)
   - [Goals for this week](#goals-for-this-week)
 - [2020-10-28 through 2020-11-04](#2020-10-28-through-2020-11-04)
-  - [Accomplishments](#accomplishments-13)
+  - [Accomplishments](#accomplishments-14)
   - [Questions](#questions-11)
 - [2020-10-21 through 2020-10-28](#2020-10-21-through-2020-10-28)
-  - [Accomplishments](#accomplishments-14)
+  - [Accomplishments](#accomplishments-15)
   - [Goals for this week](#goals-for-this-week-1)
   - [Questions](#questions-12)
 - [2020-10-14 through 2020-10-21](#2020-10-14-through-2020-10-21)
-  - [Accomplishments](#accomplishments-15)
+  - [Accomplishments](#accomplishments-16)
   - [Questions](#questions-13)
 - [2020-10-07 through 2020-10-14](#2020-10-07-through-2020-10-14)
-  - [Accomplishments](#accomplishments-16)
+  - [Accomplishments](#accomplishments-17)
   - [Questions](#questions-14)
 - [2020-09-30 through 2020-10-07](#2020-09-30-through-2020-10-07)
-  - [Accomplishments](#accomplishments-17)
+  - [Accomplishments](#accomplishments-18)
 - [2020-08-18 through 2020-08-30](#2020-08-18-through-2020-08-30)
   - [Questions](#questions-15)
-  - [Accomplishments](#accomplishments-18)
+  - [Accomplishments](#accomplishments-19)
 - [2020-08-11 through 2020-08-18](#2020-08-11-through-2020-08-18)
   - [Questions](#questions-16)
-  - [Accomplishments](#accomplishments-19)
+  - [Accomplishments](#accomplishments-20)
     - [Intel TMA method](#intel-tma-method)
     - [Intel vTune](#intel-vtune)
     - [General](#general)
@@ -103,26 +105,26 @@ Hardware Visualization
 - [Biggest questions, main points](#biggest-questions-main-points)
 - [2020-07-28 through 2020-08-11](#2020-07-28-through-2020-08-11)
   - [Questions](#questions-17)
-  - [Accomplishments](#accomplishments-20)
+  - [Accomplishments](#accomplishments-21)
 - [2020-07-21 through 2020-07-28](#2020-07-21-through-2020-07-28)
   - [Questions](#questions-18)
-  - [Accomplishments](#accomplishments-21)
-- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
   - [Accomplishments](#accomplishments-22)
+- [2020-07-14 through 2020-07-21](#2020-07-14-through-2020-07-21)
+  - [Accomplishments](#accomplishments-23)
   - [Next steps](#next-steps-1)
   - [Backlog](#backlog)
 - [2020-07-07 through 2020-07-14](#2020-07-07-through-2020-07-14)
   - [Questions](#questions-19)
-  - [Accomplishments](#accomplishments-23)
+  - [Accomplishments](#accomplishments-24)
 - [2020-06-30 through 2020-07-07](#2020-06-30-through-2020-07-07)
   - [Questions](#questions-20)
-  - [Accomplishments](#accomplishments-24)
+  - [Accomplishments](#accomplishments-25)
 - [2020-06-16 through 2020-06-30](#2020-06-16-through-2020-06-30)
   - [Questions](#questions-21)
-  - [Accomplishments](#accomplishments-25)
+  - [Accomplishments](#accomplishments-26)
 - [2020-06-09 through 2020-06-16](#2020-06-09-through-2020-06-16)
   - [Questions](#questions-22)
-  - [Accomplishments](#accomplishments-26)
+  - [Accomplishments](#accomplishments-27)
 - [2020-06-02 through 2020-06-09](#2020-06-02-through-2020-06-09)
   - [This Week's Questions](#this-weeks-questions)
     - [Top priority](#top-priority)
@@ -231,16 +233,19 @@ Hardware Visualization
 # Notes per week
 Following are my notes for each week of development.
 
-# 2021-06-18 through 2021-06-24
-
-## Goals:
-### Priority
+# Goals through end of Paige's time:
+## Priority
+- [x] benchmark is not accurate
+  - [x] if array is 8kiB, that means each core of an 8 core system
+    processes 1kiB
+  - [x] multiply array size by `nproc` except for with L3/RAM
 - [ ] "UOPS_EXECUTED..." rather than "UOPS_DISPATCHED"
-  - [ ] check likwid to see what is most commonly used
+  - [x] check likwid to see what is most commonly used
 - [ ] documentation on how to add different architectures
+  - [ ] documentation on how likwid-bench works
 - [ ] bandwidth microbenchmarks
 
-### Other
+## Other
 - [ ] document convolution/polynomial expansion
 - [ ] document "interpreting results"
 - [ ] include instructions on reproducing results for
@@ -262,8 +267,14 @@ Following are my notes for each week of development.
 - [ ] demo on real-world app
 - [ ] automate benchmark
 
+# 2021-06-24 through 2021-07-01
+## Accomplishments:
+
+# 2021-06-18 through 2021-06-24
 ## Accomplishments:
 - dramatically improved benchmark
+  - automatically gets topology information from likwid
+  - uses `grep` to isolate parts of output that need to be copied to `machine-stats.json`
 - unfortunately, likwid does seem to have a 50/50 split of whether it uses
   UOPS_DISPATCHED* or UOPS_EXECUTED*.... what's worse, skylake has DISPATCHED but not EXECUTED and broadwell has EXECUTED but not DISPATCHED
   - this will have to be handled on a per-architecture basis
