@@ -4,10 +4,10 @@ EVENTSET
 FIXC0 INSTR_RETIRED_ANY
 FIXC1 CPU_CLK_UNHALTED_CORE
 FIXC2 CPU_CLK_UNHALTED_REF
-PMC1  UOPS_EXECUTED_PORT_PORT_0
-PMC2  UOPS_EXECUTED_PORT_PORT_1
-PMC3  UOPS_EXECUTED_PORT_PORT_2
-PMC4  UOPS_EXECUTED_PORT_PORT_3
+PMC1  UOPS_DISPATCHED_PORT_PORT_0
+PMC2  UOPS_DISPATCHED_PORT_PORT_1
+PMC3  UOPS_DISPATCHED_PORT_PORT_2
+PMC4  UOPS_DISPATCHED_PORT_PORT_3
 
 METRICS
 Runtime (RDTSC) [s] time
@@ -23,5 +23,5 @@ to be calculated with hyperthreading enabled.
 
 Ratios of a given port's usage to the total usage of all ports must be
 calculated by software that processes results, for instance by summing the uops
-dispatched across all ports and then dividing each UOPS_EXECUTED_PORT_PORT_*
+dispatched across all ports and then dividing each UOPS_DISPATCHED_PORT_PORT_*
 by that sum.
