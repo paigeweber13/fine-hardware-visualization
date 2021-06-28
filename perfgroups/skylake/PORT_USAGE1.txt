@@ -1,4 +1,4 @@
-SHORT  Execution port utilization, part 1: ports 0-2
+SHORT  Execution port utilization, part 1: ports 0-3
 
 EVENTSET
 FIXC0 INSTR_RETIRED_ANY
