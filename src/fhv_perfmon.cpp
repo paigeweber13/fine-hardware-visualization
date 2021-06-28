@@ -66,6 +66,7 @@ void fhv_perfmon::init(std::string parallel_regions,
     if (cpuinfo->model == ARCH_WITH_MEM_COUNTER[i])
     {
       event_groups = EVENT_GROUPS_MEM;
+      break;
     }
   }
   topology_finalize();
@@ -378,6 +379,19 @@ void fhv_perfmon::calculate_port_usage_ratios()
   std::vector<double> uops_executed_port(machineStats.architecture.num_ports_in_core);
   double total_num_port_ops;
 
+  // Some architectures only have "UOPS_DISPATCHED_PORT_PORT_x", while others
+  // only have "UOPS_EXECUTED_PORT_PORT_x". So, we assume the counter supported
+  // by this architecture is the "DISPATCHED" variant. Then, we check if
+  // architecture has the "EXECUTED" instead. If so, we switch
+  // "uops_port_base_name" to match.
+  std::string uops_port_base_name = uops_dispatched_port_base_name;
+  for (const auto &ptr : fhv_perfmon::per_thread_results) {
+    if(ptr.result_name == uops_executed_port_base_name + std::to_string(0)) {
+      uops_port_base_name = uops_executed_port_base_name;
+      break;
+    }
+  }
+
   // everything is done on a per-thread, per-region basis
   for (int t = 0; t < fhv_perfmon::num_threads; t++)
   {
@@ -396,7 +410,7 @@ void fhv_perfmon::calculate_port_usage_ratios()
         {
           if(ptr.thread_num == t 
             && ptr.region_name == region_name
-            && ptr.result_name == likwid_port_usage_event_names[port_num])
+            && ptr.result_name == uops_port_base_name + std::to_string(port_num))
           {
             // sum 
             total_num_port_ops += ptr.result_value;

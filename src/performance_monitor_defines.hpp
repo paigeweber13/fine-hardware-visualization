@@ -70,19 +70,6 @@ const std::string json_thread_section_base = "thread_";
 // port usage ratio names
 const std::string fhv_performance_monitor_group = "FHV_PERFORMANCE_MONITOR";
 
-// architecture dependent, can change between runs. Therefore, does not go in
-// likwid_defines.hpp
-const std::vector<std::string> likwid_port_usage_event_names = {
-  uops_port_base_name + std::to_string(0),
-  uops_port_base_name + std::to_string(1),
-  uops_port_base_name + std::to_string(2),
-  uops_port_base_name + std::to_string(3),
-  uops_port_base_name + std::to_string(4),
-  uops_port_base_name + std::to_string(5),
-  uops_port_base_name + std::to_string(6),
-  uops_port_base_name + std::to_string(7),
-};
-
 const std::vector<std::string> fhv_port_usage_metrics = {
   fhv_port0_usage_ratio,
   fhv_port1_usage_ratio,
