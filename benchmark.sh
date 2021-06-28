@@ -79,10 +79,10 @@ BW_LIKWID_GROUP=( L1           L2           L3          MEM   )
 #      BW_ITERS=( 2400000000   240000000    5000000    2500   )
 
        # about 15 seconds each
-       BW_ITERS=( 600000000    60000000     1300000    700   )
+#      BW_ITERS=( 600000000    60000000     1300000    700   )
  
        # less than 3 seconds each
-#      BW_ITERS=( 20000000     2000000      500000     50    )
+       BW_ITERS=( 20000000     2000000      500000     50    )
 
 ## flops
 FLOPS_NUM_TESTS=2
@@ -143,7 +143,6 @@ for test_num in $(seq 0 $(($BW_NUM_TESTS - 1)) ); do
     run_likwid_bench_test "${BW_TESTS[$test_num]}" \
       "${BW_LIKWID_TEST_NAME[$test_num]}" "${BW_LIKWID_GROUP[$level]}" \
       "${BW_SIZES[$level]}" "${BW_ITERS[$level]}"
-    echo
   done
 done
 
@@ -152,6 +151,5 @@ for test_num in $(seq 0 $(($FLOPS_NUM_TESTS - 1)) ); do
   run_likwid_bench_test "${FLOPS_TESTS[$test_num]}" \
     "${FLOPS_LIKWID_TEST_NAME[$test_num]}" "${FLOPS_LIKWID_GROUP[$test_num]}" \
     "${FLOPS_SIZES[$test_num]}" "${FLOPS_ITERS[$test_num]}"
-  echo
 done
 
