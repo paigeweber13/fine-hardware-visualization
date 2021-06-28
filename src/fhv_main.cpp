@@ -74,6 +74,9 @@ int main(int argc, char *argv[])
   };
   std::string color_scale = "RdPu";
 
+  std::vector<std::string> perfmon_output_filenames;
+  std::string image_output_filename;
+
 
   // behavior with arguments
   po::options_description desc(
@@ -126,6 +129,8 @@ int main(int argc, char *argv[])
     return 1;
   }
 
+  if (vm.count("help") || argc == 1)
+    std::cout << desc << std::endl;
   // visualization things
   if (vm.count("test-color-lerp"))
   {
