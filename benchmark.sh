@@ -30,7 +30,7 @@ TOPO_STRING=$(likwid-topology -c -O)
 # isolate the line with the size on it. Finally, use 'sed' to capture just the
 # number and suffix (i.e. suffix == 'kB' or 'MB') and replace the entire output
 # with just the number+suffix
-CACHE_SIZE_L1=$(echo "$TOPO_STRING" | grep 'Level:,1' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
+CACHE_SIZE_L1=$(echo "$TOPO_STRING" | grep 'Level:,1' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),\+/\1\2/')
 
 # get just the number from the cache size string
 BW_SIZE_L1_NUMBER=$(echo $CACHE_SIZE_L1 | sed 's/[a-zA-Z]\+//')
@@ -48,14 +48,14 @@ BW_SIZE_L1_SUFFIX=$(echo $CACHE_SIZE_L1 | sed 's/[0-9]\+//')
 BW_SIZE_L1=$BW_SIZE_L1_NUMBER$BW_SIZE_L1_SUFFIX
 
 # repeat that process for all cache levels
-CACHE_SIZE_L2=$(echo "$TOPO_STRING" | grep 'Level:,2' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
+CACHE_SIZE_L2=$(echo "$TOPO_STRING" | grep 'Level:,2' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),\+/\1\2/')
 BW_SIZE_L2_NUMBER=$(echo $CACHE_SIZE_L2 | sed 's/[a-zA-Z]\+//')
 BW_SIZE_L2_NUMBER=$(( $BW_SIZE_L2_NUMBER * $BW_CACHE_PORTION))
 if [ $(( $BW_SIZE_L2_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L2_NUMBER=1; fi
 BW_SIZE_L2_SUFFIX=$(echo $CACHE_SIZE_L2 | sed 's/[0-9]\+//')
 BW_SIZE_L2=$BW_SIZE_L2_NUMBER$BW_SIZE_L2_SUFFIX
 
-CACHE_SIZE_L3=$(echo "$TOPO_STRING" | grep 'Level:,3' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),,,/\1\2/')
+CACHE_SIZE_L3=$(echo "$TOPO_STRING" | grep 'Level:,3' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),\+/\1\2/')
 BW_SIZE_L3_NUMBER=$(echo $CACHE_SIZE_L3 | sed 's/[a-zA-Z]\+//')
 BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION))
 if [ $(( $BW_SIZE_L3_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L3_NUMBER=1; fi
@@ -76,10 +76,10 @@ BW_LIKWID_GROUP=( L1           L2           L3          MEM   )
 #      BW_ITERS=( 25000000000  2500000000   100000000  2000  )
  
        # about 1 minute each
-       BW_ITERS=( 2400000000   240000000    5000000    2500   )
+#      BW_ITERS=( 2400000000   240000000    5000000    2500   )
 
        # about 15 seconds each
-#      BW_ITERS=( 600000000    60000000     1300000    700   )
+       BW_ITERS=( 600000000    60000000     1300000    700   )
  
        # less than 3 seconds each
 #      BW_ITERS=( 20000000     2000000      500000     50    )
