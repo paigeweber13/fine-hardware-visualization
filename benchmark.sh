@@ -61,7 +61,7 @@ BW_SIZE_L2=$BW_SIZE_L2_NUMBER$BW_SIZE_L2_SUFFIX
 
 CACHE_SIZE_L3=$(echo "$TOPO_STRING" | grep 'Level:,3' -A 1 | grep 'Size' | sed 's/Size:,\([0-9]\+\) \([a-zA-Z]\+\),\+/\1\2/')
 BW_SIZE_L3_NUMBER=$(echo $CACHE_SIZE_L3 | sed 's/[a-zA-Z]\+//')
-BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION * $NUM_CORES))
+BW_SIZE_L3_NUMBER=$(( $BW_SIZE_L3_NUMBER * $BW_CACHE_PORTION ))
 if [ $(( $BW_SIZE_L3_NUMBER == 0 )) -eq 1 ]; then BW_SIZE_L3_NUMBER=1; fi
 BW_SIZE_L3_SUFFIX=$(echo $CACHE_SIZE_L3 | sed 's/[0-9]\+//')
 BW_SIZE_L3=$BW_SIZE_L3_NUMBER$BW_SIZE_L3_SUFFIX
