@@ -1,9 +1,9 @@
+- [Key Terms](#key-terms)
 - [The Basics](#the-basics)
   - [Model-Specific Registers (MSRs)](#model-specific-registers-msrs)
   - [Configuring Environment Variables](#configuring-environment-variables)
   - [Tests](#tests)
   - [Examples](#examples)
-- [Key Terms](#key-terms)
 - [Measuring Your Code (API Usage)](#measuring-your-code-api-usage)
   - [Basic Usage](#basic-usage)
   - [Init](#init)
@@ -18,6 +18,13 @@
 - [Create a Visualization](#create-a-visualization)
 - [Advanced Usage and notes](#advanced-usage-and-notes)
   - [Thread Affinity](#thread-affinity)
+
+# Key Terms
+
+- **FHV**: this software, fine-hardware-visualization
+- **Region**: a user-defined section of code that will be measured by fhv.
+- **Group**: aka likwid performance group: a list of hardware counters and
+  metrics that will be measured by likwid.
 
 # The Basics
 
@@ -65,17 +72,10 @@ TODO: add tests info
 
 ## Examples
 
-don't forget to run `sudo modprobe msr` before running any code that uses
+Don't forget to run `sudo modprobe msr` before running any code that uses
 likwid or fhv!
 
 TODO: add examples info
-
-# Key Terms
-
-- **FHV**: this software, fine-hardware-visualization
-- **Region**: a user-defined section of code that will be measured by fhv.
-- **Group**: aka likwid performance group: a list of hardware counters and
-  metrics that will be measured by likwid.
 
 # Measuring Your Code (API Usage)
 
@@ -218,7 +218,9 @@ ready to output data.
 
 ## Output Results
 
-There are four functions available for producing output.
+There are four functions available for producing output. For more information
+on interpreting the data output by these functions, see the section
+"Understanding Numerical Results" in the file `docs/interpreting-results.md`
 
 ### `printDetailedResults()`
 
@@ -260,7 +262,9 @@ could issue the command `FHV_OUTPUT=convolution.json ./convolution`.
 To create a visualization, you must first measure some code and generate a json
 by calling [resultsToJson](#resultstojsonparam_string). After that, simply run
 `fhv -v ./path/to/perfmon_output.json`. An `.svg` diagram will be created in
-the same directory as the json.
+the same directory as the json. For more information on interpreting these
+visualizations, see the section "Understanding Visualizations" in the file
+`docs/interpreting-results.md`
 
 # Advanced Usage and notes
 
