@@ -1,12 +1,13 @@
-- [Installation](#installation)
+- [Installation Summary](#installation-summary)
 - [Preparation](#preparation)
 - [Dependencies](#dependencies)
-  - [Compiled from source](#compiled-from-source)
+  - [LIKWID](#likwid)
+- [Additional perfgroups](#additional-perfgroups)
   - [Installed via package manager](#installed-via-package-manager)
   - [Automatically included](#automatically-included)
 
 
-# Installation
+# Installation Summary
 
 In summary, to install all dependencies on ubuntu (should work with all
 debian-based systems), follow the workflow below:
@@ -32,13 +33,14 @@ debian-based systems), follow the workflow below:
      the likwid code, which is a submodule to this repository.
    - `make`
    - `make perfgroups`
-   - `sudo make install`
+   - (optional, but recommended) `sudo make install`
 
-If you were able to compile and install without errors, you're ready to use
-FHV. Skip to the `docs/usage.md` document to learn how to use FHV.
-
-If you'd like more details of what is used and why, read the "Dependencies"
-section.
+`make install` is recommended because the examples assume fhv has been
+installed to `/usr/local` (the default install directory). If you were able to
+compile and install without errors, move on to the
+["preparation"](#preparation) section to learn how to supply likwid with the
+data it needs. If you'd like more details of what is used and why, read the
+["Dependencies"](#dependencies) section.
 
 # Preparation
 
@@ -78,19 +80,33 @@ for `EXPERIENTIAL_RW_BW_L2`.
 
 For the flop rates, look for `MFlops/s`.
 
+After following these instructions, you're ready to use FHV. Go to the
+`docs/usage.md` document to learn how to use FHV. 
 
 # Dependencies
 
-## Compiled from source
+This section describes all dependencies in detail. Use this to get help
+installing everything in the case that the shorter instructions in the
+["Installation"](#installation) section are insufficient.
 
-- **likwid >= 5.0.1:** a version above 5.0.1 is required, as this has support
-  for memory counters and is confirmed to use `likwid-accessD` without root
-  permissions. If this version is available with your package manager, use
-  that. Otherwise, build it from source. Instructions to do this are available
-  [here](https://github.com/RRZE-HPC/likwid). Be sure to change `LIKWID_PREFIX`
-  in this repository's makefile to match wherever likwid is installed
-- additional perfgroups not included with likwid. These can be installed by
-  running `make perfgroups` in the root directory.
+## LIKWID
+
+**likwid == v5.1.1** is highly recommended, as it is tested and works. A
+version above 5.0.1 is absolutely required, as this has support for memory
+counters and is confirmed to use `likwid-accessD` without root permissions. You
+will likely need to build this from source as described in the
+["Installation"](#installation) section, but if this version is available with
+your package manager, use that.
+
+Be sure to change `LIKWID_PREFIX` in this repository's `config.mk` to match
+herever likwid is installed. Full instructions on building likwid from source
+re available [here](https://github.com/RRZE-HPC/likwid). 
+
+# Additional perfgroups
+
+To use all features, we need additional perfgroups not included with likwid.
+These can be installed by running `make perfgroups` in the root of this
+repository.
 
 ## Installed via package manager
 
