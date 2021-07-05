@@ -235,22 +235,29 @@ Following are my notes for each week of development.
 
 # Goals through end of Paige's time:
 ## Priority
+- [ ] bandwidth microbenchmarks
+- [ ] Documentation
+  - [ ] how to add different architectures
+  - [ ] how likwid-bench works
+  - [ ] convolution/polynomial expansion
+  - [ ] "interpreting results"
+  - [ ] include instructions on reproducing results for
+    - [ ] microbenchmarks
+    - [ ] application benchmarks
+- [x] fix issue with programs using fhv cause libfhv to error:
+  - [x] `/usr/bin/ld: /usr/local/lib/libfhv_perfmon.so: undefined reference to
+    `fmt::v6::vprint(_IO_FILE*, fmt::v6::basic_string_view<char>,
+    fmt::v6::format_args)'`
+  - [x] use `examples/minimal` to reproduce
+- [ ] why are load/store arrows un-colored?
+
+## Other
 - [x] benchmark is not accurate
   - [x] if array is 8kiB, that means each core of an 8 core system
     processes 1kiB
   - [x] multiply array size by `nproc` except for with L3/RAM
-- [ ] "UOPS_EXECUTED..." rather than "UOPS_DISPATCHED"
+- [x] "UOPS_EXECUTED..." rather than "UOPS_DISPATCHED"
   - [x] check likwid to see what is most commonly used
-- [ ] documentation on how to add different architectures
-  - [ ] documentation on how likwid-bench works
-- [ ] bandwidth microbenchmarks
-
-## Other
-- [ ] document convolution/polynomial expansion
-- [ ] document "interpreting results"
-- [ ] include instructions on reproducing results for
-  - [ ] microbenchmarks
-  - [ ] application benchmarks
 - [ ] improved documentation: 
   - [x] mention that if you don't do `make install` make sure to run `make
     perfgroups`
