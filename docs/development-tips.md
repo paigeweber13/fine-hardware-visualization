@@ -11,3 +11,12 @@ The makefile provides two convenience rules to adjust the `PATH` and `LD_LIBRARY
 By running `export $(make devexports)` in a terminal, you set the environment variables to first look in the `./build/*` directories for libraries and executables before looking in `/usr/local/*`. This way you can just run `make` and then immediately run `fhv` and see the changes updated. Linux will sometimes still pick up on the installed library so it's best to remove it first with `sudo make uninstall`
 
 Note that to test with an example you will still need to run `sudo make install`.
+
+# Custom Counters and Performance Groups
+TODO
+
+# Adding Another Architecture
+TODO
+
+# How `likwid-bench` Works
+TODO
