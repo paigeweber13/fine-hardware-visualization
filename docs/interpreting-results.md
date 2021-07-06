@@ -23,14 +23,14 @@ particular meanings.
   term is borrowed directly from intel's documentation.
   [Wikichip](https://en.wikichip.org/wiki/intel/microarchitectures/skylake_(client)#Individual_Core)
   has many good visualizations of ports.
-- **port usage**: The ratio of how many micro-ops are executed by a given port
-  x to the total number of micro-ops executed across all ports. This is useful
-  because it gives insight into what kind of operations are taking up time in
-  the processor backend. For instance, if you have a skylake processor and
-  notice that a large portion of operations are on port 4, this would tell you
-  that most operations are store operations. If you could somehow reduce the
-  number of stores you would be able to make fewer stores to RAM and free up
-  the instruction decoder and scheduler to spend time on operations that do
+- **port usage ratio**: The ratio of how many micro-ops are executed by a given
+  port x to the total number of micro-ops executed across all ports. This is
+  useful because it gives insight into what kind of operations are taking up
+  time in the processor backend. For instance, if you have a skylake processor
+  and notice that a large portion of operations are on port 4, this would tell
+  you that most operations are store operations. If you could somehow reduce
+  the number of stores you would be able to make fewer stores to RAM and free
+  up the instruction decoder and scheduler to spend time on operations that do
   computation. Both these things would improve speed.
 - **counter**: The raw value of a hardware counter. Can be things like
   "FP_ARITH_INST_RETIRED_256B_PACKED_SINGLE" (number of retired single-point
@@ -77,7 +77,35 @@ the user's kernel. This is important; many kernels will have different
 performance needs depending on what parameters are passed to it.
 
 # Understanding Visualizations
-TODO
+
+The visualization is intended to be a symbolic representation of a typical
+modern processor and RAM architecture, where both single- and double-precision
+flops are performed within the core and operations are split among several
+execution ports. Data is retreived from the lowest level of cache possible, or
+from RAM if the data is not cached.
+
+Ports are colored according to their *port usage ratios*, and all other
+sections are colored according to their *saturations*.
+
+The blocks representing RAM and the various cache levels are colored according
+to read/write bandwidth saturation. Each level that we measure also has two
+arrows, one going away from that section and one going towards that section.
+These arrows are colored according to read saturation and write saturation,
+respectively. 
+
+The "in-core" section has blocks representing each port and blocks representing
+SP and DP flops/s performance. The FLOP/s blocks are colored according to the
+saturation of single- and double-precision flops/s, respectively. Ports are
+colored according to their port usage ratios.
+
+Notice that the color scale is logarithmic: 0.1 is dramatically more colored
+than 0.01, but 0.2 is only slightly more colored than 0.1. This is because
+fully saturating any part of your architecture is very difficult outside of toy
+microbenchmarks designed specifically to saturate a component. In most
+real-world situations, saturating 50% of a component is about the maximum you
+can hope to achieve, and saturating 30% of a component is still very good.
+Therefore, we made the decision to exaggerate the differences between
+0.0 saturation and 0.2 saturation.
 
 # Case Study: Reproducing Results with Examples
 
