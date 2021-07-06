@@ -8,6 +8,7 @@ Hardware Visualization
   - [By June 30 - Deploy v1.0.0](#by-june-30---deploy-v100)
 - [Notes per week](#notes-per-week)
 - [Goals through end of Paige's time:](#goals-through-end-of-paiges-time)
+  - [Questions, next steps for Dr. Saule](#questions-next-steps-for-dr-saule)
   - [Priority](#priority)
   - [Other](#other)
 - [2021-06-24 through 2021-07-01](#2021-06-24-through-2021-07-01)
@@ -234,22 +235,36 @@ Hardware Visualization
 Following are my notes for each week of development.
 
 # Goals through end of Paige's time:
+
+## Questions, next steps for Dr. Saule
+- can you look through `docs/interpreting-results.md` and make sure I didn't
+  make any glaring errors?
+
 ## Priority
-- [ ] bandwidth microbenchmarks
 - [ ] Documentation
   - [ ] how to add different architectures
   - [ ] how likwid-bench works
-  - [ ] convolution/polynomial expansion
-  - [ ] "interpreting results"
+  - [x] "interpreting results"
   - [ ] include instructions on reproducing results for
     - [ ] microbenchmarks
+      - [ ] peakflops (is this really necessary? It's pretty simple... maybe
+        add a section in "usage" where the reader is instructed to use it as a
+        kind of litmus test to make sure everything's working)
     - [ ] application benchmarks
+      - [ ] convolution/polynomial expansion
+- [ ] bandwidth microbenchmarks
 - [x] fix issue with programs using fhv cause libfhv to error:
   - [x] `/usr/bin/ld: /usr/local/lib/libfhv_perfmon.so: undefined reference to
     `fmt::v6::vprint(_IO_FILE*, fmt::v6::basic_string_view<char>,
     fmt::v6::format_args)'`
   - [x] use `examples/minimal` to reproduce
 - [ ] why are load/store arrows un-colored?
+  - For the Skylake architecture, memory data is reported as "Memory *load*
+    bandwidth" and "Memory *evict* bandwidth". For the BroadwellEP arcitecture,
+    these same metrics are reported as "Memory *read* bandwidth" and "Memory
+    *write* bandwidth"
+  - options to fix include: 1. open a pull request with likwid to unify this
+    discrepency or 2. edit the FHV code to check for both possibilities.
 
 ## Other
 - [x] benchmark is not accurate
