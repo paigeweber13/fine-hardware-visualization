@@ -2,7 +2,36 @@
 TODO. This section was intended to explain how the makefile works.
 
 # Source Files
-TODO
+
+This section gives an overview of what each source file does.
+
+- **computation_measurements**: This file is *deprecated*. Before we began to
+  use the likwid benchmark (see `./benchmark.sh` in this repository) this was
+  used to try to get a maximum value for flop rates and bandwidths. It is
+  included here only for informational purposes and should **not** be used.
+- **config**: Reads and parses the `machine-stats.json` file.
+- **fhv_main**: The entry point for the `fhv` command line tool. This file is
+  only responsible for parsing command line parameters and calling the
+  functions in `saturation_diagram` that are needed to create a visualization.
+- **fhv_perfmon**: The primary working code of FHV. This is the file that
+  becomes the `libfhv` library. This file provides the functions like `init`,
+  `startRegion`, `calculate_saturation`, and `resultsToJson` that do the actual
+  program measuring and result output.
+- **likwid_defines**: Strings and codes used by likwid to identify
+  architectures, events, and metrics. This allows fhv to identify key parts of
+  the likwid output without relying on the programmer remembering exactly how
+  to spell each thing likwid uses.
+- **performance_monitor_defines**: Like above, but for fhv. These are all codes
+  defined by fhv, whereas `likwid_defines` is for codes defined by likwid.
+- **saturation_diagram**: The code which creates a visualization from a json.
+  The most important function here is `draw_diagram_overview`. Also includes
+  code that was used to test swatches, scales, and color interpolation.
+- **types**: Defines types used by FHV to gather and aggregate likwid data.
+  Types defined include `PerThreadResult`, `AggregateResult`, and
+  `aggregation_t`.
+- **utils**: This was its own file because it was intended to be a place to
+  gather utility functions that were used across many other files. Currently it
+  only includes one function, `create_directories_for_file`.
 
 # Some Easy Todo Items for a New Developer
 
@@ -12,6 +41,10 @@ TODO
   contrast, `fhv_perfmon.c/hpp` has a class with the title `fhv_perfmon`, so
   all functions are in the namespace `fhv_perfmon`. Ideally, this should be a
   class `perfmon` within the namespace `fhv`.
+  - also, `performance_monitor_defines` should be inside its own namespace
+    which is inside the fhv namespace. I would suggest using `fhv::defines`.
+  - also, `likwid_defines` should have some namespacing like above. Consider
+    `likwid::defines`.
 - load/store arrows are un-colored for the broadwellEP architecture. This is a
   relatively easy fix.
   - For the Skylake architecture, memory data is reported as "Memory *load*
@@ -21,6 +54,8 @@ TODO
   - options to fix include: 1. open a pull request with likwid to change the
     name of the metrics in the perfgroups and thus unify this discrepency or 2.
     edit the FHV code to check for both possibilities.
+- function naming is inconsistent. sometimes `snake_case` is used, and other
+  times `camelCase` is used. Convert all functions with `snake_case` names to `camelCase`.
 
 # Suggested Workflow
 
