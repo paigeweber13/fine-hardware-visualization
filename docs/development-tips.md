@@ -55,7 +55,16 @@ This section gives an overview of what each source file does.
     name of the metrics in the perfgroups and thus unify this discrepency or 2.
     edit the FHV code to check for both possibilities.
 - function naming is inconsistent. sometimes `snake_case` is used, and other
-  times `camelCase` is used. Convert all functions with `snake_case` names to `camelCase`.
+  times `camelCase` is used. Convert all functions with `snake_case` names to
+  `camelCase`.
+- the port usage ratios and port coloring in the diagram should use a different
+  color scale than the saturation values. This is because even at very high
+  saturations (I've observed 0.71 single-precison flops saturation), port usage
+  peaks around 0.3 or so because there are just so many ports to split
+  operations between. Theoretically even if every single operation was a vector
+  FMA operation, the highest port usage you'd ever see is 0.5, where operations
+  are evenly split between the two FMA units. Maybe just double port usage
+  before coloring it? Discuss with Dr. Saule.
 
 # Suggested Workflow
 
