@@ -1,7 +1,8 @@
 This file tracks my past accomplishments and work as I have developed Fine
-Hardware Visualization
+Hardware Visualization. I know it's long, but I hope it's somehow useful to
+whoever works on this project next.
 
-- [Plan for remainder of Riley's time (through June 2021)](#plan-for-remainder-of-rileys-time-through-june-2021)
+- [Plan for remainder of Paige's time (through June 2021)](#plan-for-remainder-of-paiges-time-through-june-2021)
   - [By April 14 - Confirm soundness of tool](#by-april-14---confirm-soundness-of-tool)
   - [By May 1 (but start now) - How does the next person to work on this pick it up and move forward?](#by-may-1-but-start-now---how-does-the-next-person-to-work-on-this-pick-it-up-and-move-forward)
   - [By May 12 - use this tool to gain insight on one real application](#by-may-12---use-this-tool-to-gain-insight-on-one-real-application)
@@ -177,7 +178,7 @@ Hardware Visualization
   - [Some notes on what does and doesn't get counted:](#some-notes-on-what-does-and-doesnt-get-counted)
     counted:](#some-notes-on-what-does-and-doesnt-get-counted)
 
-# Plan for remainder of Riley's time (through June 2021)
+# Plan for remainder of Paige's time (through June 2021)
 
 ## By April 14 - Confirm soundness of tool
 
@@ -828,24 +829,24 @@ For this week:
   head nodes and worker nodes.
 - wrote discrete color scale, and it looks great. For instance, compare [the
   original interpolated purple-blue
-  scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/0acea0827c9dc5be73279ee05998edb24b38100c/visualizations/swatches/interpolated-continuous-scale/colorbrewer-255%2C247%2C251_to_2%2C56%2C88.svg)
+  scale](https://raw.githubusercontent.com/paigeweber13/fine-hardware-visualization/0acea0827c9dc5be73279ee05998edb24b38100c/visualizations/swatches/interpolated-continuous-scale/colorbrewer-255%2C247%2C251_to_2%2C56%2C88.svg)
   to the [new, discrete purple-blue
-  scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/c4e49a8d3c486340139476e9f5419f8cf29bcee4/visualizations/swatches/discrete-scale/PuBu.svg).
+  scale](https://raw.githubusercontent.com/paigeweber13/fine-hardware-visualization/c4e49a8d3c486340139476e9f5419f8cf29bcee4/visualizations/swatches/discrete-scale/PuBu.svg).
   The new scale is much less muddy and does a better job conveying the different
   levels.
 - created an [image demonstrating each
-  scale](https://raw.githubusercontent.com/rileyweber13/fine-hardware-visualization/bca16bf665a8724f49f02aae4fc2d6e833f84fb1/visualizations/swatches/all_discrete_scales.svg).
+  scale](https://raw.githubusercontent.com/paigeweber13/fine-hardware-visualization/bca16bf665a8724f49f02aae4fc2d6e833f84fb1/visualizations/swatches/all_discrete_scales.svg).
   In my opinion, many of these look better than the purple-blue scale. My
   favorites are the red-purple and yellow-green, which are in the 3rd and 4th
   rows, respectively.
 - visualization now uses discrete color scale. You can find a [bunch of
-  examples here](https://github.com/rileyweber13/NPB3.0-omp-C/tree/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A)
+  examples here](https://github.com/paigeweber13/NPB3.0-omp-C/tree/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A)
   - to compare each scale, check out these:
-    - [PuBu](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_PuBu_add.svg)
-    - [RdPu](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_RdPu_add.svg)
-    - [YlGn](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_YlGn_add.svg)
-    - [YlGnBu](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_YlGnBu_add.svg)
-    - [Greys](https://raw.githubusercontent.com/rileyweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_Greys_add.svg)
+    - [PuBu](https://raw.githubusercontent.com/paigeweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_PuBu_add.svg)
+    - [RdPu](https://raw.githubusercontent.com/paigeweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_RdPu_add.svg)
+    - [YlGn](https://raw.githubusercontent.com/paigeweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_YlGn_add.svg)
+    - [YlGnBu](https://raw.githubusercontent.com/paigeweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_YlGnBu_add.svg)
+    - [Greys](https://raw.githubusercontent.com/paigeweber13/NPB3.0-omp-C/bc52ae1269c5841b6ccda50bb17f6d24824500df/data/bt.A/bt.A_Greys_add.svg)
   - my favorites are "YlGnBu" and "RdPu"
   - Erik's favorite is "RdPu"
 
@@ -952,7 +953,7 @@ All of these examples are from [the SuiteSparse Matrix Collection](https://spars
 
 - all commits working on NPB-C are on the branch "add-fhv-measuring", which
   is available here:
-  https://github.com/rileyweber13/NPB3.0-omp-C/tree/add-fhv-measuring
+  https://github.com/paigeweber13/NPB3.0-omp-C/tree/add-fhv-measuring
 - got BT to work with FHV measuring. Following are some stats:
   - | class | Time to run (s) |
     | ----- | --------------- |
@@ -983,7 +984,7 @@ All of these examples are from [the SuiteSparse Matrix Collection](https://spars
     to create json: `FHV_OUTPUT=data/TEST/bt.W.json LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib bin/bt.W`
     to create visualization: `LD_LIBRARY_PATH=/usr/local/likwid-master/lib:~/code/fine-hardware-visualization/build/lib ~/code/fine-hardware-visualization/build/bin/fhv -v data/TEST/bt.W.json -o data/TEST_SVG/bt.W.svg`
   - moved some globals from `fhv_perfmon` to `types` and `utils`
-- made some diagrams for bencmark bt! You can see them [here](https://github.com/rileyweber13/NPB3.0-omp-C/tree/add-fhv-measuring/data/bt.A)
+- made some diagrams for bencmark bt! You can see them [here](https://github.com/paigeweber13/NPB3.0-omp-C/tree/add-fhv-measuring/data/bt.A)
   - tri-diagonal solver
   - adi_all diagram seems to make sense.
     - Port 5 and 6 are integer operations, and it makes sense that we'd see
@@ -1521,8 +1522,8 @@ This was in response to some changes Thomas wanted me to make.
     - command used (in both cases, $(CXX) is replaced with g++ or clang++):
       `$(CXX) polynomial_block.cpp -std=c++14 -O3 -fopenmp -march=native
       -mtune=native -I /usr/local/likwid-master/include -I
-      /home/riley/code/fine-hardware-visualization/lib -fopenmp
-      /home/riley/code/fine-hardware-visualization/obj/performance_monitor.o -L
+      /home/paige/code/fine-hardware-visualization/lib -fopenmp
+      /home/paige/code/fine-hardware-visualization/obj/performance_monitor.o -L
       /usr/local/likwid-master/lib -llikwid -DFHV_PERFMON -o
       polynomial_block_fhv_perfmon`
     - key parts are the flags `-std=c++14 -O3 -fopenmp -march=native -mtune=native -llikwid -DFHV_PERFMON`
