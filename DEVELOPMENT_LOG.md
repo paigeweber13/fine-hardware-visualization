@@ -243,13 +243,10 @@ Following are my notes for each week of development.
 ## Priority
 - [ ] Documentation
   - [ ] how to add different architectures
+    - [x] custom performance groups
   - [ ] how likwid-bench works
   - [x] "interpreting results"
   - [ ] include instructions on reproducing results for
-    - [ ] microbenchmarks
-      - [ ] peakflops (is this really necessary? It's pretty simple... maybe
-        add a section in "usage" where the reader is instructed to use it as a
-        kind of litmus test to make sure everything's working)
     - [ ] application benchmarks
       - [ ] convolution/polynomial expansion
 - [ ] bandwidth microbenchmarks
