@@ -242,8 +242,64 @@ To help the reader understand how FHV can be used to gain insights into
 software and to demonstrate the accuracy of FHV, this section will describe
 what results to expect from the examples included in this repository. 
 
+This section assumes you have successfully installed likwid and fhv to the
+standard prefix, `/usr/local`.
+
 ## Polynomial Expansion
-TODO
+
+As a refresher, "polynomial expansion" refers to the computation performed to
+evaluate a polynomial expression $c_0 + c_1 x + c_2 x^2 + ... + c_d x^d$
+for a given $x$.
+
+The runtime and computational requirements of polynomial expansion are
+determined entirely by two parameters: the number of different $x$ for which
+the expression should be evaluated $n$ and the degree of the equation $d$. If
+$n$ is large but $d$ is small, we expect there to be a greater burden on
+memory. However, if $d$ is large and $n$ is small, we expect most of our time
+to be spent doing actual computation. Let's test that theory.
+
+Enter the directory `./examples/polynomial_expansion` in this repository and
+run `make`. Several executables will be created, but the one we're most
+interested right now is `polynomial_block_fhv_perfmon`. The word "block" in
+that file's name refers to the fact that this version of the executable unrolls
+different "blocks" of the polynomial evaluation to enable better pipelining.
+The size `n` must be a multiple of the block size, which is 64 at the time of
+writing. Run that file first with a low `n` and high `d`, and then with a high
+`n` and low `d`, and instruct FHV to name the files accordingly:
+
+```
+n=1280; d=100000; FHV_OUTPUT=polynomial_block_fhv_perfmon_n=${n}_d=${d}.json ./polynomial_block_fhv_perfmon $n $d 1000 
+n=1280000; d=1; FHV_OUTPUT=polynomial_block_fhv_perfmon_n=${n}_d=${d}.json ./polynomial_block_fhv_perfmon $n $d 1000 
+``` 
+
+Then, visualize both files by running the command `fhv -v *.json`. This will
+create two `.svg` diagrams in the same directory.
+
+The exact coloring of your diagram will probably differ slightly from mine, but
+you should see in the file
+`polynomial_block_fhv_perfmon_n=1280_d=100000_poly_block.svg` that when `d` is
+high and `n` is low, the "single-precison flop/s" block will be very darkly
+colored, whereas RAM and cache should be pretty light. Inspecting the json
+shows me that, in my case, the saturation is around 0.71, which is
+*exceptionally* high, while cache and memory saturation are all below 0.03. In
+my case, ports 0 and 1 are also fairly dark (with usage ratios around 0.28)
+because on my architecture, skylake, ports 0 and 1 have the floating point FMA
+units.
+
+When `n` is high and `d` is low (as in the file
+`polynomial_block_fhv_perfmon_n=1280000_d=1_poly_block.svg`) you will see that
+RAM (and probably L3) are very darkly colored, whereas single-precision flops
+is fairly light. In my case, inspecting the json shows that RAM r/w saturation
+is 0.47, L3 rw saturation is 0.20, and SP flops saturation is under 0.04. Port
+4 executes more operations than any other port, because it is the store unit.
+Ports 2 and 3 are also pretty saturated because they are the load units.
+
+As a further exercise, try to see if you can tune the parameters so the problem
+size fits inside your cache and you can see one cache level more saturated than
+the rest. Be aware that the array size will be `n * 4 * 2 / num_cores` bytes
+per core: the code uses two arrays, one for parameters and one for the result,
+each item occupies four bytes of memory, and that total size is split evenly
+(more or less) among your cores.
 
 ## Convolution
 TODO

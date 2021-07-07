@@ -241,14 +241,15 @@ Following are my notes for each week of development.
   make any glaring errors?
 
 ## Priority
-- [ ] Documentation
+- [x] Documentation
   - [x] how to add different architectures
     - [x] custom performance groups
   - [x] how likwid-bench works
   - [x] "interpreting results"
-  - [ ] include instructions on reproducing results for
-    - [ ] application benchmarks
-      - [ ] convolution/polynomial expansion
+  - [x] include instructions on reproducing results for
+    - [x] application benchmarks
+      - [ ] convolution
+      - [x] polynomial expansion
   - [x] basic information on what is in each file
 - [ ] bandwidth microbenchmarks
 - [x] fix issue with programs using fhv cause libfhv to error:
