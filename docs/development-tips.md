@@ -1,6 +1,26 @@
 # Makefile
+TODO. This section was intended to explain how the makefile works.
 
 # Source Files
+TODO
+
+# Some Easy Todo Items for a New Developer
+
+- replace instances of `std::cout` and `std::cerr` with `fmt::print`
+- unify namespacing. `types.c/hpp` and `utils.c/hpp` are very cleanly namespaced:
+  everything is within `fhv::types` and `fhv::utils`, respectively. By
+  contrast, `fhv_perfmon.c/hpp` has a class with the title `fhv_perfmon`, so
+  all functions are in the namespace `fhv_perfmon`. Ideally, this should be a
+  class `perfmon` within the namespace `fhv`.
+- load/store arrows are un-colored for the broadwellEP architecture. This is a
+  relatively easy fix.
+  - For the Skylake architecture, memory data is reported as "Memory *load*
+    bandwidth" and "Memory *evict* bandwidth". For the BroadwellEP arcitecture,
+    these same metrics are reported as "Memory *read* bandwidth" and "Memory
+    *write* bandwidth"
+  - options to fix include: 1. open a pull request with likwid to change the
+    name of the metrics in the perfgroups and thus unify this discrepency or 2.
+    edit the FHV code to check for both possibilities.
 
 # Suggested Workflow
 
@@ -93,7 +113,65 @@ This level of granularity is rarely required and is outside the scope of this
 repository, so no further notes on usage will be supplied.
 
 # Adding Another Architecture
-TODO
+
+Adding support for another architecture in FHV is as simple as discovering what
+counters that architecture supports and creating any perfgroups necessary to
+add functionality not included with likwid.
+
+For full FHV functionality, an architecture must be able to do the following:
+- count time
+- count floating point operations (`FP_ARITH_INST_RETIRED*` or similar)
+- count the volume of data read and written through each level of cache
+  (`L1D_REPLACEMENT`, `L1D_M_EVICT`, and similar)
+- count the volume of data read and written through memory (`DRAM_READS` and
+  `DRAM_WRITES` or similar)
+- count the number of instructions executed in each port
+  (`UOPS_DISPATCHED_PORT_PORT_*` or similar)
+
+As far as I know, every architecture supported by likwid has perfgroups that
+will give you counter values for floating point operations and movement of data
+through cache. The two that are less-widely supported are memory volume and
+port usage counters. Likwid *does* include a `PORT_USAGE` group for skylake,
+but it requires that hyperthreading be disabled (so that eight counters may be
+used instead of four). Adding support for your architecture will likely boil
+down to adding memory counters and port-usage counters.
+
+## Memory Counters
+
+When calculating saturation for the diagram, FHV looks for metrics with the
+names "Memory bandwidth [MBytes/s]", "Memory evict bandwidth [MBytes/s]", and
+"Memory load bandwidth [MBytes/s]". If your architecture provides events that
+record the number of reads and writes to DRAM, you can calculate these metrics
+yourself. For read bandwidth multiply the number of reads by the cache line
+size. Do this with the number of writes for write bandwidth and add those two
+values together for total bandwidth. For more specific help on how to do this,
+look at one of the `MEM` perfgroups provided by likwid, like the file
+`./groups/skylake/MEM.txt` in the likwid repository.
+
+After you add the requried `MEM` perfgroups, find your architecture's code in
+the likwid repository in the file `./src/includes/topology.h` and add it to the
+file `./src/likwid_defines.hpp` in this repository. You will also need to add
+that code to the list `ARCH_WITH_MEM_COUNTER` in the `likwid_defines.hpp` file.
+
+Unfortunately, some architectures simply do not provide events for tracking
+reads and writes to RAM. In this case it's impossible to get memory saturation.
+
+## Port Usage Ratios
+
+Port usage ratios are all calculated by FHV, in the function
+`fhv_perfmon.cpp::calculate_port_usage_ratios()`. This is because you have to
+use multiple groups to track all port_usage counters, so it's difficult to use
+the likwid metric feature to calculate port usage ratios. Instead, FHV looks
+for the events `UOPS_DISPATCHED_PORT_PORT_*` or `UOPS_EXECUTED_PORT_PORT_*`,
+depending on the architecture, and sums up the events for each port to get a
+total. 
+
+If your architecture has one of those counters, adding support for port usage
+ratios is as simple as adding a perfgroup that tracks those counters.
+`calculate_port_usage_ratios   will automatically check for both variants. If
+your architecture provides a different event that records uops executed on a
+per-core basis, you will have to extend `calculate_port_usage_ratios` to
+support that event.
 
 # How `likwid-bench` Works
 TODO

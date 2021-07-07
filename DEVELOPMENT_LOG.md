@@ -242,13 +242,14 @@ Following are my notes for each week of development.
 
 ## Priority
 - [ ] Documentation
-  - [ ] how to add different architectures
+  - [x] how to add different architectures
     - [x] custom performance groups
   - [ ] how likwid-bench works
   - [x] "interpreting results"
   - [ ] include instructions on reproducing results for
     - [ ] application benchmarks
       - [ ] convolution/polynomial expansion
+  - [ ] basic information on what is in each file
 - [ ] bandwidth microbenchmarks
 - [x] fix issue with programs using fhv cause libfhv to error:
   - [x] `/usr/bin/ld: /usr/local/lib/libfhv_perfmon.so: undefined reference to
