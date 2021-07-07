@@ -244,7 +244,7 @@ Following are my notes for each week of development.
 - [ ] Documentation
   - [x] how to add different architectures
     - [x] custom performance groups
-  - [ ] how likwid-bench works
+  - [x] how likwid-bench works
   - [x] "interpreting results"
   - [ ] include instructions on reproducing results for
     - [ ] application benchmarks

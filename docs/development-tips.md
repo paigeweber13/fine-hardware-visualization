@@ -174,4 +174,22 @@ per-core basis, you will have to extend `calculate_port_usage_ratios` to
 support that event.
 
 # How `likwid-bench` Works
-TODO
+
+`likwid-bench` is a very clever piece of software that is used by the
+microbenchmarks (see `./tests/microbenchmarks` in this repository). This
+software is entirely contained in the `./bench` directory of the likwid
+repository. In short, there are hand-written `.ptt` files for each architecture
+that use a likwid-specific syntax which is fairly similar to assembly. When
+`make` is called in the `./bench` directory, these file are processed into
+`.pas` files by the script `./bench/perl/generatePas.pl`. Those are then
+converted into `.s` (assembly) files by `./bench/perl/AsmGen.pl`, which are
+finally compiled into `.o` (object) files by an assembler (the GNU assembler
+`as`, if you're compiling with GCC).
+
+The microbenchmarks rely on likwid to do all this wizardry, and just call
+`make` in the `bench` directory of the likwid repository. Then, they link the
+object files into C++ code by declaring the assembly functions as `extern "C"`
+functions. See the file `./tests/microbenchmarks/src/peakflops_sp_avx_fma.hpp`
+for the code I used.
+
+If I had more time I would have loved to add bandwidth microbenchmarks.
